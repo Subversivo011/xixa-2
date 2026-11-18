@@ -444,6 +444,7 @@ Os protótipos conceituais desenvolvidos pela comunidade estão catalogados na p
 - **Mockup Geral & Linha do Tempo:** [`docs/references/riba_main.html`](docs/references/riba_main.html)
 - **Álbum de Figurinhas Digital:** [`docs/references/riba_album.html`](docs/references/riba_album.html)
 - **Conceito Completo com Feed & Avatar:** [`docs/references/cid_ideia.html`](docs/references/cid_ideia.html)
+- **Protótipo @Subversivo011 (fork do xixa-2):** [`prototipos/subversivo011/`](prototipos/subversivo011/) — site alternativo com tema claro/escuro, álbum com loja de pacotes e moedas, player de YouTube, tela de vídeo/foto por época e funções Netlify (votos e visualizações). Importado com o histórico original (autoria preservada). Abra `prototipos/subversivo011/index.html` ou acesse `/prototipos/subversivo011/` no site publicado; as funções `/api/votos` e `/api/yt-stats` só funcionam no Netlify.
 
 ### 6.2. Referência visual e funcional: Não Salvo 2 (demo)
 Referência principal do visual e das mecânicas de álbum, ranking e avatar: **<https://nao-salvo-2.netlify.app/>** (cadastro em [`#/cadastro`](https://nao-salvo-2.netlify.app/#/cadastro), álbum em [`#/album`](https://nao-salvo-2.netlify.app/#/album), ranking em [`#/ranking`](https://nao-salvo-2.netlify.app/#/ranking)). O que foi extraído e onde foi aplicado no `index.html`:
@@ -499,4 +500,6 @@ Cadastro de quem quer ajudar o projeto. Os dados vão para um banco PostgreSQL p
 ---
 
 ### 🤝 Como Contribuir
+**Contribuidores:** [@willianjack0](https://github.com/willianjack0) · [@Subversivo011](https://github.com/Subversivo011) (protótipo de telas, álbum e player).
+
 Consulte os responsáveis pelo repositório (`@SePPZAO`, `@cidcidoso`) para alinhamento nas issues e branches de desenvolvimento.
