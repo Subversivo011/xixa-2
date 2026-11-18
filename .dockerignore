@@ -28,3 +28,7 @@ docker-compose*.yml
 *.tmp
 Thumbs.db
 .DS_Store
+
+# Backend, segredos e config de deploy
+api
+.secrets

@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Dashboard de contribuidores · NÃO SALVO</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Barlow:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root { --bg:#030409; --card:#0d1220; --border:rgba(255,255,255,.09); --text:#f2f4f9; --muted:#a7b0c2; --accent:#2459ff; --accent-hover:#3d6bff; --danger:#ff6b76; --display:'Barlow Condensed',sans-serif; --body:'Barlow',system-ui,sans-serif; }
+    * { box-sizing: border-box; margin: 0; }
+    body { background: var(--bg); color: var(--text); font: 15px/1.5 var(--body); min-height: 100vh; }
+    a { color: #8fb0ff; }
+    .wrap { max-width: 1180px; margin: 0 auto; padding: 24px 16px 64px; }
+    .top { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 24px; }
+    h1 { font-family: var(--display); font-size: clamp(30px, 5vw, 44px); letter-spacing: .6px; text-transform: uppercase; }
+    h2 { font-family: var(--display); font-size: 18px; letter-spacing: 1.2px; text-transform: uppercase; margin-bottom: 14px; color: var(--muted); }
+    .btn { font-family: var(--display); font-size: 16px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: #fff; background: var(--accent); border: 1px solid transparent; border-radius: 10px; min-height: 44px; padding: 0 18px; cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; transition: background-color .2s; }
+    .btn:hover { background: var(--accent-hover); }
+    .btn.ghost { background: transparent; border-color: var(--border); color: var(--text); }
+    .btn.ghost:hover { border-color: var(--accent-hover); }
+    .login { max-width: 420px; margin: 12vh auto 0; border: 1px solid var(--border); border-radius: 16px; background: var(--card); padding: 28px; display: grid; gap: 14px; }
+    input[type=password], input[type=search] { width: 100%; background: #070a14; border: 1px solid var(--border); border-radius: 10px; color: var(--text); font: inherit; padding: 11px 13px; min-height: 44px; }
+    input:focus { outline: 2px solid var(--accent-hover); outline-offset: 1px; border-color: transparent; }
+    .msg { color: var(--danger); font-size: 14px; min-height: 20px; }
+    .kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 14px; margin-bottom: 18px; }
+    .card { border: 1px solid var(--border); border-radius: 14px; background: linear-gradient(180deg, rgba(13,18,32,.95), rgba(7,10,18,.95)); padding: 18px; min-width: 0; }
+    .kpi b { display: block; font-family: var(--display); font-size: 44px; line-height: 1; letter-spacing: .5px; }
+    .kpi span { color: var(--muted); font-size: 13px; letter-spacing: 1px; text-transform: uppercase; font-family: var(--display); font-weight: 600; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 14px; margin-bottom: 18px; }
+    .bar { display: grid; grid-template-columns: minmax(90px, 40%) 1fr 30px; gap: 10px; align-items: center; margin-bottom: 8px; font-size: 14px; }
+    .bar .t { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .bar .track { height: 10px; border-radius: 6px; background: rgba(255,255,255,.07); overflow: hidden; }
+    .bar .fill { height: 100%; border-radius: 6px; background: var(--accent); }
+    .bar .n { text-align: right; color: var(--muted); font-variant-numeric: tabular-nums; }
+    .empty { color: var(--muted); font-size: 14px; }
+    .tools { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 12px; }
+    .tools input { flex: 1 1 240px; }
+    .tablewrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; min-width: 820px; }
+    th { text-align: left; font-family: var(--display); font-size: 13px; letter-spacing: 1.2px; text-transform: uppercase; color: var(--muted); padding: 8px 10px; border-bottom: 1px solid var(--border); white-space: nowrap; }
+    td { padding: 10px; border-bottom: 1px solid rgba(255,255,255,.05); vertical-align: top; font-size: 14px; }
+    td small { color: var(--muted); display: block; }
+    .tag { display: inline-block; font-size: 12px; padding: 2px 8px; border-radius: 999px; border: 1px solid rgba(36,89,255,.45); background: rgba(36,89,255,.14); margin: 0 4px 4px 0; white-space: nowrap; }
+    .del { background: none; border: 1px solid var(--border); color: var(--danger); border-radius: 8px; min-height: 32px; padding: 0 10px; cursor: pointer; font: inherit; font-size: 13px; }
+    .del:hover { border-color: var(--danger); }
+    [hidden] { display: none !important; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <section class="login" id="login">
+      <h1>Acesso restrito</h1>
+      <p style="color:var(--muted)">Informe o token de administração para ver os cadastros.</p>
+      <form id="loginForm" style="display:grid;gap:12px">
+        <label for="token" style="font-family:var(--display);letter-spacing:1.2px;text-transform:uppercase;font-weight:700">Token</label>
+        <input type="password" id="token" autocomplete="current-password" required>
+        <div class="msg" id="loginMsg" role="alert"></div>
+        <button class="btn" type="submit">Entrar</button>
+      </form>
+    </section>
+
+    <section id="app" hidden>
+      <header class="top">
+        <h1>Contribuidores</h1>
+        <div style="display:flex;gap:10px;flex-wrap:wrap">
+          <a class="btn ghost" href="/contribuir/">Ver formulário</a>
+          <button class="btn ghost" id="refresh" type="button">Atualizar</button>
+          <button class="btn ghost" id="csv" type="button">Exportar CSV</button>
+          <button class="btn ghost" id="logout" type="button">Sair</button>
+        </div>
+      </header>
+
+      <div class="kpis" id="kpis"></div>
+      <div class="grid">
+        <div class="card"><h2>Por área</h2><div id="byArea"></div></div>
+        <div class="card"><h2>Experiência</h2><div id="byExp"></div></div>
+        <div class="card"><h2>Disponibilidade semanal</h2><div id="byHours"></div></div>
+        <div class="card"><h2>Cadastros por dia</h2><div id="byDay"></div></div>
+      </div>
+
+      <div class="card">
+        <h2>Cadastros</h2>
+        <div class="tools"><input type="search" id="q" placeholder="Buscar por nome, nick, e-mail, área ou ferramenta" aria-label="Buscar"></div>
+        <div class="tablewrap">
+          <table>
+            <thead><tr><th>Quando</th><th>Pessoa</th><th>Áreas</th><th>Horas/sem</th><th>Experiência</th><th>Ferramentas</th><th></th></tr></thead>
+            <tbody id="rows"></tbody>
+          </table>
+        </div>
+        <p class="empty" id="none" hidden>Nenhum cadastro encontrado.</p>
+      </div>
+    </section>
+  </div>
+
+<script>
+(function () {
+  var KEY = 'ns_admin_token', items = [];
+  var $ = function (id) { return document.getElementById(id); };
+  var esc = function (s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); };
+  var token = ''; try { token = sessionStorage.getItem(KEY) || ''; } catch (e) {}
+
+  function api(path, opts) {
+    opts = opts || {}; opts.headers = Object.assign({ Authorization: 'Bearer ' + token }, opts.headers);
+    return fetch(path, opts);
+  }
+  function logout() { token = ''; try { sessionStorage.removeItem(KEY); } catch (e) {} $('app').hidden = true; $('login').hidden = false; }
+
+  function load() {
+    return api('/api/admin/contribuidores').then(function (r) {
+      if (r.status === 401) { logout(); $('loginMsg').textContent = 'Token inválido.'; return; }
+      if (!r.ok) throw new Error('erro');
+      return r.json().then(function (j) { items = j.items; $('login').hidden = true; $('app').hidden = false; render(); });
+    }).catch(function () { $('loginMsg').textContent = 'Falha ao carregar. Tente novamente.'; });
+  }
+
+  function bars(el, entries) {
+    if (!entries.length) { el.innerHTML = '<p class="empty">Sem dados ainda.</p>'; return; }
+    var max = Math.max.apply(null, entries.map(function (e) { return e[1]; }));
+    el.innerHTML = entries.map(function (e) {
+      return '<div class="bar"><span class="t" title="' + esc(e[0]) + '">' + esc(e[0]) + '</span><span class="track"><span class="fill" style="display:block;width:' + Math.round(e[1] / max * 100) + '%"></span></span><span class="n">' + e[1] + '</span></div>';
+    }).join('');
+  }
+  function count(list) { var m = {}; list.forEach(function (k) { m[k] = (m[k] || 0) + 1; }); return Object.keys(m).map(function (k) { return [k, m[k]]; }).sort(function (a, b) { return b[1] - a[1]; }); }
+
+  function render() {
+    var total = items.length, hours = items.reduce(function (s, i) { return s + i.horas_semana; }, 0);
+    var week = items.filter(function (i) { return Date.now() - new Date(i.criado_em) < 7 * 864e5; }).length;
+    $('kpis').innerHTML = [[total, 'Cadastros'], [week, 'Nos últimos 7 dias'], [hours, 'Horas/semana somadas'], [total ? Math.round(hours / total) : 0, 'Média de horas']]
+      .map(function (k) { return '<div class="card kpi"><b>' + k[0] + '</b><span>' + k[1] + '</span></div>'; }).join('');
+
+    var areas = []; items.forEach(function (i) { (i.areas || []).forEach(function (a) { areas.push(a); }); if (i.area_outros) areas.push('Outros'); });
+    bars($('byArea'), count(areas));
+    bars($('byExp'), count(items.map(function (i) { return i.experiencia; })));
+    bars($('byHours'), count(items.map(function (i) { var h = i.horas_semana; return h <= 5 ? 'Até 5 h' : h <= 10 ? '6 a 10 h' : h <= 20 ? '11 a 20 h' : 'Mais de 20 h'; })));
+    var days = count(items.map(function (i) { return new Date(i.criado_em).toLocaleDateString('pt-BR'); })).slice(0, 7);
+    bars($('byDay'), days);
+    drawRows();
+  }
+
+  function drawRows() {
+    var q = $('q').value.trim().toLowerCase();
+    var list = items.filter(function (i) {
+      if (!q) return true;
+      return [i.nome, i.nick, i.email, (i.areas || []).join(' '), i.area_outros, i.ferramentas, i.experiencia].join(' ').toLowerCase().indexOf(q) > -1;
+    });
+    $('none').hidden = list.length > 0;
+    $('rows').innerHTML = list.map(function (i) {
+      var tags = (i.areas || []).map(function (a) { return '<span class="tag">' + esc(a) + '</span>'; }).join('') + (i.area_outros ? '<span class="tag">Outros: ' + esc(i.area_outros) + '</span>' : '');
+      return '<tr><td>' + esc(new Date(i.criado_em).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' })) + '</td>' +
+        '<td><b>' + esc(i.nome) + '</b><small>@' + esc(i.nick) + ' · ' + esc(i.email) + '</small>' + (i.mensagem ? '<small>“' + esc(i.mensagem) + '”</small>' : '') + '</td>' +
+        '<td>' + tags + '</td><td>' + esc(i.horas_semana) + ' h</td><td>' + esc(i.experiencia) + '</td><td>' + esc(i.ferramentas) + '</td>' +
+        '<td><button class="del" data-id="' + esc(i.id) + '" type="button">Excluir</button></td></tr>';
+    }).join('');
+  }
+
+  $('loginForm').addEventListener('submit', function (e) {
+    e.preventDefault(); token = $('token').value.trim(); $('loginMsg').textContent = '';
+    try { sessionStorage.setItem(KEY, token); } catch (err) {}
+    load();
+  });
+  $('q').addEventListener('input', drawRows);
+  $('refresh').addEventListener('click', load);
+  $('logout').addEventListener('click', logout);
+  $('csv').addEventListener('click', function () {
+    api('/api/admin/contribuidores.csv').then(function (r) { return r.blob(); }).then(function (b) {
+      var a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download = 'contribuidores.csv'; a.click(); URL.revokeObjectURL(a.href);
+    });
+  });
+  $('rows').addEventListener('click', function (e) {
+    var btn = e.target.closest('.del'); if (!btn) return;
+    if (!window.confirm('Excluir este cadastro? Não dá para desfazer.')) return;
+    api('/api/admin/contribuidores/' + encodeURIComponent(btn.dataset.id), { method: 'DELETE' }).then(load);
+  });
+
+  if (token) load();
+})();
+</script>
+</body>
+</html>

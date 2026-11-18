@@ -19,6 +19,7 @@ Este projeto nasceu da união da comunidade (comunidade XET, Cid Cidoso, moderad
 - [4. Estrutura de Diretórios Recomendada](#4-estrutura-de-diretórios-recomendada)
 - [5. Regras de Negócio e Curadoria](#5-regras-de-negócio-e-curadoria)
 - [6. Referências de Design e Mockups](#6-referências-de-design-e-mockups)
+- [7. Formulário de Contribuidores e Dashboard](#7-formulário-de-contribuidores-e-dashboard)
 
 ---
 
@@ -479,6 +480,21 @@ Referência principal do visual e das mecânicas de álbum, ranking e avatar: **
 - Os dados de ranking, patentes e níveis são de demonstração. Ainda não há backend.
 
 > Os pontos acima descrevem o comportamento e o visual observados na demo pública. O código-fonte da referência não é copiado para este repositório, só as regras e os valores necessários para reproduzir o comportamento.
+
+## 7. Formulário de Contribuidores e Dashboard
+
+Cadastro de quem quer ajudar o projeto. Os dados vão para um banco PostgreSQL próprio (`naosalvo`), no servidor 2.
+
+| Peça | Onde | O que faz |
+|---|---|---|
+| Página GitHub Pages | `docs/index.html` → `https://willianjack0.github.io/xixa-2/` | Redireciona para o formulário hospedado |
+| Formulário | `/contribuir/` | Nome, nick, e-mail, áreas (caixas + "Outros"), horas/semana, experiência, linguagens/ferramentas, mensagem, consentimento |
+| Dashboard | `/dashboard/` | KPIs, gráficos por área/experiência/horas/dia, busca, exportar CSV, excluir. Pede token de admin |
+| API | `api/server.js` (Node + `pg`) em `/api` | `POST /api/contribuidores`, `GET /api/contribuidores/meta`, rotas `/api/admin/*` com Bearer token |
+
+**Segurança:** validação no servidor, e-mail único, honeypot, rate limit (8 envios/10 min por IP), CSV sem injeção de fórmula. Senha do banco e token admin ficam em Docker secrets (`naosalvo_db_password`, `naosalvo_admin_token`), nunca no git. O dashboard tem `noindex`.
+
+**Deploy (servidor 2):** `docker build -t naosalvo-api:latest ./api && docker build -t naosalvo-frontend:latest . && docker stack deploy -c docker-stack.yml naosalvo`. A tabela `contribuidores` é criada pela API na primeira subida.
 
 ---
 

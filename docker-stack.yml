@@ -15,6 +15,36 @@ services:
     networks:
       - v0net
 
+  api:
+    image: naosalvo-api:latest
+    environment:
+      DB_HOST: postgres
+      DB_NAME: naosalvo
+      DB_USER: naosalvo
+      DB_PASSWORD_FILE: /run/secrets/naosalvo_db_password
+      ADMIN_TOKEN_FILE: /run/secrets/naosalvo_admin_token
+    secrets:
+      - naosalvo_db_password
+      - naosalvo_admin_token
+    deploy:
+      replicas: 1
+      labels:
+        - "traefik.enable=true"
+        - "traefik.docker.network=v0net"
+        - "traefik.http.routers.naosalvo-api.rule=Host(`naosalvo-local.fishlab.com.br`) && PathPrefix(`/api`)"
+        - "traefik.http.routers.naosalvo-api.priority=100"
+        - "traefik.http.routers.naosalvo-api.entrypoints=websecure"
+        - "traefik.http.routers.naosalvo-api.tls.certresolver=letsencryptresolver"
+        - "traefik.http.services.naosalvo-api.loadbalancer.server.port=3000"
+    networks:
+      - v0net
+
+secrets:
+  naosalvo_db_password:
+    external: true
+  naosalvo_admin_token:
+    external: true
+
 networks:
   v0net:
     external: true

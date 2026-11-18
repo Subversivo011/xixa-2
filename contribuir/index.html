@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Quero contribuir · NÃO SALVO</title>
+  <meta name="description" content="Entre para a equipe que preserva a internet brasileira. Conte suas habilidades e disponibilidade.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Barlow:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root { --bg:#030409; --card:#0d1220; --border:rgba(255,255,255,.09); --text:#f2f4f9; --muted:#a7b0c2; --accent:#2459ff; --accent-hover:#3d6bff; --danger:#ff6b76; --ok:#2fbf5b; --display:'Barlow Condensed',sans-serif; --body:'Barlow',system-ui,sans-serif; }
+    * { box-sizing: border-box; margin: 0; }
+    body { background: radial-gradient(900px 500px at 50% -10%, rgba(36,89,255,.25), transparent 70%), var(--bg); color: var(--text); font: 16px/1.5 var(--body); min-height: 100vh; }
+    a { color: #8fb0ff; }
+    .wrap { max-width: 760px; margin: 0 auto; padding: 28px 16px 64px; }
+    .top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 36px; gap: 12px; flex-wrap: wrap; }
+    .brand { font-family: var(--display); font-weight: 800; font-size: 24px; letter-spacing: 1px; text-decoration: none; color: var(--text); }
+    .brand b { color: var(--accent-hover); }
+    h1 { font-family: var(--display); font-size: clamp(40px, 8vw, 64px); line-height: 1; letter-spacing: .5px; text-transform: uppercase; }
+    h1 span { color: var(--accent-hover); }
+    .lead { color: var(--muted); margin: 14px 0 6px; max-width: 56ch; }
+    .count { display: inline-block; margin-top: 10px; font-family: var(--display); letter-spacing: 1px; text-transform: uppercase; color: var(--muted); font-size: 15px; }
+    .count b { color: var(--text); font-size: 20px; }
+    form { margin-top: 28px; display: grid; gap: 22px; border: 1px solid var(--border); border-radius: 16px; background: linear-gradient(180deg, rgba(13,18,32,.95), rgba(7,10,18,.95)); padding: clamp(18px, 4vw, 32px); }
+    .row { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+    label, legend { display: block; font-family: var(--display); font-size: 15px; font-weight: 700; letter-spacing: 1.2px; text-transform: uppercase; margin-bottom: 6px; padding: 0; }
+    .hint { color: var(--muted); font-size: 13px; margin-top: 4px; font-weight: 400; letter-spacing: 0; text-transform: none; font-family: var(--body); }
+    input[type=text], input[type=email], input[type=number], select, textarea { width: 100%; background: #070a14; border: 1px solid var(--border); border-radius: 10px; color: var(--text); font: inherit; padding: 11px 13px; min-height: 44px; transition: border-color .2s; }
+    textarea { min-height: 96px; resize: vertical; }
+    input:focus, select:focus, textarea:focus { outline: 2px solid var(--accent-hover); outline-offset: 1px; border-color: transparent; }
+    fieldset { border: 0; padding: 0; min-width: 0; }
+    .chips { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 8px; }
+    .chip { position: relative; }
+    .chip input { position: absolute; opacity: 0; inset: 0; width: 100%; height: 100%; cursor: pointer; margin: 0; }
+    .chip span { display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 8px 12px; border: 1px solid var(--border); border-radius: 10px; background: #070a14; font-family: var(--body); font-size: 15px; letter-spacing: 0; text-transform: none; font-weight: 500; transition: border-color .2s, background-color .2s; }
+    .chip span::before { content: ''; flex: none; width: 18px; height: 18px; border-radius: 5px; border: 2px solid var(--muted); transition: background-color .2s, border-color .2s; }
+    .chip input:checked + span { border-color: var(--accent-hover); background: rgba(36,89,255,.16); }
+    .chip input:checked + span::before { background: var(--accent) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M3 8.5l3.2 3L13 4.5' fill='none' stroke='white' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center/12px no-repeat; border-color: var(--accent); }
+    .chip input:focus-visible + span { outline: 2px solid var(--accent-hover); outline-offset: 2px; }
+    #outrosBox { margin-top: 10px; }
+    #outrosBox[hidden] { display: none; }
+    .check { display: flex; gap: 10px; align-items: flex-start; font-size: 14px; color: var(--muted); }
+    .check input { margin-top: 4px; width: 18px; height: 18px; accent-color: var(--accent); flex: none; }
+    .err { color: var(--danger); font-size: 13px; margin-top: 5px; min-height: 0; }
+    .err:empty { display: none; }
+    .btn { font-family: var(--display); font-size: 20px; font-weight: 700; letter-spacing: 1.2px; text-transform: uppercase; color: #fff; background: var(--accent); border: 0; border-radius: 12px; min-height: 52px; padding: 0 28px; cursor: pointer; transition: background-color .2s, transform .2s; }
+    .btn:hover { background: var(--accent-hover); transform: translateY(-2px); }
+    .btn:disabled { opacity: .6; cursor: progress; transform: none; }
+    .hp { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
+    .status { padding: 14px 16px; border-radius: 10px; font-size: 15px; display: none; }
+    .status.show { display: block; }
+    .status.ok { background: rgba(47,191,91,.12); border: 1px solid rgba(47,191,91,.5); }
+    .status.bad { background: rgba(255,107,118,.1); border: 1px solid rgba(255,107,118,.5); }
+    .foot { margin-top: 26px; color: var(--muted); font-size: 13px; }
+    @media (max-width: 600px) { .row { grid-template-columns: 1fr; } }
+    @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header class="top">
+      <a class="brand" href="/">NÃO <b>SALVO</b></a>
+      <a href="/">← Voltar ao acervo</a>
+    </header>
+
+    <main>
+      <h1>Ajude a salvar a<br><span>internet brasileira</span></h1>
+      <p class="lead">Estamos montando a equipe que vai construir, curar e preservar o acervo. Conte um pouco sobre você e quanto tempo pode dedicar. Entramos em contato por e-mail.</p>
+      <p class="count" id="count" hidden><b id="countN">0</b> pessoas já se cadastraram</p>
+
+      <form id="form" novalidate>
+        <div class="row">
+          <div>
+            <label for="nome">Nome</label>
+            <input type="text" id="nome" name="nome" autocomplete="name" maxlength="120" required>
+            <div class="err" data-err="nome"></div>
+          </div>
+          <div>
+            <label for="nick">Nick</label>
+            <input type="text" id="nick" name="nick" autocomplete="nickname" maxlength="40" placeholder="@seunick" required>
+            <div class="err" data-err="nick"></div>
+          </div>
+        </div>
+
+        <div>
+          <label for="email">E-mail</label>
+          <input type="email" id="email" name="email" autocomplete="email" maxlength="160" required>
+          <div class="err" data-err="email"></div>
+        </div>
+
+        <fieldset>
+          <legend>Área de especialidade</legend>
+          <div class="chips" id="areas"></div>
+          <div class="err" data-err="areas"></div>
+          <div id="outrosBox" hidden>
+            <label for="area_outros">Qual outra área?</label>
+            <input type="text" id="area_outros" name="area_outros" maxlength="120" placeholder="Ex.: pesquisa histórica, tradução, jurídico…">
+          </div>
+        </fieldset>
+
+        <div class="row">
+          <div>
+            <label for="horas_semana">Disponibilidade (horas por semana)</label>
+            <input type="number" id="horas_semana" name="horas_semana" min="1" max="80" inputmode="numeric" required>
+            <div class="err" data-err="horas_semana"></div>
+          </div>
+          <div>
+            <label for="experiencia">Tempo de experiência</label>
+            <select id="experiencia" name="experiencia" required><option value="">Selecione…</option></select>
+            <div class="err" data-err="experiencia"></div>
+          </div>
+        </div>
+
+        <div>
+          <label for="ferramentas">Linguagens e ferramentas</label>
+          <input type="text" id="ferramentas" name="ferramentas" maxlength="300" placeholder="Ex.: JavaScript, Figma, After Effects, PostgreSQL" required>
+          <div class="hint">Para quem é de design: Figma, Photoshop, Illustrator, Blender… Para dev: linguagens e frameworks.</div>
+          <div class="err" data-err="ferramentas"></div>
+        </div>
+
+        <div>
+          <label for="mensagem">Algo mais? (opcional)</label>
+          <textarea id="mensagem" name="mensagem" maxlength="600" placeholder="Portfólio, GitHub, o que mais te anima no projeto…"></textarea>
+        </div>
+
+        <div class="hp" aria-hidden="true"><label>Não preencha <input type="text" name="website" tabindex="-1" autocomplete="off"></label></div>
+
+        <div>
+          <label class="check"><input type="checkbox" id="consentimento" name="consentimento"><span>Concordo em ser contatado por e-mail sobre o projeto e que meus dados sejam usados apenas para esse fim.</span></label>
+          <div class="err" data-err="consentimento"></div>
+        </div>
+
+        <div class="status" id="status" role="status" aria-live="polite"></div>
+        <div><button class="btn" id="submit" type="submit">Quero contribuir</button></div>
+      </form>
+      <p class="foot">Seus dados ficam em banco próprio do projeto e não são compartilhados. Para remover seu cadastro, responda o e-mail de contato.</p>
+    </main>
+  </div>
+
+<script>
+(function () {
+  var form = document.getElementById('form'), statusEl = document.getElementById('status'), btn = document.getElementById('submit');
+  var AREAS = ['Frontend','Backend','Design UI/UX','Ilustração / Arte','Motion / Animação','Dados / Arquivamento','DevOps / Infra','Curadoria de conteúdo','Moderação / Comunidade','QA / Testes'];
+  var EXP = ['Menos de 1 ano','1 a 3 anos','3 a 5 anos','5 a 10 anos','Mais de 10 anos'];
+
+  document.getElementById('areas').innerHTML = AREAS.map(function (a, i) {
+    return '<label class="chip"><input type="checkbox" name="areas" value="' + a + '"><span>' + a + '</span></label>';
+  }).join('') + '<label class="chip"><input type="checkbox" id="outrosChk"><span>Outros</span></label>';
+  document.getElementById('experiencia').insertAdjacentHTML('beforeend', EXP.map(function (e) { return '<option>' + e + '</option>'; }).join(''));
+
+  var outrosBox = document.getElementById('outrosBox');
+  document.getElementById('outrosChk').addEventListener('change', function (e) {
+    outrosBox.hidden = !e.target.checked;
+    if (e.target.checked) document.getElementById('area_outros').focus(); else document.getElementById('area_outros').value = '';
+  });
+
+  fetch('/api/contribuidores/meta').then(function (r) { return r.json(); }).then(function (m) {
+    if (m.total > 0) { document.getElementById('countN').textContent = m.total; document.getElementById('count').hidden = false; }
+  }).catch(function () {});
+
+  function showErrors(errors) {
+    document.querySelectorAll('[data-err]').forEach(function (el) { el.textContent = errors[el.dataset.err] || ''; });
+    var first = Object.keys(errors)[0];
+    if (first) { var f = form.querySelector('[name="' + first + '"]'); if (f) f.focus(); }
+  }
+  function say(kind, msg) { statusEl.className = 'status show ' + kind; statusEl.textContent = msg; }
+
+  form.addEventListener('submit', function (ev) {
+    ev.preventDefault();
+    showErrors({}); statusEl.className = 'status';
+    var fd = new FormData(form);
+    var payload = {
+      nome: fd.get('nome'), nick: fd.get('nick'), email: fd.get('email'),
+      areas: fd.getAll('areas'), area_outros: fd.get('area_outros') || '',
+      horas_semana: fd.get('horas_semana'), experiencia: fd.get('experiencia'),
+      ferramentas: fd.get('ferramentas'), mensagem: fd.get('mensagem'),
+      consentimento: document.getElementById('consentimento').checked, website: fd.get('website')
+    };
+    btn.disabled = true; btn.textContent = 'Enviando…';
+    fetch('/api/contribuidores', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) })
+      .then(function (r) { return r.json().then(function (j) { return { s: r.status, j: j }; }); })
+      .then(function (res) {
+        if (res.s === 201) {
+          form.reset(); outrosBox.hidden = true;
+          say('ok', 'Cadastro recebido! Obrigado por querer ajudar. Entraremos em contato por e-mail.');
+        } else if (res.s === 422) { showErrors(res.j.errors || {}); say('bad', 'Revise os campos destacados.'); }
+        else say('bad', res.j.error || 'Não foi possível enviar agora. Tente novamente.');
+      })
+      .catch(function () { say('bad', 'Sem conexão com o servidor. Tente novamente em instantes.'); })
+      .then(function () { btn.disabled = false; btn.textContent = 'Quero contribuir'; });
+  });
+})();
+</script>
+</body>
+</html>

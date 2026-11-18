@@ -19,3 +19,4 @@ inspect_*.py
 .impeccable/
 .claude/
 docs/references/*.png
+.secrets/
