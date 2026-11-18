@@ -83,7 +83,7 @@
 
       <div class="card">
         <h2>Cadastros</h2>
-        <div class="tools"><input type="search" id="q" placeholder="Buscar por nome, nick, e-mail, área ou ferramenta" aria-label="Buscar"></div>
+        <div class="tools"><input type="search" id="q" placeholder="Buscar por nome, nick, Discord, área ou ferramenta" aria-label="Buscar"></div>
         <div class="tablewrap">
           <table>
             <thead><tr><th>Quando</th><th>Pessoa</th><th>Áreas</th><th>Horas/sem</th><th>Experiência</th><th>Ferramentas</th><th></th></tr></thead>
@@ -144,13 +144,13 @@
     var q = $('q').value.trim().toLowerCase();
     var list = items.filter(function (i) {
       if (!q) return true;
-      return [i.nome, i.nick, i.email, (i.areas || []).join(' '), i.area_outros, i.ferramentas, i.experiencia].join(' ').toLowerCase().indexOf(q) > -1;
+      return [i.nome, i.nick, i.discord, (i.areas || []).join(' '), i.area_outros, i.ferramentas, i.experiencia].join(' ').toLowerCase().indexOf(q) > -1;
     });
     $('none').hidden = list.length > 0;
     $('rows').innerHTML = list.map(function (i) {
       var tags = (i.areas || []).map(function (a) { return '<span class="tag">' + esc(a) + '</span>'; }).join('') + (i.area_outros ? '<span class="tag">Outros: ' + esc(i.area_outros) + '</span>' : '');
       return '<tr><td>' + esc(new Date(i.criado_em).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' })) + '</td>' +
-        '<td><b>' + esc(i.nome) + '</b><small>@' + esc(i.nick) + ' · ' + esc(i.email) + '</small>' + (i.mensagem ? '<small>“' + esc(i.mensagem) + '”</small>' : '') + '</td>' +
+        '<td><b>' + esc(i.nome) + '</b><small>@' + esc(i.nick) + ' · ' + esc(i.discord) + '</small>' + (i.mensagem ? '<small>“' + esc(i.mensagem) + '”</small>' : '') + '</td>' +
         '<td>' + tags + '</td><td>' + esc(i.horas_semana) + ' h</td><td>' + esc(i.experiencia) + '</td><td>' + esc(i.ferramentas) + '</td>' +
         '<td><button class="del" data-id="' + esc(i.id) + '" type="button">Excluir</button></td></tr>';
     }).join('');

@@ -23,12 +23,21 @@ const AREAS = ['Frontend', 'Backend', 'Design UI/UX', 'Ilustração / Arte', 'Mo
   'Dados / Arquivamento', 'DevOps / Infra', 'Curadoria de conteúdo', 'Moderação / Comunidade', 'QA / Testes'];
 const EXPERIENCE = ['Menos de 1 ano', '1 a 3 anos', '3 a 5 anos', '5 a 10 anos', 'Mais de 10 anos'];
 
+// migração: versão anterior guardava e-mail; agora guarda usuário do Discord
+await pool.query(`
+  DO $$ BEGIN
+    IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'contribuidores' AND column_name = 'email') THEN
+      DROP INDEX IF EXISTS contribuidores_email_uq;
+      ALTER TABLE contribuidores RENAME COLUMN email TO discord;
+    END IF;
+  END $$;
+`);
 await pool.query(`
   CREATE TABLE IF NOT EXISTS contribuidores (
     id            BIGSERIAL PRIMARY KEY,
     nome          TEXT NOT NULL,
     nick          TEXT NOT NULL,
-    email         TEXT NOT NULL,
+    discord       TEXT NOT NULL,
     areas         TEXT[] NOT NULL DEFAULT '{}',
     area_outros   TEXT,
     horas_semana  INT NOT NULL,
@@ -37,7 +46,7 @@ await pool.query(`
     mensagem      TEXT,
     criado_em     TIMESTAMPTZ NOT NULL DEFAULT now()
   );
-  CREATE UNIQUE INDEX IF NOT EXISTS contribuidores_email_uq ON contribuidores (lower(email));
+  CREATE UNIQUE INDEX IF NOT EXISTS contribuidores_discord_uq ON contribuidores (lower(discord));
 `);
 
 const send = (res, code, body, headers = {}) => {
@@ -72,7 +81,7 @@ const clean = (v, max) => String(v ?? '').replace(/[\u0000-\u001f\u007f]/g, ' ')
 
 function validate(b) {
   const errors = {};
-  const nome = clean(b.nome, 120), nick = clean(b.nick, 40).replace(/^@/, ''), email = clean(b.email, 160).toLowerCase();
+  const nome = clean(b.nome, 120), nick = clean(b.nick, 40).replace(/^@/, ''), discord = clean(b.discord, 40).replace(/^@/, '').toLowerCase();
   const areas = (Array.isArray(b.areas) ? b.areas : []).map((a) => clean(a, 40)).filter((a) => AREAS.includes(a));
   const area_outros = clean(b.area_outros, 120);
   const horas = Number.parseInt(b.horas_semana, 10);
@@ -81,13 +90,13 @@ function validate(b) {
   const mensagem = clean(b.mensagem, 600);
   if (nome.length < 2) errors.nome = 'Informe seu nome.';
   if (!/^[\w.\-]{2,40}$/.test(nick)) errors.nick = 'Use 2–40 letras, números, ponto, hífen ou _.';
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) errors.email = 'E-mail inválido.';
+  if (!/^[a-z0-9_.]{2,32}$/.test(discord) || discord.includes('..')) errors.discord = 'Usuário do Discord inválido (2 a 32: letras minúsculas, números, _ e .).';
   if (!areas.length && !area_outros) errors.areas = 'Escolha ao menos uma área ou descreva em “Outros”.';
   if (!(horas >= 1 && horas <= 80)) errors.horas_semana = 'Informe de 1 a 80 horas por semana.';
   if (!EXPERIENCE.includes(experiencia)) errors.experiencia = 'Selecione o tempo de experiência.';
   if (ferramentas.length < 2) errors.ferramentas = 'Conte quais linguagens ou ferramentas você domina.';
   if (b.consentimento !== true) errors.consentimento = 'É preciso aceitar o uso dos dados para contato.';
-  return { errors, data: { nome, nick, email, areas, area_outros: area_outros || null, horas_semana: horas, experiencia, ferramentas, mensagem: mensagem || null } };
+  return { errors, data: { nome, nick, discord, areas, area_outros: area_outros || null, horas_semana: horas, experiencia, ferramentas, mensagem: mensagem || null } };
 }
 
 function isAdmin(req) {
@@ -124,11 +133,11 @@ const server = http.createServer(async (req, res) => {
       if (Object.keys(errors).length) return send(res, 422, { error: 'Revise os campos.', errors });
       try {
         await pool.query(
-          `INSERT INTO contribuidores (nome,nick,email,areas,area_outros,horas_semana,experiencia,ferramentas,mensagem)
+          `INSERT INTO contribuidores (nome,nick,discord,areas,area_outros,horas_semana,experiencia,ferramentas,mensagem)
            VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)`,
-          [data.nome, data.nick, data.email, data.areas, data.area_outros, data.horas_semana, data.experiencia, data.ferramentas, data.mensagem]);
+          [data.nome, data.nick, data.discord, data.areas, data.area_outros, data.horas_semana, data.experiencia, data.ferramentas, data.mensagem]);
       } catch (e) {
-        if (e.code === '23505') return send(res, 409, { error: 'E-mail já cadastrado. Obrigado!' });
+        if (e.code === '23505') return send(res, 409, { error: 'Este usuário do Discord já está cadastrado. Obrigado!' });
         throw e;
       }
       return send(res, 201, { ok: true });
@@ -143,7 +152,7 @@ const server = http.createServer(async (req, res) => {
       }
       if (req.method === 'GET' && url.pathname === '/api/admin/contribuidores.csv') {
         const { rows } = await pool.query('SELECT * FROM contribuidores ORDER BY criado_em DESC');
-        const cols = ['id', 'nome', 'nick', 'email', 'areas', 'area_outros', 'horas_semana', 'experiencia', 'ferramentas', 'mensagem', 'criado_em'];
+        const cols = ['id', 'nome', 'nick', 'discord', 'areas', 'area_outros', 'horas_semana', 'experiencia', 'ferramentas', 'mensagem', 'criado_em'];
         const csv = '﻿' + [cols.join(','), ...rows.map((r) => cols.map((c) => csvCell(r[c])).join(','))].join('\r\n');
         res.writeHead(200, {
           'Content-Type': 'text/csv; charset=utf-8',

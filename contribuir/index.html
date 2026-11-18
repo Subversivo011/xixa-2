@@ -26,7 +26,7 @@
     .row { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
     label, legend { display: block; font-family: var(--display); font-size: 15px; font-weight: 700; letter-spacing: 1.2px; text-transform: uppercase; margin-bottom: 6px; padding: 0; }
     .hint { color: var(--muted); font-size: 13px; margin-top: 4px; font-weight: 400; letter-spacing: 0; text-transform: none; font-family: var(--body); }
-    input[type=text], input[type=email], input[type=number], select, textarea { width: 100%; background: #070a14; border: 1px solid var(--border); border-radius: 10px; color: var(--text); font: inherit; padding: 11px 13px; min-height: 44px; transition: border-color .2s; }
+    input[type=text], input[type=number], select, textarea { width: 100%; background: #070a14; border: 1px solid var(--border); border-radius: 10px; color: var(--text); font: inherit; padding: 11px 13px; min-height: 44px; transition: border-color .2s; }
     textarea { min-height: 96px; resize: vertical; }
     input:focus, select:focus, textarea:focus { outline: 2px solid var(--accent-hover); outline-offset: 1px; border-color: transparent; }
     fieldset { border: 0; padding: 0; min-width: 0; }
@@ -66,7 +66,7 @@
 
     <main>
       <h1>Ajude a salvar a<br><span>internet brasileira</span></h1>
-      <p class="lead">Estamos montando a equipe que vai construir, curar e preservar o acervo. Conte um pouco sobre você e quanto tempo pode dedicar. Entramos em contato por e-mail.</p>
+      <p class="lead">Estamos montando a equipe que vai construir, curar e preservar o acervo. Conte um pouco sobre você e quanto tempo pode dedicar. Entramos em contato pelo Discord.</p>
       <p class="count" id="count" hidden><b id="countN">0</b> pessoas já se cadastraram</p>
 
       <form id="form" novalidate>
@@ -84,9 +84,10 @@
         </div>
 
         <div>
-          <label for="email">E-mail</label>
-          <input type="email" id="email" name="email" autocomplete="email" maxlength="160" required>
-          <div class="err" data-err="email"></div>
+          <label for="discord">Usuário do Discord</label>
+          <input type="text" id="discord" name="discord" autocomplete="off" maxlength="40" placeholder="seu_usuario" autocapitalize="none" spellcheck="false" required>
+          <div class="hint">O nome de usuário (não o apelido de exibição). Ex.: seu_usuario</div>
+          <div class="err" data-err="discord"></div>
         </div>
 
         <fieldset>
@@ -127,14 +128,14 @@
         <div class="hp" aria-hidden="true"><label>Não preencha <input type="text" name="website" tabindex="-1" autocomplete="off"></label></div>
 
         <div>
-          <label class="check"><input type="checkbox" id="consentimento" name="consentimento"><span>Concordo em ser contatado por e-mail sobre o projeto e que meus dados sejam usados apenas para esse fim.</span></label>
+          <label class="check"><input type="checkbox" id="consentimento" name="consentimento"><span>Concordo em ser contatado pelo Discord sobre o projeto e que meus dados sejam usados apenas para esse fim.</span></label>
           <div class="err" data-err="consentimento"></div>
         </div>
 
         <div class="status" id="status" role="status" aria-live="polite"></div>
         <div><button class="btn" id="submit" type="submit">Quero contribuir</button></div>
       </form>
-      <p class="foot">Seus dados ficam em banco próprio do projeto e não são compartilhados. Para remover seu cadastro, responda o e-mail de contato.</p>
+      <p class="foot">Seus dados ficam em banco próprio do projeto e não são compartilhados. Para remover seu cadastro, avise pelo Discord.</p>
     </main>
   </div>
 
@@ -171,7 +172,7 @@
     showErrors({}); statusEl.className = 'status';
     var fd = new FormData(form);
     var payload = {
-      nome: fd.get('nome'), nick: fd.get('nick'), email: fd.get('email'),
+      nome: fd.get('nome'), nick: fd.get('nick'), discord: fd.get("discord"),
       areas: fd.getAll('areas'), area_outros: fd.get('area_outros') || '',
       horas_semana: fd.get('horas_semana'), experiencia: fd.get('experiencia'),
       ferramentas: fd.get('ferramentas'), mensagem: fd.get('mensagem'),
@@ -183,7 +184,7 @@
       .then(function (res) {
         if (res.s === 201) {
           form.reset(); outrosBox.hidden = true;
-          say('ok', 'Cadastro recebido! Obrigado por querer ajudar. Entraremos em contato por e-mail.');
+          say('ok', 'Cadastro recebido! Obrigado por querer ajudar. Entraremos em contato pelo Discord.');
         } else if (res.s === 422) { showErrors(res.j.errors || {}); say('bad', 'Revise os campos destacados.'); }
         else say('bad', res.j.error || 'Não foi possível enviar agora. Tente novamente.');
       })

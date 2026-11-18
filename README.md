@@ -488,11 +488,11 @@ Cadastro de quem quer ajudar o projeto. Os dados vão para um banco PostgreSQL p
 | Peça | Onde | O que faz |
 |---|---|---|
 | Página GitHub Pages | `docs/index.html` → `https://willianjack0.github.io/xixa-2/` | Redireciona para o formulário hospedado |
-| Formulário | `/contribuir/` | Nome, nick, e-mail, áreas (caixas + "Outros"), horas/semana, experiência, linguagens/ferramentas, mensagem, consentimento |
+| Formulário | `/contribuir/` | Nome, nick, usuário do Discord, áreas (caixas + "Outros"), horas/semana, experiência, linguagens/ferramentas, mensagem, consentimento |
 | Dashboard | `/dashboard/` | KPIs, gráficos por área/experiência/horas/dia, busca, exportar CSV, excluir. Pede token de admin |
 | API | `api/server.js` (Node + `pg`) em `/api` | `POST /api/contribuidores`, `GET /api/contribuidores/meta`, rotas `/api/admin/*` com Bearer token |
 
-**Segurança:** validação no servidor, e-mail único, honeypot, rate limit (8 envios/10 min por IP), CSV sem injeção de fórmula. Senha do banco e token admin ficam em Docker secrets (`naosalvo_db_password`, `naosalvo_admin_token`), nunca no git. O dashboard tem `noindex`.
+**Segurança:** validação no servidor, Discord único, honeypot, rate limit (8 envios/10 min por IP), CSV sem injeção de fórmula. Senha do banco e token admin ficam em Docker secrets (`naosalvo_db_password`, `naosalvo_admin_token`), nunca no git. O dashboard tem `noindex`.
 
 **Deploy (servidor 2):** `docker build -t naosalvo-api:latest ./api && docker build -t naosalvo-frontend:latest . && docker stack deploy -c docker-stack.yml naosalvo`. A tabela `contribuidores` é criada pela API na primeira subida.
 
