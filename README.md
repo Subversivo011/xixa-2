@@ -438,10 +438,47 @@ naosalvo/
 
 ## 6. Referências de Design e Mockups
 
-Os protótipos conceituais desenvolvidos pela comunidade estão catalogados na pasta [`docs/references/`](file:///docs/references/):
-- **Mockup Geral & Linha do Tempo:** [`docs/references/riba_main.html`](file:///docs/references/riba_main.html)
-- **Álbum de Figurinhas Digital:** [`docs/references/riba_album.html`](file:///docs/references/riba_album.html)
-- **Conceito Completo com Feed & Avatar:** [`docs/references/cid_ideia.html`](file:///docs/references/cid_ideia.html)
+### 6.1. Protótipos da comunidade
+Os protótipos conceituais desenvolvidos pela comunidade estão catalogados na pasta [`docs/references/`](docs/references/):
+- **Mockup Geral & Linha do Tempo:** [`docs/references/riba_main.html`](docs/references/riba_main.html)
+- **Álbum de Figurinhas Digital:** [`docs/references/riba_album.html`](docs/references/riba_album.html)
+- **Conceito Completo com Feed & Avatar:** [`docs/references/cid_ideia.html`](docs/references/cid_ideia.html)
+
+### 6.2. Referência visual e funcional: Não Salvo 2 (demo)
+Referência principal do visual e das mecânicas de álbum, ranking e avatar: **<https://nao-salvo-2.netlify.app/>** (cadastro em [`#/cadastro`](https://nao-salvo-2.netlify.app/#/cadastro), álbum em [`#/album`](https://nao-salvo-2.netlify.app/#/album), ranking em [`#/ranking`](https://nao-salvo-2.netlify.app/#/ranking)). O que foi extraído e onde foi aplicado no `index.html`:
+
+**Arquitetura observada**
+- SPA em React com rotas por hash (`#/...`), empacotada com Vite. O bundle inclui o cliente do Supabase (funções de borda), o que aponta para o backend de dados e autenticação.
+- Rotas: `/` (início), `/explorar` e `/explorar/:ano`, `/categorias` e `/categorias/:id`, `/aleatorio`, `/busca`, `/v/:slug` (vídeo), `/album` e `/album/:colecao`, `/colecoes`, `/disquetes`, `/eventos`, `/ranking`, `/perfil`, `/u/:username`, `/enviar`, `/moderacao`, `/cadastro` e `/entrar`.
+
+**Sistema visual**
+
+| Token | Valor |
+|---|---|
+| Fundo / painel | `#030409` / `#0a0e18` |
+| Texto / texto secundário | `#f2f4f9` / `#a7b0c2` |
+| Azul principal (+ variações) | `#2459ff` (`#3d6bff`, `#6b8fff`) |
+| Destaques | roxo `#7c5cff`, dourado `#f5b70a`, verde `#2fbf5b`, vermelho `#ff3b47` |
+| Tipografia | Barlow Condensed (títulos, caixa alta) e Barlow (texto) |
+| Raios / largura | 10 px e 16 px / contêiner de 1400 px, cabeçalho de 76 px |
+
+**Mecânicas extraídas**
+- **Início:** hero com mosaico de memes, pilares (Colaborativo, Organizado, Eternizado, Feito por fãs), trilho de anos, "Em alta agora", "Hoje há 10 anos", "Últimos adicionados", top colaboradores e categorias.
+- **Álbum:** barra lateral com coleções e progresso, fichário com argolas e paginação, painel de detalhe da carta e cartas bloqueadas como silhueta `???`. Tabelas completas na seção 1.4.
+- **Raridades e economia:** 6 níveis (Comum, Relevante, Raro, Relíquia, Lendário, Mítico) com XP e moedas por repetida (2/5, 4/10, 8/20, 15/40, 30/80, 60/150).
+- **Disquetes:** 10 tipos de 4 a 5 cartas, com chances por raridade (padrão 52/26/13/6/2,5/0,5 %), carta garantida, evento de chance dobrada e disquete Ouro sem comuns.
+- **Criador de gatos:** 4 abas (Pelo, Acessórios, Roupa, Fundo), com 10 pelagens, 5 padrões, 5 cores de olhos, 8 acessórios (um por região), 7 roupas, 8 fundos e botão "Embaralhar tudo".
+- **Ranking:** pódio com gatos, filtros (XP geral, Envios aprovados, Cartas coletadas), tabela com patente e nível, e painel de patentes (Discado, Banda larga, Colaborador, Moderador, Dono de comunidade, Lenda da internet).
+- **Cadastro:** fluxo em 3 passos, com o avatar do gato criado junto com a conta.
+
+**Diferenças deliberadas neste projeto**
+- O acervo usa os 59 memes reais do projeto. As coleções Expansão Orkut, Plataformas Raiz e Blogs & Épicos ainda não têm registros e mostram só vagas bloqueadas.
+- As cartas ganharam moldura por estilo (polaroid, tela de TV, tira de filme e clássica) e brilho reflexivo que segue o ponteiro em Relíquia, Lendário e Mítico.
+- O disquete tem animação de abertura (queda, carga, flash e distribuição das cartas).
+- O ranking mantém os Guardiões do acervo junto dos usuários de demonstração da referência.
+- Os dados de ranking, patentes e níveis são de demonstração. Ainda não há backend.
+
+> Os pontos acima descrevem o comportamento e o visual observados na demo pública. O código-fonte da referência não é copiado para este repositório, só as regras e os valores necessários para reproduzir o comportamento.
 
 ---
 
