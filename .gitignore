@@ -14,3 +14,8 @@ Thumbs.db
 # Temp files
 *.tmp
 inspect_*.py
+
+# Ferramentas locais e referencias visuais (nao fazem parte do projeto)
+.impeccable/
+.claude/
+docs/references/*.png

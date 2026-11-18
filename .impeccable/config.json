@@ -1,8 +1,0 @@
-{
-  "detector": {
-    "ignoreFiles": [
-      "docs/references/**",
-      "docs/**"
-    ]
-  }
-}
