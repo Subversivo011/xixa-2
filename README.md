@@ -40,15 +40,65 @@ Este projeto nasceu da união da comunidade (comunidade XET, Cid Cidoso, moderad
 - Histórias de bastidores: campo *"Conta pra quem não viveu"* contextualizando a piada original.
 
 ### 🃏 4. Álbum de Figurinhas da Internet (Gamificação)
-- Coleções temáticas (ex.: *Fotolog Legends*, *Orkut Legends*, *TV & Bordões*, *Clássicos do YouTube*).
-- Níveis de raridade: Comum, Relevante, Raro, Relíquia, Lendário e Mítico.
-- **Pacotes Diários (Booster Packs):** abertura de pacotes com animação 3D flip e efeitos sonoros.
-- **Reciclagem de Repetidas:** 5 cartas repetidas viram 1 novo pacote.
-- **Sistema de Trocas (Trades):** mural e links diretos para propor trocas entre usuários.
+O álbum tem quatro áreas: **Minhas coleções** (barra lateral), **Fichário** (cartas da coleção, 6 por página com paginação), **Detalhe da carta** e **Disquetes**.
+
+**11 coleções (195 cartas):**
+
+| Coleção | Cartas | Moldura da arte |
+|---|---|---|
+| Fotolog Legends | 16 | Polaroid |
+| Lendas do Orkut | 14 | Clássica |
+| Expansão Orkut | 14 | Clássica |
+| YouTube Clássico | 16 | Tira de filme |
+| Memes Icônicos | 16 | Clássica |
+| Plataformas Raiz | 20 | Tela de TV |
+| Blogs & Épicos | 15 | Clássica |
+| TV & Intervalo | 21 | Tela de TV |
+| Hits da Internet | 24 | Tela de TV |
+| Era do Zap | 22 | Tira de filme |
+| Vídeos Curtos | 17 | Tira de filme |
+
+**6 raridades**, cada uma com moldura própria e valores de XP e moedas (repetida vira moeda):
+
+| Raridade | Cor | XP | Moedas (repetida) | Efeito visual |
+|---|---|---|---|---|
+| Comum | Cinza | 2 | 5 | Moldura de aço |
+| Relevante | Verde | 4 | 10 | Moldura verde |
+| Raro | Azul | 8 | 20 | Moldura azul |
+| Relíquia | Roxo | 15 | 40 | Brilho reflexivo que segue o ponteiro |
+| Lendário | Dourado | 30 | 80 | Brilho reflexivo + holográfico |
+| Mítico | Vermelho | 60 | 150 | Brilho reflexivo + holográfico + moldura animada |
+
+Cartas bloqueadas aparecem como silhueta com `???` até serem tiradas de um disquete.
+
+**Disquetes (pacotes de 4 a 5 cartas):**
+
+| Disquete | Cartas | Preço | Garantia |
+|---|---|---|---|
+| Diário | 4 | Grátis (1 por dia) | Relevante ou melhor |
+| Boas-vindas | 5 | Grátis (uma vez) | Raro ou melhor |
+| Semana do Orkut (evento) | 5 | 90 moedas | Raro ou melhor, chance dobrada de Lendário |
+| Orkut, Fotolog, Viral, Web Raiz, Horário Nobre, Zap | 5 | 150 moedas | Relevante ou melhor |
+| Ouro | 5 | 400 moedas | Sem comuns, Relíquia ou melhor |
+
+- **Animação de abertura:** o disquete cai, treme e carrega, estoura com flash e faíscas na cor da melhor carta, e as cartas são distribuídas e viradas uma a uma (ou todas de uma vez em "Revelar todas"). Toque para pular. Respeita `prefers-reduced-motion`.
+- **Reciclagem de Repetidas:** 5 cartas repetidas viram 1 disquete diário.
+- **Sistema de Trocas (Trades):** mural e links diretos para propor trocas entre usuários (planejado para o backend).
 
 ### 🐱 5. Criador de Avatar (Gatopeixe) & Carteirinha de Membro
-- Construtor modular em SVG do mascote felino: cor de pelo, padrões (tigrado, frajola, liso), olhos, acessórios (óculos escuros, boné, fone, bandana), roupas e fundos.
+Construtor em quatro abas, com miniaturas renderizadas de cada opção:
+1. **Pelo:** 10 cores de pelo (incluindo Tricolor e Cósmico), 5 padrões (tigrado, mármore, pintado, smoking, liso) e 5 cores de olhos.
+2. **Acessórios:** óculos redondo, óculos escuro, monóculo, boné, gorro, fone, bandana e corrente. Um acessório por região (cabeça, olhos, pescoço).
+3. **Roupa:** hoodie, camiseta, jaqueta jeans, moletom, bomber, camisa xadrez e regata.
+4. **Fundo:** azul, roxo, rosa, verde-água, laranja, synthwave, galáxia e grade.
+
+- Botão **Aleatório** sorteia todas as opções. O mesmo gato (SVG) é usado no ranking e no perfil.
 - Carteirinha digital com Nick, ano em que começou a navegar na web, meme favorito e selo de membro fundador, disponível para download e compartilhamento em redes.
+
+### 🏆 5.1. Ranking & Patentes
+- **Pódio** com o 1º, 2º e 3º colocados (gato do usuário, patente e pontuação) e tabela completa abaixo.
+- **Filtros:** XP geral, Envios aprovados e Cartas coletadas.
+- **Patentes por nível:** Discado (1+), Banda larga (3+), Colaborador (5+), Moderador (10+), Dono de comunidade (15+) e Lenda da internet (20+).
 
 ### ☁️ 6. Submissão Aberta com Anti-Duplicação
 - Envio de novos memes pela comunidade com detecção em tempo real de links e títulos já cadastrados.
