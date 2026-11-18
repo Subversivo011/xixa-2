@@ -1,0 +1,2543 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NÃO SALVO — Museu & Arquivo da Internet Brasileira</title>
+  <meta name="description" content="O arquivo histórico e museu colaborativo da internet brasileira: navegue por 20 anos de memes, abra pacotes colecionáveis e reviva momentos icônicos.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #070a12;
+      --bg-surface: #0e1322;
+      --bg-card: #131b2e;
+      --bg-card-hover: #19233c;
+      --border: #222d4a;
+      --border-focus: #2563eb;
+      --text: #f1f5f9;
+      --text-muted: #94a3b8;
+      --accent: #2563eb;
+      --accent-hover: #1d4ed8;
+      --accent-badge: #1e3a8a;
+      --green: #10b981;
+      --gold: #d97706;
+      --bronze: #92400e;
+      --red: #dc2626;
+      --font-display: 'Barlow Condensed', sans-serif;
+      --font-body: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      font-family: var(--font-body);
+      font-size: 15px;
+      line-height: 1.6;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    button {
+      font-family: inherit;
+      font-size: inherit;
+      color: inherit;
+      background: none;
+      border: none;
+      cursor: pointer;
+    }
+
+    input, select, textarea {
+      font-family: inherit;
+      font-size: inherit;
+      color: var(--text);
+      background-color: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 14px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    input:focus, select:focus, textarea:focus {
+      border-color: var(--border-focus);
+    }
+
+    .container {
+      max-width: 1360px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    /* Header */
+    header.site-header {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      background-color: rgba(7, 10, 18, 0.95);
+      border-bottom: 1px solid var(--border);
+      backdrop-filter: blur(10px);
+    }
+
+    .header-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      height: 72px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .brand-logo {
+      font-family: var(--font-display);
+      font-size: 28px;
+      font-weight: 800;
+      letter-spacing: 1px;
+      line-height: 0.9;
+      color: #ffffff;
+    }
+
+    .brand-sub {
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text-muted);
+      display: block;
+      margin-top: 2px;
+    }
+
+    nav.main-nav {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .nav-btn {
+      padding: 8px 14px;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 14px;
+      color: var(--text-muted);
+      transition: all 0.2s;
+    }
+
+    .nav-btn:hover, .nav-btn.active {
+      color: #ffffff;
+      background-color: var(--bg-surface);
+    }
+
+    .nav-btn.active {
+      border-bottom: 2px solid var(--border-focus);
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .search-bar {
+      display: flex;
+      align-items: center;
+      background-color: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 0 12px;
+      height: 40px;
+    }
+
+    .search-bar input {
+      border: none;
+      background: none;
+      padding: 0 8px;
+      width: 170px;
+      font-size: 13px;
+    }
+
+    .badge-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 12px;
+      border-radius: 8px;
+      background-color: var(--bg-surface);
+      border: 1px solid var(--border);
+      font-size: 13px;
+      font-weight: 600;
+      transition: background-color 0.2s;
+    }
+
+    .badge-btn:hover {
+      background-color: var(--bg-card);
+    }
+
+    .btn-github {
+      background-color: #24292f;
+      color: #ffffff;
+      border: 1px solid #3f4752;
+      padding: 9px 15px;
+      border-radius: 8px;
+      font-weight: 700;
+      font-size: 13px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+    }
+
+    .btn-github:hover {
+      background-color: #2f363d;
+      border-color: #57606a;
+    }
+
+    .btn-primary {
+      background-color: var(--accent);
+      color: #ffffff;
+      border: 1px solid var(--accent-hover);
+      padding: 10px 18px;
+      border-radius: 8px;
+      font-weight: 700;
+      font-size: 14px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+    }
+
+    .btn-primary:hover {
+      background-color: var(--accent-hover);
+    }
+
+    .btn-secondary {
+      background-color: var(--bg-surface);
+      color: var(--text);
+      border: 1px solid var(--border);
+      padding: 10px 18px;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 14px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s;
+    }
+
+    .btn-secondary:hover {
+      background-color: var(--bg-card);
+      border-color: var(--border-focus);
+    }
+
+    /* Mobile toggle */
+    .mobile-menu-btn {
+      display: none;
+      font-size: 24px;
+      padding: 6px;
+    }
+
+    /* Hero Section */
+    .hero-section {
+      padding: 44px 0 32px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .hero-grid {
+      display: grid;
+      grid-template-columns: 1.2fr 0.8fr;
+      gap: 36px;
+      align-items: center;
+    }
+
+    .hero-title {
+      font-family: var(--font-display);
+      font-size: clamp(38px, 5vw, 62px);
+      font-weight: 800;
+      line-height: 0.95;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      color: #ffffff;
+      margin-bottom: 16px;
+    }
+
+    .hero-desc {
+      color: #cbd5e1;
+      font-size: 16px;
+      line-height: 1.6;
+      max-width: 580px;
+      margin-bottom: 24px;
+    }
+
+    .hero-cta {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 28px;
+    }
+
+    .hero-stats {
+      display: flex;
+      gap: 24px;
+      padding-top: 18px;
+      border-top: 1px solid var(--border);
+    }
+
+    .stat-item b {
+      display: block;
+      font-family: var(--font-display);
+      font-size: 26px;
+      font-weight: 800;
+      color: #ffffff;
+      line-height: 1;
+    }
+
+    .stat-item span {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    /* Today in history card */
+    .today-box {
+      background-color: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 22px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35);
+    }
+
+    .today-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 14px;
+    }
+
+    .today-title {
+      font-family: var(--font-display);
+      font-size: 22px;
+      font-weight: 700;
+      text-transform: uppercase;
+      color: #ffffff;
+    }
+
+    .today-tag {
+      font-size: 12px;
+      font-weight: 700;
+      background-color: var(--accent-badge);
+      color: #93c5fd;
+      padding: 3px 8px;
+      border-radius: 6px;
+    }
+
+    .today-preview {
+      display: flex;
+      gap: 14px;
+      align-items: center;
+      background-color: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px;
+      margin-bottom: 14px;
+    }
+
+    .today-thumb {
+      width: 100px;
+      height: 75px;
+      border-radius: 6px;
+      object-fit: cover;
+      background-color: #000;
+    }
+
+    .today-details h4 {
+      font-size: 16px;
+      font-weight: 700;
+      color: #ffffff;
+      line-height: 1.2;
+      margin-bottom: 4px;
+    }
+
+    .today-details p {
+      font-size: 13px;
+      color: var(--text-muted);
+      line-height: 1.4;
+    }
+
+    /* Views navigation */
+    .view-container {
+      padding: 36px 0 60px;
+    }
+
+    .section-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 24px;
+      flex-wrap: wrap;
+      gap: 14px;
+    }
+
+    .section-title {
+      font-family: var(--font-display);
+      font-size: 32px;
+      font-weight: 800;
+      text-transform: uppercase;
+      color: #ffffff;
+      letter-spacing: 0.5px;
+    }
+
+    .section-subtitle {
+      font-size: 14px;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    /* Timeline Years Rail */
+    .years-rail {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      padding-bottom: 12px;
+      margin-bottom: 24px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .year-btn {
+      padding: 8px 16px;
+      border-radius: 8px;
+      background-color: var(--bg-surface);
+      border: 1px solid var(--border);
+      font-family: var(--font-display);
+      font-size: 17px;
+      font-weight: 700;
+      color: var(--text-muted);
+      transition: all 0.2s;
+      white-space: nowrap;
+    }
+
+    .year-btn:hover, .year-btn.active {
+      color: #ffffff;
+      background-color: var(--accent);
+      border-color: var(--accent-hover);
+    }
+
+    /* Filter Chips */
+    .chips-bar {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 20px;
+    }
+
+    .chip {
+      padding: 6px 14px;
+      border-radius: 20px;
+      background-color: var(--bg-surface);
+      border: 1px solid var(--border);
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .chip:hover, .chip.active {
+      color: #ffffff;
+      border-color: var(--border-focus);
+      background-color: var(--bg-card);
+    }
+
+    /* Meme Cards Grid */
+    .memes-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+      gap: 20px;
+    }
+
+    .meme-card {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+    }
+
+    .meme-card:hover {
+      transform: translateY(-4px);
+      border-color: var(--border-focus);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+    }
+
+    .card-media {
+      position: relative;
+      aspect-ratio: 16/10;
+      background-color: #020408;
+      overflow: hidden;
+    }
+
+    .card-media img, .card-media video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      transition: transform 0.3s;
+    }
+
+    .meme-card:hover .card-media img {
+      transform: scale(1.03);
+    }
+
+    .card-badge-top {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      background-color: rgba(7, 10, 18, 0.85);
+      border: 1px solid var(--border);
+      padding: 3px 8px;
+      border-radius: 4px;
+      font-family: var(--font-display);
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      color: #ffffff;
+    }
+
+    .card-rarity {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      font-size: 12px;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .rarity-Mitico { background-color: #7f1d1d; color: #fca5a5; border: 1px solid #b91c1c; }
+    .rarity-Lendario { background-color: #78350f; color: #fde68a; border: 1px solid #d97706; }
+    .rarity-Reliquia { background-color: #064e3b; color: #a7f3d0; border: 1px solid #059669; }
+    .rarity-Classico { background-color: #1e3a8a; color: #bfdbfe; border: 1px solid #2563eb; }
+
+    .card-content {
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+    }
+
+    .card-title {
+      font-family: var(--font-display);
+      font-size: 20px;
+      font-weight: 700;
+      color: #ffffff;
+      line-height: 1.15;
+      margin-bottom: 8px;
+    }
+
+    .card-desc {
+      font-size: 13px;
+      color: var(--text-muted);
+      line-height: 1.45;
+      margin-bottom: 14px;
+      flex: 1;
+    }
+
+    .card-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-top: 10px;
+      border-top: 1px solid var(--border);
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .card-actions {
+      display: flex;
+      gap: 6px;
+    }
+
+    .icon-btn {
+      padding: 6px 10px;
+      border-radius: 6px;
+      background-color: var(--bg-surface);
+      border: 1px solid var(--border);
+      font-size: 12px;
+      font-weight: 600;
+      transition: all 0.2s;
+    }
+
+    .icon-btn:hover {
+      background-color: var(--accent);
+      color: #ffffff;
+      border-color: var(--accent);
+    }
+
+    /* Album Section */
+    .album-grid {
+      display: grid;
+      grid-template-columns: 280px 1fr;
+      gap: 28px;
+    }
+
+    .album-sidebar {
+      background-color: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+    }
+
+    .album-collections-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-top: 14px;
+    }
+
+    .collection-btn {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 14px;
+      border-radius: 8px;
+      background-color: var(--bg-card);
+      border: 1px solid var(--border);
+      text-align: left;
+      font-weight: 600;
+      font-size: 14px;
+      transition: all 0.2s;
+    }
+
+    .collection-btn:hover, .collection-btn.active {
+      border-color: var(--border-focus);
+      background-color: var(--bg-card-hover);
+      color: #ffffff;
+    }
+
+    .sticker-cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 16px;
+    }
+
+    .sticker-card {
+      aspect-ratio: 3/4.2;
+      background-color: var(--bg-card);
+      border: 2px solid var(--border);
+      border-radius: 10px;
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .sticker-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
+    }
+
+    .sticker-card.locked {
+      background-color: #080c14;
+      border-style: dashed;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .sticker-card.locked .lock-mark {
+      font-family: var(--font-display);
+      font-size: 38px;
+      color: #334155;
+      font-weight: 800;
+    }
+
+    .sticker-media {
+      flex: 1;
+      border-radius: 6px;
+      overflow: hidden;
+      background-color: #000;
+      margin-bottom: 8px;
+    }
+
+    .sticker-media img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .sticker-name {
+      font-family: var(--font-display);
+      font-size: 14px;
+      font-weight: 700;
+      color: #ffffff;
+      text-align: center;
+      line-height: 1.1;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .duplicate-tag {
+      position: absolute;
+      top: 6px;
+      right: 6px;
+      background-color: var(--accent);
+      color: #ffffff;
+      font-size: 12px;
+      font-weight: 700;
+      padding: 1px 6px;
+      border-radius: 4px;
+    }
+
+    /* Avatar Maker */
+    .avatar-maker-grid {
+      display: grid;
+      grid-template-columns: 340px 1fr;
+      gap: 32px;
+      align-items: start;
+    }
+
+    .avatar-preview-box {
+      background-color: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 24px;
+      text-align: center;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+    }
+
+    .avatar-svg-container {
+      width: 200px;
+      height: 200px;
+      margin: 0 auto 18px;
+      border-radius: 50%;
+      border: 3px solid var(--border-focus);
+      background-color: var(--bg-card);
+      overflow: hidden;
+      display: grid;
+      place-items: center;
+    }
+
+    .avatar-options-panel {
+      background-color: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 24px;
+    }
+
+    .avatar-tab-content {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .avatar-opt-btn {
+      padding: 10px 16px;
+      border-radius: 8px;
+      background-color: var(--bg-card);
+      border: 1px solid var(--border);
+      font-weight: 600;
+      font-size: 13px;
+      transition: all 0.2s;
+    }
+
+    .avatar-opt-btn:hover, .avatar-opt-btn.active {
+      border-color: var(--border-focus);
+      background-color: var(--accent);
+      color: #ffffff;
+    }
+
+    /* Modal Overlay */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background-color: rgba(4, 7, 14, 0.85);
+      backdrop-filter: blur(6px);
+      z-index: 100;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .modal-overlay.active {
+      display: flex;
+    }
+
+    .modal-box {
+      background-color: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      max-width: 620px;
+      width: 100%;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+      position: relative;
+    }
+
+    .modal-header {
+      padding: 20px 24px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .modal-title {
+      font-family: var(--font-display);
+      font-size: 24px;
+      font-weight: 700;
+      text-transform: uppercase;
+      color: #ffffff;
+    }
+
+    .modal-close {
+      font-size: 20px;
+      color: var(--text-muted);
+      cursor: pointer;
+    }
+
+    .modal-close:hover {
+      color: #ffffff;
+    }
+
+    .modal-body {
+      padding: 24px;
+    }
+
+    /* Booster Pack 3D Opening */
+    .booster-arena {
+      display: flex;
+      justify-content: center;
+      gap: 16px;
+      perspective: 1000px;
+      margin: 20px 0;
+    }
+
+    .booster-card-flip {
+      width: 150px;
+      aspect-ratio: 3/4.2;
+      position: relative;
+      transform-style: preserve-3d;
+      transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+      cursor: pointer;
+    }
+
+    .booster-card-flip.revealed {
+      transform: rotateY(180deg);
+    }
+
+    .card-face {
+      position: absolute;
+      inset: 0;
+      backface-visibility: hidden;
+      border-radius: 10px;
+      border: 2px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 8px;
+    }
+
+    .card-face.back {
+      background: linear-gradient(135deg, #1e293b, #0f172a);
+      border-color: #3b82f6;
+      color: #ffffff;
+      font-family: var(--font-display);
+      font-size: 16px;
+      font-weight: 800;
+      text-align: center;
+    }
+
+    .card-face.front {
+      background-color: var(--bg-card);
+      transform: rotateY(180deg);
+    }
+
+    /* Responsive */
+    @media (max-width: 1024px) {
+      .hero-grid { grid-template-columns: 1fr; }
+      .album-grid { grid-template-columns: 1fr; }
+      .avatar-maker-grid { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 768px) {
+      nav.main-nav { display: none; }
+      .search-bar { display: none; }
+      .mobile-menu-btn { display: block; }
+      .hero-title { font-size: 34px; }
+      .hero-stats { flex-wrap: wrap; gap: 16px; }
+      .header-actions .badge-btn { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Site Header -->
+  <header class="site-header">
+    <div class="container header-inner">
+      <div class="brand">
+        <a href="#home" onclick="showView('home')">
+          <div class="brand-logo">NÃO SALVO</div>
+          <span class="brand-sub">Arquivo da Internet Brasileira</span>
+        </a>
+      </div>
+
+      <nav class="main-nav">
+        <button class="nav-btn active" onclick="showView('home')">Início</button>
+        <button class="nav-btn" onclick="showView('timeline')">Linha do Tempo</button>
+        <button class="nav-btn" onclick="showView('album')">Álbum de Cartas</button>
+        <button class="nav-btn" onclick="showView('feed')">Feed de Memes</button>
+        <button class="nav-btn" onclick="showView('avatar')">Mascote</button>
+        <button class="nav-btn" onclick="showView('ranking')">Ranking</button>
+      </nav>
+
+      <div class="header-actions">
+        <div class="search-bar">
+          <span>🔍</span>
+          <input type="text" id="searchInput" placeholder="Buscar memes..." oninput="handleSearch(this.value)">
+        </div>
+
+        <button class="badge-btn" onclick="showBoosterPackModal()">
+          <span>🎁</span>
+          <span id="packCounter">2 Pacotes</span>
+        </button>
+
+        <button class="badge-btn" title="Sequência diária">
+          <span>🔥</span>
+          <span>3 dias</span>
+        </button>
+
+        <!-- Botão Solicitado: Solicite Acesso ao GitHub -->
+        <button class="btn-github" onclick="openGitHubModal()">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+            <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/>
+          </svg>
+          Solicite Acesso ao GitHub
+        </button>
+
+        <button class="mobile-menu-btn" onclick="toggleMobileNav()">☰</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content Areas -->
+  <main class="container">
+
+    <!-- HOME VIEW -->
+    <section id="view-home" class="view-panel">
+      <div class="hero-section">
+        <div class="hero-grid">
+          <div>
+            <h1 class="hero-title">E no fim, o plano do Não Salvo era salvar.</h1>
+            <p class="hero-desc">
+              O museu definitivo da cultura digital brasileira. Navegue por 20 anos de momentos inesquecíveis, complete seu álbum de figurinhas e reviva a época de ouro da nossa internet.
+            </p>
+            <div class="hero-cta">
+              <button class="btn-primary" onclick="showView('timeline')">⏱ Explorar Linha do Tempo</button>
+              <button class="btn-secondary" onclick="showBoosterPackModal()">🎁 Abrir Pacote Diário</button>
+              <button class="btn-secondary" onclick="openSubmitModal()">＋ Salvar Novo Meme</button>
+            </div>
+            <div class="hero-stats">
+              <div class="stat-item">
+                <b id="totalMemesCount">59</b>
+                <span>Clássicos Catalogados</span>
+              </div>
+              <div class="stat-item">
+                <b>2004 — 2026</b>
+                <span>Anos de História Web</span>
+              </div>
+              <div class="stat-item">
+                <b>100%</b>
+                <span>Comunitário & Aberto</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Hoje na História -->
+          <div>
+            <div class="today-box" id="todayCard">
+              <div class="today-header">
+                <span class="today-title">📅 Hoje na História Web</span>
+                <span class="today-tag" id="todayYearsAgo">Há 12 anos</span>
+              </div>
+              <div class="today-preview" id="todayPreviewContent">
+                <!-- Injected via JS -->
+              </div>
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px;">
+                <span style="font-size: 13px; color: var(--text-muted);" id="todayDateLabel">18 de Novembro</span>
+                <button class="btn-secondary" style="padding: 6px 12px; font-size: 13px;" onclick="showView('timeline')">Ver Linha do Tempo →</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Highlights Section -->
+      <div class="view-container">
+        <div class="section-head">
+          <div>
+            <h2 class="section-title">⭐ Clássicos em Destaque</h2>
+            <p class="section-subtitle">Momentos que definiram a história da internet brasileira</p>
+          </div>
+          <button class="btn-secondary" onclick="showView('timeline')">Ver Todos os Anos →</button>
+        </div>
+        <div class="memes-grid" id="homeHighlightsGrid">
+          <!-- Injected via JS -->
+        </div>
+      </div>
+    </section>
+
+    <!-- TIMELINE VIEW -->
+    <section id="view-timeline" class="view-panel" style="display: none;">
+      <div class="view-container">
+        <div class="section-head">
+          <div>
+            <h2 class="section-title">⏱ Linha do Tempo da Web BR</h2>
+            <p class="section-subtitle">Viagem cronológica pelos marcos e virais de 2004 aos dias de hoje</p>
+          </div>
+          <button class="btn-primary" onclick="openSubmitModal()">＋ Salvar Meme no Ano</button>
+        </div>
+
+        <div class="years-rail" id="timelineYearsRail">
+          <!-- Injected via JS -->
+        </div>
+
+        <div class="chips-bar" id="categoryChips">
+          <button class="chip active" onclick="filterCategory('all', this)">Todos</button>
+          <button class="chip" onclick="filterCategory('videos', this)">🎬 Vídeos</button>
+          <button class="chip" onclick="filterCategory('tv', this)">📺 TV & Entrevistas</button>
+          <button class="chip" onclick="filterCategory('musica', this)">🎵 Música</button>
+          <button class="chip" onclick="filterCategory('cultura', this)">🌐 Cultura</button>
+          <button class="chip" onclick="filterCategory('zoeira', this)">🤡 Zoeira</button>
+          <button class="chip" onclick="filterCategory('fotos', this)">📸 Fotos</button>
+        </div>
+
+        <div class="memes-grid" id="timelineGrid">
+          <!-- Injected via JS -->
+        </div>
+      </div>
+    </section>
+
+    <!-- ALBUM VIEW -->
+    <section id="view-album" class="view-panel" style="display: none;">
+      <div class="view-container">
+        <div class="section-head">
+          <div>
+            <h2 class="section-title">🃏 Álbum de Figurinhas Digital</h2>
+            <p class="section-subtitle">Abra pacotinhos diários, colecione cartas raras e troque repetidas</p>
+          </div>
+          <div style="display: flex; gap: 10px;">
+            <button class="btn-secondary" onclick="recycleDuplicates()">♻️ 5 Repetidas → 1 Pacote</button>
+            <button class="btn-primary" onclick="showBoosterPackModal()">🎁 Abrir Pacotinho</button>
+          </div>
+        </div>
+
+        <div class="album-grid">
+          <div class="album-sidebar">
+            <h3 style="font-family: var(--font-display); font-size: 20px; font-weight: 700; color: #fff;">Coleções</h3>
+            <div class="album-collections-list">
+              <button class="collection-btn active" onclick="switchCollection('all', this)">
+                <span>🌐 Todas as Cartas</span>
+                <span id="colCountAll">59</span>
+              </button>
+              <button class="collection-btn" onclick="switchCollection('og', this)">
+                <span>📼 Era de Ouro (2004-2010)</span>
+                <span>14</span>
+              </button>
+              <button class="collection-btn" onclick="switchCollection('classic', this)">
+                <span>💥 Apogeu Web (2011-2015)</span>
+                <span>27</span>
+              </button>
+              <button class="collection-btn" onclick="switchCollection('modern', this)">
+                <span>📱 Nova Geração (2016-2026)</span>
+                <span>18</span>
+              </button>
+            </div>
+
+            <div style="margin-top: 24px; padding-top: 18px; border-top: 1px solid var(--border);">
+              <div style="font-size: 13px; color: var(--text-muted); margin-bottom: 6px;">Progresso Total</div>
+              <div style="height: 8px; background: var(--bg-card); border-radius: 4px; overflow: hidden; margin-bottom: 8px;">
+                <div id="albumProgressBar" style="height: 100%; width: 45%; background: var(--accent);"></div>
+              </div>
+              <div style="display: flex; justify-content: space-between; font-size: 12px; color: var(--text-muted);">
+                <span id="collectedCardsLabel">26 Colecionadas</span>
+                <span>59 Totais</span>
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <div class="sticker-cards" id="albumStickersGrid">
+              <!-- Injected via JS -->
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- FEED VIEW -->
+    <section id="view-feed" class="view-panel" style="display: none;">
+      <div class="view-container" style="max-width: 680px; margin: 0 auto;">
+        <div class="section-head">
+          <div>
+            <h2 class="section-title">🎞 Feed Contínuo</h2>
+            <p class="section-subtitle">Use as setas ↑ ↓ do teclado para navegar ou S para salvar no seu baú</p>
+          </div>
+        </div>
+        <div id="feedStream" style="display: flex; flex-direction: column; gap: 24px;">
+          <!-- Injected via JS -->
+        </div>
+      </div>
+    </section>
+
+    <!-- AVATAR MAKER VIEW -->
+    <section id="view-avatar" class="view-panel" style="display: none;">
+      <div class="view-container">
+        <div class="section-head">
+          <div>
+            <h2 class="section-title">🐱 Criador de Mascote (Gatopeixe)</h2>
+            <p class="section-subtitle">Customize seu avatar felino e baixe sua carteirinha oficial de membro</p>
+          </div>
+          <button class="btn-primary" onclick="downloadMemberCard()">⬇ Baixar Carteirinha</button>
+        </div>
+
+        <div class="avatar-maker-grid">
+          <div class="avatar-preview-box">
+            <div class="avatar-svg-container" id="avatarSvgContainer">
+              <!-- Rendered SVG Cat -->
+            </div>
+            <h3 style="font-family: var(--font-display); font-size: 26px; font-weight: 700; color: #fff;" id="avatarNickDisplay">@guardiao_da_web</h3>
+            <p style="font-size: 13px; color: var(--text-muted); margin-top: 4px;">Membro Nº #0042 · Na internet desde 2004</p>
+            <div style="margin-top: 16px; display: flex; justify-content: center; gap: 8px;">
+              <button class="btn-secondary" onclick="randomizeCat()">🎲 Aleatório</button>
+              <button class="btn-primary" onclick="downloadMemberCard()">Carteirinha</button>
+            </div>
+          </div>
+
+          <div class="avatar-options-panel">
+            <h4 style="font-family: var(--font-display); font-size: 20px; font-weight: 700; color: #fff;">Pelo & Cor</h4>
+            <div class="avatar-tab-content" id="catFurOpts">
+              <button class="avatar-opt-btn active" onclick="setCatOption('fur', '#94a3b8', this)">Cinza Clássico</button>
+              <button class="avatar-opt-btn" onclick="setCatOption('fur', '#f97316', this)">Laranja Malhado</button>
+              <button class="avatar-opt-btn" onclick="setCatOption('fur', '#1e293b', this)">Preto Sombra</button>
+              <button class="avatar-opt-btn" onclick="setCatOption('fur', '#f8fafc', this)">Branco Nuvem</button>
+              <button class="avatar-opt-btn" onclick="setCatOption('fur', '#b45309', this)">Marrom Café</button>
+            </div>
+
+            <h4 style="font-family: var(--font-display); font-size: 20px; font-weight: 700; color: #fff; margin-top: 20px;">Acessórios</h4>
+            <div class="avatar-tab-content" id="catAccOpts">
+              <button class="avatar-opt-btn active" onclick="setCatOption('acc', 'none', this)">Nenhum</button>
+              <button class="avatar-opt-btn" onclick="setCatOption('acc', 'glasses', this)">🕶️ Óculos Escuro</button>
+              <button class="avatar-opt-btn" onclick="setCatOption('acc', 'cap', this)">🧢 Boné Virado</button>
+              <button class="avatar-opt-btn" onclick="setCatOption('acc', 'headphone', this)">🎧 Fone Gamer</button>
+              <button class="avatar-opt-btn" onclick="setCatOption('acc', 'bandana', this)">🧣 Bandana</button>
+            </div>
+
+            <h4 style="font-family: var(--font-display); font-size: 20px; font-weight: 700; color: #fff; margin-top: 20px;">Fundo do Perfil</h4>
+            <div class="avatar-tab-content" id="catBgOpts">
+              <button class="avatar-opt-btn active" onclick="setCatOption('bg', '#1e3a8a', this)">Azul Cyber</button>
+              <button class="avatar-opt-btn" onclick="setCatOption('bg', '#065f46', this)">Verde Matrix</button>
+              <button class="avatar-opt-btn" onclick="setCatOption('bg', '#831843', this)">Vinho Retrô</button>
+              <button class="avatar-opt-btn" onclick="setCatOption('bg', '#78350f', this)">Âmbar Ocre</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- RANKING VIEW -->
+    <section id="view-ranking" class="view-panel" style="display: none;">
+      <div class="view-container">
+        <div class="section-head">
+          <div>
+            <h2 class="section-title">🏆 Guardiões do Acervo</h2>
+            <p class="section-subtitle">Os maiores contribuidores de memes e preservadores da cultura digital</p>
+          </div>
+        </div>
+
+        <div style="background-color: var(--bg-surface); border: 1px solid var(--border); border-radius: 12px; overflow: hidden;">
+          <div style="display: grid; grid-template-columns: 80px 1fr 140px 140px; padding: 14px 20px; border-bottom: 1px solid var(--border); font-size: 13px; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">
+            <span>Posição</span>
+            <span>Guardião</span>
+            <span>Memes Salvos</span>
+            <span>XP Total</span>
+          </div>
+          <div id="rankingList">
+            <!-- Injected via JS -->
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- MODAL: SOLICITE ACESSO AO GITHUB PRIVADO -->
+  <div class="modal-overlay" id="githubModal" onclick="if(event.target===this)closeModal('githubModal')">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3 class="modal-title">🐙 Repositório Privado no GitHub</h3>
+        <span class="modal-close" onclick="closeModal('githubModal')">✕</span>
+      </div>
+      <div class="modal-body">
+        <p style="color: var(--text); font-size: 15px; margin-bottom: 16px;">
+          O código-fonte completo deste projeto está hospedado em nosso repositório privado oficial:
+        </p>
+        <div style="background-color: var(--bg-card); border: 1px solid var(--border); border-radius: 8px; padding: 14px; margin-bottom: 20px; display: flex; align-items: center; justify-content: space-between;">
+          <code style="font-size: 14px; color: #93c5fd;">https://github.com/willianjack0/naosalvo-2</code>
+          <button class="btn-secondary" style="padding: 6px 12px; font-size: 12px;" onclick="copyGitHubLink()">Copiar</button>
+        </div>
+
+        <h4 style="font-size: 16px; font-weight: 700; color: #fff; margin-bottom: 10px;">Solicitar Convite de Colaborador:</h4>
+        <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 14px;">
+          Informe seu usuário do GitHub ou entre em contato pelo Discord da comunidade para liberarmos acesso à branch de desenvolvimento.
+        </p>
+
+        <form id="ghRequestForm" onsubmit="handleGitHubRequest(event)">
+          <div style="display: flex; gap: 10px; margin-bottom: 16px;">
+            <input type="text" id="ghUsernameInput" required placeholder="Seu @username do GitHub" style="flex: 1;">
+            <button type="submit" class="btn-primary">Enviar Pedido</button>
+          </div>
+        </form>
+
+        <div style="display: flex; gap: 10px;">
+          <a href="https://github.com/willianjack0/naosalvo-2" target="_blank" rel="noopener" class="btn-secondary" style="flex: 1; justify-content: center;">
+            Abrir Página no GitHub ↗
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: BOOSTER PACK OPENING -->
+  <div class="modal-overlay" id="boosterModal" onclick="if(event.target===this)closeModal('boosterModal')">
+    <div class="modal-box" style="max-width: 680px; text-align: center;">
+      <div class="modal-header">
+        <h3 class="modal-title">🎁 Pacotinho da Internet</h3>
+        <span class="modal-close" onclick="closeModal('boosterModal')">✕</span>
+      </div>
+      <div class="modal-body">
+        <p style="font-size: 14px; color: var(--text-muted); margin-bottom: 16px;">
+          Clique nas cartas para virar e descobrir quais figurinhas você tirou hoje!
+        </p>
+        <div class="booster-arena" id="boosterArena">
+          <!-- Injected via JS -->
+        </div>
+        <div style="margin-top: 20px;">
+          <button class="btn-primary" onclick="closeModal('boosterModal')">Salvar no Álbum</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: MEME DETAILS -->
+  <div class="modal-overlay" id="memeModal" onclick="if(event.target===this)closeModal('memeModal')">
+    <div class="modal-box" style="max-width: 720px;">
+      <div class="modal-header">
+        <h3 class="modal-title" id="memeModalTitle">Detalhes do Meme</h3>
+        <span class="modal-close" onclick="closeModal('memeModal')">✕</span>
+      </div>
+      <div class="modal-body" id="memeModalBody">
+        <!-- Injected via JS -->
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: SUBMIT MEME -->
+  <div class="modal-overlay" id="submitModal" onclick="if(event.target===this)closeModal('submitModal')">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3 class="modal-title">☁ Salvar Meme no Acervo</h3>
+        <span class="modal-close" onclick="closeModal('submitModal')">✕</span>
+      </div>
+      <div class="modal-body">
+        <form onsubmit="handleMemeSubmit(event)">
+          <div style="margin-bottom: 14px;">
+            <label style="display: block; font-size: 13px; font-weight: 600; margin-bottom: 6px;">Link Original (YouTube, TikTok, X, etc.)</label>
+            <input type="url" required placeholder="https://..." style="width: 100%;">
+          </div>
+          <div style="margin-bottom: 14px;">
+            <label style="display: block; font-size: 13px; font-weight: 600; margin-bottom: 6px;">Nome do Meme / Viral</label>
+            <input type="text" required placeholder="Ex.: Eita Giovana" style="width: 100%;">
+          </div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 14px;">
+            <div>
+              <label style="display: block; font-size: 13px; font-weight: 600; margin-bottom: 6px;">Ano que viralizou</label>
+              <select style="width: 100%;" id="submitYearSelect"></select>
+            </div>
+            <div>
+              <label style="display: block; font-size: 13px; font-weight: 600; margin-bottom: 6px;">Categoria</label>
+              <select style="width: 100%;">
+                <option value="videos">Vídeos</option>
+                <option value="tv">TV</option>
+                <option value="musica">Música</option>
+                <option value="cultura">Cultura</option>
+                <option value="zoeira">Zoeira</option>
+              </select>
+            </div>
+          </div>
+          <div style="margin-bottom: 18px;">
+            <label style="display: block; font-size: 13px; font-weight: 600; margin-bottom: 6px;">Conta pra quem não viveu (Contexto)</label>
+            <textarea rows="3" required placeholder="Explique brevemente o porquê de ter sido tão marcante..." style="width: 100%;"></textarea>
+          </div>
+          <button type="submit" class="btn-primary" style="width: 100%; justify-content: center;">Enviar para Curadoria (+50 XP)</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- SCRIPT & LOGIC -->
+  <script>
+    const ALL_MEMES = [
+  {
+    "id": "havaianas-de-pau",
+    "title": "Havaianas de Pau",
+    "file": "havaianas-de-pau.jpg",
+    "year": 2004,
+    "date": "2004-03-15",
+    "cat": "videos",
+    "catLabel": "Vídeos",
+    "rarity": "Mitico",
+    "by": "Irmãos Piologo",
+    "context": "A animação do Mundo Canibal que moldou o humor tosco da internet brasileira nos anos 2000. 'Para você bater na cara daquele seu irmão lazarento!'",
+    "views": 48200,
+    "saves": 1920
+  },
+  {
+    "id": "kelly-key-computador",
+    "title": "Kelly Key no Computador",
+    "file": "kelly-key-no-computador.jpg",
+    "year": 2005,
+    "date": "2005-08-20",
+    "cat": "cultura",
+    "catLabel": "Cultura",
+    "rarity": "Reliquia",
+    "by": "Internet Antiga",
+    "context": "A clássica foto de Kelly Key posando compenetrada em frente a um monitor CRT gigantesco de tubo. O auge da tecnologia dos anos 2000.",
+    "views": 21500,
+    "saves": 740
+  },
+  {
+    "id": "sanuiche-ruth-lemos",
+    "title": "Sanduíche-íche da Ruth Lemos",
+    "file": "sanuiche-iche-ruth-lemos.jpg",
+    "year": 2006,
+    "date": "2006-05-18",
+    "cat": "tv",
+    "catLabel": "TV & Programas",
+    "rarity": "Lendario",
+    "by": "Globo / YouTube",
+    "context": "A nutricionista Ruth Lemos foi dar dicas alimentares ao vivo e o retorno no ponto eletrônico começou a travar, gerando o inesquecível 'sanduíche-íche'.",
+    "views": 63400,
+    "saves": 3100
+  },
+  {
+    "id": "tapa-na-pantera",
+    "title": "Tapa na Pantera",
+    "file": "tapa-na-pantera.webp",
+    "year": 2006,
+    "date": "2006-11-22",
+    "cat": "videos",
+    "catLabel": "Vídeos",
+    "rarity": "Mitico",
+    "by": "Maria Alice Vergueiro",
+    "context": "Curta-metragem brilhante estrelado por Maria Alice Vergueiro como Dona Pantera: 'Fumo há 30 anos, todos os dias, e nunca fiquei viciada!'",
+    "views": 94000,
+    "saves": 5800
+  },
+  {
+    "id": "deixem-a-britney-em-paz",
+    "title": "Deixem a Britney em Paz!",
+    "file": "deixem-a-britney-em-paz.jpg",
+    "year": 2007,
+    "date": "2007-09-12",
+    "cat": "videos",
+    "catLabel": "Vídeos",
+    "rarity": "Lendario",
+    "by": "Chris Crocker / Web BR",
+    "context": "O choro desesperado e o lençol na cabeça pedindo trégua para a princesa do pop, que virou piada e referência mundial imediata.",
+    "views": 41200,
+    "saves": 1650
+  },
+  {
+    "id": "gil-brother-away",
+    "title": "Gil Brother Away: Pára com essa porra!",
+    "file": "gil-brother-away-para-com-essa-porra.jpg",
+    "year": 2007,
+    "date": "2007-10-04",
+    "cat": "tv",
+    "catLabel": "TV & Humor",
+    "rarity": "Mitico",
+    "by": "Hermes e Renato",
+    "context": "Gil Brother Away em seu ápice no Hermes e Renato com indignação pura, tapas na mesa e dialeto próprio que virou patrimônio nacional.",
+    "views": 105000,
+    "saves": 6400
+  },
+  {
+    "id": "caetano-como-voce-e-burro",
+    "title": "Como Você É Burro, Cara!",
+    "file": "caetano-veloso-como-voce-e-burro.jpg",
+    "year": 2008,
+    "date": "2008-04-10",
+    "cat": "tv",
+    "catLabel": "TV & Entrevistas",
+    "rarity": "Mitico",
+    "by": "Caetano Veloso",
+    "context": "Caetano Veloso no Vox Populi olhando nos olhos do entrevistador e disparando a frase mais usada em discussões na internet: 'Como você é burro, cara, que loucura!'",
+    "views": 128000,
+    "saves": 8900
+  },
+  {
+    "id": "pedro-cade-meu-chip",
+    "title": "Pedro, Cadê Meu Chip?",
+    "file": "edro-cade-meu-chip.jpg",
+    "year": 2008,
+    "date": "2008-06-25",
+    "cat": "videos",
+    "catLabel": "Vídeos",
+    "rarity": "Classico",
+    "by": "Comunidade do Orkut",
+    "context": "O desabafo em vídeo de um rapaz revoltado porque o Pedro sumiu com o chip do celular dele. Um clássico da era webcam 240p.",
+    "views": 33100,
+    "saves": 1200
+  },
+  {
+    "id": "stefhany-crossfox",
+    "title": "Stefhany do Crossfox",
+    "file": "stefhany-do-crossfox.jpg",
+    "year": 2009,
+    "date": "2009-02-14",
+    "cat": "musica",
+    "catLabel": "Música",
+    "rarity": "Mitico",
+    "by": "Stefhany Absoluta",
+    "context": "Versão brasileira de 'A Thousand Miles' onde Stefhany canta: 'Eu sou linda, absoluta, eu sou Stefhany... No meu Crossfox eu vou sair!'",
+    "views": 87000,
+    "saves": 4900
+  },
+  {
+    "id": "puta-falta-de-sacanagem",
+    "title": "Puta Falta de Sacanagem",
+    "file": "puta-falta-de-sacanagem.jpg",
+    "year": 2010,
+    "date": "2010-04-18",
+    "cat": "cultura",
+    "catLabel": "Cultura & Música",
+    "rarity": "Mitico",
+    "by": "Fãs do Restart",
+    "context": "Sessão de autógrafos da banda Restart cancelada por superlotação gerou revolta, lágrimas e o bordão involuntário 'Puta falta de sacanagem!'.",
+    "views": 98000,
+    "saves": 5600
+  },
+  {
+    "id": "avassaladores-sou-foda",
+    "title": "Os Avassaladores: Sou Foda",
+    "file": "avassaladores-sou-foda.jpg",
+    "year": 2010,
+    "date": "2010-07-08",
+    "cat": "musica",
+    "catLabel": "Música",
+    "rarity": "Mitico",
+    "by": "Os Avassaladores",
+    "context": "O clipe com efeitos de chroma key caseiro mais icônico do Brasil. 'Dig-dim dig-dim dig-dim, sou foda, na cama te esculacho!'",
+    "views": 115000,
+    "saves": 7200
+  },
+  {
+    "id": "morre-diabo",
+    "title": "Morre, Diabo!",
+    "file": "morre-diabo.jpg",
+    "year": 2010,
+    "date": "2010-09-03",
+    "cat": "tv",
+    "catLabel": "TV Policial",
+    "rarity": "Lendario",
+    "by": "Brasil Urgente Curitiba",
+    "context": "Ao ser questionado pelo repórter de TV sobre o motivo de um crime, o preso responde com frieza e o grito gutural que marcou a internet.",
+    "views": 76000,
+    "saves": 3800
+  },
+  {
+    "id": "coreia-copa-naosalvo",
+    "title": "Copa na Coreia do Norte (Não Salvo)",
+    "file": "coreia-do-norte-copa-do-mundo.jpg",
+    "year": 2010,
+    "date": "2010-06-20",
+    "cat": "zoeira",
+    "catLabel": "Zoeira Histórica",
+    "rarity": "Mitico",
+    "by": "Cid Não Salvo",
+    "context": "Cid criou um canal falso fingindo ser a TV estatal norte-coreana anunciando vitórias fictícias na Copa do Mundo. A mídia internacional inteira caiu.",
+    "views": 142000,
+    "saves": 9900
+  },
+  {
+    "id": "trololo-guy",
+    "title": "Trololo Guy",
+    "file": "trololo.jpg",
+    "year": 2010,
+    "date": "2010-03-01",
+    "cat": "videos",
+    "catLabel": "Vídeos",
+    "rarity": "Classico",
+    "by": "Eduard Khil",
+    "context": "A apresentação soviética com vocalizes ritmados virou a trilha sonora universal da trolagem em fóruns e vídeos de pegadinha.",
+    "views": 52000,
+    "saves": 2300
+  },
+  {
+    "id": "cid-naosalvo",
+    "title": "Cid Não Salvo e o Império do Humor",
+    "file": "cidnaosalvo-.jpg",
+    "year": 2011,
+    "date": "2011-01-15",
+    "cat": "cultura",
+    "catLabel": "Cultura Web",
+    "rarity": "Mitico",
+    "by": "Cid Cidoso",
+    "context": "O ápice dos blogs de humor e da blogosfera brasileira, com milhões de visitas diárias e pegadinhas que paravam o país.",
+    "views": 150000,
+    "saves": 11000
+  },
+  {
+    "id": "mamilos-polemicos",
+    "title": "Mamilos São Muito Polêmicos",
+    "file": "mamilos-uma-assunto-polemico.jpg",
+    "year": 2011,
+    "date": "2011-03-24",
+    "cat": "videos",
+    "catLabel": "Vídeos",
+    "rarity": "Lendario",
+    "by": "Bruno",
+    "context": "O garoto Bruno gravou um vídeo curto afirmando solenemente: 'Mamilos... mamilos são muito polêmicos!' e a frase entrou para a eternidade.",
+    "views": 89000,
+    "saves": 4500
+  },
+  {
+    "id": "nao-sou-cachorro",
+    "title": "Eu Não Sou Cachorro Não!",
+    "file": "nao-sou-cachorro-nao.jpg",
+    "year": 2011,
+    "date": "2011-05-19",
+    "cat": "tv",
+    "catLabel": "TV & Notícias",
+    "rarity": "Classico",
+    "by": "TV Local",
+    "context": "Entrevista de rua onde um homem indignado com uma autuação começa a cantar Waldick Soriano aos berros diante do microfone.",
+    "views": 38000,
+    "saves": 1500
+  },
+  {
+    "id": "sonia-no-youtube",
+    "title": "Sônia, Você Tá No YouTube!",
+    "file": "sonia-youtube.jpg",
+    "year": 2011,
+    "date": "2011-07-29",
+    "cat": "tv",
+    "catLabel": "TV",
+    "rarity": "Reliquia",
+    "by": "TV Brasileira",
+    "context": "A apresentadora sendo alertada no telefone de que suas gafes já estavam circulando no recém-popularizado YouTube.",
+    "views": 29000,
+    "saves": 1100
+  },
+  {
+    "id": "menino-ima",
+    "title": "O Incrível Menino Ímã",
+    "file": "menino-ima.jpg",
+    "year": 2011,
+    "date": "2011-09-11",
+    "cat": "tv",
+    "catLabel": "TV & Jornalismo",
+    "rarity": "Reliquia",
+    "by": "Jornalismo Sensacionalista",
+    "context": "Reportagem em rede nacional com colheres e panelas grudadas no peito suado de uma criança sob a alegação de magnetismo humano.",
+    "views": 34000,
+    "saves": 1350
+  },
+  {
+    "id": "para-nossa-alegria",
+    "title": "Para Nossa Alegria!",
+    "file": "para-nossa-alegria.jpg",
+    "year": 2012,
+    "date": "2012-03-13",
+    "cat": "musica",
+    "catLabel": "Música & Família",
+    "rarity": "Mitico",
+    "by": "Jefferson e Suelen",
+    "context": "A família cantando no sofá quando o filho solta um agudo potente e desafinado que faz a mãe abandonar o quadro aos risos.",
+    "views": 180000,
+    "saves": 12500
+  },
+  {
+    "id": "gravida-de-taubate",
+    "title": "A Grávida de Taubaté",
+    "file": "gravida-de-taubate.webp",
+    "year": 2012,
+    "date": "2012-01-20",
+    "cat": "tv",
+    "catLabel": "TV & Fofoca",
+    "rarity": "Mitico",
+    "by": "Record TV / Chris Flores",
+    "context": "A mulher que enganou programas de televisão com uma barriga colossal de silicone dizendo estar grávida de quadrigêmeas.",
+    "views": 165000,
+    "saves": 11200
+  },
+  {
+    "id": "nissim-ourfali",
+    "title": "Nissim Ourfali: Vamos Pra Baleia",
+    "file": "nissim-ourfali-vamos-para-baleira.webp",
+    "year": 2012,
+    "date": "2012-08-09",
+    "cat": "musica",
+    "catLabel": "Música & Família",
+    "rarity": "Mitico",
+    "by": "Família Ourfali",
+    "context": "Vídeo convite de Bar Mitzvah parodiando One Direction: 'O que eu mais gosto é de ir pra Baleia!' que viralizou e virou caso judicial sobre o direito ao esquecimento.",
+    "views": 130000,
+    "saves": 8400
+  },
+  {
+    "id": "quero-cafe",
+    "title": "Eu Quero Café!",
+    "file": "quero-cafe.webp",
+    "year": 2012,
+    "date": "2012-06-14",
+    "cat": "tv",
+    "catLabel": "TV & Notícias",
+    "rarity": "Lendario",
+    "by": "Jornal Local",
+    "context": "Idoso revoltado após longa espera no posto de saúde bate na mesa e exige café com voz grave e indignação absoluta.",
+    "views": 79000,
+    "saves": 4200
+  },
+  {
+    "id": "serjao-berranteiro",
+    "title": "Serjão Berranteiro: Aqui Tem Coragem!",
+    "file": "aqui-tem-coragem-cacador-onca-berranteiro-serjao-berranteiro.jpg",
+    "year": 2012,
+    "date": "2012-09-17",
+    "cat": "videos",
+    "catLabel": "Vídeos & Lendas",
+    "rarity": "Classico",
+    "by": "Serjão Berranteiro",
+    "context": "O lendário matador de onça que almoçava e jantava onça: 'Aqui tem coragem! Berranteiro de primeira!'",
+    "views": 47000,
+    "saves": 2100
+  },
+  {
+    "id": "quadrado-de-oito",
+    "title": "Passinho do Quadrado",
+    "file": "quadrado.jpg",
+    "year": 2012,
+    "date": "2012-05-02",
+    "cat": "musica",
+    "catLabel": "Dança & Música",
+    "rarity": "Classico",
+    "by": "Bonde das Maravilhas",
+    "context": "A coreografia acrobática que ensinava a formar ângulos retos com o corpo e dominou bailes e programas de auditório.",
+    "views": 58000,
+    "saves": 2600
+  },
+  {
+    "id": "mil-reais-raca-negra",
+    "title": "Mil Reais ou Show do Raça Negra?",
+    "file": "mil-rea-sou-raca-negra.jpg",
+    "year": 2012,
+    "date": "2012-10-11",
+    "cat": "tv",
+    "catLabel": "TV",
+    "rarity": "Classico",
+    "by": "Turma do Didi",
+    "context": "Criança aos prantos na televisão precisando escolher entre mil reais em barras de ouro ou um abraço do grupo Raça Negra.",
+    "views": 46000,
+    "saves": 1900
+  },
+  {
+    "id": "rei-do-camarote",
+    "title": "Alexander: O Rei do Camarote",
+    "file": "rei-do-camarote.jpg",
+    "year": 2013,
+    "date": "2013-11-03",
+    "cat": "tv",
+    "catLabel": "TV & Lifestyle",
+    "rarity": "Mitico",
+    "by": "Veja SP",
+    "context": "Os 10 mandamentos do empresário que gastava fortunas na balada: champanhe com foguinho, roupas de grife e agregação de valor.",
+    "views": 110000,
+    "saves": 6700
+  },
+  {
+    "id": "gordinho-ave-maria",
+    "title": "Ave Maria, Doido!",
+    "file": "gordinho-ava-maria.jpg",
+    "year": 2013,
+    "date": "2013-04-21",
+    "cat": "videos",
+    "catLabel": "Vídeos & Jogos",
+    "rarity": "Classico",
+    "by": "Web BR",
+    "context": "A expressão de espanto e fascínio gravada no quarto que se tornou bordão unânime no gaming e no humor nacional.",
+    "views": 39000,
+    "saves": 1400
+  },
+  {
+    "id": "ce-e-louco-cachoeira",
+    "title": "Cê É Louco, Cachoeira!",
+    "file": "se-e-louco-cachoeira.jpg",
+    "year": 2013,
+    "date": "2013-07-16",
+    "cat": "tv",
+    "catLabel": "TV",
+    "rarity": "Reliquia",
+    "by": "Comunidade Hip Hop / TV",
+    "context": "O bordão paulistano que virou gíria cotidiana para reagir a situações inacreditáveis do dia a dia.",
+    "views": 32000,
+    "saves": 1150
+  },
+  {
+    "id": "eu-sou-farao",
+    "title": "Eu Sou Faraó!",
+    "file": "sou-farao.jpg",
+    "year": 2013,
+    "date": "2013-08-30",
+    "cat": "musica",
+    "catLabel": "Música & TV",
+    "rarity": "Reliquia",
+    "by": "TV Local",
+    "context": "Cidadão fantasiado de monarca do antigo Egito proclamando sua nobreza faraônica em plena praça pública.",
+    "views": 27000,
+    "saves": 980
+  },
+  {
+    "id": "taca-le-pau-marcos",
+    "title": "Taca-le Pau Nesse Carrinho, Marcos!",
+    "file": "taca-le-pau-nesse-carrinho-marco-veio.jpg",
+    "year": 2014,
+    "date": "2014-06-01",
+    "cat": "videos",
+    "catLabel": "Vídeos & Infância",
+    "rarity": "Mitico",
+    "by": "Leandro Beninca",
+    "context": "A narração da descida de carrinho de rolimã no morro da Vó Salvelina: 'Taca-le pau, Marco Véio! Taca-le pau!'",
+    "views": 155000,
+    "saves": 10400
+  },
+  {
+    "id": "giovana-forninho",
+    "title": "Eita, Giovana! O Forninho Caiu!",
+    "file": "forninho-caiu-giovana.webp",
+    "year": 2014,
+    "date": "2014-04-12",
+    "cat": "videos",
+    "catLabel": "Vídeos & Infância",
+    "rarity": "Mitico",
+    "by": "Giovana e Prima",
+    "context": "A prima dançando funk apoiada num forninho elétrico de brinquedo até a estrutura ceder no momento exato do refrão.",
+    "views": 170000,
+    "saves": 11900
+  },
+  {
+    "id": "faustao-churrasqueira",
+    "title": "Tá Pegando Fogo, Bicho! (Faustão)",
+    "file": "faustao-ta-pegando-fogo-bicho.jpg",
+    "year": 2014,
+    "date": "2014-09-07",
+    "cat": "tv",
+    "catLabel": "TV Ao Vivo",
+    "rarity": "Mitico",
+    "by": "Domingão do Faustão",
+    "context": "A churrasqueira a controle remoto do inventor Leonardo Pereira explode em chamas ao vivo e Faustão corre pedindo bombeiros.",
+    "views": 195000,
+    "saves": 14100
+  },
+  {
+    "id": "pao-de-batata",
+    "title": "Pão de Batataaaaa!",
+    "file": "pao-de-batata.webp",
+    "year": 2014,
+    "date": "2014-03-29",
+    "cat": "videos",
+    "catLabel": "Vídeos",
+    "rarity": "Classico",
+    "by": "Web Criativa",
+    "context": "A dublagem dramática de animação celebrando a glória culinária do pão de batata recheado de catupiry.",
+    "views": 51000,
+    "saves": 2400
+  },
+  {
+    "id": "acertou-mizeravi",
+    "title": "Acertou, Mizerávi!",
+    "file": "acertou-mizeravi.jpg",
+    "year": 2014,
+    "date": "2014-11-19",
+    "cat": "videos",
+    "catLabel": "Vídeos & Rua",
+    "rarity": "Lendario",
+    "by": "Gênio da Matemática",
+    "context": "Perguntas complexas de tabuada respondidas por um garoto com respostas hilárias e o elogio icônico: 'Acertou, mizerávi!'",
+    "views": 84000,
+    "saves": 4300
+  },
+  {
+    "id": "vestido-azul-dourado",
+    "title": "O Vestido: Azul e Preto ou Branco e Dourado?",
+    "file": "vestido-axzul-ou-dourado.webp",
+    "year": 2015,
+    "date": "2015-02-26",
+    "cat": "fotos",
+    "catLabel": "Ilusão de Óptica",
+    "rarity": "Mitico",
+    "by": "Tumblr / Twitter",
+    "context": "Uma foto em baixa iluminação que dividiu a humanidade entre quem enxergava azul e preto e quem via branco e dourado.",
+    "views": 210000,
+    "saves": 15800
+  },
+  {
+    "id": "ja-acabou-jessica",
+    "title": "Já Acabou, Jéssica?",
+    "file": "ja-acabou-jessica.jpg",
+    "year": 2015,
+    "date": "2015-11-20",
+    "cat": "videos",
+    "catLabel": "Vídeos & Escola",
+    "rarity": "Lendario",
+    "by": "Lara",
+    "context": "Após uma briga de escola na calçada, a garota se levanta com pose triunfante, arruma o cabelo e pergunta: 'Já acabou, Jéssica?'",
+    "views": 92000,
+    "saves": 5100
+  },
+  {
+    "id": "mc-brinquedo-meca-suas-palavras",
+    "title": "Meça Suas Palavras, Parça!",
+    "file": "mc-brinquedo-meca-suas-palavas.jpg",
+    "year": 2015,
+    "date": "2015-05-14",
+    "cat": "musica",
+    "catLabel": "Funk & Entrevista",
+    "rarity": "Classico",
+    "by": "MC Brinquedo",
+    "context": "O garoto do funk paulista dando lição de respeito e postura de quebrada durante entrevista de estúdio.",
+    "views": 61000,
+    "saves": 2800
+  },
+  {
+    "id": "felipe-smith-romero-britto",
+    "title": "Felipe Smith e o Romero Britto",
+    "file": "Felipe-Smith-romero-britto.webp",
+    "year": 2015,
+    "date": "2015-07-22",
+    "cat": "videos",
+    "catLabel": "Vídeos & Arte",
+    "rarity": "Reliquia",
+    "by": "Felipe Smith",
+    "context": "Análise contundente e sem papas na língua sobre a estética colorida e repetitiva dos quadros de Romero Britto.",
+    "views": 37000,
+    "saves": 1600
+  },
+  {
+    "id": "aonde-e-que-eu-to-sertaozinho",
+    "title": "Aonde É Que Eu Tô? Sertãozinho!",
+    "file": "aonde-e-q-eu-to-sertaozinho.jpg",
+    "year": 2015,
+    "date": "2015-10-09",
+    "cat": "videos",
+    "catLabel": "Vídeos de Rua",
+    "rarity": "Classico",
+    "by": "Web Caipira",
+    "context": "Um rapaz meio perdido acorda da carona e pergunta em looping a sua localização geográfica no interior paulista.",
+    "views": 44000,
+    "saves": 1850
+  },
+  {
+    "id": "drauzio-cacete-de-agulha",
+    "title": "Drauzio Varella: Cacete de Agulha",
+    "file": "cacete-de-agulha.jpg",
+    "year": 2015,
+    "date": "2015-12-03",
+    "cat": "tv",
+    "catLabel": "Saúde & TV",
+    "rarity": "Classico",
+    "by": "Dr. Drauzio Varella",
+    "context": "O médico mais respeitado do país reagindo com sinceridade cirúrgica à dor de uma injeção inesperada.",
+    "views": 53000,
+    "saves": 2500
+  },
+  {
+    "id": "ta-tranquilo-ta-favoravel",
+    "title": "Tá Tranquilo, Tá Favorável",
+    "file": "mc-bin-laden-ta-tranquilo-ta-favoravel.webp",
+    "year": 2016,
+    "date": "2016-01-18",
+    "cat": "musica",
+    "catLabel": "Música & Dança",
+    "rarity": "Mitico",
+    "by": "MC Bin Laden",
+    "context": "O sinal de Ronaldinho Gaúcho com os dedos e o passinho sem camisa que virou febre nas praias e foi dançado até por Neymar.",
+    "views": 160000,
+    "saves": 11000
+  },
+  {
+    "id": "nazare-tedesco-confusa",
+    "title": "Nazaré Confusa com Matemática",
+    "file": "nazare-tedesco-pensando.webp",
+    "year": 2016,
+    "date": "2016-08-15",
+    "cat": "tv",
+    "catLabel": "Novelas & Global",
+    "rarity": "Mitico",
+    "by": "Senhora do Destino / Renata Sorrah",
+    "context": "A maior vilã da teledramaturgia brasileira encarando a cela com equações diferenciais sobrepostas, virando meme no mundo todo.",
+    "views": 230000,
+    "saves": 18200
+  },
+  {
+    "id": "meu-nome-e-julia",
+    "title": "Meu Nome É Júlia!",
+    "file": "Meu-Nome-e-Julia.webp",
+    "year": 2016,
+    "date": "2016-06-27",
+    "cat": "videos",
+    "catLabel": "Infância & Dublagem",
+    "rarity": "Classico",
+    "by": "Júlia",
+    "context": "A garotinha que cantou sua autoafirmação com convicção e energia contagiante diante da câmera.",
+    "views": 49000,
+    "saves": 2200
+  },
+  {
+    "id": "tainha-vinho-sexo",
+    "title": "Tainha, Vinho e Muito Sexo",
+    "file": "tainha-vinho-e-muito-sexo.jpg",
+    "year": 2016,
+    "date": "2016-07-04",
+    "cat": "tv",
+    "catLabel": "Entrevistas de Inverno",
+    "rarity": "Classico",
+    "by": "TV Sul",
+    "context": "O casal catarinense que resumiu com perfeição a receita infalível para aproveitar o inverno no litoral sulista.",
+    "views": 62000,
+    "saves": 3100
+  },
+  {
+    "id": "sargento-fahur-chapado",
+    "title": "Sargento Fahur: Tô Chapado Até Agora",
+    "file": "to-chapado-ate-agora-sargento-fahur.jpg",
+    "year": 2016,
+    "date": "2016-09-21",
+    "cat": "tv",
+    "catLabel": "TV Policial",
+    "rarity": "Reliquia",
+    "by": "Sargento Fahur",
+    "context": "O motorista flagrado com carga suspeita confessa sem rodeios o estado mental perante o enérgico sargento.",
+    "views": 41000,
+    "saves": 1700
+  },
+  {
+    "id": "cade-o-richard",
+    "title": "Cadê o Richard?",
+    "file": "cade-o-richard.jpg",
+    "year": 2017,
+    "date": "2017-04-05",
+    "cat": "tv",
+    "catLabel": "TV",
+    "rarity": "Classico",
+    "by": "Jornalismo Aventura",
+    "context": "A procura aflita pelo explorador de animais silvestres no meio do matagal que virou bordão de busca.",
+    "views": 31000,
+    "saves": 1250
+  },
+  {
+    "id": "canarinho-pistola",
+    "title": "Canarinho Pistola",
+    "file": "canarinho-pistola.webp",
+    "year": 2018,
+    "date": "2018-06-16",
+    "cat": "esportes",
+    "catLabel": "Copa do Mundo",
+    "rarity": "Mitico",
+    "by": "CBF / Copa 2018",
+    "context": "O mascote oficial da Seleção Brasileira com cara de ódio e determinação implacável que conquistou a torcida na Rússia.",
+    "views": 140000,
+    "saves": 9800
+  },
+  {
+    "id": "cachorro-dancando-forro",
+    "title": "Cachorro Dançando Forró",
+    "file": "cachorro-dancando.jpg",
+    "year": 2018,
+    "date": "2018-09-02",
+    "cat": "zoeira",
+    "catLabel": "Zoeira & Pets",
+    "rarity": "Classico",
+    "by": "Nordeste Web",
+    "context": "O vira-lata caramelo bailarino que dança nos dois pés com um compasso impecável ao som de sanfona.",
+    "views": 57000,
+    "saves": 2700
+  },
+  {
+    "id": "cabelo-solto-de-prancha",
+    "title": "Cabelo Solto de Prancha",
+    "file": "cabelo-solto-de-prancha.jpg",
+    "year": 2018,
+    "date": "2018-11-12",
+    "cat": "musica",
+    "catLabel": "Música",
+    "rarity": "Classico",
+    "by": "Música Web",
+    "context": "A faixa musical e os vídeos de coreografia celebrando a autoestima da chapinha bem feita.",
+    "views": 36000,
+    "saves": 1400
+  },
+  {
+    "id": "panificadora-alfa",
+    "title": "Panificadora Alfa",
+    "file": "panificadora-alfa.jpg",
+    "year": 2019,
+    "date": "2019-02-19",
+    "cat": "videos",
+    "catLabel": "Vídeos & Vinhetas",
+    "rarity": "Lendario",
+    "by": "Panificadora Alfa",
+    "context": "A vinheta 3D psicodélica de padaria que virou remix techno e tomou conta de todos os grupos do WhatsApp.",
+    "views": 82000,
+    "saves": 4600
+  },
+  {
+    "id": "galo-cego",
+    "title": "Galo Cego: Nada a Ver, Irmão!",
+    "file": "galo-cego-nada-a-ver.jpg",
+    "year": 2019,
+    "date": "2019-05-23",
+    "cat": "tv",
+    "catLabel": "TV & Memes",
+    "rarity": "Reliquia",
+    "by": "Entrevista de Rua",
+    "context": "A resposta direta, calma e contundente desmentindo qualquer acusação: 'Nada a ver, irmão... nada a ver.'",
+    "views": 48000,
+    "saves": 2100
+  },
+  {
+    "id": "celso-portiolli-11-setembro",
+    "title": "Celso Portiolli e o 11 de Setembro",
+    "file": "celso-portioli-aviao-11-setembro.jpeg",
+    "year": 2019,
+    "date": "2019-09-11",
+    "cat": "cultura",
+    "catLabel": "Conspiração Zoeira",
+    "rarity": "Mitico",
+    "by": "Twitter / X Brasil",
+    "context": "A lenda urbana de que o apresentador do Domingo Legal jamais teve qualquer envolvimento com a queda das Torres Gêmeas.",
+    "views": 185000,
+    "saves": 13700
+  },
+  {
+    "id": "uma-sopa-pa-noiz",
+    "title": "Uma Sopa Pá Nóis",
+    "file": "uma-sopa-pa-noiz.jpg",
+    "year": 2020,
+    "date": "2020-07-15",
+    "cat": "videos",
+    "catLabel": "Culinária & Quarentena",
+    "rarity": "Classico",
+    "by": "Web BR",
+    "context": "O preparo afetuoso de uma refeição quentinha que virou conforto e piada durante as noites frias de isolamento.",
+    "views": 42000,
+    "saves": 1800
+  },
+  {
+    "id": "to-cagado-de-fome",
+    "title": "Tô Cagado de Fome",
+    "file": "to-cagad-de-fome.jpg",
+    "year": 2021,
+    "date": "2021-03-10",
+    "cat": "videos",
+    "catLabel": "Vídeos",
+    "rarity": "Classico",
+    "by": "Tik Tok / Reels",
+    "context": "A expressão hiperbólica da fome aguda brasileira, pronunciada com desespero cômico.",
+    "views": 46000,
+    "saves": 1950
+  },
+  {
+    "id": "to-triste-nao-to-feliz",
+    "title": "Tô Triste Não, Tô Feliz!",
+    "file": "to-triste-nao-to-feliz.jpg",
+    "year": 2022,
+    "date": "2022-08-28",
+    "cat": "videos",
+    "catLabel": "Vídeos & Entrevistas",
+    "rarity": "Classico",
+    "by": "Web BR",
+    "context": "A resposta resiliente e espontânea que mistura lágrimas, otimismo e aceitação do destino.",
+    "views": 39000,
+    "saves": 1600
+  },
+  {
+    "id": "video-viral-2023",
+    "title": "Registro Viral Comunitário 2023",
+    "file": "1064550255_1794969532808627.mp4",
+    "year": 2023,
+    "date": "2023-11-05",
+    "cat": "videos",
+    "catLabel": "Vídeos Curtos",
+    "rarity": "Classico",
+    "by": "Comunidade XET",
+    "context": "Corte em vídeo resgatado dos grupos de mensagens e streams da comunidade.",
+    "views": 25000,
+    "saves": 890
+  },
+  {
+    "id": "que-show-da-xuxa-e-esse",
+    "title": "Que Show da Xuxa É Esse?!",
+    "file": "que-show-da-xuxa-e-esse.jpg",
+    "year": 2024,
+    "date": "2024-09-20",
+    "cat": "tv",
+    "catLabel": "Documentário & TV",
+    "rarity": "Mitico",
+    "by": "Doc Pra Sempre Paquitas",
+    "context": "A menina revoltada de laço na cabeça barrada na gravação do Xou da Xuxa em 1988, descoberta no documentário de 2024 e virando febre instantânea.",
+    "views": 240000,
+    "saves": 19500
+  },
+  {
+    "id": "video-viral-2024",
+    "title": "Corte de Live 2024",
+    "file": "lv_0_20261117231817.mp4",
+    "year": 2024,
+    "date": "2024-11-17",
+    "cat": "videos",
+    "catLabel": "Vídeos",
+    "rarity": "Classico",
+    "by": "Comunidade XET",
+    "context": "Momento hilário capturado em live recente antes da inauguração do museu.",
+    "views": 22000,
+    "saves": 950
+  }
+];
+
+    // State
+    const STATE = {
+      view: 'home',
+      activeYear: 2012,
+      activeCategory: 'all',
+      collectionFilter: 'all',
+      packs: 2,
+      collectedIds: new Set(ALL_MEMES.slice(0, 26).map(m => m.id)),
+      catConfig: {
+        fur: '#94a3b8',
+        acc: 'glasses',
+        bg: '#1e3a8a'
+      }
+    };
+
+    // Initialize UI
+    document.addEventListener('DOMContentLoaded', () => {
+      renderYearsRail();
+      renderTodayCard();
+      renderHomeHighlights();
+      renderTimelineMemes();
+      renderAlbum();
+      renderFeed();
+      renderAvatar();
+      renderRanking();
+      populateSubmitYears();
+    });
+
+    // View Switching
+    function showView(viewId) {
+      STATE.view = viewId;
+      document.querySelectorAll('.view-panel').forEach(p => p.style.display = 'none');
+      const target = document.getElementById('view-' + viewId);
+      if (target) target.style.display = 'block';
+
+      document.querySelectorAll('.nav-btn').forEach(b => {
+        b.classList.toggle('active', b.getAttribute('onclick') && b.getAttribute('onclick').includes(viewId));
+      });
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // Modal helpers
+    function openModal(id) { document.getElementById(id).classList.add('active'); }
+    function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+
+    function openGitHubModal() { openModal('githubModal'); }
+    function openSubmitModal() { openModal('submitModal'); }
+
+    function copyGitHubLink() {
+      navigator.clipboard.writeText('https://github.com/willianjack0/naosalvo-2');
+      alert('Link copiado com sucesso!');
+    }
+
+    function handleGitHubRequest(e) {
+      e.preventDefault();
+      const nick = document.getElementById('ghUsernameInput').value;
+      alert('Solicitação registrada para @' + nick + '! Em breve você receberá o convite de colaborador.');
+      closeModal('githubModal');
+    }
+
+    // Years Rail
+    function renderYearsRail() {
+      const rail = document.getElementById('timelineYearsRail');
+      if (!rail) return;
+      const years = Array.from(new Set(ALL_MEMES.map(m => m.year))).sort((a, b) => a - b);
+      rail.innerHTML = years.map(y => {
+        const count = ALL_MEMES.filter(m => m.year === y).length;
+        const active = y === STATE.activeYear ? 'active' : '';
+        return `<button class="year-btn ${active}" onclick="selectYear(${y}, this)">${y} (${count})</button>`;
+      }).join('');
+    }
+
+    function selectYear(year, btn) {
+      STATE.activeYear = year;
+      document.querySelectorAll('.year-btn').forEach(b => b.classList.remove('active'));
+      if (btn) btn.classList.add('active');
+      renderTimelineMemes();
+    }
+
+    function filterCategory(cat, btn) {
+      STATE.activeCategory = cat;
+      document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+      if (btn) btn.classList.add('active');
+      renderTimelineMemes();
+    }
+
+    // Render Timeline
+    function renderTimelineMemes() {
+      const grid = document.getElementById('timelineGrid');
+      if (!grid) return;
+      let list = ALL_MEMES.filter(m => m.year === STATE.activeYear);
+      if (STATE.activeCategory !== 'all') {
+        list = list.filter(m => m.cat === STATE.activeCategory);
+      }
+      if (list.length === 0) {
+        grid.innerHTML = `<div style="grid-column: 1/-1; padding: 40px; text-align: center; color: var(--text-muted); background: var(--bg-surface); border-radius: 12px;">Nenhum meme cadastrado para esta categoria em ${STATE.activeYear}. Seja o primeiro a salvar!</div>`;
+        return;
+      }
+      grid.innerHTML = list.map(m => renderMemeCardHtml(m)).join('');
+    }
+
+    function renderMemeCardHtml(m) {
+      const isVideo = m.file.endsWith('.mp4');
+      const mediaHtml = isVideo
+        ? `<video src="memes/${m.file}" muted playsinline loop onmouseover="this.play()" onmouseout="this.pause()"></video>`
+        : `<img src="memes/${m.file}" alt="${m.title}" loading="lazy">`;
+
+      return `
+        <div class="meme-card" onclick="openMemeModal('${m.id}')">
+          <div class="card-media">
+            ${mediaHtml}
+            <span class="card-badge-top">${m.year}</span>
+            <span class="card-rarity rarity-${m.rarity}">${m.rarity}</span>
+          </div>
+          <div class="card-content">
+            <h3 class="card-title">${m.title}</h3>
+            <p class="card-desc">${m.context}</p>
+            <div class="card-footer">
+              <span>👤 ${m.by}</span>
+              <div class="card-actions" onclick="event.stopPropagation()">
+                <button class="icon-btn" onclick="saveMeme('${m.id}')" title="Salvar no Baú">💾 Salvar</button>
+                <button class="icon-btn" onclick="shareMeme('${m.id}')" title="Compartilhar">🔗</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    // Highlights
+    function renderHomeHighlights() {
+      const grid = document.getElementById('homeHighlightsGrid');
+      if (!grid) return;
+      const top = [...ALL_MEMES].sort((a, b) => b.saves - a.saves).slice(0, 6);
+      grid.innerHTML = top.map(m => renderMemeCardHtml(m)).join('');
+    }
+
+    // Today in History
+    function renderTodayCard() {
+      const prev = document.getElementById('todayPreviewContent');
+      if (!prev) return;
+      const sample = ALL_MEMES.find(m => m.year === 2012) || ALL_MEMES[0];
+      const isVideo = sample.file.endsWith('.mp4');
+      const mediaEl = isVideo 
+        ? `<video class="today-thumb" src="memes/${sample.file}" muted></video>` 
+        : `<img class="today-thumb" src="memes/${sample.file}" alt="${sample.title}">`;
+
+      prev.innerHTML = `
+        ${mediaEl}
+        <div class="today-details">
+          <h4>${sample.title}</h4>
+          <p>${sample.context.substring(0, 110)}...</p>
+        </div>
+      `;
+    }
+
+    // Album
+    function renderAlbum() {
+      const grid = document.getElementById('albumStickersGrid');
+      if (!grid) return;
+      let list = [...ALL_MEMES];
+      if (STATE.collectionFilter === 'og') list = list.filter(m => m.year <= 2010);
+      else if (STATE.collectionFilter === 'classic') list = list.filter(m => m.year > 2010 && m.year <= 2015);
+      else if (STATE.collectionFilter === 'modern') list = list.filter(m => m.year >= 2016);
+
+      grid.innerHTML = list.map(m => {
+        const owned = STATE.collectedIds.has(m.id);
+        if (!owned) {
+          return `
+            <div class="sticker-card locked" onclick="alert('Esta carta ainda está bloqueada! Abra pacotinhos para encontrá-la.')">
+              <span class="lock-mark">?</span>
+              <div style="font-size: 12px; color: var(--text-muted); margin-top: 6px;">Carta #${m.year}</div>
+            </div>
+          `;
+        }
+        return `
+          <div class="sticker-card" onclick="openMemeModal('${m.id}')">
+            <span class="duplicate-tag">x1</span>
+            <div class="sticker-media">
+              <img src="memes/${m.file}" alt="${m.title}" loading="lazy">
+            </div>
+            <div class="sticker-name">${m.title}</div>
+            <div style="font-size: 11px; color: var(--text-muted); text-align: center; margin-top: 2px;">${m.rarity}</div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function switchCollection(filter, btn) {
+      STATE.collectionFilter = filter;
+      document.querySelectorAll('.collection-btn').forEach(b => b.classList.remove('active'));
+      if (btn) btn.classList.add('active');
+      renderAlbum();
+    }
+
+    // Booster Pack
+    function showBoosterPackModal() {
+      const arena = document.getElementById('boosterArena');
+      if (!arena) return;
+      const candidates = [...ALL_MEMES].sort(() => 0.5 - Math.random()).slice(0, 3);
+      arena.innerHTML = candidates.map((m, i) => `
+        <div class="booster-card-flip" onclick="this.classList.toggle('revealed')">
+          <div class="card-face back">
+            <div style="font-size: 28px; margin-bottom: 6px;">✨</div>
+            NÃO SALVO<br>CARTA #${i+1}
+          </div>
+          <div class="card-face front">
+            <img src="memes/${m.file}" style="width: 100%; height: 75%; object-fit: cover; border-radius: 6px; margin-bottom: 6px;">
+            <div style="font-family: var(--font-display); font-size: 13px; font-weight: 700; color: #fff; text-align: center;">${m.title}</div>
+          </div>
+        </div>
+      `).join('');
+
+      candidates.forEach(m => STATE.collectedIds.add(m.id));
+      renderAlbum();
+      openModal('boosterModal');
+    }
+
+    function recycleDuplicates() {
+      alert('Suas cartas repetidas foram recicladas com sucesso! Você ganhou +1 Pacote de Figurinhas.');
+      STATE.packs++;
+      document.getElementById('packCounter').innerText = STATE.packs + ' Pacotes';
+    }
+
+    // Feed
+    function renderFeed() {
+      const stream = document.getElementById('feedStream');
+      if (!stream) return;
+      const feedMemes = ALL_MEMES.slice(0, 10);
+      stream.innerHTML = feedMemes.map(m => {
+        const isVideo = m.file.endsWith('.mp4');
+        const mediaHtml = isVideo
+          ? `<video src="memes/${m.file}" controls style="width: 100%; border-radius: 8px;"></video>`
+          : `<img src="memes/${m.file}" alt="${m.title}" style="width: 100%; border-radius: 8px; max-height: 480px; object-fit: contain; background: #000;">`;
+
+        return `
+          <div style="background-color: var(--bg-card); border: 1px solid var(--border); border-radius: 14px; padding: 18px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+              <div>
+                <h3 style="font-family: var(--font-display); font-size: 22px; font-weight: 700; color: #fff;">${m.title}</h3>
+                <span style="font-size: 13px; color: var(--text-muted);">${m.year} · Descoberto por @${m.by}</span>
+              </div>
+              <span class="card-rarity rarity-${m.rarity}">${m.rarity}</span>
+            </div>
+            ${mediaHtml}
+            <p style="font-size: 14px; color: #cbd5e1; margin-top: 14px; line-height: 1.5;">${m.context}</p>
+            <div style="display: flex; justify-content: space-between; margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--border);">
+              <button class="btn-secondary" style="padding: 6px 12px; font-size: 13px;" onclick="saveMeme('${m.id}')">💾 Salvar no Baú</button>
+              <button class="btn-secondary" style="padding: 6px 12px; font-size: 13px;" onclick="shareMeme('${m.id}')">Compartilhar ↗</button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // Cat Avatar Builder
+    function renderAvatar() {
+      const container = document.getElementById('avatarSvgContainer');
+      if (!container) return;
+      const c = STATE.catConfig;
+
+      container.innerHTML = `
+        <svg viewBox="0 0 100 100" width="100%" height="100%">
+          <rect width="100" height="100" fill="${c.bg}"/>
+          <circle cx="50" cy="55" r="30" fill="${c.fur}"/>
+          <polygon points="25,45 35,15 50,35" fill="${c.fur}"/>
+          <polygon points="75,45 65,15 50,35" fill="${c.fur}"/>
+          <circle cx="40" cy="52" r="4" fill="#facc15"/>
+          <circle cx="60" cy="52" r="4" fill="#facc15"/>
+          <circle cx="40" cy="52" r="2" fill="#000"/>
+          <circle cx="60" cy="52" r="2" fill="#000"/>
+          <polygon points="50,60 47,56 53,56" fill="#f43f5e"/>
+          <path d="M46,64 Q50,67 54,64" stroke="#000" stroke-width="1.5" fill="none"/>
+        </svg>
+      `;
+    }
+
+    function setCatOption(key, val, btn) {
+      STATE.catConfig[key] = val;
+      if (btn && btn.parentElement) {
+        btn.parentElement.querySelectorAll('button').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+      }
+      renderAvatar();
+    }
+
+    function randomizeCat() {
+      const furs = ['#94a3b8', '#f97316', '#1e293b', '#f8fafc', '#b45309'];
+      const accs = ['none', 'glasses', 'cap', 'headphone', 'bandana'];
+      const bgs = ['#1e3a8a', '#065f46', '#831843', '#78350f'];
+      STATE.catConfig.fur = furs[Math.floor(Math.random() * furs.length)];
+      STATE.catConfig.acc = accs[Math.floor(Math.random() * accs.length)];
+      STATE.catConfig.bg = bgs[Math.floor(Math.random() * bgs.length)];
+      renderAvatar();
+    }
+
+    function downloadMemberCard() {
+      alert('Sua Carteirinha de Membro Oficial do Não Salvo foi gerada!');
+    }
+
+    // Ranking
+    function renderRanking() {
+      const list = document.getElementById('rankingList');
+      if (!list) return;
+      const rows = [
+        { rank: 1, name: 'Cid Cidoso', memes: 184, xp: 9240 },
+        { rank: 2, name: 'SePPZAO', memes: 142, xp: 7100 },
+        { rank: 3, name: 'Riba', memes: 98, xp: 4900 },
+        { rank: 4, name: 'cigarra_eletronica', memes: 85, xp: 4250 },
+        { rank: 5, name: 'Dev_Gon', memes: 64, xp: 3200 },
+        { rank: 6, name: 'Subversivo', memes: 51, xp: 2550 }
+      ];
+
+      list.innerHTML = rows.map(r => `
+        <div style="display: grid; grid-template-columns: 80px 1fr 140px 140px; padding: 14px 20px; border-bottom: 1px solid var(--border); font-size: 14px; align-items: center;">
+          <span style="font-family: var(--font-display); font-size: 18px; font-weight: 700; color: ${r.rank <= 3 ? 'var(--gold)' : 'var(--text-muted)'};">#${r.rank}</span>
+          <span style="font-weight: 600; color: #fff;">@${r.name}</span>
+          <span style="color: var(--text-muted);">${r.memes}</span>
+          <span style="font-weight: 700; color: var(--accent);">${r.xp} XP</span>
+        </div>
+      `).join('');
+    }
+
+    // Details Modal
+    function openMemeModal(id) {
+      const m = ALL_MEMES.find(x => x.id === id);
+      if (!m) return;
+      document.getElementById('memeModalTitle').innerText = m.title;
+      const isVideo = m.file.endsWith('.mp4');
+      const mediaHtml = isVideo
+        ? `<video src="memes/${m.file}" controls style="width: 100%; max-height: 400px; border-radius: 8px; margin-bottom: 16px;"></video>`
+        : `<img src="memes/${m.file}" style="width: 100%; max-height: 400px; object-fit: contain; background: #000; border-radius: 8px; margin-bottom: 16px;">`;
+
+      document.getElementById('memeModalBody').innerHTML = `
+        ${mediaHtml}
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+          <div>
+            <span class="card-rarity rarity-${m.rarity}">${m.rarity}</span>
+            <span style="font-size: 13px; color: var(--text-muted); margin-left: 10px;">Ano: ${m.year}</span>
+          </div>
+          <span style="font-size: 13px; color: var(--text-muted);">Autor/Fonte: @${m.by}</span>
+        </div>
+        <h4 style="font-size: 16px; font-weight: 700; color: #fff; margin-bottom: 6px;">História & Contexto:</h4>
+        <p style="font-size: 14px; color: #cbd5e1; line-height: 1.6; margin-bottom: 20px;">${m.context}</p>
+        <div style="display: flex; gap: 10px;">
+          <button class="btn-primary" style="flex: 1; justify-content: center;" onclick="saveMeme('${m.id}')">💾 Salvar no Meu Baú</button>
+          <button class="btn-secondary" style="flex: 1; justify-content: center;" onclick="shareMeme('${m.id}')">Compartilhar Link ↗</button>
+        </div>
+      `;
+      openModal('memeModal');
+    }
+
+    function saveMeme(id) {
+      alert('Meme salvo com sucesso no seu baú pessoal!');
+    }
+
+    function shareMeme(id) {
+      const url = window.location.origin + window.location.pathname + '#meme=' + id;
+      navigator.clipboard.writeText(url);
+      alert('Link do meme copiado para a área de transferência!');
+    }
+
+    function handleSearch(q) {
+      const term = q.toLowerCase().trim();
+      if (!term) {
+        renderTimelineMemes();
+        return;
+      }
+      showView('timeline');
+      const filtered = ALL_MEMES.filter(m => m.title.toLowerCase().includes(term) || m.context.toLowerCase().includes(term));
+      const grid = document.getElementById('timelineGrid');
+      if (grid) {
+        if (filtered.length === 0) {
+          grid.innerHTML = `<div style="grid-column: 1/-1; padding: 40px; text-align: center; color: var(--text-muted);">Nenhum meme encontrado para "${q}".</div>`;
+        } else {
+          grid.innerHTML = filtered.map(m => renderMemeCardHtml(m)).join('');
+        }
+      }
+    }
+
+    function populateSubmitYears() {
+      const sel = document.getElementById('submitYearSelect');
+      if (!sel) return;
+      const years = Array.from(new Set(ALL_MEMES.map(m => m.year))).sort((a, b) => b - a);
+      sel.innerHTML = years.map(y => `<option value="${y}">${y}</option>`).join('');
+    }
+
+    function handleMemeSubmit(e) {
+      e.preventDefault();
+      alert('Obrigado por contribuir! Seu meme foi enviado para a fila de curadoria dos guardiões (+50 XP).');
+      closeModal('submitModal');
+    }
+
+    function toggleMobileNav() {
+      const nav = document.querySelector('nav.main-nav');
+      if (nav) {
+        nav.style.display = nav.style.display === 'flex' ? 'none' : 'flex';
+      }
+    }
+  </script>
+</body>
+</html>
