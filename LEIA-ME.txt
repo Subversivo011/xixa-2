@@ -1,0 +1,35 @@
+NÃO SALVO — protótipo do site (acervo + álbum de figurinhas)
+
+Como publicar no Netlify
+  Jeito simples (arrastar a pasta): sobe tudo, mas os votos e as visualizações
+  reais não funcionam, porque o Netlify não monta as funções nesse modo.
+  O site continua funcionando e cada pessoa vê só os próprios votos.
+
+  Jeito completo (ligado ao GitHub): no Netlify, "Add new project" >
+  "Import from GitHub", escolha o repositório e em "Base directory" coloque
+  site-v2 (ou deixe vazio se esta pasta estiver na raiz). Assim o Netlify lê o
+  netlify.toml, instala o package.json e liga as funções:
+    /api/votos     curtidas, não curtidas e estrelas de todo mundo (Netlify Blobs)
+    /api/yt-stats  visualizações reais dos vídeos no YouTube
+
+  Para as visualizações reais: crie uma chave da "YouTube Data API v3" no
+  Google Cloud Console e cadastre no Netlify em Project configuration >
+  Environment variables com o nome YT_API_KEY. Depois faça um novo deploy.
+
+  Feedback do rodapé: chega em Netlify > Forms > feedback (ative "Form
+  detection" na primeira vez).
+
+Arquivos
+  index.html    página inicial (acervo, linha do tempo, envio, moderação)
+  home.css      visual dos blocos da página inicial
+  album.html    álbum de figurinhas (estoque de pacotes, loja, coleções)
+  album.css     visual do álbum e da abertura de pacotes
+  common.js     conta (Google/Discord/e-mail), gatinho, moedas, rodapé, feedback
+  data.js       memes do acervo e cartas do álbum (editar aqui o conteúdo)
+  player.js     player de vídeo do YouTube
+  viewer.js/css tela do vídeo e da foto no layout de cada época
+  theme.css     cores, modo claro/escuro, menus e rodapé
+  netlify/      funções do servidor (votos e visualizações)
+
+Observação: é um protótipo. Conta, moedas e cartas ficam salvos só no
+navegador de quem está testando.
