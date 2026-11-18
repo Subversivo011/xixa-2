@@ -53,7 +53,7 @@ const TOAST=y=>{y=parseInt(y)||0;return y>=2007&&y<=2009?{t:"msn",h:"Fernandinha
 
 // ---- partes comuns ----
 const relList=(rel,n)=>rel.slice(0,n||8);
-const thumb=(r,c)=>r.yt?`<span class="${c||"th"}" style="background-image:url(https://i.ytimg.com/vi/${r.yt}/mqdefault.jpg),${vpGrad(r.t)}"></span>`:`<span class="${c||"th"}" style="background:${vpGrad(r.t)}">${r.art||""}</span>`;
+const thumb=(r,c)=>(r.img||r.yt)?`<span class="${c||"th"}" style="background-image:url(${r.img||"https://i.ytimg.com/vi/"+r.yt+"/mqdefault.jpg"}),${vpGrad(r.t)}"></span>`:`<span class="${c||"th"}" style="background:${vpGrad(r.t)}">${r.art||""}</span>`;
 function relHTML(e,rel){
   const L=relList(rel,e===5?10:8);
   if(e===1)return`<div class="rel1"><h5>Vídeos relacionados</h5>${L.map(r=>`<a class="ri" data-id="${r.id}">${thumb(r)}<span><b>${escapeHtml(r.t)}</b><small>De: <u>${CANAL}</u></small><small>Exibições: ${fmt(r.views)}</small></span></a>`).join("")}</div>`;

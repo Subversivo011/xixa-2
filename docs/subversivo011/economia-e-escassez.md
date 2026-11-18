@@ -57,7 +57,7 @@ A simulação deixa de fora três coisas: troca de cartas entre jogadores, event
 
 ## Resultados
 
-![Percentual de jogadores com o álbum completo por dias desde o cadastro, por perfil](img/completos-por-perfil.png)
+![Percentual de jogadores com o álbum completo por dias desde o cadastro, por perfil](completos-por-perfil.png)
 
 A mediana para completar o álbum é de **166 dias** para o hardcore, **252 dias** para o engajado e **678 dias** para o casual. Nos primeiros 2 meses, ninguém completa.
 

@@ -377,7 +377,7 @@ function renderFooter(){
     <div class="ft-legal"><b>Aviso legal</b>
       <p>O Não Salvo é apenas um compilado de vídeos e fotos que já estão publicados na internet. Não hospedamos nenhum vídeo: todos são exibidos direto do YouTube, pelo player oficial, e continuam pertencendo aos seus autores e canais de origem. As fotos e marcas citadas pertencem aos seus respectivos donos.</p>
       <p>É dono de algum conteúdo e quer que ele saia daqui? <button onclick="openFeedback('remocao')">Peça a remoção</button> e a gente tira.</p>
-      <small>© ${new Date().getFullYear()} Não Salvo · projeto de fã, sem fins lucrativos</small></div>
+      <small>© ${new Date().getFullYear()} Não Salvo · projeto de fã, sem fins lucrativos · <a href="/contribuir/">Quero contribuir</a></small></div>
     <img class="ft-boneco" src="boneco.png" alt="" width="478" height="600">
   </div></div>`;
   document.body.appendChild(f);
@@ -404,10 +404,10 @@ async function sendFeedback(e){
   const data={"form-name":"feedback",tipo:(f.tipo.value||"ideia"),msg,contato:f.contato.value.trim(),pagina:location.pathname+location.hash,"bot-field":f["bot-field"].value};
   const btn=f.querySelector(".fb-go");btn.disabled=true;
   let ok=false;
-  try{const r=await fetch("/",{method:"POST",headers:{"Content-Type":"application/x-www-form-urlencoded"},body:new URLSearchParams(data).toString()});ok=r.ok}catch(_){}
+  try{const r=await fetch("/api/feedback",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(data)});ok=r.ok}catch(_){}
   if(!ok){try{const k="ns_feedback",a=JSON.parse(localStorage.getItem(k)||"[]");a.push({...data,ts:Date.now()});localStorage.setItem(k,JSON.stringify(a))}catch(_){}}
   btn.disabled=false;f.reset();document.getElementById("fbm").classList.remove("open");
-  toast(ok?"Amém! Feedback recebido.":"Feedback salvo aqui. Ele é enviado de verdade quando o site estiver no Netlify.",3400);
+  toast(ok?"Amém! Feedback recebido.":"Sem conexão: feedback salvo neste navegador.",3400);
   return false;
 }
 if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",renderFooter);else renderFooter();
