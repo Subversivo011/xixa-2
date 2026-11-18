@@ -206,7 +206,7 @@ flowchart TD
     Feedback -->|POST| ApiFeed["API: /api/feedback"]:::ext
 ```
 
-> Rotas: não há roteador. A home aceita âncoras (`index.html#2012`, `#2020mais`, `#rank`, `#mod`, `#send`, `#rand`, `#tl`, `#todos`), usadas pelos links do rodapé e do álbum. `/contribuir/` e `/dashboard/` são páginas separadas.
+> Rotas: não há roteador. A home aceita âncoras (`index.html#2012`, `#2020mais`, `#rank`, `#mod`, `#send`, `#rand`, `#tl`, `#todos`), usadas pelos links do rodapé e do álbum. `/contribuir/`, `/dashboard/` e `/admin/` são páginas separadas.
 
 ---
 
@@ -236,7 +236,7 @@ flowchart TD
     API -->|Estatisticas com YT_API_KEY opcional| YTAPI["YouTube Data API v3"]:::ext
 ```
 
-> O nginx (`deploy/nginx.conf`) só serve arquivos estáticos (e `noindex` em `/dashboard/`); o Traefik é quem separa `/api` para o serviço Node. A imagem do site (`Dockerfile`) não leva `api/`, `docs/`, `README.md` nem `memes_data.json` (ver `.dockerignore`).
+> O nginx (`deploy/nginx.conf`) só serve arquivos estáticos (e `noindex` em `/dashboard/` e `/admin/`); o Traefik é quem separa `/api` para o serviço Node. A imagem do site (`Dockerfile`) não leva `api/`, `docs/`, `README.md` nem `memes_data.json` (ver `.dockerignore`).
 
 ---
 
@@ -626,3 +626,18 @@ Cadastro de quem quer ajudar o projeto, mais as rotas de votos, visualizações 
 **Contribuidores:** [@willianjack0](https://github.com/willianjack0) · [@Subversivo011](https://github.com/Subversivo011) (protótipo de telas, álbum e player).
 
 Consulte os responsáveis pelo repositório (`@SePPZAO`, `@cidcidoso`) para alinhamento nas issues e branches de desenvolvimento.
+
+### 7.1. Painel `/admin/` (exemplo)
+Tela de exemplo (dados fictícios, estado só na sessão do navegador, nada vai ao servidor) que mistura moderação ao estilo wiki com gamificação, usando as patentes do site:
+
+| Aba | O que mostra |
+|---|---|
+| Visão geral | KPIs, progresso de patente, missões da semana, selos e top moderadores |
+| Fila de envios | Checagens automáticas (link, duplicado, histórico do autor), votos com motivo, consenso de 2 moderadores e voto de minerva do Dono quando os votos dividem |
+| Mudanças recentes | Feed estilo wiki com diff antes/depois, patrulhar e reverter com motivo |
+| Remoções | Pedidos do rodapé com prazo de 72 h |
+| Usuários e patentes | Permissões por patente, precisão, sequência, promover/rebaixar (Dono) |
+| Log | Registro de todas as ações |
+| Regras de XP | XP por ação e princípios do modelo |
+
+Para virar real falta: login/autorização, tabelas de fila/histórico/log no Postgres e rotas `/api/admin/*` correspondentes.
