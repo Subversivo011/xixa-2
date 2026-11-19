@@ -12,9 +12,12 @@ import links from './routes/links.js';
 import yt from './routes/yt.js';
 import admin from './routes/admin.js';
 import economia from './routes/economia.js';
+import authRotas from './routes/auth.js';
 
-export function criarApp({ pool, adminToken = '', ytKey = '', autenticar = null } = {}) {
-  const router = criarRouter({ pool, adminToken, autenticar, extras: { ytKey } });
-  for (const modulo of [saude, acervo, contribuidores, votos, feedback, comentarios, links, yt, economia, admin]) modulo(router);
+// auth = { discord: config | null, fetch, cookieSecure, origemSite }  (ver routes/auth.js e auth/discord.js)
+export function criarApp({ pool, adminToken = '', ytKey = '', autenticar = null, auth = {} } = {}) {
+  const cfgAuth = { discord: null, fetch: globalThis.fetch, cookieSecure: true, origemSite: '', ...auth };
+  const router = criarRouter({ pool, adminToken, autenticar, extras: { ytKey, auth: cfgAuth } });
+  for (const modulo of [saude, acervo, contribuidores, votos, feedback, comentarios, links, yt, authRotas, economia, admin]) modulo(router);
   return { router, server: http.createServer((req, res) => router.tratar(req, res)) };
 }
