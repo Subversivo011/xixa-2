@@ -30,8 +30,8 @@ function playerHTML(m,bare){
   return `<div class="vp vp-e${e.id}${bare?" bare":""}">
    ${e.id===0&&!bare?`<div class="vp-title"><span>▶ Reproduzindo: ${slug}.wmv</span><span>_ □ ×</span></div>`:""}
    <div class="vp-stage">
-    <div class="vp-screen" style="background:${vpGrad(m.t)}">${m.yt?`<img class="vp-thumb" src="https://i.ytimg.com/vi/${m.yt}/hqdefault.jpg" alt="" onerror="this.remove()">`:""}<span class="vp-emo">${m.e}</span><div class="vp-noise"></div>
-      <button class="vp-big" data-a="play">▶</button><div class="vp-buf"><span></span>${e.id<=1?"Carregando… (conexão discada?)":"Carregando…"}</div><div class="vp-end"></div></div>
+    <div class="vp-screen" style="background:${vpGrad(m.t)}">${m.yt?`<img class="vp-thumb" src="https://i.ytimg.com/vi/${m.yt}/hqdefault.jpg" alt="" onerror="this.remove()">`:m.img?`<img class="vp-thumb" src="${escapeHtml(m.img)}" alt="" onerror="this.remove()">`:""}${m.yt||m.img?"":`<span class="vp-emo">${m.e}</span>`}<div class="vp-noise"></div>
+      ${m.yt?`<button class="vp-big" data-a="play">▶</button>`:`<div class="vp-off"><b>Vídeo original fora do ar</b><small>Conhece o link no YouTube? Mande pelo campo abaixo do vídeo.</small></div>`}<div class="vp-buf"><span></span>${e.id<=1?"Carregando… (conexão discada?)":"Carregando…"}</div><div class="vp-end"></div></div>
     <div class="vp-bar"><button class="vp-pp" data-a="play">▶</button><div class="vp-track"><i class="vp-load"></i><i class="vp-prog"></i><b class="vp-knob"></b></div>
       <span class="vp-time">0:00 / ${m.yt?"--:--":mmss(m.dur||47)}</span>${q?`<span class="vp-q">${q}</span>`:""}<button class="vp-ic vp-mute" title="Som">🔊</button>${e.id>=4?'<span class="vp-ic">⚙</span>':''}<button class="vp-ic vp-fs" title="Tela cheia">⛶</button></div>
    </div>${under}
@@ -116,6 +116,7 @@ const PLAYER_CSS=`
 .vp-screen.playing .vp-emo{animation:vpb 1.1s ease-in-out infinite}
 @keyframes vpb{0%,100%{transform:translateY(0) rotate(-3deg)}50%{transform:translateY(-10px) rotate(3deg) scale(1.06)}}
 .vp-noise{position:absolute;inset:0;pointer-events:none;opacity:0}
+.vp-off{position:absolute;z-index:4;left:50%;top:50%;transform:translate(-50%,-50%);max-width:82%;text-align:center;background:#000c;color:#fff;padding:12px 16px;border-radius:10px;font:13px Arial,sans-serif;display:flex;flex-direction:column;gap:4px}.vp-off small{opacity:.8;font-size:11.5px}
 .vp-big{position:absolute;width:74px;height:52px;border-radius:14px;background:#000a;color:#fff;font-size:24px;border:0;cursor:pointer}
 .vp-screen.playing .vp-big,.vp-screen.buffering .vp-big,.vp-screen.ended .vp-big{display:none}
 .vp-buf{position:absolute;display:none;flex-direction:column;align-items:center;gap:10px;color:#fff;font-size:12px;text-shadow:0 1px 3px #000}

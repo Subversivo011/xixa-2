@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/theme.css?v=20261119h">
+<link rel="stylesheet" href="/theme.css?v=20261119i">
 <script>try{var t=localStorage.getItem("ns_theme")}catch(e){}document.documentElement.dataset.theme=t==="dark"?"dark":"light"</script>
 <style>
 .wrap{max-width:1280px;margin:0 auto;padding:18px 20px 70px}
@@ -310,7 +310,7 @@ function viewRem(){
 function viewUsu(){
   const u=me(),list=[...S.users].sort((a,b)=>b.xp-a.xp);
   return `<div class="card"><h2>Patentes e permissões</h2><div class="scroll"><table class="t"><thead><tr><th>Patente</th><th>A partir de</th><th>Pode fazer</th></tr></thead><tbody>
-   ${[["Discado","Navegar, abrir pacotes e colecionar."],["Banda larga","Enviar vídeos ao acervo."],["Colaborador","Salvar link de virais sem vídeo."],["Moderador","Votar na fila, patrulhar, reverter, responder remoções."],["Dono de comunidade","Voto de minerva, promover e rebaixar até Moderador."],["Lenda da internet","Tudo, inclusive regras de XP e patentes acima de Moderador."]].map((x,i)=>`<tr><td>${pill(RANKS[i])}</td><td>${fmt(RANKS[i].xp)} XP</td><td>${x[1]}</td></tr>`).join("")}</tbody></table></div></div>
+   ${[["Discado","Navegar, abrir pacotes e colecionar."],["Banda larga","Enviar memes ao acervo."],["Colaborador","Salvar link de virais sem vídeo."],["Moderador","Votar na fila, patrulhar, reverter, responder remoções."],["Dono de comunidade","Voto de minerva, promover e rebaixar até Moderador."],["Lenda da internet","Tudo, inclusive regras de XP e patentes acima de Moderador."]].map((x,i)=>`<tr><td>${pill(RANKS[i])}</td><td>${fmt(RANKS[i].xp)} XP</td><td>${x[1]}</td></tr>`).join("")}</tbody></table></div></div>
    <div class="card" style="margin-top:14px"><h2>Usuários</h2><div class="scroll"><table class="t"><thead><tr><th>Usuário</th><th>Patente</th><th>XP</th><th>Precisão</th><th>Decisões</th><th>Sequência</th><th></th></tr></thead><tbody>
    ${list.map(x=>`<tr><td><b>@${esc(x.n)}</b></td><td>${rankPill(x)}</td><td>${fmt(x.xp)}</td><td>${x.prec==null?"—":x.prec+"%"}</td><td>${x.dec}</td><td>${x.streak?x.streak+" d":"—"}</td>
    <td>${isDono(u)&&x.n!==u.n&&rIdx(x.xp)<4?`<button class="b" data-up="${esc(x.n)}">${ic("up")} Promover</button> <button class="b bad" data-down="${esc(x.n)}">${ic("down")} Rebaixar</button>`:""}</td></tr>`).join("")}</tbody></table></div></div>`;

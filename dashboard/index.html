@@ -109,6 +109,29 @@
         </div>
         <p class="empty" id="fbNone" hidden>Nenhum feedback ainda. Ele chega pelo botão "fala que eu te escuto" no rodapé do site.</p>
       </div>
+
+      <div class="card" id="lkCard" style="margin-top:18px">
+        <h2>Links de vídeo enviados <span id="lkCount" style="color:var(--text)"></span></h2>
+        <p style="margin:0 0 10px;color:var(--muted,#9aa)">Memes sem vídeo original recebem links da comunidade. Abra o link, confira se é o vídeo certo e aprove: ele passa a aparecer no site para todo mundo.</p>
+        <div class="tablewrap">
+          <table style="min-width:720px">
+            <thead><tr><th>Quando</th><th>Meme</th><th>Link</th><th>Enviado por</th><th>Status</th><th></th></tr></thead>
+            <tbody id="lkRows"></tbody>
+          </table>
+        </div>
+        <p class="empty" id="lkNone" hidden>Nenhum link enviado ainda.</p>
+      </div>
+
+      <div class="card" id="cmCard" style="margin-top:18px">
+        <h2>Comentários das fotos <span id="cmCount" style="color:var(--text)"></span></h2>
+        <div class="tablewrap">
+          <table style="min-width:640px">
+            <thead><tr><th>Quando</th><th>Foto</th><th>Autor</th><th>Comentário</th><th></th></tr></thead>
+            <tbody id="cmRows"></tbody>
+          </table>
+        </div>
+        <p class="empty" id="cmNone" hidden>Nenhum comentário ainda.</p>
+      </div>
     </section>
   </div>
 
@@ -129,7 +152,7 @@
     return api('/api/admin/contribuidores').then(function (r) {
       if (r.status === 401) { logout(); $('loginMsg').textContent = 'Token inválido.'; return; }
       if (!r.ok) throw new Error('erro');
-      return r.json().then(function (j) { items = j.items; $('login').hidden = true; $('app').hidden = false; render(); loadFeedback(); });
+      return r.json().then(function (j) { items = j.items; $('login').hidden = true; $('app').hidden = false; render(); loadFeedback(); loadLinks(); loadComentarios(); });
     }).catch(function () { $('loginMsg').textContent = 'Falha ao carregar. Tente novamente.'; });
   }
 
@@ -159,6 +182,37 @@
         '<td>' + esc(f.contato || '—') + '</td><td><small>' + esc(f.pagina || '—') + '</small></td>' +
         '<td><button class="del" data-fb="' + esc(f.id) + '" type="button">Excluir</button></td></tr>';
     }).join('');
+  }
+
+  var links = [], comentarios = [];
+  var ST = { pendente: 'Pendente', aprovado: 'Aprovado', recusado: 'Recusado' };
+  var quando = function (d) { return esc(new Date(d).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' })); };
+  function loadLinks() {
+    return api('/api/admin/links').then(function (r) { return r.ok ? r.json() : { items: [] }; }).then(function (j) {
+      links = j.items || [];
+      var pend = links.filter(function (l) { return l.status === 'pendente'; }).length;
+      $('lkCount').textContent = links.length ? '(' + pend + ' pendente' + (pend === 1 ? '' : 's') + ')' : '';
+      $('lkNone').hidden = links.length > 0;
+      $('lkRows').innerHTML = links.map(function (l) {
+        var acts = l.status === 'pendente'
+          ? '<button class="del" style="background:#1f7a3a;border-color:#1f7a3a;color:#fff" data-lk="' + esc(l.id) + '" data-st="aprovado" type="button">Aprovar</button> <button class="del" data-lk="' + esc(l.id) + '" data-st="recusado" type="button">Recusar</button>'
+          : '<button class="del" data-lk="' + esc(l.id) + '" data-st="' + (l.status === 'aprovado' ? 'recusado' : 'aprovado') + '" type="button">' + (l.status === 'aprovado' ? 'Desfazer' : 'Aprovar') + '</button>';
+        return '<tr><td style="white-space:nowrap">' + quando(l.criado_em) + '</td><td><b>' + esc(l.meme_id) + '</b></td>' +
+          '<td><a href="https://www.youtube.com/watch?v=' + esc(l.yt) + '" target="_blank" rel="noopener">youtu.be/' + esc(l.yt) + '</a></td>' +
+          '<td>' + esc(l.autor) + '</td><td><span class="tag">' + esc(ST[l.status] || l.status) + '</span></td><td style="white-space:nowrap">' + acts + '</td></tr>';
+      }).join('');
+    }).catch(function () {});
+  }
+  function loadComentarios() {
+    return api('/api/admin/comentarios').then(function (r) { return r.ok ? r.json() : { items: [] }; }).then(function (j) {
+      comentarios = j.items || [];
+      $('cmCount').textContent = comentarios.length ? '(' + comentarios.length + ')' : '';
+      $('cmNone').hidden = comentarios.length > 0;
+      $('cmRows').innerHTML = comentarios.map(function (c) {
+        return '<tr><td style="white-space:nowrap">' + quando(c.criado_em) + '</td><td>' + esc(c.meme_id) + '</td><td>' + esc(c.autor) + '</td>' +
+          '<td style="white-space:pre-wrap;max-width:420px">' + esc(c.texto) + '</td><td><button class="del" data-cm="' + esc(c.id) + '" type="button">Excluir</button></td></tr>';
+      }).join('');
+    }).catch(function () {});
   }
 
   function bars(el, entries) {
@@ -228,6 +282,15 @@
     api('/api/admin/feedback/' + encodeURIComponent(btn.dataset.fb), { method: 'DELETE' }).then(loadFeedback);
   });
   $('refresh').addEventListener('click', loadFeedback);
+  $('lkRows').addEventListener('click', function (e) {
+    var btn = e.target.closest('[data-lk]'); if (!btn) return;
+    api('/api/admin/links/' + encodeURIComponent(btn.dataset.lk), { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ status: btn.dataset.st }) }).then(loadLinks);
+  });
+  $('cmRows').addEventListener('click', function (e) {
+    var btn = e.target.closest('[data-cm]'); if (!btn) return;
+    if (!window.confirm('Excluir este comentário? Não dá para desfazer.')) return;
+    api('/api/admin/comentarios/' + encodeURIComponent(btn.dataset.cm), { method: 'DELETE' }).then(loadComentarios);
+  });
 
   if (token) load();
 })();
