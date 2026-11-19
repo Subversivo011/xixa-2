@@ -28,3 +28,9 @@ Baixadas em 2026-11-19. Para adicionar uma imagem nova: salve em `memes/`, preen
 | Leandro, o Cachorro | 2022 | `memes/leandro.jpg` | [Know Your Meme](https://knowyourmeme.com/search?q=Leandro) | https://i.kym-cdn.com/entries/icons/original/000/041/812/Leandro.jpg |
 | Indo Ali | 2023 | `memes/indo-ali.jpg` | [Know Your Meme](https://knowyourmeme.com/search?q=Indo%20Ali) | https://i.kym-cdn.com/entries/icons/original/000/046/552/indo_ali_meme_cover.jpg |
 | Luva de Horror Cósmico | 2024 | `memes/luva-de-horror-cosmico.jpg` | [Know Your Meme](https://knowyourmeme.com/search?q=Receba%20Parodies) | https://i.kym-cdn.com/entries/icons/original/000/049/024/6AFB53CC-0988-4761-840B-2C4DC663BBF9.jpeg |
+
+### Adicionada em 2026-11-19 (captura de vídeo)
+
+| Registro | Ano | Arquivo | Fonte | Endereço original |
+|---|---|---|---|---|
+| Cadê o Richard? | 2019 | `memes/cade-o-richard.jpg` | [Captura do vídeo original · uso editorial](https://www.youtube.com/watch?v=0KoFxC7BhRk) | https://www.youtube.com/watch?v=0KoFxC7BhRk |
