@@ -146,6 +146,9 @@
 .flip:not(.f):hover{transform:translateY(-6px)}
 .flip .front .card{transform:none}
 .new{top:-10px;right:-8px;background:#ffd23f;color:#3a2a00;box-shadow:0 3px 10px #0005}
+.slot>.new{visibility:hidden}
+.slot.rev>.new{visibility:visible;animation:newpop .3s cubic-bezier(.2,.9,.3,1.4)}
+@keyframes newpop{from{opacity:0;transform:scale(.5)}}
 .spark{position:absolute;width:8px;height:8px;border-radius:2px;pointer-events:none;z-index:20;animation:spark .9s cubic-bezier(.2,.7,.4,1) forwards}
 @keyframes spark{to{transform:translate(var(--x),var(--y)) rotate(260deg) scale(.3);opacity:0}}
 .pkstage .sum span{background:#ffffff14;border:0;color:#fff;display:inline-flex;align-items:center;gap:6px;padding:7px 14px}
