@@ -53,3 +53,33 @@ jobs:
         with:
           node-version: 22
       - run: bash scripts/ci/run-api-tests.sh
+
+  migrations:
+    name: Migrações sobem do zero (Postgres)
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:14   # mesma versão do servidor 2
+        env:
+          POSTGRES_USER: naosalvo
+          POSTGRES_PASSWORD: ci-descartavel
+          POSTGRES_DB: naosalvo_ci
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U naosalvo"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      DB_HOST: localhost
+      DB_PORT: 5432
+      DB_USER: naosalvo
+      DB_PASSWORD: ci-descartavel
+      DB_NAME: naosalvo_ci
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: bash scripts/ci/check-migrations.sh
