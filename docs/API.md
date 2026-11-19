@@ -57,7 +57,7 @@ OAuth2 do Discord (scope `identify`). Quem usa: o site abre `/api/auth/discord?v
 
 **State assinado.** O cookie `ns_oauth` é `<state>.<destino>.<emitido em>.<hmac>`: HMAC-SHA256 com chave derivada do client secret. O servidor recusa (`400`) assinatura inválida, destino adulterado, cookie com mais de 10 minutos (validado no servidor, não só pelo `Max-Age`) ou emitido "no futuro". O `state` também precisa bater com o da URL de volta.
 
-Primeiro login cria o usuário com apelido único derivado do nome no Discord (acentos removidos, 3 a 20 caracteres; colisão ganha sufixo numérico: `Ana`, `Ana2`…) e um gato provisório determinístico pelo id do Discord (o cadastro só fica completo quando a pessoa salva o gato: ver **Perfil e cadastro**). Um login seguinte reaproveita o usuário e só atualiza o nome de exibição. Rate limit: 30 chamadas por IP a cada 10 min nas rotas de auth (`429`).
+Primeiro login cria o usuário com apelido único derivado do nome no Discord (acentos removidos, 3 a 20 caracteres; colisão ganha sufixo numérico: `Ana`, `Ana2`…; nome **reservado** ganha `_gato`: `Admin` vira `Admin_gato`, ver **Apelido: reservados e limite de troca**) e um gato provisório determinístico pelo id do Discord (o cadastro só fica completo quando a pessoa salva o gato: ver **Perfil e cadastro**). Um login seguinte reaproveita o usuário e só atualiza o nome de exibição. Rate limit: 30 chamadas por IP a cada 10 min nas rotas de auth (`429`).
 
 **Sessão.** Cookie `ns_sessao`: `HttpOnly`, `Secure`, `SameSite=Lax`, 30 dias. O valor é um token aleatório de 256 bits; **o banco guarda só o sha256 dele** (`sessoes.id`), então um vazamento do banco não entrega sessões. Renovação deslizante: se passou mais de 1 dia desde a última renovação, o uso empurra a expiração e reemite o cookie, com teto absoluto de 90 dias desde a criação. No máximo 10 sessões por usuário (a mais antiga cai). Expiradas são ignoradas na leitura e apagadas na subida da API e a cada hora.
 
@@ -73,7 +73,7 @@ Estado do perfil (todos em `usuario` de `GET /api/eu`):
 
 | Campo | Tipo | Significado |
 |---|---|---|
-| `apelido` | string | 3 a 20 caracteres de `A-Z a-z 0-9 _ . -`. Único sem diferenciar maiúsculas |
+| `apelido` | string | 3 a 20 caracteres de `A-Z a-z 0-9 _ . -`. Único sem diferenciar maiúsculas, não pode ser reservado e só muda 1 vez a cada 24 h (a 1ª troca é livre): ver **Apelido: reservados e limite de troca** |
 | `avatar_gato` | objeto | O gato (**avatar padrão**), sempre completo: `{ fur, pat, eye, acc, clo, bg }`, inteiros (lista fechada abaixo) |
 | `avatar_url` | string \| null | Foto do Discord (CDN, montada no servidor) ou `null` se a conta não tem foto |
 | `usar_foto` | bool | `true` = mostrar a foto em vez do gato. **Só é `true` se existir `avatar_url`** (se a pessoa tirar a foto no Discord, volta a `false` sozinho). Padrão `false` |
@@ -101,9 +101,18 @@ Resposta `200`:
 | `400` `{ erro }` | JSON inválido, corpo vazio ou sem nenhum dos campos, chave desconhecida (inclusive `avatar_url`), corpo que não é objeto |
 | `401` / `403` | Sem login / sem `X-CSRF` válido ou conta suspensa |
 | `409` `{ erro: "apelido já está em uso" }` | Apelido ocupado por **outra** pessoa (sem diferenciar maiúsculas). Trocar só a caixa do próprio apelido (`ana` → `Ana`) é permitido |
-| `422` `{ erro, campo }` | Valor inválido: `campo` é `"apelido"` (fora da regra), `"avatar_gato"` (faltou chave, chave extra, não inteiro ou fora da faixa) ou `"usar_foto"` (não é booleano, ou `true` sem `avatar_url`) |
-| `429` | Mais de 30 alterações de perfil em 10 min |
+| `422` `{ erro, campo }` | Valor inválido: `campo` é `"apelido"` (fora da regra **ou reservado**), `"avatar_gato"` (faltou chave, chave extra, não inteiro ou fora da faixa) ou `"usar_foto"` (não é booleano, ou `true` sem `avatar_url`) |
+| `429` `{ erro }` | Mais de 30 alterações de perfil em 10 min |
+| `429` `{ erro, campo: "apelido", tente_em_segundos }` | Apelido trocado há menos de 24 h. `tente_em_segundos` (inteiro, ≥ 1) diz quanto falta; o mesmo valor vai no header `Retry-After`. Como o PATCH é tudo ou nada, **nada** do corpo é gravado (nem o gato, nem as boas-vindas): reenvie sem o apelido |
 | `503` | Pacote de boas-vindas não cadastrado (sem seed): **nada é gravado** |
+
+### Apelido: reservados e limite de troca
+
+**Reservados.** Recusados com `422 { erro, campo: "apelido" }`: `admin`, `administrador`, `mod`, `moderador`, `moderacao`, `suporte`, `staff`, `nao salvo`, `naosalvo`, `xet`, `sistema`, `system`, `root`, `discord`, `oficial`. A comparação é **normalizada**: minúsculas, sem acentos, sem espaço nem `. _ -` e sem números no fim. Então `Admin`, `ADMIN_2`, `a.d.m.i.n`, `Nao-Salvo`, `Moderação` e `xet99` caem; `Modesto`, `admin_joao`, `rootbeer` e `ad2min` passam. A lista fica em `api/auth/apelidos.js`.
+
+**Apelido gerado no 1º login.** Nunca é reservado. Como `admin2` também é reservado, número não resolve: a base reservada ganha `_gato` (`Admin` → `Admin_gato`; se colidir, `Admin_gato2`).
+
+**Limite de troca.** O apelido só muda **1 vez a cada 24 h**. A **primeira troca é livre** (`usuarios.apelido_alterado_em` nulo); cada troca grava `apelido_alterado_em` e a seguinte só passa depois de 24 h (relógio do banco), senão `429` com `tente_em_segundos`. **Não contam** como troca: salvar o gato (a criação do gato), `usar_foto`, enviar o mesmo apelido que já tem (nada a fazer, `200`) e tentativas recusadas (`409` ocupado, `422` reservado ou inválido). Trocar só a caixa (`ana` → `Ana`) conta como troca. Contas existentes começam com a primeira troca livre (sem backfill). A ordem das checagens no servidor é: formato e reservado (`422`), janela de 24 h (`429`), apelido ocupado (`409`).
 
 **Boas-vindas (regra fechada).** Na **primeira vez** que o `avatar_gato` é salvo (`cadastro_completo_em` era nulo) o servidor, na mesma transação e com a linha do usuário travada: preenche `cadastro_completo_em` e põe **1** pacote `boas` no estoque. Nunca duas vezes, nem com 10 `PATCH` simultâneos (índice único parcial em `pacotes_estoque` por usuário + origem `boas`). Salvar de novo o gato, trocar apelido ou `usar_foto` **não** dá pacote. `POST /api/visita` não dá boas-vindas.
 

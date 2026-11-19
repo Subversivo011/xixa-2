@@ -396,3 +396,23 @@ test('PATCH /api/eu com cookie de sessão exige X-CSRF e Origin do site; o apeli
   assert.equal(ok.status, 200); assert.equal(ok.json.usuario.apelido, 'ComCsrf' + ipN); assert.ok(ok.json.pacote_boas_vindas);
   assert.equal((await eu(r.cookie)).json.usuario.apelido, 'ComCsrf' + ipN, 'a sessão segue o usuário pelo id, mesmo com apelido novo');
 });
+
+// ---- apelido: reservado no 1º login e limite de troca com sessão ----
+test('1º login com nome reservado do Discord ganha apelido com _gato (nunca admin, admin2...)', { skip }, async () => {
+  const r1 = await login(perfilDe(novoId(), 'Admin'));
+  assert.equal((await eu(r1.cookie)).json.usuario.apelido, 'Admin_gato');
+  const r2 = await login(perfilDe(novoId(), 'admin'));      // colide (sem diferenciar caixa): _gato2, que continua não reservado
+  assert.equal((await eu(r2.cookie)).json.usuario.apelido, 'admin_gato2');
+  const r3 = await login(perfilDe(novoId(), 'Moderação'));
+  assert.equal((await eu(r3.cookie)).json.usuario.apelido, 'Moderacao_gato');
+});
+
+test('troca de apelido com sessão: 5 PATCH simultâneos = 1 sucesso e 4 x 429', { skip }, async () => {
+  const r = await login(perfilDe(novoId(), 'Troca Simultanea'));
+  const csrf = await csrfDe(r.cookie);
+  const rs = await Promise.all(Array.from({ length: 5 }, (_, i) =>
+    s.patch('/api/eu', { apelido: `Simult${ipN}_${i}` }, { headers: { Cookie: r.cookie, 'X-CSRF': csrf, Origin: SITE } })));
+  assert.deepEqual(rs.map((x) => x.status).sort(), [200, 429, 429, 429, 429]);
+  const certo = rs.find((x) => x.status === 200);
+  assert.equal((await eu(r.cookie)).json.usuario.apelido, certo.json.usuario.apelido);
+});
