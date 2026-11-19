@@ -1,0 +1,20 @@
+// Monta a aplicação HTTP: roteador + módulos de rotas por assunto (api/routes/).
+// Separado do server.js para os testes subirem a API com um pool próprio, sem migrar nem abrir a porta 3000.
+import http from 'node:http';
+import { criarRouter } from './lib/router.js';
+import saude from './routes/saude.js';
+import acervo from './routes/acervo.js';
+import contribuidores from './routes/contribuidores.js';
+import votos from './routes/votos.js';
+import feedback from './routes/feedback.js';
+import comentarios from './routes/comentarios.js';
+import links from './routes/links.js';
+import yt from './routes/yt.js';
+import admin from './routes/admin.js';
+import economia from './routes/economia.js';
+
+export function criarApp({ pool, adminToken = '', ytKey = '', autenticar = null } = {}) {
+  const router = criarRouter({ pool, adminToken, autenticar, extras: { ytKey } });
+  for (const modulo of [saude, acervo, contribuidores, votos, feedback, comentarios, links, yt, economia, admin]) modulo(router);
+  return { router, server: http.createServer((req, res) => router.tratar(req, res)) };
+}

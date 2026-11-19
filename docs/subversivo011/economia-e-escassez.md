@@ -2,6 +2,8 @@
 
 *Atualizado em 18/11/2026*
 
+> **Desatualizado em um ponto (decisão fechada em 19/11/2026):** este documento e a simulação assumem que "toda repetida vira moeda na hora". No site de verdade a repetida **fica no inventário** e só vira moeda quando o jogador converte (`POST /api/album/reciclar`), o que deixa espaço para troca de figurinhas. Detalhes em `docs/API.md` ("Decisões de produto"). Os números abaixo servem como referência de ritmo, não como regra exata.
+
 ## Resumo
 
 Com as regras propostas pelo grupo, **ninguém completa o álbum em menos de 2 meses, e só ~8% dos usuários fecham o álbum em 6 meses**. Numa base de 20 mil usuários ativos, isso dá ~1.600 álbuns completos em 6 meses e ~6.100 em 1 ano.
