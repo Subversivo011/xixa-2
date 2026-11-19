@@ -280,12 +280,14 @@ test('sem seed: abrir pacote responde 503 claro e não grava nada', { skip }, as
     await vazio.pool.query("INSERT INTO pacotes_tipo (id, nome, chances) VALUES ('boas', 'Boas', '{\"Comum\":1}')");
     await vazio.pool.query("INSERT INTO pacotes_estoque (usuario_id, tipo, origem) SELECT id, 'boas', 'boas' FROM usuarios");
     const r = await sv.post('/api/pacotes/abrir', { tipo: 'boas' }, h);
-    assert.equal(r.status, 503); assert.match(r.json.erro, /acervo.*seed/);
+    assert.equal(r.status, 503); assert.equal(r.json.erro, 'serviço indisponível, tente mais tarde');
+    assert.ok(!/seed|acervo|regras|tabela/i.test(JSON.stringify(r.json)), 'detalhe interno vazou para o cliente');
     assert.equal((await vazio.pool.query('SELECT count(*)::int AS n FROM pacotes_abertos')).rows[0].n, 0);
     assert.equal((await vazio.pool.query('SELECT count(*)::int AS n FROM pacotes_estoque WHERE usado_em IS NULL')).rows[0].n, 1);
     // regras apagadas: também 503, não 500
     await vazio.pool.query('DELETE FROM regras_economia');
-    assert.equal((await sv.get('/api/carteira', h)).status, 503);
+    const c = await sv.get('/api/carteira', h);
+    assert.equal(c.status, 503); assert.equal(c.json.erro, 'serviço indisponível, tente mais tarde');
   } finally { await sv.fechar(); await vazio.fechar(); }
 });
 

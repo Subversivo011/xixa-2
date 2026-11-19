@@ -12,6 +12,13 @@ export class ErroNegocio extends Error {
   constructor(status, mensagem) { super(mensagem); this.status = status; }
 }
 
+/** Falta de acervo/regras: o cliente vê uma mensagem genérica; o detalhe (que cita seed e tabelas) só vai para o log. */
+export const MSG_INDISPONIVEL = 'serviço indisponível, tente mais tarde';
+function indisponivel(detalhe) {
+  console.error(new Date().toISOString(), 'economia indisponível:', detalhe);
+  return new ErroNegocio(503, MSG_INDISPONIVEL);
+}
+
 async function transacao(pool, fn) {
   const cli = await pool.connect();
   try {
@@ -32,7 +39,7 @@ async function carregarRegras(db) {
   const { rows } = await db.query('SELECT chave, valor FROM regras_economia');
   const r = Object.fromEntries(rows.map((x) => [x.chave, x.valor]));
   for (const k of ['valor_repetida', 'recompensa_moedas', 'xp_ganho', 'limites']) {
-    if (!r[k]) throw new ErroNegocio(503, `regras de economia ausentes ("${k}"): rode as migrações e o seed`);
+    if (!r[k]) throw indisponivel(`regras_economia sem a chave "${k}" (rode as migrações e o seed)`);
   }
   return r;
 }
@@ -226,7 +233,7 @@ export async function abrirPacote(pool, usuario, { estoque_id = null, tipo = nul
     const { rows: [pk] } = await cli.query('SELECT id, nome, cartas, chances, garantia, escopo FROM pacotes_tipo WHERE id = $1', [item.tipo]);
     const escopo = pk ? await cartasDoEscopo(cli, pk.escopo === 'colecao' ? item.colecao_id : null) : [];
     // acervo não carregado (seed não rodou): erro claro e nada é gravado
-    if (!pk || !escopo.length) throw new ErroNegocio(503, 'acervo de cartas ainda não foi carregado (rode node api/seed/acervo.js); tente mais tarde');
+    if (!pk || !escopo.length) throw indisponivel(`acervo de cartas não carregado (pacote ${item.tipo}, ${escopo.length} cartas no escopo): rode node api/seed/acervo.js`);
     const semente = novaSemente();
     const sorteadas = sortearPacote({ cartas: escopo, chances: pk.chances, garantia: pk.garantia, quantidade: pk.cartas, rng: criarRng(semente) });
 

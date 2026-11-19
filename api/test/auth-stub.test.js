@@ -19,6 +19,15 @@ test('recusa subir: naosalvo (produção), naosalvo_staging, banco ausente', () 
   assert.throws(() => ligar({}), RECUSADO);
   assert.throws(() => ligar({ DB_NAME: '' }), RECUSADO);
   assert.throws(() => ligar({ DB_NAME: 'naosalvo', NODE_ENV: 'development' }), RECUSADO);
+  assert.throws(() => ligar({ DB_NAME: 'naosalvo', NODE_ENV: 'test' }), RECUSADO); // NODE_ENV=test não basta
+  assert.throws(() => ligar({ NODE_ENV: 'test' }), RECUSADO);
+  assert.throws(() => ligar({ NODE_ENV: 'TEST', DB_NAME: 'naosalvo' }), RECUSADO);
+});
+
+test('recusa nome que só CONTÉM dev/test como pedaço de outra palavra (sem token)', () => {
+  for (const nome of ['PROD_DEVEL', 'prod_devel', 'naosalvo_devops', 'naosalvo_testing', 'devel', 'contest_db', 'naosalvo_prod']) {
+    assert.throws(() => ligar({ DB_NAME: nome }), RECUSADO, nome);
+  }
 });
 
 test('recusa subir com NODE_ENV=production em qualquer grafia, mesmo em banco dev/test', () => {
@@ -29,16 +38,17 @@ test('recusa subir com NODE_ENV=production em qualquer grafia, mesmo em banco de
   assert.throws(() => ligar({ NODE_ENV: 'Production' }), RECUSADO);
 });
 
-test('liga em naosalvo_dev, bancos de teste e NODE_ENV=test (sem diferenciar maiúsculas)', () => {
-  for (const env of [{ DB_NAME: 'naosalvo_dev' }, { DB_NAME: 'NAOSALVO_DEV' }, { DB_NAME: 'naosalvo_test' },
-    { DB_NAME: 'Test_db' }, { DB_NAME: 'naosalvo', NODE_ENV: 'test' }, { NODE_ENV: 'TEST' }, { DB_NAME: 'naosalvo_dev', NODE_ENV: 'development' }]) {
+test('liga só com nome de banco de teste/dev por token (sem diferenciar maiúsculas)', () => {
+  for (const env of [{ DB_NAME: 'naosalvo_dev' }, { DB_NAME: 'NAOSALVO_DEV' }, { DB_NAME: 'naosalvo_test' }, { DB_NAME: 'Test_db' },
+    { DB_NAME: 'dev_naosalvo' }, { DB_NAME: 'naosalvotest' }, { DB_NAME: 'dev' }, { DB_NAME: 'naosalvo_test', NODE_ENV: 'test' },
+    { DB_NAME: 'naosalvo_dev', NODE_ENV: 'development' }]) {
     assert.equal(typeof ligar(env), 'function', JSON.stringify(env));
   }
 });
 
 test('a mensagem de erro diz o que fazer e mostra o ambiente detectado', () => {
   assert.throws(() => ligar({ DB_NAME: 'naosalvo', NODE_ENV: 'production' }),
-    (e) => /"test" ou "dev"/.test(e.message) && /DB_NAME="naosalvo"/.test(e.message) && /Remova AUTH_STUB/.test(e.message));
+    (e) => /teste\/dev/.test(e.message) && /DB_NAME="naosalvo"/.test(e.message) && /Remova AUTH_STUB/.test(e.message));
 });
 
 test('stubPermitido: tabela de decisão', () => {

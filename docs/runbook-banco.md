@@ -51,14 +51,16 @@ A 008 cria índices **únicos** no razão. Se já existir linha repetida, a cria
 SELECT usuario_id, motivo, ref, count(*) AS n
   FROM eventos_xp
  WHERE motivo IN ('visita_diaria', 'carta_nova', 'colecao_completa')
+   AND ref IS NOT NULL
  GROUP BY usuario_id, motivo, ref
 HAVING count(*) > 1;
 
 SELECT usuario_id, motivo, ref, count(*) AS n
   FROM movimentos_moeda
  WHERE motivo = 'colecao_completa'
+   AND ref IS NOT NULL
  GROUP BY usuario_id, motivo, ref
 HAVING count(*) > 1;
 ```
 
-Se aparecer alguma linha: faça o `pg_dump`, apague as repetidas deixando a de menor `id` de cada grupo e recalcule `usuarios.xp` e `usuarios.moedas` como soma do razão antes de subir. Linhas com `ref` NULL não conflitam (NULL é distinto no índice único).
+Se aparecer alguma linha: faça o `pg_dump`, apague as repetidas deixando a de menor `id` de cada grupo e recalcule `usuarios.xp` e `usuarios.moedas` como soma do razão antes de subir. As consultas ignoram `ref` NULL de propósito: NULL é distinto no índice único, então essas linhas não impedem a 008.
