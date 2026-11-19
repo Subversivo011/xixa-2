@@ -317,4 +317,3 @@ const server = http.createServer(async (req, res) => {
   }
 });
 server.listen(3000, () => console.log('naosalvo-api :3000'));
-const = ;
