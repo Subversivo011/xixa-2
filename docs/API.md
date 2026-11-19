@@ -27,7 +27,7 @@ Moedas, XP e cartas só mudam por chamadas da API, dentro de uma transação que
 
 Sem o acervo carregado (seed não rodou) ou sem as regras de economia, `abrir` e a carteira respondem `503 { erro: "serviço indisponível, tente mais tarde" }`; o detalhe (o que falta e o que rodar) vai só para o log do servidor. Nada é gravado.
 
-Rotas marcadas com 🔒 exigem usuário (ver **Autenticação provisória**). Erros de regra: `{ erro }` com 400, 402 (moedas insuficientes), 404 ou 409. Até 60 ações de escrita por usuário a cada 10 min (429).
+Rotas marcadas com 🔒 exigem usuário (ver **Login com Discord e sessão**). Erros de regra: `{ erro }` com 400, 402 (moedas insuficientes), 404 ou 409. Até 60 ações de escrita por usuário a cada 10 min (429).
 
 | Rota | Descrição |
 |---|---|
@@ -41,12 +41,33 @@ Rotas marcadas com 🔒 exigem usuário (ver **Autenticação provisória**). Er
 
 Idempotência do razão: visita do dia, carta nova e coleção completa têm índice único por usuário e referência, então retry ou corrida nunca pagam duas vezes.
 
-## Autenticação provisória (stub)
+## Login com Discord e sessão
 
-O login com Discord ainda não existe. Até lá, `api/auth-stub.js` é o **único** ponto de identidade: com `AUTH_STUB=1`, o header `X-Test-User: <apelido>` (3 a 20 letras, números, `_`, `.`, `-`) identifica o usuário e o cria na primeira chamada. Sem a variável, as rotas 🔒 respondem `401`.
+OAuth2 do Discord (scope `identify`). Quem usa: o site abre `/api/auth/discord?voltar=/album.html`, o usuário autoriza no Discord e volta para a página de origem já logado.
+
+| Rota | Descrição |
+|---|---|
+| `GET /api/auth/discord?voltar=/caminho` | Gera um `state` aleatório, guarda no cookie `ns_oauth` (httpOnly, 10 min, só viaja para `/api/auth`) e redireciona (302) ao Discord. `voltar` só aceita **caminho relativo do próprio site**; qualquer outra coisa (`https://…`, `//…`, `/\\…`, `javascript:`) vira `/` |
+| `GET /api/auth/discord/callback` | Confere o `state` com o cookie (`400` se faltar ou divergir), troca o `code`, lê `/users/@me`, cria ou atualiza `usuarios` + `contas_oauth`, abre a sessão e redireciona para `voltar` (revalidado). Falhas voltam para a mesma página com `?login=` **`negado`** (cancelou no Discord), **`erro`** (Discord recusou o code), **`banido`** (conta suspensa: não abre sessão), **`nao_membro`** (só se `DISCORD_EXIGIR_MEMBRO=1`) |
+| `POST /api/auth/sair` | Apaga a sessão no banco e limpa o cookie. Exige `X-CSRF`. Sem sessão, só limpa o cookie |
+| 🔒 `GET /api/eu` | `{ usuario: { id, apelido, avatar_gato }, patente, proxima_patente, moedas, xp, csrf }`. `401` se não estiver logado. **O `csrf` daqui vai no header `X-CSRF` das chamadas que alteram dados** |
+
+Primeiro login cria o usuário com apelido único derivado do nome no Discord (acentos removidos, 3 a 20 caracteres; colisão ganha sufixo numérico: `Ana`, `Ana2`…) e um gato inicial determinístico pelo id do Discord. Um login seguinte reaproveita o usuário e só atualiza o nome de exibição. Rate limit: 30 chamadas por IP a cada 10 min nas rotas de auth (`429`).
+
+**Sessão.** Cookie `ns_sessao`: `HttpOnly`, `Secure`, `SameSite=Lax`, 30 dias. O valor é um token aleatório de 256 bits; **o banco guarda só o sha256 dele** (`sessoes.id`), então um vazamento do banco não entrega sessões. Renovação deslizante: se passou mais de 1 dia desde a última renovação, o uso empurra a expiração e reemite o cookie, com teto absoluto de 90 dias desde a criação. No máximo 10 sessões por usuário (a mais antiga cai). Expiradas são ignoradas na leitura e apagadas na subida da API e a cada hora.
+
+**CSRF.** Rota autenticada por cookie que altera dados (POST/PUT/PATCH/DELETE) exige **`X-CSRF`** igual ao token da sessão (vem em `GET /api/eu`; é derivado do token do cookie, que o JavaScript não lê) e, se o navegador mandar `Origin`, ele precisa ser o do site. Falha = `403`. GET não exige. O stub de teste (header, sem cookie) não precisa.
+
+**Patente.** `lib/patente.js`: a patente é calculada no servidor pela soma do razão `eventos_xp` e pela tabela `patentes`. Ao registrar uma rota, `{ autenticada: true }` exige usuário e `{ patente: 'moderador' }` exige também essa patente ou maior (id ou nome: `'banda_larga'`, `'Banda larga'`). `401` sem login, `403` abaixo da patente (`{ erro, patente_atual }`), `503` se a tabela `patentes` estiver vazia. Todas as rotas de economia usam a sessão; nenhuma rota de admin por patente foi criada ainda.
+
+**Configuração (nunca no repositório, nunca em log).** Segredos só por arquivo (Docker secrets): `DISCORD_CLIENT_ID_FILE`, `DISCORD_CLIENT_SECRET_FILE` e, opcional, `DISCORD_GUILD_ID_FILE`. `DISCORD_REDIRECT_URI` por variável (https obrigatório fora de localhost) e precisa ser **exatamente** a URL cadastrada no portal do Discord. Sem client id/secret/redirect a API sobe normalmente e as rotas de login respondem `503`. Opcionais: `DISCORD_EXIGIR_MEMBRO=1` (só entra quem está no servidor do `DISCORD_GUILD_ID`; pede também o scope `guilds`), `SITE_ORIGIN` (origem do site para o CSRF; padrão = origem do redirect) e `COOKIE_SECURE=0` (só para teste local sem HTTPS). Nas stacks: `docker-stack.dev.yml` e `deploy/auto/stack.dev.yml` usam `naosalvo_dev_discord_client_id`, `naosalvo_dev_discord_client_secret` e `naosalvo_discord_guild_id`; `docker-stack.yml` e `deploy/auto/stack.main.yml` usam `naosalvo_discord_client_id`, `naosalvo_discord_client_secret` e `naosalvo_discord_guild_id`. A access token do Discord é usada só durante o callback e descartada (não é gravada).
+
+## Autenticação de teste (stub)
+
+`api/auth-stub.js` continua existindo **só para dev e testes**: com `AUTH_STUB=1`, o header `X-Test-User: <apelido>` (3 a 20 letras, números, `_`, `.`, `-`) identifica o usuário e o cria na primeira chamada. A sessão do login Discord tem prioridade; o stub só entra se não houver sessão válida. Sem a variável, o header é ignorado.
 
 - **Só dev e teste.** Quem manda o header vira aquele usuário. A guarda é uma **allowlist**: o stub só liga se `DB_NAME` é de teste/dev **por token** (`naosalvo_dev`, `naosalvo_test`, `test_x`, `dev_x` ou nome terminando em `test`/`dev`; `prod_devel` não vale) **e** `NODE_ENV` não é `production` (sem diferenciar maiúsculas). `NODE_ENV=test` sozinho não basta. Qualquer outro caso (`naosalvo`, `naosalvo_staging`, banco ausente, `NODE_ENV=Production`, `naosalvo` com `NODE_ENV=test`) faz a API **recusar subir**, com erro claro, antes de tocar no banco. Nunca coloque `AUTH_STUB` em `docker-stack.yml`.
-- O login Discord troca só o autenticador (`(req, pool) => usuario | null`, sessão em cookie `httpOnly`); as rotas e os testes de economia seguem iguais.
+- Em produção as rotas 🔒 só aceitam a sessão do login Discord.
 
 ## Decisões de produto
 
@@ -56,7 +77,7 @@ O login com Discord ainda não existe. Até lá, `api/auth-stub.js` é o **únic
 
 ### Em aberto (implementado como no protótipo; confirmar com o grupo antes de divulgar)
 
-1. **Boas-vindas na primeira visita**, não "no cadastro" como diz o documento de economia, porque ainda não há cadastro. Com o login Discord passa a ser no primeiro login.
+1. **Boas-vindas na primeira visita** (`POST /api/visita`), não "no cadastro" como diz o documento de economia. Com o login Discord já existe cadastro (primeiro login); mover o pacote para o momento da criação da conta é decisão em aberto.
 2. **Preço do pacote Clássico (150 moedas)**: número da simulação, ainda não validado pelo grupo. Fica em `pacotes_tipo.preco`.
 3. **Pacote diário acumula até 7** e o "dia" segue `America/Sao_Paulo` (`regras_economia.limites`).
 4. **Sem tiragem numerada nos Míticos** (é recomendação do documento de economia, não implementada).
