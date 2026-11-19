@@ -6,6 +6,7 @@ import { criarAutenticadorStub } from './auth-stub.js';
 import { criarAutenticador } from './auth/autenticador.js';
 import { lerConfigDiscord } from './auth/discord.js';
 import { limparExpiradas } from './auth/sessao.js';
+import { agendarLimpezaEventosIp } from './lib/limpeza.js';
 
 // falha ANTES de tocar no banco se o stub estiver ligado fora da allowlist (ver auth-stub.js)
 const stub = criarAutenticadorStub();
@@ -33,4 +34,5 @@ const { server } = criarApp({
   autenticar: criarAutenticador({ stub, cookieSecure }), // sessão do login Discord; o stub só existe em dev/teste (allowlist)
   auth: { discord, cookieSecure, origemSite }
 });
+agendarLimpezaEventosIp(pool); // apaga eventos_meme_ip antigos: já no boot e a cada 6h
 server.listen(3000, () => console.log('naosalvo-api :3000'));

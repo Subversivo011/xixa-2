@@ -472,3 +472,11 @@ a[onclick]:not([href]):focus-visible{outline:2px solid var(--brand);outline-offs
   .hd .sub{flex:1;min-width:0;justify-content:space-evenly}
   .hd .sub .sp{display:none}
 }
+
+/* selo de cuidado: miniatura borrada, estilo spoiler */
+img.cdo-blur{filter:blur(16px) saturate(.6);transform:scale(1.15)}
+.cdo-t{position:absolute;inset:0;z-index:3;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;color:#fff;background:rgba(15,18,30,.35);text-align:center;padding:6px;pointer-events:none}
+.cdo-t .ico.in{width:20px;height:20px;margin:0;color:#ffd23f}
+.cdo-t b{font:700 11px/1.1 Inter,system-ui,sans-serif;letter-spacing:.6px;text-transform:uppercase}
+.cdo-t small{font-size:10px;opacity:.85}
+.em .cdo-t small,.em .cdo-t b{display:none}

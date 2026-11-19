@@ -228,6 +228,13 @@ function testDay(){NS.dayOffset=(NS.dayOffset||0)+1;nsSave();location.reload()}
 
 // ---- Ícones dos menus (SVG próprios, traço único) ----
 const ICONS={
+ book:'<path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v15H6.5A2.5 2.5 0 0 0 4 20.5v-15Z"/><path d="M4 20.5A2.5 2.5 0 0 1 6.5 18H20v3H6.5"/><path d="M9 7.5h7M9 11h5"/>',
+ care:'<path d="M12 3 4.5 6v5.5c0 4.6 3.1 8.2 7.5 9.5 4.4-1.3 7.5-4.9 7.5-9.5V6L12 3Z"/><path d="M12 8.5v4.5M12 16h.01"/>',
+ eye:'<path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12Z"/><circle cx="12" cy="12" r="3"/>',
+ extlink:'<path d="M14 4h6v6M20 4l-9 9"/><path d="M19 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1h5"/>',
+ edit:'<path d="M4 20h4L19 9l-4-4L4 16v4Z"/><path d="m13.5 6.5 4 4"/>',
+ fire:'<path d="M12 21c-4 0-6.5-2.7-6.5-6.2 0-3.6 3-5.8 3.6-9.3 2.4 1.4 3.6 3.6 3.6 5.6 1-.6 1.7-1.7 1.9-3 2 1.6 3.9 4.1 3.9 6.9 0 3.4-2.5 6-6.5 6Z"/>',
+ cursor:'<path d="M5 3.5 19 11l-6.2 1.6L10.5 19 5 3.5Z"/>',
  login:'<path d="M14 4h5a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1h-5M3 12h12m-5-5 5 5-5 5"/>',
  home:'<path d="M3 11.5 12 4l9 7.5"/><path d="M5.5 10v9.5h5v-5.5h3v5.5h5V10"/>',
  timeline:'<path d="M3 12h18"/><circle cx="6" cy="12" r="1.9" fill="currentColor"/><circle cx="12" cy="12" r="1.9" fill="currentColor"/><circle cx="18" cy="12" r="1.9" fill="currentColor"/><path d="M6 8.5V5M12 15.5V19M18 8.5V5"/>',
@@ -473,7 +480,7 @@ function renderFooter(){
     <div class="ft-legal">${socialHTML()}<b>Aviso legal</b>
       <p>O Não Salvo é apenas um compilado de vídeos e fotos que já estão publicados na internet. Não hospedamos nenhum vídeo: todos são exibidos direto do YouTube, pelo player oficial, e continuam pertencendo aos seus autores e canais de origem. As fotos e marcas citadas pertencem aos seus respectivos donos.</p>
       <p>É dono de algum conteúdo e quer que ele saia daqui? <button onclick="openFeedback('remocao')">Peça a remoção</button> e a gente tira.</p>
-      <small>© ${new Date().getFullYear()} Não Salvo · projeto de fã, sem fins lucrativos</small></div>
+      <small>© ${new Date().getFullYear()} Não Salvo · projeto do Xet, sem fins lucrativos</small></div>
     <div class="fq fq-in">
       <button class="fq-art" onclick="openFeedback()" aria-label="Mandar feedback">${PHONE_SVG}</button>
       <span class="fq-txt"><span class="fq-logo">fala<i>.</i>que<i>.</i>eu<i>.</i>te<i>.</i>escut<span class="fq-o">o</span></span>
@@ -525,3 +532,16 @@ if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",
   const run=()=>{fix();new MutationObserver(()=>fix()).observe(document.body,{childList:true,subtree:true})};
   if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",run);else run();
 })();
+
+
+// ---- visitas e cliques (Sobe.Desce de verdade) ----
+// visita = abriu o meme; clique = deu play. O servidor conta 1 por meme, pessoa e dia.
+// Aqui fica uma cópia local (só deste navegador) para o Sobe.Desce funcionar antes de a API estar no ar.
+function registrarEvento(id,tipo){
+  if(!id||!/^(visita|clique)$/.test(tipo))return;
+  NS.ev=NS.ev||{};const d=nsToday(),e=NS.ev[id]||(NS.ev[id]={});const k=tipo==="visita"?"v":"c";
+  const dias=e[k]||(e[k]={});if(!dias[d]){dias[d]=1;e[k+"t"]=(e[k+"t"]||0)+1;
+    // guarda só os últimos 3 dias por meme
+    Object.keys(dias).sort().slice(0,-3).forEach(x=>delete dias[x]);nsSave()}
+  try{fetch("/api/eventos",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({id,tipo}),keepalive:true}).catch(()=>{})}catch(err){}
+}

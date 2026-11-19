@@ -243,3 +243,52 @@ button:hover>.thumb>.play,button:hover>.ct>.play,.tthumb:hover>.play,.card:hover
 .hero .sun img{filter:none!important}
 .hero .sun::before{content:"";position:absolute;left:18%;right:18%;bottom:2%;height:9%;border-radius:50%;background:radial-gradient(closest-side,#00000038,transparent);z-index:0;animation:shd 4.6s cubic-bezier(.45,0,.55,1) infinite}
 @keyframes shd{50%{transform:scaleX(.9);opacity:.75}}
+/* prévia da linha do tempo trocando sozinha */
+#cur .mini{transition:opacity .26s ease,transform .26s ease}
+#cur .mini.swap{opacity:0;transform:translateY(6px)}
+/* blocos de "sobre" mais discretos: uma faixa fina, sem cara de conteúdo */
+.facts{display:flex!important;flex-wrap:wrap;justify-content:center;gap:6px 26px;margin:56px auto 0;padding:16px 10px 0;border-top:1px dashed var(--line);max-width:980px;opacity:.82;transition:opacity .2s}
+.facts:hover{opacity:1}
+.fact{all:unset;display:inline-flex!important;align-items:center;gap:8px;font-size:12px;color:var(--mut)}
+.fact>.ico{width:16px!important;height:16px!important;padding:0!important;background:none!important;color:var(--brand);grid-row:auto!important;flex:none}
+.fact b{font:600 12px/1.2 Inter,system-ui,sans-serif!important;color:var(--txt)!important;letter-spacing:0!important;text-transform:none!important;margin:0!important}
+.fact span{font-size:12px;color:var(--mut)}
+.fact span::before{content:"· ";opacity:.6}
+.note{margin:12px auto 0!important;max-width:760px;font-size:10.5px!important;opacity:.7}
+@media(max-width:760px){.facts{justify-content:flex-start;gap:8px 16px;margin-top:40px}.fact{width:100%}.fact span{display:inline}}
+
+.em{position:relative;overflow:hidden}
+/* sobe.desce: abas (visitados/clicados) e período no ícone */
+.sd-per{position:relative}
+.sd-clip{cursor:pointer;border:0;transition:background .15s,transform .15s}
+.sd-clip:hover{transform:translateY(-1px)}
+.sd-per.open .sd-clip{background:var(--brand);color:#fff}
+.sd-pop{position:absolute;right:0;top:calc(100% + 6px);z-index:20;display:none;flex-direction:column;min-width:170px;padding:6px;border-radius:12px;background:var(--panel);box-shadow:0 10px 30px #0003,0 0 0 1px var(--line)}
+.sd-per.open .sd-pop{display:flex;animation:sdpop .16s ease}
+@keyframes sdpop{from{opacity:0;transform:translateY(-4px)}}
+.sd-pop b{font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--mut);padding:4px 8px}
+.sd-pop button{display:flex;align-items:center;gap:8px;padding:8px;border-radius:8px;font-size:13px;color:var(--txt);text-align:left;cursor:pointer;background:none;border:0}
+.sd-pop button:hover{background:var(--sunk)}
+.sd-pop button.on{color:var(--brand);font-weight:700;background:var(--brand-soft)}
+.sd-pop .ico.in{width:15px;height:15px;margin:0}
+.sd-tabs{display:flex;align-items:center;gap:4px;margin-top:10px;padding:3px;border-radius:10px;background:var(--sunk)}
+.sd-tabs button{flex:1;display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:7px 6px;border-radius:8px;font:600 12px Inter,system-ui,sans-serif;color:var(--mut);background:none;border:0;cursor:pointer;transition:background .15s,color .15s}
+.sd-tabs button.on{background:var(--panel);color:var(--txt);box-shadow:0 1px 3px #0002}
+.sd-tabs .ico.in{width:14px;height:14px;margin:0}
+.sd-pl{font-size:10px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:var(--brand);padding:0 6px;white-space:nowrap}
+.sd-vz{font-size:12px;color:var(--mut);padding:6px 2px}
+.sd-load{grid-column:1/-1;font-size:12px;color:var(--mut);padding:10px 0}
+.sd-nota{font-size:10.5px;color:var(--faint);margin-top:8px}
+@media(max-width:420px){.sd-pl{display:none}}
+/* jujuba escondida (easter-egg) */
+#cur{position:relative}
+.jjb{position:absolute;right:10px;bottom:8px;width:22px;height:22px;padding:0;border:0;background:none;cursor:pointer;opacity:.55;z-index:3;transition:transform .2s,opacity .2s;filter:drop-shadow(0 1px 1px #0003)}
+.jjb:hover{opacity:1;transform:scale(1.35) rotate(-12deg)}
+.jjb svg{width:100%;height:100%;display:block}
+.jjb.pego{animation:jjpop .7s ease forwards}
+@keyframes jjpop{40%{transform:scale(1.8) rotate(20deg);opacity:1}100%{transform:translateY(-60px) scale(.2);opacity:0}}
+/* faixa explicativa mais perto do rodapé (sem grudar) */
+.facts{margin-top:110px!important}
+main:has(.facts){padding-bottom:22px!important}
+body:has(main .facts) .nsft2{margin-top:22px!important}
+@media(max-width:760px){.facts{margin-top:70px!important}main:has(.facts){padding-bottom:16px!important}body:has(main .facts) .nsft2{margin-top:18px!important}}
