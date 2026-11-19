@@ -347,3 +347,29 @@ body.vw-open{overflow:hidden}
 
 .pcred{display:block;margin-top:6px;font-size:12px;color:var(--mut);line-height:1.4}
 .pcred a{color:var(--brand-ink);text-underline-offset:2px}
+
+/* celular, era Orkut: a regra de 120px acima vencia a de 1 coluna e espremia o conteúdo */
+@media(max-width:700px){
+  .vw-win .okw{grid-template-columns:minmax(0,1fr)!important;margin:8px}
+  .vw-win .orkut header{gap:10px;padding:8px 12px}
+  .vw-win .orkut nav{min-width:0;overflow-x:auto;gap:10px;scrollbar-width:none;white-space:nowrap}
+  .vw-win .orkut nav::-webkit-scrollbar{display:none}
+  .vw-win .orkut .vx{flex:none}
+  .vw-win .okn{gap:8px}.vw-win .okn span{text-align:center}
+}
+
+/* celular, Instagram: a busca decorativa e o menu estouravam a janela em ~170px */
+@media(max-width:700px){
+  .vw-win{overflow-x:hidden}
+  .vw-win .ig header{padding:10px 12px;gap:10px}
+  .vw-win .ig .sr{display:none}
+  .vw-win .ig .lk{margin-left:auto}
+}
+
+/* celular: o conteúdo principal dos vídeos e o cabeçalho do Tumblr não podem passar da janela */
+@media(max-width:700px){
+  .vw-win .yc>main{min-width:0;max-width:100%;width:auto;box-sizing:border-box}
+  .vw-win .tumblr header{gap:10px;padding:8px 12px}
+  .vw-win .tumblr header .sr{display:none}
+  .vw-win .tumblr .vx{flex:none;margin-left:auto}
+}
