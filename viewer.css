@@ -537,7 +537,12 @@ body.vw-open{overflow:hidden}
 .vw-win .etoast.top .et em{font-size:12px;opacity:.75;text-transform:none}
 .vw-win .etoast.top .etx{font-weight:500}
 @keyframes etdown{from{transform:translate(-50%,-140%);opacity:0}to{transform:translate(-50%,0);opacity:1}}
-.vw-win .lan{position:static!important;display:flex!important;flex-direction:row!important;flex-wrap:wrap;justify-content:center;align-items:center;gap:4px 14px;width:100%;box-sizing:border-box;border:0!important;border-bottom:2px solid #0a0!important;box-shadow:none!important;padding:5px 10px!important;font-size:11px!important}
+.vw-win .lan{position:absolute!important;right:12px!important;bottom:12px!important;left:auto!important;top:auto!important;z-index:25;pointer-events:none;display:flex!important;flex-direction:column!important;gap:1px!important;padding:8px 12px!important;font-size:11px!important;border:2px solid #0a0!important;box-shadow:0 0 12px #0f03!important;width:auto}
+/* XP: fica acima da barra de tarefas; avisos que somem sobem para não ficar embaixo do cronômetro */
+.vw-win.vw-e0 .lan{bottom:46px!important}
+.vw-win.tem-lan .etoast:not(.top){bottom:96px!important}
+.vw-win.vw-e0.tem-lan .etoast:not(.top){bottom:130px!important}
+@media(max-width:700px){.vw-win .lan{right:8px!important;bottom:8px!important;padding:4px 8px!important;font-size:9px!important}.vw-win.vw-e0 .lan{bottom:44px!important}.vw-win.tem-lan .etoast:not(.top){bottom:70px!important}}
 @media(max-width:700px){.vw-win .etoast{right:8px!important;bottom:8px!important;max-width:calc(100% - 16px)!important}.vw-win .etoast.top{top:8px!important}}
 
 /* botão da Memepédia nos botões de baixo */

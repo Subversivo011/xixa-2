@@ -8,9 +8,10 @@
 const API={votos:"/api/votos",stats:"/api/yt-stats"};
 const CANAL="Não Salvo",AV="avatar-ns.png";
 // canal real do vídeo no YouTube (data.js: canal); avatar com a inicial do canal
-const canal=m=>escapeHtml((m&&m.canal)||CANAL);
+// todos os canais e perfis do player são do Não Salvo (o canal original do YouTube fica guardado em m.canal)
+const canal=m=>escapeHtml(CANAL);
 const AVC=["#e53935","#8e24aa","#3949ab","#00897b","#f4511e","#6d4c41","#1e88e5","#43a047","#c0ca33","#fb8c00"];
-function avSrc(m){if(!m||!m.canal)return AV;const n=m.canal.trim(),L=(n.match(/[A-Za-zÀ-ÿ0-9]/)||["?"])[0].toUpperCase();let h=0;for(const c of n)h=(h*31+c.charCodeAt(0))>>>0;
+function avSrc(m){return AV;if(!m||!m.canal)return AV;const n=m.canal.trim(),L=(n.match(/[A-Za-zÀ-ÿ0-9]/)||["?"])[0].toUpperCase();let h=0;for(const c of n)h=(h*31+c.charCodeAt(0))>>>0;
   return"data:image/svg+xml,"+encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40"><rect width="40" height="40" fill="${AVC[h%AVC.length]}"/><text x="20" y="27" font-family="Arial,sans-serif" font-size="20" font-weight="700" fill="#fff" text-anchor="middle">${L}</text></svg>`)}
 const MESES=["janeiro","fevereiro","março","abril","maio","junho","julho","agosto","setembro","outubro","novembro","dezembro"];
 async function apiGet(u){try{const r=await fetch(u,{headers:{accept:"application/json"}});if(!r.ok)return null;const t=r.headers.get("content-type")||"";return t.includes("json")?await r.json():null}catch(e){return null}}
@@ -125,7 +126,7 @@ function videoPage(m,rel){
 
 // ---- vídeos verticais (2020+): visual de app de vídeo curto ----
 function shortPage(m){
-  const T=escapeHtml(m.t),pl=playerHTML(m,true),c=canal(m),h="@"+((m.canal||"naosalvo").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[^a-z0-9_.]+/g,""));
+  const T=escapeHtml(m.t),pl=playerHTML(m,true),c=canal(m),h="@"+(("naosalvo").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[^a-z0-9_.]+/g,""));
   const x=`<button class="vx" data-act="close" title="Fechar (Esc)">${icon("xmark")}</button>`,snd=`<button class="snd" data-act="snd" title="Sons da época">${icon(SND.on?"volume":"mute")}<span>Sons da época</span></button>`;
   return`<div class="tkp"><header class="tkh"><span class="tkt"><b>Para você</b><span>Seguindo</span></span><div class="lk">${snd}${x}</div></header>
     <div class="tkw"><div class="tkv">${pl}
@@ -277,7 +278,7 @@ function openViewer(m,opt={}){
     if(discada(m.y))hooks.beforeStart=()=>dialUp(el);
     hooks.onPlay=()=>{if(!VW||VW.toasted)return;VW.toasted=1;if(typeof registrarEvento==="function")registrarEvento(m.id,"clique");VW.toastT=setTimeout(()=>{if(VW&&VW.m===m&&typeof alertaDaEpoca==="function")alertaDaEpoca(el,m,false)},4000)};
     VW.player=initPlayer(el.querySelector(".vp"),m,rel,id=>opt.onPick&&opt.onPick(id),hooks);
-    if(lanhouse(m.y)){const b=document.createElement("div");b.className="lan";let s=29*60+59;b.innerHTML=`<b>LAN HOUSE</b><span>Máquina 07</span><span class="lt"></span><small>R$ 1,50/hora</small>`;el.querySelector(".vw-win").prepend(b);const lt=b.querySelector(".lt");
+    if(lanhouse(m.y)){const b=document.createElement("div");b.className="lan";let s=29*60+59;b.innerHTML=`<b>LAN HOUSE</b><span>Máquina 07</span><span class="lt"></span><small>R$ 1,50/hora</small>`;el.querySelector(".vw-win").appendChild(b);el.querySelector(".vw-win").classList.add("tem-lan");const lt=b.querySelector(".lt");
       const tick=()=>{lt.textContent="Tempo restante "+String(Math.floor(s/60)).padStart(2,"0")+":"+String(s%60).padStart(2,"0");if(s>0)s--};tick();VW.clock=setInterval(tick,1000)}
     const ck=el.querySelector("[data-clock]");if(ck){const f=()=>ck.textContent=new Date().toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit"});f();VW.clock=setInterval(f,30000)}
   }
