@@ -53,7 +53,7 @@ main{padding:24px 28px 60px;max-width:1280px;margin:0 auto}
 .tag{display:inline-block;font-size:9px;letter-spacing:1px;font-weight:800;padding:2px 6px;border-radius:4px;margin-top:6px;text-transform:uppercase;background:#a35cff22;color:#8a4dff;font-family:Inter}
 .tag.Lendário{background:#f2b22a26;color:#c88a00}.tag.Mítico{background:#ff4a8a22;color:#e0306f}.tag.Clássico{background:var(--brand-soft);color:var(--brand)}
 :root[data-theme="dark"] .tag{color:#b89bff}:root[data-theme="dark"] .tag.Lendário{color:#ffc84d}:root[data-theme="dark"] .tag.Mítico{color:#ff6bb3}:root[data-theme="dark"] .tag.Clássico{color:var(--brand2)}
-.timeline{border:1px solid var(--line2);border-radius:20px;padding:18px 22px 24px;background:linear-gradient(180deg,var(--panel2),var(--panel));box-shadow:0 0 40px var(--glow);margin-bottom:24px;scroll-margin-top:140px}
+.timeline{border:1px solid var(--line2);border-radius:20px;padding:18px 22px 24px;background:linear-gradient(180deg,var(--panel2),var(--panel));box-shadow:0 0 40px var(--glow);margin-bottom:24px;scroll-margin-top:calc(var(--hdh,64px) + 12px)}
 .years{display:flex;align-items:flex-end;justify-content:space-between;position:relative;padding:18px 0 8px;overflow-x:auto;gap:4px;scrollbar-width:thin}
 .years::before{content:"";position:absolute;left:0;right:0;bottom:15px;height:2px;background:linear-gradient(90deg,transparent,var(--brand),transparent)}
 .y{flex:1;min-width:46px;text-align:center;position:relative;font-family:Rajdhani;font-weight:700;font-size:14px;color:var(--mut);padding-bottom:22px}
@@ -80,7 +80,7 @@ main{padding:24px 28px 60px;max-width:1280px;margin:0 auto}
 .chip{border:1px solid var(--line);padding:7px 13px;border-radius:99px;font-size:12px;color:var(--mut);background:var(--panel)}
 .chip.on,.chip:hover{border-color:var(--brand);color:var(--brand-ink);background:var(--brand-soft)}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px}
-#browse{scroll-margin-top:140px}
+#browse{scroll-margin-top:calc(var(--hdh,64px) + 12px)}
 .modal{position:fixed;inset:0;background:var(--overlay);display:none;place-items:center;z-index:65;padding:20px}
 .modal.open{display:grid}
 .box{position:relative;background:var(--panel);border:1px solid var(--line2);border-radius:18px;max-width:760px;width:100%;max-height:calc(100vh - 40px);overflow:auto;box-shadow:var(--shadow)}

@@ -337,7 +337,8 @@ a[onclick]:not([href]):focus-visible{outline:2px solid var(--brand);outline-offs
 @media(max-width:860px){.nsft{margin-top:36px}.ft-wrap{padding-bottom:18px}.ytpop{width:min(290px,calc(100vw - 40px))}}
 /* celular: avisos no topo (não cobrem botões nem modais) e popup do YouTube como folha */
 @media(max-width:760px){
-  #toast{top:calc(env(safe-area-inset-top,0px) + 12px)!important;bottom:auto!important;left:12px!important;right:12px!important;transform:none!important;max-width:none!important;text-align:center}
+  #toast{pointer-events:none;top:max(calc(env(safe-area-inset-top,0px) + 12px),calc(var(--hdh,0px) + 8px))!important;bottom:auto!important;left:12px!important;right:12px!important;transform:none!important;max-width:none!important;text-align:center}
+  .hd:has([aria-expanded="true"]) ~ #toast{top:auto!important;bottom:calc(env(safe-area-inset-bottom,0px) + 12px)!important}
   .ytw{position:static}
   .ytpop{position:fixed;left:12px;right:12px;bottom:12px;width:auto;z-index:80;padding:12px}
   .ytpop a{padding:12px 8px}
@@ -349,3 +350,59 @@ a[onclick]:not([href]):focus-visible{outline:2px solid var(--brand);outline-offs
 .ft-legal .soc .ytw{display:inline-block}
 .ytpop svg{width:18px;height:18px}
 @media(max-width:760px){.ft-legal .soc .sb{width:48px;height:48px}}
+
+/* Navegação e busca do cabeçalho compartilhado */
+.header-menu,.account-tools,.hd .tools{display:flex;align-items:center;gap:8px}
+.header-menu{flex:1;min-width:0;justify-content:space-between}
+.account-tools{min-width:0}
+.hd-icon{width:42px;height:42px;display:grid;place-items:center;flex:none;border-radius:12px;color:var(--brand-ink)}
+.hd-icon:hover,.hd-icon[aria-expanded="true"]{background:var(--brand-soft)}
+.hd :focus-visible{outline:2px solid var(--brand);outline-offset:2px}
+.menu-toggle{display:none}
+
+.hd .srch{position:absolute;inset:calc(100% + 5px) 12px auto auto;width:min(340px,calc(100% - 24px))}
+.hd .srch input,.hd .srch input:focus{width:100%;height:44px;background:var(--panel);box-shadow:var(--shadow);font-size:16px}
+.hd .sub{position:static;align-items:center;gap:2px;padding:0;border:0;overflow:visible;background:transparent}
+.hd .sub .pop{position:absolute;top:100%;max-height:65vh;overflow-y:auto}
+.sub>:is(button,a){padding:8px;gap:5px;transition-property:color,background-color,border-color}
+@media(min-width:1200px) and (max-width:1849px){
+  .hd{gap:8px;padding-inline:12px}
+  .tsw .lb{display:none}
+  .tsw span{padding-inline:5px}
+  .brand small,.wl-r{display:none}
+  .brand img{height:26px}
+  .sg-acct>span:last-child{max-width:72px;overflow:hidden;text-overflow:ellipsis}
+  .sub :is(button,a){padding-inline:6px}
+}
+@media(min-width:1200px) and (max-width:1499px){
+  .hd{gap:6px;padding-inline:8px}
+  .brand img{height:21px}
+  .hd .sub{gap:1px}
+  .sub>:is(button,a),.account-tools .account-actions button{gap:3px;padding-inline:3px;font-size:12px}
+  .sub>:is(button,a)>.ico,.account-tools .account-actions .ico{width:16px;height:16px}
+  .wl{padding-inline:6px}
+}
+@media(min-width:1200px) and (max-width:1279px){
+  .header-menu,.account-tools,.hd .tools{gap:4px}
+  .brand img{height:18px}
+  .sg-cta{padding-inline:6px;font-size:11px}
+  .tsw span{padding-inline:2px}
+  .wl-c{font-size:16px;gap:4px}
+  .wl-c .ico{width:16px;height:16px}
+  .tools .hd-icon,.tools .tsw:has(>svg){width:36px}
+  .sub>:is(button,a),.account-tools .account-actions button{padding-inline:2px}
+}
+@media(max-width:1199px){
+  .hd,.hd:has(.srch){position:sticky;flex-wrap:nowrap;padding:6px 12px;gap:4px;background:var(--bg)}
+  .brand{margin-right:auto}.brand small{display:none}.brand img{height:auto;width:clamp(106px,36vw,162px)}
+  .tsw .lb{display:none}.tsw span{padding-inline:6px}
+  .hd .tools{flex:0 0 auto;flex-wrap:nowrap;gap:2px}.hd-icon{width:44px;height:44px}
+  .menu-toggle{display:grid;order:1}
+  .header-menu{display:none;position:absolute;inset:100% 8px auto auto;width:min(340px,calc(100% - 16px));max-height:calc(100dvh - 70px);overflow-y:auto;background:var(--panel);border:1px solid var(--line2);border-radius:14px;box-shadow:var(--shadow);padding:8px}
+  .menu-toggle[aria-expanded="true"] + .header-menu{display:block}
+  .hd .sub{flex-direction:column;align-items:stretch}.sub .sp{display:none}
+  .sub>:is(button,a){min-height:44px;border-radius:9px;padding:8px 12px;font-size:14px;gap:10px}
+  .hd .sub .pop{position:static;box-shadow:none;max-height:none;margin-inline:8px}
+  .account-tools{flex-wrap:wrap;border-top:1px solid var(--line);margin-top:8px;padding:8px 4px 0;justify-content:space-between}
+  .wl-r{display:none}
+}
