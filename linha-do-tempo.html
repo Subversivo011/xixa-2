@@ -8,8 +8,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Inter:wght@400;500;600;700;800&family=Baloo+2:wght@700;800&family=Press+Start+2P&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="theme.css?v=20261119p">
-<link rel="stylesheet" href="viewer.css?v=20261119p">
+<link rel="stylesheet" href="theme.css?v=20261119n">
+<link rel="stylesheet" href="viewer.css?v=20261119n">
 <script>try{var t=localStorage.getItem("ns_theme")}catch(e){}document.documentElement.dataset.theme=t==="dark"?"dark":"light"</script>
 <style>
 /* ===== estrutura (identidade do site) ===== */
@@ -32,9 +32,10 @@
 .ry small{position:absolute;top:60px;left:0;right:0;font:600 10.5px Inter,sans-serif;color:var(--faint);opacity:0;transition:opacity .2s}
 .ry:hover{color:var(--txt)}.ry:hover .dt{transform:scale(1.2);border-color:var(--c)}.ry:hover small{opacity:1}
 .ry.on{color:#fff}
-.ry.on .rl{background:var(--brand);box-shadow:0 6px 16px var(--glow);font-size:17px;padding:4px 12px}
-.ry.on .dt{width:22px;height:22px;margin-left:-11px;top:35px;background:var(--brand);border:4px solid var(--panel);box-shadow:0 0 0 3px var(--brand),0 0 18px var(--glow)}
-.ry.on small{opacity:1;color:var(--brand);font-weight:800}
+.ry.on .rl{background:#0a6a9a;box-shadow:0 6px 16px var(--glow);font-size:17px;padding:4px 12px}
+.ry.on .dt{width:22px;height:22px;margin-left:-11px;top:35px;background:#0a6a9a;border:4px solid var(--panel);box-shadow:0 0 0 3px #0a6a9a,0 0 18px var(--glow)}
+.ry.on small{opacity:1;color:#0a6a9a;font-weight:800}
+:root[data-theme="dark"] .ry.on small{color:#7fd3ff}
 .ry.era0 .ert{position:absolute;top:-2px}
 @media(max-width:760px){.lt-rail{grid-template-columns:30px minmax(0,1fr) 30px;padding:8px 4px 4px;border-radius:16px}.rl-arr{width:30px;height:30px;font-size:17px}.ry{flex-basis:64px;height:84px;font-size:14px}.ry small{top:62px}.lt-yrs{scroll-snap-type:x proximity}}
 /* ===== palco do ano (muda de época) ===== */
@@ -56,7 +57,14 @@
 .lt-list:before{content:"";position:absolute;left:8px;top:6px;bottom:6px;width:3px;border-radius:2px}
 .lt-mes{position:relative;margin:4px 0 12px;font:800 18px "Baloo 2",Inter,sans-serif;text-transform:uppercase;letter-spacing:.5px}
 .lt-mes:before{content:"";position:absolute;left:-28px;top:6px;width:13px;height:13px;border-radius:50%;border:3px solid currentColor;background:var(--lt-bg,#fff)}
-.lt-it{display:grid;grid-template-columns:230px minmax(0,1fr);gap:18px;align-items:center;padding:12px;margin:0 0 14px;border-radius:16px;cursor:pointer;transition:transform .15s,box-shadow .15s;text-align:left;width:100%;font:inherit;color:inherit;opacity:0;transform:translateY(12px)}
+.lt-it{position:relative;display:grid;grid-template-columns:230px minmax(0,1fr);gap:18px;align-items:center;padding:12px;margin:0 0 14px;border-radius:16px;cursor:pointer;transition:transform .15s,box-shadow .15s;opacity:0;transform:translateY(12px)}
+.lt-ab{all:unset;cursor:pointer;color:inherit;font:inherit}
+.lt-ab::after{content:"";position:absolute;inset:0;border-radius:inherit}
+.lt-it:focus-within{outline:3px solid #ffbf00;outline-offset:3px}
+.lt-ab:focus-visible{text-decoration:underline}
+.sr-only{position:absolute!important;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+.lt-marcas{margin:14px 4px 0;font-size:11.5px;color:var(--mut);text-align:center}
+.lt-th .cdo-t,.lt-th .yb,.lt-th .pl{pointer-events:none}
 .lt-it.in{opacity:1;transform:none;transition:opacity .45s ease,transform .45s ease,box-shadow .15s}
 .lt-it:hover{transform:translateY(-2px)}
 .lt-th{position:relative;aspect-ratio:16/9;border-radius:12px;overflow:hidden;background:#0003}
@@ -80,7 +88,7 @@
 .lt-tick:hover .tk span{animation-play-state:paused}
 @keyframes tick{to{transform:translateX(-50%)}}
 .lt-tick i{font-style:normal}
-@media(prefers-reduced-motion:reduce){.lt-tick .tk span{animation:none}.lt-it{opacity:1;transform:none}}
+@media(prefers-reduced-motion:reduce){.lt-tick .tk span{animation:none}.lt-it{opacity:1;transform:none;transition:none}.lt-yrs{scroll-behavior:auto}.lt-it:hover,.ry:hover .dt,.rl-arr:hover{transform:none}}
 @media(max-width:760px){
   .lt-wrap{padding:14px 12px 30px}
   .lt-hero{grid-template-columns:40px 1fr 40px;padding:22px 10px 20px;gap:6px}.lt-hero .nav{width:38px;height:38px}
@@ -137,7 +145,7 @@ body.ep-ork .lt-top small,body.ep-fb .lt-top small,body.ep-zap .lt-top small,bod
 .th-xp .lt-chips button.on{background:linear-gradient(#3b9a3b,#1f7a1f);color:#fff}
 .th-xp .lt-list:before{background:#0a54d6}.th-xp .lt-mes{color:#0a54d6}
 .th-xp .lt-it{background:#f6f6f0;border:1px solid #c5c2b2;border-radius:4px}
-.th-xp .lt-it h3{color:#0a246a;font-family:Tahoma,sans-serif}.th-xp .lt-d{color:#2f9a2a}
+.th-xp .lt-it h3{color:#0a246a;font-family:Tahoma,sans-serif}.th-xp .lt-d{color:#1e6b1a}
 .th-xp .lt-cat{background:#d6e8ff;color:#0a246a;border-radius:3px}
 .th-xp .lt-mais button{background:linear-gradient(#fff,#ece9d8);border:1px solid #003c74;border-radius:3px}
 /* 2004–2006: Orkut */
@@ -168,7 +176,7 @@ body.ep-ork .lt-top small,body.ep-fb .lt-top small,body.ep-zap .lt-top small,bod
 .th-msn .lt-chips button.on{background:linear-gradient(#bff27a,#4caf2a);color:#123;border-color:#dfffb0}
 .th-msn .lt-list:before{background:linear-gradient(#bff27a,#7fd3ff)}.th-msn .lt-mes{color:#bff27a}
 .th-msn .lt-it{background:linear-gradient(180deg,#ffffff2a,#ffffff10);border:1px solid #ffffff44;border-radius:10px;box-shadow:inset 0 1px 0 #ffffff66}
-.th-msn .lt-d{color:#bff27a}.th-msn .lt-cat{background:#ffffff26;color:#fff}
+.th-msn .lt-d{color:#e6ffc8}.th-msn .lt-cat{background:#ffffff26;color:#fff}
 .th-msn .lt-mais button{background:linear-gradient(#ffffff55,#ffffff14);border:1px solid #ffffff66;color:#fff;border-radius:6px}
 /* 2010–2012: Facebook */
 .th-fb{background:#e9ebee;color:#1d2129;font-family:"Lucida Grande",Tahoma,Verdana,sans-serif;--lt-bg:#e9ebee}
@@ -182,7 +190,7 @@ body.ep-ork .lt-top small,body.ep-fb .lt-top small,body.ep-zap .lt-top small,bod
 .th-fb .lt-chips button.on{background:#4267b2;color:#fff;border-color:#4267b2}
 .th-fb .lt-list:before{background:#ced0d4}.th-fb .lt-mes{color:#4b4f56;font-family:inherit;font-size:14px}
 .th-fb .lt-it{background:#fff;border:1px solid #dddfe2;border-radius:3px}
-.th-fb .lt-it h3{color:#365899;font-family:inherit;font-size:16px}.th-fb .lt-d{color:#90949c}
+.th-fb .lt-it h3{color:#365899;font-family:inherit;font-size:16px}.th-fb .lt-d{color:#606770}
 .th-fb .lt-cat{background:#f6f7f9;color:#4b4f56;border:1px solid #dddfe2;border-radius:2px}
 .th-fb .lt-foot{color:#4267b2;font-weight:bold;opacity:1}
 .th-fb .lt-mais button{background:#f6f7f9;border:1px solid #ced0d4;border-radius:2px}
@@ -203,7 +211,7 @@ body.ep-ork .lt-top small,body.ep-fb .lt-top small,body.ep-zap .lt-top small,bod
 .th-zap .lt-it:nth-of-type(even){background:#fff;border-radius:0 10px 10px 10px;margin-left:0;margin-right:auto}
 .th-zap .lt-it h3{font-size:17px}.th-zap .lt-d{color:#075e54}
 .th-zap .lt-cat{background:#0000000d}
-.th-zap .lt-foot{text-align:right;color:#4fc3f7;opacity:1;font-size:12px}
+.th-zap .lt-foot{text-align:right;color:#1565a0;opacity:1;font-size:12px}
 .th-zap .lt-mais button{background:#fff;border-radius:16px;color:#075e54}
 /* 2017–2019: Instagram (stories) */
 .th-ig{background:#fafafa;color:#262626;font-family:-apple-system,"Segoe UI",Roboto,Helvetica,sans-serif;--lt-bg:#fafafa}
@@ -219,7 +227,7 @@ body.ep-ork .lt-top small,body.ep-fb .lt-top small,body.ep-zap .lt-top small,bod
 .th-ig .lt-it{background:#fff;border:1px solid #dbdbdb;border-radius:8px}
 .th-ig .lt-th{border-radius:6px}
 .th-ig .lt-th:after{content:"";position:absolute;inset:0;border-radius:6px;box-shadow:inset 0 0 0 3px #fff,inset 0 0 0 5px #dc2743}
-.th-ig .lt-d{color:#8e8e8e}.th-ig .lt-cat{background:#efefef;color:#262626}
+.th-ig .lt-d{color:#737373}.th-ig .lt-cat{background:#efefef;color:#262626}
 .th-ig .lt-foot{font-weight:600;opacity:1}
 .th-ig .lt-mais button{background:#0095f6;color:#fff;border-radius:8px}
 /* 2020–2026: vídeo curto (escuro com neon) */
@@ -244,14 +252,16 @@ body.ep-ork .lt-top small,body.ep-fb .lt-top small,body.ep-zap .lt-top small,bod
 <main class="lt-wrap">
   <div class="lt-top"><small>Linha do tempo</small><h1>Explorar por ano</h1><p>Escolha um ano e veja o que estava bombando, em ordem cronológica, com a cara da internet daquela época.</p></div>
   <div class="lt-rail"><button class="rl-arr" id="yl" aria-label="Ano anterior">‹</button><nav class="lt-yrs" id="yrs" aria-label="Anos"></nav><button class="rl-arr" id="yr" aria-label="Próximo ano">›</button></div>
-  <section class="lt-stage" id="stage" aria-live="polite"></section>
+  <p id="aviso" class="sr-only" aria-live="polite" aria-atomic="true"></p>
+  <section class="lt-stage" id="stage" aria-label="Memes do ano escolhido"></section>
+  <p class="lt-marcas">Visual inspirado na internet de cada época. Marcas, nomes e estilos citados pertencem aos seus donos.</p>
 </main>
 
-<script src="common.js?v=20261119p"></script>
-<script src="data.js?v=20261119p"></script>
-<script src="player.js?v=20261119p"></script>
-<script src="viewer.js?v=20261119p"></script>
-<script src="alertas.js?v=20261119p"></script>
+<script src="common.js?v=20261119r"></script>
+<script src="data.js?v=20261119q"></script>
+<script src="player.js?v=20261119n"></script>
+<script src="viewer.js?v=20261119n"></script>
+<script src="alertas.js?v=20261119n"></script>
 <script>
 renderHeader("tl",{sub:[
   {k:"inicio",ic:"home",label:"Início",href:"index.html"},
@@ -264,7 +274,8 @@ renderHeader("tl",{sub:[
 setSubOn("tl");renderWallet();
 const $=id=>document.getElementById(id);
 const yKey=y=>{y=parseInt(y)||2020;return y<2000?"1995–1999":y<=2003?"2000–2003":y>=2026?"2026":String(y)};
-const yLab=k=>(YEAR_INFO[k]&&YEAR_INFO[k].rot)||k;
+const temAno=k=>typeof k==="string"&&Object.hasOwn(YEAR_INFO,k); // "#constructor" e afins não são anos
+const yLab=k=>(temAno(k)&&YEAR_INFO[k].rot)||k;
 const KEYS=Object.keys(YEAR_INFO).sort((a,b)=>parseInt(a)-parseInt(b));
 const CAT_IC={"Vídeos":"video","TV":"tv","Música":"music","Cultura":"culture","Zoeira":"star","Fotos":"photo"};
 const MES=["janeiro","fevereiro","março","abril","maio","junho","julho","agosto","setembro","outubro","novembro","dezembro"];
@@ -301,6 +312,8 @@ const DETALHE={
  "2026":["4️⃣2️⃣ 67 ou 42?","Gabi Panquequinha · Tu, finish! · Copa do Mundo"]
 };
 const ST={ano:"2012",cat:"Todas"};
+const calmo=()=>matchMedia("(prefers-reduced-motion: reduce)").matches;
+const rolar=()=>calmo()?"auto":"smooth";
 const ALL=MEMES.slice();
 const doAno=k=>ALL.filter(m=>yKey(m.y)===k);
 const foto=m=>m.img?m.img:m.yt?`https://i.ytimg.com/vi/${m.yt}/mqdefault.jpg`:"";
@@ -309,13 +322,13 @@ const rodape={"95":()=>"🔗 Adicionar aos Favoritos · Assinar livro de visitas
 
 const COR={"95":"#00a3a3","xp":"#2a6bff","ork":"#e3007a","msn":"#4caf2a","fb":"#3b5998","zap":"#25d366","ig":"#dc2743","tt":"#fe2c55"};
 function anos(){
-  $("yrs").innerHTML=KEYS.map(k=>{const n=doAno(k).length;return`<button class="ry ${k===ST.ano?"on":""}" data-k="${k}" style="--c:${COR[EPOCA(k)]}" title="${escapeHtml(yLab(k))} · ${n} meme${n===1?"":"s"}" ${k===ST.ano?'aria-current="true"':""}><span class="rl">${escapeHtml(yLab(k))}</span><i class="dt"></i><small>${n} meme${n===1?"":"s"}</small></button>`}).join("");
-  $("yrs").querySelectorAll("button").forEach(b=>b.onclick=()=>ir(b.dataset.k));
+  $("yrs").innerHTML=KEYS.map(k=>{const n=doAno(k).length;return`<button class="ry ${k===ST.ano?"on":""}" data-k="${escapeHtml(k)}" style="--c:${COR[EPOCA(k)]}" title="${escapeHtml(yLab(k))} · ${n} meme${n===1?"":"s"}" ${k===ST.ano?'aria-current="true"':""}><span class="rl">${escapeHtml(yLab(k))}</span><i class="dt"></i><small>${n} meme${n===1?"":"s"}</small></button>`}).join("");
+  $("yrs").querySelectorAll("button").forEach(b=>b.onclick=()=>ir(b.dataset.k,()=>$("yrs").querySelector(".ry.on")));
   const i=KEYS.indexOf(ST.ano);$("yl").disabled=!KEYS[i-1];$("yr").disabled=!KEYS[i+1];
-  const on=$("yrs").querySelector(".on"),nv=$("yrs");if(on){const d=on.getBoundingClientRect().left-nv.getBoundingClientRect().left;nv.scrollTo({left:nv.scrollLeft+d-nv.clientWidth/2+on.clientWidth/2})}
+  const on=$("yrs").querySelector(".on"),nv=$("yrs");if(on){const d=on.getBoundingClientRect().left-nv.getBoundingClientRect().left;nv.scrollTo({left:nv.scrollLeft+d-nv.clientWidth/2+on.clientWidth/2,behavior:rolar()})}
 }
 function palco(){
-  const k=ST.ano,i=KEYS.indexOf(k),p=KEYS[i-1],n=KEYS[i+1],e=EPOCA(k),info=YEAR_INFO[k]||{lema:"",txt:""},det=DETALHE[k]||["",""];
+  const k=ST.ano,i=KEYS.indexOf(k),p=KEYS[i-1],n=KEYS[i+1],e=EPOCA(k),info=temAno(k)?YEAR_INFO[k]:{lema:"",txt:""},det=Object.hasOwn(DETALHE,k)?DETALHE[k]:["",""];
   const L=doAno(k).sort((a,b)=>(a.date||"").localeCompare(b.date||""));
   const cats=["Todas",...new Set(L.map(m=>m.c))];if(!cats.includes(ST.cat))ST.cat="Todas";
   const F=L.filter(m=>ST.cat==="Todas"||m.c===ST.cat);
@@ -323,32 +336,39 @@ function palco(){
   const st=$("stage");st.className="lt-stage th-"+e;document.body.className=document.body.className.replace(/\bep-\w+/g,"").trim()+" ep-"+e;
   const nt=det[1].split(" · ").map(x=>`<i>${escapeHtml(x)}</i>`).join("<i>·</i>");
   st.innerHTML=`<div class="lt-tick" aria-hidden="true"><b>${k.includes("–")?"Na época":"Em "+escapeHtml(k)}</b><div class="tk"><span>${Array(8).fill(nt+"<i>·</i>").join("")}</span></div></div>
-   <div class="lt-hero"><button class="nav" ${p?`data-k="${p}"`:"disabled"} aria-label="Ano anterior">‹</button>
+   <div class="lt-hero"><button class="nav" ${p?`data-k="${escapeHtml(p)}" data-f="prev"`:"disabled"} aria-label="Ano anterior">‹</button>
      <div><div class="lt-era">${EPOCA_NOME[e]} · ${EPOCA_ANOS[e]}</div><div class="lt-big">${escapeHtml(yLab(k))}</div><div class="lt-lema">${escapeHtml(info.lema)}</div>
       <p class="lt-sub">${L.length} ${L.length===1?"viral salvo":"virais salvos"} · ${escapeHtml(info.txt)}</p>${det[0]?`<span class="lt-deco">${escapeHtml(det[0])}</span>`:""}</div>
-     <button class="nav" ${n?`data-k="${n}"`:"disabled"} aria-label="Próximo ano">›</button></div>
+     <button class="nav" ${n?`data-k="${escapeHtml(n)}" data-f="next"`:"disabled"} aria-label="Próximo ano">›</button></div>
    <div class="lt-body"><div class="lt-chips">${cats.map(c=>`<button class="${c===ST.cat?"on":""}" data-c="${escapeHtml(c)}">${c==="Todas"?`Tudo de ${escapeHtml(yLab(k))}`:icon(CAT_IC[c]||"video")+escapeHtml(c)} <small>${c==="Todas"?L.length:L.filter(m=>m.c===c).length}</small></button>`).join("")}</div>
-    <div class="lt-list">${grupos.length?grupos.map(g=>`<div class="lt-mes"><span>${escapeHtml(g.g)}</span></div>${g.its.map(m=>`<button class="lt-it" data-id="${m.id}">
-       <span class="lt-th${m.vert?" vert":""}">${m.cuidado?`<span class="cdo-t">${icon("care","in")}<b>Selo de cuidado</b><small>clique para saber mais</small></span>`:""}${foto(m)?`<img src="${escapeHtml(foto(m))}" alt="" loading="lazy"${m.cuidado?' class="cdo-blur"':""}>`:""}<span class="yb">${m.y}</span>${m.tipo==="foto"?"":`<span class="pl">▶</span>`}</span>
-       <span><div class="lt-d">${escapeHtml(dataTxt(m))}</div><h3>${escapeHtml(m.t)}</h3><p>${escapeHtml(m.d||"")}</p>
+    <div class="lt-list">${grupos.length?grupos.map(g=>`<div class="lt-mes"><span>${escapeHtml(g.g)}</span></div>${g.its.map(m=>`<article class="lt-it">
+       <div class="lt-th${m.vert?" vert":""}">${m.cuidado?`<span class="cdo-t">${icon("care","in")}<b>Selo de cuidado</b><small>clique para saber mais</small></span>`:""}${foto(m)?`<img src="${escapeHtml(foto(m))}" alt="" loading="lazy"${m.cuidado?' class="cdo-blur"':""}>`:""}<span class="yb">${m.y}</span>${m.yt&&m.tipo!=="foto"?`<span class="pl" aria-hidden="true">▶</span>`:""}</div>
+       <div class="lt-tx"><div class="lt-d">${escapeHtml(dataTxt(m))}</div><h3><button class="lt-ab" data-id="${escapeHtml(m.id)}">${escapeHtml(m.t)}</button></h3><p>${escapeHtml(m.d||"")}</p>
         <span class="lt-meta"><span class="lt-cat">${icon(CAT_IC[m.c]||"video")}${escapeHtml(m.c)}</span>${m.by?`<span>por ${escapeHtml(m.by)}</span>`:""}${m.tipo==="foto"?"<span>📷 foto</span>":m.vert?"<span>📱 vídeo vertical</span>":""}</span>
-        <div class="lt-foot">${rodape[e](m)}</div></span></button>`).join("")}`).join(""):`<div class="lt-vazio">Nada desse tipo em ${escapeHtml(yLab(k))} ainda. <a href="index.html#send">Envie um meme</a>!</div>`}</div>
-    <div class="lt-mais">${p?`<button data-k="${p}">‹ ${escapeHtml(yLab(p))}</button>`:"<span></span>"}${n?`<button data-k="${n}">${escapeHtml(yLab(n))} ›</button>`:"<span></span>"}</div></div>`;
-  st.querySelectorAll("[data-k]").forEach(b=>b.onclick=()=>{ir(b.dataset.k);$("yrs").scrollIntoView({behavior:"smooth",block:"start"})});
-  st.querySelectorAll("[data-c]").forEach(b=>b.onclick=()=>{ST.cat=b.dataset.c;palco()});
-  st.querySelectorAll(".lt-it").forEach(b=>b.onclick=()=>ver(b.dataset.id));
+        <div class="lt-foot">${rodape[e](m)}</div></div></article>`).join("")}`).join(""):`<div class="lt-vazio">Nada desse tipo em ${escapeHtml(yLab(k))} ainda. <a href="index.html#send">Envie um meme</a>!</div>`}</div>
+    <div class="lt-mais">${p?`<button data-k="${escapeHtml(p)}" data-f="mprev">‹ ${escapeHtml(yLab(p))}</button>`:"<span></span>"}${n?`<button data-k="${escapeHtml(n)}" data-f="mnext">${escapeHtml(yLab(n))} ›</button>`:"<span></span>"}</div></div>`;
+  st.querySelectorAll("[data-k]").forEach(b=>b.onclick=()=>{const f=b.dataset.f;ir(b.dataset.k,()=>st.querySelector(`[data-f="${f}"]:not([disabled])`)||st.querySelector(".nav:not([disabled])"));if(f&&f.startsWith("m"))$("yrs").scrollIntoView({behavior:rolar(),block:"start"})});
+  st.querySelectorAll("[data-c]").forEach(b=>b.onclick=()=>{ST.cat=b.dataset.c;palco();const c=ST.cat;const nb=[...st.querySelectorAll("[data-c]")].find(x=>x.dataset.c===c);nb&&nb.focus();
+    const n=doAno(ST.ano).filter(m=>c==="Todas"||m.c===c).length;avisar(`${c==="Todas"?"Tudo de "+yLab(ST.ano):c+" em "+yLab(ST.ano)}: ${n} ${n===1?"viral":"virais"}`)});
+  st.querySelectorAll(".lt-ab").forEach(b=>b.onclick=ev=>{ev.stopPropagation();ver(b.dataset.id)});
+  st.querySelectorAll(".lt-it").forEach(a=>a.onclick=ev=>{if(ev.target.closest("a,button"))return;a.querySelector(".lt-ab").click()});
   // os memes entram com animação conforme aparecem na tela
   const io=new IntersectionObserver(es=>es.forEach(x=>{if(x.isIntersecting){x.target.classList.add("in");io.unobserve(x.target)}}),{rootMargin:"0px 0px -40px"});
   st.querySelectorAll(".lt-it").forEach((it,j)=>{it.style.transitionDelay=Math.min(j,6)*60+"ms";io.observe(it)});
   document.title=`${yLab(k)} · Linha do tempo · NÃO SALVO`;
 }
-function ir(k){if(!YEAR_INFO[k])return;ST.ano=k;ST.cat="Todas";history.replaceState(null,"","#"+encodeURIComponent(k));anos();palco()}
+function avisar(t){const a=$("aviso");a.textContent="";setTimeout(()=>a.textContent=t,30)}
+function ir(k,foco){if(!temAno(k))return;const veioDaRegua=document.activeElement&&document.activeElement.closest&&document.activeElement.closest("#yrs,.lt-rail");
+  ST.ano=k;ST.cat="Todas";history.replaceState(null,"","#"+encodeURIComponent(k));anos();palco();
+  const n=doAno(k).length;avisar(`Ano ${yLab(k)}, ${n} ${n===1?"viral":"virais"}`);
+  // devolve o foco ao botão equivalente (a régua e o palco foram refeitos)
+  const alvo=typeof foco==="function"?foco():veioDaRegua?($("yrs").querySelector(".ry.on")):null;if(alvo)alvo.focus({preventScroll:true})}
 function ver(id){const m=ALL.find(x=>x.id===id);if(!m)return;const rel=ALL.filter(x=>x.id!==id).sort((p,q)=>Math.abs(p.y-m.y)-Math.abs(q.y-m.y));
   openViewer(m,{related:rel,onPick:ver,onYear:y=>ir(yKey(y))})}
-$("yl").onclick=()=>{const i=KEYS.indexOf(ST.ano);if(KEYS[i-1])ir(KEYS[i-1])};$("yr").onclick=()=>{const i=KEYS.indexOf(ST.ano);if(KEYS[i+1])ir(KEYS[i+1])};
+$("yl").onclick=()=>{const i=KEYS.indexOf(ST.ano);if(KEYS[i-1])ir(KEYS[i-1],()=>$("yl").disabled?$("yr"):$("yl"))};$("yr").onclick=()=>{const i=KEYS.indexOf(ST.ano);if(KEYS[i+1])ir(KEYS[i+1],()=>$("yr").disabled?$("yl"):$("yr"))};
 addEventListener("keydown",e=>{if(document.querySelector(".vw"))return;const i=KEYS.indexOf(ST.ano);if(e.key==="ArrowRight"&&KEYS[i+1])ir(KEYS[i+1]);if(e.key==="ArrowLeft"&&KEYS[i-1])ir(KEYS[i-1])});
-addEventListener("hashchange",()=>{const h=decodeURIComponent(location.hash.slice(1));const k=YEAR_INFO[h]?h:/^\d{4}$/.test(h)?yKey(h):null;if(k&&k!==ST.ano)ir(k)});
-const h0=decodeURIComponent(location.hash.slice(1));ST.ano=YEAR_INFO[h0]?h0:/^\d{4}$/.test(h0)?yKey(h0):"2012";
+addEventListener("hashchange",()=>{const h=decodeURIComponent(location.hash.slice(1));const k=temAno(h)?h:/^\d{4}$/.test(h)?yKey(h):null;if(k&&k!==ST.ano)ir(k)});
+const h0=decodeURIComponent(location.hash.slice(1));ST.ano=temAno(h0)?h0:/^\d{4}$/.test(h0)?yKey(h0):"2012";
 anos();palco();
 </script>
 </body>
