@@ -47,6 +47,7 @@
     var texto = (r.json && (r.json.erro || r.json.error)) || '';
     var e = erro(r.status, texto);
     if (r.json && typeof r.json.campo === 'string') e.campo = r.json.campo; // 422 do PATCH /api/eu: qual campo falhou
+    if (r.json && typeof r.json.tente_em_segundos === 'number') e.tente_em_segundos = r.json.tente_em_segundos; // 429 do apelido: quanto falta
     var quieto = opcoes && opcoes.silencioso;
     if (r.status === 401) { irParaEntrar(); throw e; }
     if (!quieto) {

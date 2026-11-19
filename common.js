@@ -243,6 +243,11 @@ async function submitSignup(){
     if(e.status===409)return sgErros("apelido","Esse apelido já está em uso. Escolha outro.");
     if(e.status===422)return sgErros(e.campo||"",e.erro||"Valor inválido.");
     if(e.status===0)return sgErros("","Sem conexão. Tente de novo.");
+    if(e.status===429&&e.campo==="apelido"){
+      // o PATCH é tudo ou nada: nada foi salvo. Dá para salvar só o gato voltando o apelido para o atual.
+      const s=Number(e.tente_em_segundos)||0,t=s>=3600?Math.ceil(s/3600)+" h":Math.max(1,Math.ceil(s/60))+" min";
+      return sgErros("apelido",`Você trocou o apelido há pouco: dá para trocar de novo em ${t}. Para salvar só o gato, volte o apelido para “${u.apelido}”.`);
+    }
     if(e.status===429)return sgErros("","Muitas alterações seguidas. Aguarde um pouco.");
     if(e.status===503)return sgErros("","Serviço indisponível. Tente de novo em instantes.");
     return sgErros("",e.erro||"Não foi possível salvar.");

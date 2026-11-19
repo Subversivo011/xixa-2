@@ -240,3 +240,19 @@ test("Usar minha foto só aparece com avatar_url e troca o avatar do cabeçalho"
   assert.strictEqual(await page.$eval("#acct .sg-av img", (i) => i.getAttribute("src")), FOTO);
   await ctx.close();
 });
+
+test("429 do apelido (troca há menos de 24 h) explica o prazo e salvar só o gato funciona", opts, async () => {
+  const { ctx, page, api } = await abrirPagina("/index.html", { usuario: { id: 1, apelido: "Ana", avatar_gato: GATO, avatar_url: null, usar_foto: false, cadastro_completo: true }, boasVindas: null, patchStatus: 429, patchErro: { erro: "troca de apelido recente", campo: "apelido", tente_em_segundos: 7300 } });
+  await page.evaluate(() => openSignup());
+  await page.fill("#sgU", "Bia");
+  await page.click("#sgGo");
+  await page.waitForFunction(() => /3 h/.test(document.getElementById("sgErrU").textContent));
+  assert.match(await page.textContent("#sgErrU"), /volte o apelido para “Ana”/);
+  assert.strictEqual(await modalAberto(page), true);
+  api.st.patchStatus = 200;
+  await page.fill("#sgU", "Ana");
+  await page.click("#sgGo");
+  await page.waitForFunction(() => /Perfil salvo/.test(document.getElementById("toast")?.textContent || ""));
+  assert.ok(!("apelido" in api.st.patches[1].corpo), "sem apelido no segundo PATCH");
+  await ctx.close();
+});
