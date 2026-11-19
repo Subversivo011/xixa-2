@@ -473,6 +473,7 @@ function scheduleApprovals(){NS.subs.filter(s=>s.status==="pending").forEach(s=>
 
 // ---- Salvar link de viral antigo (+5) ----
 function saveOldLink(id,u){
+  if(needAccount("salvar o link"))return`<div class="chk bad">Entre na sua conta para salvar o link.</div>`;
   if(!ECO.pronto)return`<div class="chk warn">Carregando a sua patente… tente de novo em instantes.</div>`;
   if(nivelPatente()<2)return`<div class="chk bad">Salvar link é a partir da patente Colaborador (${fmt(RANKS[2].xp)} XP). Você tem ${fmt(ECO.xp)} XP.</div>`;
   const key=normUrl(u);

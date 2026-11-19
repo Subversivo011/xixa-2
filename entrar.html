@@ -77,20 +77,33 @@
   var ICO={leve:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16.5h.01"/></svg>',
            serio:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.3 3.9 2.4 18a2 2 0 0 0 1.7 3h15.8a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/><path d="M12 9v4M12 17h.01"/></svg>'};
   var q=new URLSearchParams(location.search);
-  // só aceita caminho do próprio site (a API valida de novo)
+  // só aceita caminho do próprio site (a API valida de novo). Igual ao caminhoSeguro da API: nada de caracteres de
+  // controle/espaço (o navegador remove TAB/LF/CR e "/<TAB>/evil.com" viraria "//evil.com"), de "\", de "//" no início,
+  // e a URL resolvida precisa continuar na mesma origem.
+  function caminhoSeguro(c){
+    if(typeof c!=="string"||c.charAt(0)!=="/"||c.charAt(1)==="/"||/[\u0000-\u001f\u007f\s\\]/.test(c)||/entrar\.html/.test(c))return false;
+    try{return new URL(c,location.origin).origin===location.origin}catch(e){return false}
+  }
   var v=q.get("voltar")||"/";
-  if(v.charAt(0)!=="/"||v.indexOf("//")===0||v.indexOf("\\")>=0||/entrar\.html/.test(v))v="/";
+  if(!caminhoSeguro(v))v="/";
   var a=document.getElementById("entrar");
   a.href="/api/auth/discord?voltar="+encodeURIComponent(v);
   a.addEventListener("click",function(){a.classList.add("indo");a.setAttribute("aria-busy","true")});
   // modo convidado: grava a marca e volta para a página de origem (o gate.js e o cliente de economia respeitam a marca)
-  document.getElementById("convidado").addEventListener("click",function(){try{localStorage.setItem("ns_convidado","1")}catch(e){}location.href=v});
+  document.getElementById("convidado").addEventListener("click",function(){
+    var gravou=false;try{localStorage.setItem("ns_convidado","1");gravou=localStorage.getItem("ns_convidado")==="1"}catch(e){}
+    if(!gravou){mostraAviso(["leve","Armazenamento bloqueado","Seu navegador bloqueou o armazenamento do site. Ative para continuar sem login, ou entre com o Discord."]);return}
+    location.href=v;
+  });
   // ao voltar pelo "voltar" do navegador, o botão não fica preso em "discando"
   addEventListener("pageshow",function(){a.classList.remove("indo");a.removeAttribute("aria-busy")});
-  var m=q.get("login");
-  if(m){var d=Object.prototype.hasOwnProperty.call(MSG,m)?MSG[m]:MSG.erro,av=document.getElementById("aviso");
+  var av=document.getElementById("aviso");
+  function mostraAviso(d){
     av.className="ent-aviso on "+d[0];av.innerHTML=ICO[d[0]]+"<span><b></b><span></span></span>";
-    av.querySelector("b").textContent=d[1];av.querySelector("b+span").textContent=d[2]}
+    av.querySelector("b").textContent=d[1];av.querySelector("b+span").textContent=d[2];
+  }
+  var m=q.get("login");
+  if(m)mostraAviso(Object.prototype.hasOwnProperty.call(MSG,m)?MSG[m]:MSG.erro);
   // tema claro/escuro (mesma chave do resto do site)
   var tb=document.getElementById("tema"),html=document.documentElement;
   var pinta=function(){var esc=html.dataset.theme==="dark";tb.setAttribute("aria-checked",String(esc));tb.title=esc?"Modo escuro ativo · clique para o modo claro":"Modo claro ativo · clique para o modo escuro"};

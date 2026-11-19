@@ -209,3 +209,51 @@ test("nits do #37: regex da foto é ancorada; 429 de apelido sem tente_em_segund
   assert.doesNotMatch(await page.textContent("#sgErrU"), /\d+ (min|h)\b/);
   await ctx.close();
 });
+
+for (const [nome, voltar] of [["TAB", "%2F%09%2Fevil.example"], ["LF", "%2F%0a%2Fevil.example"], ["CR", "%2F%0d%2Fevil.example"], ["TAB no meio", "%2Fmemepedia.html%09"]]) {
+  test(`entrar.html: voltar com ${nome} não vira open redirect (botão e link do Discord)`, opts, async () => {
+    const { ctx, page } = await abrir(`/entrar.html?voltar=${voltar}`, { convidado: false });
+    await page.waitForSelector("#convidado");
+    const href = await page.getAttribute("#entrar", "href");
+    assert.strictEqual(decodeURIComponent(href.split("voltar=")[1]), "/", "link do Discord usa a raiz");
+    await page.click("#convidado");
+    await page.waitForURL((u) => u.hostname === "127.0.0.1");
+    assert.strictEqual(new URL(page.url()).hostname, "127.0.0.1", "ficou no próprio site");
+    assert.strictEqual(new URL(page.url()).pathname, "/");
+    await ctx.close();
+  });
+}
+
+test("entrar.html: quem já está logado e chega com voltar malicioso fica no próprio site", opts, async () => {
+  const { ctx, page } = await abrir("/entrar.html?voltar=%2F%09%2Fevil.example%2Fx", { convidado: false, logado: true });
+  await page.waitForURL((u) => !/entrar\.html/.test(u.pathname));
+  assert.strictEqual(new URL(page.url()).hostname, "127.0.0.1");
+  assert.strictEqual(new URL(page.url()).pathname, "/");
+  await ctx.close();
+});
+
+test("entrar.html: armazenamento bloqueado mostra aviso em vez de voltar ao login em silêncio", opts, async () => {
+  const api = criarApi();
+  const ctx = await browser.newContext();
+  await api.instalar(ctx);
+  await ctx.addInitScript(() => { const o = Storage.prototype.setItem; Storage.prototype.setItem = function (k, v) { if (k === "ns_convidado") throw new Error("bloqueado"); return o.call(this, k, v); }; });
+  const page = await ctx.newPage();
+  await page.goto(base + "/entrar.html?voltar=%2Fmemepedia.html");
+  await page.click("#convidado");
+  await page.waitForFunction(() => /Armazenamento bloqueado/.test(document.getElementById("aviso").textContent));
+  assert.match(await page.textContent("#aviso"), /Ative para continuar sem login/);
+  assert.strictEqual(new URL(page.url()).pathname, "/entrar.html", "não navega sem a marca");
+  await ctx.close();
+});
+
+test("convidado: saveOldLink chamado direto pede login (sem 'tem 0 XP')", opts, async () => {
+  const { ctx, page, erros } = await abrir("/index.html");
+  await prontoConvidado(page);
+  const html = await page.evaluate(() => saveOldLink("x", "https://youtu.be/abc"));
+  assert.match(html, /Entre na sua conta para salvar o link/);
+  assert.doesNotMatch(html, /XP/);
+  await page.waitForFunction(() => document.getElementById("login-dialog").open);
+  assert.match((await dialogo(page)).msg, /salvar o link/);
+  assert.deepStrictEqual(erros, []);
+  await ctx.close();
+});
