@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Entrar · Não Salvo</title>
+<link rel="icon" href="logo-word.png">
+<link rel="stylesheet" href="theme.css?v=20261119t">
+<style>
+.ent{min-height:100dvh;display:grid;place-items:center;padding:24px 16px;background:var(--bg)}
+.ent-box{width:min(420px,100%);padding:32px 24px;text-align:center;background:var(--panel);border:1px solid var(--line2);border-radius:18px;box-shadow:var(--shadow)}
+.ent-box img{width:min(260px,70%);height:auto;display:block;margin:0 auto 18px}
+.ent-box h1{margin:0 0 8px;font-size:22px;line-height:1.25;color:var(--txt)}
+.ent-box p{margin:0 0 20px;color:var(--mut);font-size:14.5px;line-height:1.55}
+.ent-discord{display:flex;align-items:center;justify-content:center;gap:10px;min-height:48px;padding:12px 16px;border-radius:12px;background:#5865f2;color:#fff;font-weight:700;font-size:15px;text-decoration:none;border:0}
+.ent-discord:hover{filter:brightness(1.08)}
+.ent-discord:focus-visible{outline:3px solid var(--brand);outline-offset:3px}
+.ent-discord svg{width:22px;height:22px;flex:none}
+.ent-novo{margin-top:14px;font-size:13.5px;color:var(--mut)}
+.ent-aviso{display:none;margin:0 0 16px;padding:10px 12px;border-radius:10px;background:var(--panel2);border:1px solid var(--line2);color:var(--txt);font-size:14px;text-align:left}
+.ent-aviso.on{display:block}
+.ent-foot{margin-top:22px;font-size:12px;color:var(--mut)}
+</style>
+</head>
+<body>
+<main class="ent">
+  <section class="ent-box" aria-labelledby="ent-h">
+    <img src="logo-word.png" alt="Não Salvo">
+    <h1 id="ent-h">Entre para ver o museu</h1>
+    <p>O Não Salvo é o museu da internet brasileira. Para ver os memes, abrir pacotes e guardar o seu álbum, entre com a sua conta do Discord.</p>
+    <p class="ent-aviso" id="aviso" role="alert"></p>
+    <a class="ent-discord" id="entrar" href="/api/auth/discord">
+      <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path fill="#5865F2" d="M20.3 4.4A19.6 19.6 0 0 0 15.4 3l-.6 1.3a18 18 0 0 0-5.6 0L8.6 3a19.5 19.5 0 0 0-4.9 1.5C.6 9.1-.3 13.6.1 18.1a19.8 19.8 0 0 0 6 3l1.3-2.1a12.8 12.8 0 0 1-2-1l.5-.4a14 14 0 0 0 12.1 0l.5.4-2 1 1.3 2.1a19.7 19.7 0 0 0 6-3c.5-5.2-.9-9.7-3.5-13.7zM8 15.4c-1.2 0-2.2-1.1-2.2-2.4S6.8 10.6 8 10.6s2.2 1.1 2.2 2.4-1 2.4-2.2 2.4zm8 0c-1.2 0-2.2-1.1-2.2-2.4s1-2.4 2.2-2.4 2.2 1.1 2.2 2.4-1 2.4-2.2 2.4z"/></svg>
+      <span>Continuar com Discord</span>
+    </a>
+    <p class="ent-novo">Sou novo: é só entrar com o Discord que a sua conta é criada.</p>
+    <p class="ent-foot">Tela de login provisória.</p>
+  </section>
+</main>
+<script>
+(function(){
+  var MSG={negado:"Login cancelado no Discord.",erro:"Não foi possível entrar com o Discord. Tente de novo.",banido:"Esta conta não pode entrar.",nao_membro:"Para entrar, você precisa ser membro do servidor do Discord da comunidade."};
+  var q=new URLSearchParams(location.search);
+  // só aceita caminho do próprio site (a API valida de novo)
+  var v=q.get("voltar")||"/";
+  if(v.charAt(0)!=="/"||v.indexOf("//")===0||v.indexOf("\\")>=0||/entrar\.html/.test(v))v="/";
+  var a=document.getElementById("entrar");
+  a.href="/api/auth/discord?voltar="+encodeURIComponent(v);
+  var m=q.get("login");
+  if(m){var av=document.getElementById("aviso");av.textContent=MSG[m]||MSG.erro;av.classList.add("on")}
+  // já logado? volta para onde estava
+  fetch("/api/eu",{credentials:"same-origin",cache:"no-store"}).then(function(r){if(r.ok)location.replace(v)}).catch(function(){});
+})();
+</script>
+</body>
+</html>
