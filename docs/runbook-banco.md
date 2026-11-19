@@ -42,3 +42,23 @@ Isso desfaz só o nome de `votos`. Como as colunas e tabelas da 005/006 continua
 ## Links sugeridos (007)
 
 `links_sugeridos.meme_id` tem FK para `memes`: sem o seed rodado, `POST /api/links` responde 404 "meme não encontrado". Meme novo vindo de PR (ex.: entradas novas no `data.js`) só aceita sugestão depois de reexecutar o seed no ambiente.
+
+## Antes da migração 008 em produção (conferir duplicatas)
+
+A 008 cria índices **únicos** no razão. Se já existir linha repetida, a criação do índice falha e a migração inteira é desfeita (a API não sobe até corrigir). Rode antes, no banco alvo; o esperado é **0 linhas** nas duas consultas (hoje nenhum código grava nessas tabelas, então só deve haver linhas se alguém inseriu à mão):
+
+```sql
+SELECT usuario_id, motivo, ref, count(*) AS n
+  FROM eventos_xp
+ WHERE motivo IN ('visita_diaria', 'carta_nova', 'colecao_completa')
+ GROUP BY usuario_id, motivo, ref
+HAVING count(*) > 1;
+
+SELECT usuario_id, motivo, ref, count(*) AS n
+  FROM movimentos_moeda
+ WHERE motivo = 'colecao_completa'
+ GROUP BY usuario_id, motivo, ref
+HAVING count(*) > 1;
+```
+
+Se aparecer alguma linha: faça o `pg_dump`, apague as repetidas deixando a de menor `id` de cada grupo e recalcule `usuarios.xp` e `usuarios.moedas` como soma do razão antes de subir. Linhas com `ref` NULL não conflitam (NULL é distinto no índice único).

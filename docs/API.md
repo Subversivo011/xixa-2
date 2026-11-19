@@ -25,16 +25,18 @@ Cada meme: `id, titulo, ano, data, categoria, tipo, raridade, emoji, descricao, 
 
 Moedas, XP e cartas só mudam por chamadas da API, dentro de uma transação que trava a linha do usuário. Saldo e XP são a **soma do razão** (`movimentos_moeda`, `eventos_xp`); `usuarios.moedas` e `usuarios.xp` são cache atualizado na mesma transação. Valores de recompensa e de repetidas vêm de `regras_economia`; preço, chances e garantia de cada pacote vêm de `pacotes_tipo`. Regras de negócio: `docs/subversivo011/economia-e-escassez.md`.
 
+Sem o acervo carregado (seed não rodou) ou sem as regras de economia, `abrir` e a carteira respondem `503` com mensagem clara; nada é gravado.
+
 Rotas marcadas com 🔒 exigem usuário (ver **Autenticação provisória**). Erros de regra: `{ erro }` com 400, 402 (moedas insuficientes), 404 ou 409. Até 60 ações de escrita por usuário a cada 10 min (429).
 
 | Rota | Descrição |
 |---|---|
 | 🔒 `GET /api/carteira` | `moedas`, `xp` (do razão), `patente` e `proxima_patente`, `pacotes` no estoque, resumo das `cartas` e `valor_das_repetidas` |
 | 🔒 `GET /api/album` | Coleções com todas as cartas e a `quantidade` que o usuário tem; `tenho`, `total`, `completa` |
-| 🔒 `POST /api/visita` | Visita do dia (fuso de `regras_economia.limites`): +XP, pacote diário (acumula até 7) e, uma vez na vida da conta, o pacote de boas-vindas. Idempotente por dia |
+| 🔒 `POST /api/visita` | Visita do dia (fuso de `regras_economia.limites`): +XP, pacote diário (acumula até 7) e, **na primeira visita da conta** (ainda não existe cadastro), o pacote de boas-vindas. Idempotente por dia |
 | 🔒 `POST /api/pacotes/comprar` | `{ tipo, colecao_id? }` (`colecao_id` só no pacote da coleção). Cobra no razão e guarda no estoque. `402` sem moedas; pacote grátis não se compra |
 | 🔒 `POST /api/pacotes/abrir` | `{ estoque_id }` ou `{ tipo, colecao_id? }` (abre o mais antigo). Sorteia no servidor, grava em `pacotes_abertos` (com a `semente`, que reproduz o sorteio) e credita cartas, XP e o bônus de coleção completa numa só transação. Devolve `cartas[]` (com `nova`), `xp_ganho`, `moedas_ganhas`, `colecoes_completas`, `carteira` |
-| 🔒 `POST /api/album/reciclar` | `{ carta_id }` ou `{ todas: true }`. Converte repetidas em moedas (sempre fica 1 de cada). `409` se não houver repetida |
+| 🔒 `POST /api/album/reciclar` | `{ carta_id }` ou `{ todas: true }`. **É o único jeito de uma repetida virar moeda**: abrir pacote só soma a carta ao inventário (`quantidade`) e informa `valor_das_repetidas`, sem pagar. Converte repetidas em moedas (sempre fica 1 de cada). `409` se não houver repetida |
 | `GET /api/ranking?metrica=xp\|cartas&limite=50` | Público. `xp` soma os eventos do razão; `cartas` conta cartas distintas. Banidos ficam de fora |
 
 Idempotência do razão: visita do dia, carta nova e coleção completa têm índice único por usuário e referência, então retry ou corrida nunca pagam duas vezes.
@@ -43,8 +45,22 @@ Idempotência do razão: visita do dia, carta nova e coleção completa têm ín
 
 O login com Discord ainda não existe. Até lá, `api/auth-stub.js` é o **único** ponto de identidade: com `AUTH_STUB=1`, o header `X-Test-User: <apelido>` (3 a 20 letras, números, `_`, `.`, `-`) identifica o usuário e o cria na primeira chamada. Sem a variável, as rotas 🔒 respondem `401`.
 
-- **Só dev e teste.** Quem manda o header vira aquele usuário. A API **recusa subir** com `AUTH_STUB=1` se `NODE_ENV=production` ou se `DB_NAME` for o banco de produção (`naosalvo`, ou ausente). Nunca coloque `AUTH_STUB` em `docker-stack.yml`.
+- **Só dev e teste.** Quem manda o header vira aquele usuário. A guarda é uma **allowlist**: o stub só liga se `DB_NAME` contém `test` ou `dev` (ou `NODE_ENV=test`) **e** `NODE_ENV` não é `production` (sem diferenciar maiúsculas). Qualquer outro caso (`naosalvo`, `naosalvo_staging`, banco ausente, `NODE_ENV=Production`) faz a API **recusar subir**, com erro claro, antes de tocar no banco. Nunca coloque `AUTH_STUB` em `docker-stack.yml`.
 - O login Discord troca só o autenticador (`(req, pool) => usuario | null`, sessão em cookie `httpOnly`); as rotas e os testes de economia seguem iguais.
+
+## Decisões de produto em aberto
+
+O que está implementado hoje segue o protótipo; confirmar com o grupo antes de divulgar:
+
+1. **Repetida vira moeda só pelo botão** (`POST /api/album/reciclar`), como na tela do protótipo. A simulação em `docs/subversivo011/economia-e-escassez.md` assume o contrário ("toda repetida vira moeda na hora"). Trocar para automático é mudar `abrirPacote`; os números da economia mudam (a moeda chega mais cedo).
+2. **Boas-vindas na primeira visita**, não "no cadastro" como diz o documento de economia, porque ainda não há cadastro. Com o login Discord passa a ser no primeiro login.
+3. **Preço do pacote Clássico (150 moedas)**: número da simulação, ainda não validado pelo grupo. Fica em `pacotes_tipo.preco`.
+4. **Pacote diário acumula até 7** e o "dia" segue `America/Sao_Paulo` (`regras_economia.limites`).
+5. **Sem tiragem numerada nos Míticos** (é recomendação do documento de economia, não implementada).
+
+## Configuração
+
+`DB_POOL_MAX` define o tamanho do pool de conexões do pg (inteiro de 1 a 100; padrão 10).
 
 ## Rotas já existentes (comportamento inalterado)
 
