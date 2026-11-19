@@ -1,7 +1,8 @@
 # Sons dos alertas de época
 
 Coloque aqui os arquivos de som em **MP3**, com exatamente estes nomes.
-Se o arquivo existir, o site toca ele; se não existir, toca uma imitação gerada pelo próprio navegador.
+Depois de colocar o arquivo, acrescente o nome dele em `lista.json` (ex.: `["msn-entrou", "whatsapp"]`).
+Se o nome estiver na lista, o site toca o arquivo; se não, toca a imitação gerada pelo próprio navegador (definida em `SYNTH`, no `alertas.js`).
 
 Use só sons que o grupo tenha direito de usar (gravados por vocês, licença livre ou com autorização).
 

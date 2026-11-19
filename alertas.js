@@ -79,13 +79,61 @@ const ALERTAS=[
   {som:"instagram",id:"ig-close",v:"igs",net:["ig"],ic:"star",ti:"instagram",tx:"Você foi adicionado aos Melhores Amigos de alguém.",s:sndPop}
 ];
 
+
+// ---- imitações sintetizadas mais fiéis (inspiradas nos sons da época, sem arquivo) ----
+// sino: parciais inarmônicos com decaimento exponencial (marimba / sino de notificação)
+function sino(c,f,t,dur,v,parts){const out=c.createGain();out.gain.value=1;out.connect(c.destination);
+  (parts||[[1,1],[2.01,.35],[3.98,.12]]).forEach(([m,a])=>{const o=c.createOscillator(),g=c.createGain();o.type="sine";o.frequency.setValueAtTime(f*m,t);
+    g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(v*a,t+.006);g.gain.exponentialRampToValueAtTime(.0001,t+dur*(m>1?.55:1));o.connect(g).connect(out);o.start(t);o.stop(t+dur+.05)})}
+// gota: tom com queda rápida de afinação (pop de mensagem)
+function gota(c,f1,f2,t,dur,v){const o=c.createOscillator(),g=c.createGain();o.type="sine";o.frequency.setValueAtTime(f1,t);o.frequency.exponentialRampToValueAtTime(f2,t+dur*.7);
+  g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(v,t+.004);g.gain.exponentialRampToValueAtTime(.0001,t+dur);o.connect(g).connect(c.destination);o.start(t);o.stop(t+dur+.02)}
+// bipe quadrado curto (celular antigo)
+function bipe(c,f,t,dur,v){const o=c.createOscillator(),g=c.createGain(),lp=c.createBiquadFilter();o.type="square";o.frequency.value=f;lp.type="lowpass";lp.frequency.value=3200;
+  g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(v,t+.003);g.gain.setValueAtTime(v,t+dur-.01);g.gain.linearRampToValueAtTime(0,t+dur);o.connect(lp).connect(g).connect(c.destination);o.start(t);o.stop(t+dur+.02)}
+function tique(c,t,v){hiss(c,t,.012,v||.05,4500)}
+const SYNTH={
+  "msn-entrou":(c,t)=>{sino(c,659,t,.9,.09,[[1,1],[3,.18],[5.4,.06]]);sino(c,988,t+.13,1.1,.08,[[1,1],[3,.15],[5.4,.05]]);sino(c,1319,t+.13,1,.03)},
+  "msn-chamar-atencao":(c,t)=>{for(let i=0;i<9;i++){const o=c.createOscillator(),g=c.createGain();o.type="sawtooth";o.frequency.setValueAtTime(95+(i%2)*25,t+i*.055);g.gain.setValueAtTime(.06,t+i*.055);g.gain.exponentialRampToValueAtTime(.001,t+i*.055+.05);o.connect(g).connect(c.destination);o.start(t+i*.055);o.stop(t+i*.055+.06)}sino(c,784,t+.52,.5,.06)},
+  "msn-erro":(c,t)=>{sino(c,392,t,.5,.08);sino(c,370,t+.16,.6,.08)},
+  "windows-balao":(c,t)=>{sino(c,1175,t,.55,.06,[[1,1],[2,.3]]);sino(c,1568,t+.075,.7,.06,[[1,1],[2,.3]])},
+  "windows-erro":(c,t)=>{sino(c,523,t,.9,.09,[[1,1],[2.5,.3],[4.1,.1]]);sino(c,659,t,.9,.05)},
+  "windows-uac":(c,t)=>{sino(c,880,t,.4,.05);sino(c,659,t+.12,.7,.07)},
+  "email":(c,t)=>{sino(c,1047,t,.5,.06);sino(c,1319,t+.1,.5,.05);sino(c,1568,t+.2,.8,.05)},
+  "notificacao":(c,t)=>{sino(c,1568,t,.6,.06,[[1,1],[2.4,.2]])},
+  "notificacao-pop":(c,t)=>{gota(c,900,520,t,.12,.12)},
+  "clique":(c,t)=>{tique(c,t,.09)},
+  "orkut":(c,t)=>{sino(c,880,t,.35,.07,[[1,1],[4,.25]]);sino(c,1175,t+.09,.45,.06,[[1,1],[4,.2]])},
+  "facebook":(c,t)=>{gota(c,1300,1100,t,.09,.08);gota(c,1700,1500,t+.085,.12,.07)},
+  "whatsapp":(c,t)=>{tique(c,t,.04);gota(c,1250,620,t+.005,.11,.14);gota(c,1500,900,t+.12,.09,.07)},
+  "iphone":(c,t)=>{sino(c,1661,t,.35,.06,[[1,1],[2,.25]]);sino(c,1245,t+.13,.35,.06,[[1,1],[2,.25]]);sino(c,1661,t+.26,.6,.06,[[1,1],[2,.25]])},
+  "celular-sms":(c,t)=>{[[0,.06],[.1,.06],[.2,.06],[.36,.16],[.56,.16],[.8,.06],[.9,.06],[1,.06]].forEach(([o,d])=>bipe(c,1760,t+o,d,.075))},
+  "moeda":(c,t)=>{bipe(c,988,t,.08,.08);bipe(c,1319,t+.08,.32,.08)},
+  "vuvuzela":(c,t)=>{const o=c.createOscillator(),g=c.createGain(),l=c.createOscillator(),lg=c.createGain(),bp=c.createBiquadFilter();o.type="sawtooth";o.frequency.value=233;l.frequency.value=5.5;lg.gain.value=4;l.connect(lg).connect(o.frequency);bp.type="bandpass";bp.frequency.value=700;bp.Q.value=.8;
+    g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(.09,t+.15);g.gain.setValueAtTime(.09,t+1.5);g.gain.linearRampToValueAtTime(0,t+1.8);o.connect(bp).connect(g).connect(c.destination);o.start(t);l.start(t);o.stop(t+1.85);l.stop(t+1.85)},
+  "twitter":(c,t)=>{[0,.07,.14].forEach((o,i)=>gota(c,2600+i*300,3400+i*300,t+o,.06,.09))},
+  "snapchat":(c,t)=>{gota(c,600,1200,t,.1,.08);gota(c,800,1600,t+.1,.12,.07)},
+  "tiktok":(c,t)=>{gota(c,1400,700,t,.08,.09);gota(c,1800,900,t+.08,.1,.07)},
+  "instagram":(c,t)=>{sino(c,1319,t,.4,.05);sino(c,1760,t+.09,.5,.05)},
+  "pokemon":(c,t)=>{[523,659,784,1047].forEach((f,i)=>bipe(c,f,t+i*.09,.09,.07));bipe(c,1047,t+.4,.3,.07)},
+  "pix":(c,t)=>{sino(c,1047,t,.4,.06);sino(c,1397,t+.1,.4,.06);sino(c,2093,t+.2,.8,.05)},
+  "delivery":(c,t)=>{sino(c,988,t,.6,.07);sino(c,784,t+.22,.9,.07)},
+  "reuniao":(c,t)=>{gota(c,500,380,t,.18,.09)},
+  "tumblr":(c,t)=>{gota(c,700,1100,t,.1,.07);sino(c,1320,t+.08,.4,.04)},
+  "modem":null
+};
+function imitar(nome,fallback){if(!SND.on)return;const f=SYNTH[nome];if(!f){fallback&&fallback();return}const c=actx();if(!c)return;f(c,c.currentTime+.03)}
+
 // som real: se existir sons/<nome>.mp3 no site, toca o arquivo; se não, usa a imitação sintetizada
-const SOM_OK={};
+// sons/lista.json diz quais MP3 existem (evita pedir arquivos que não estão lá)
+const SOM_OK={};let SONS_LISTA=null;
+fetch("sons/lista.json",{cache:"no-cache"}).then(r=>r.ok?r.json():[]).then(l=>{SONS_LISTA=new Set(Array.isArray(l)?l.map(x=>String(x).replace(/\.mp3$/,"")):[])}).catch(()=>{SONS_LISTA=new Set()});
 function tocarSom(nome,fallback){
   if(!SND.on)return;
-  if(!nome||SOM_OK[nome]===false){fallback&&fallback();return}
+  const sint=()=>imitar(nome,fallback);
+  if(!nome||SOM_OK[nome]===false||!SONS_LISTA||!SONS_LISTA.has(nome)){sint();return}
   const au=new Audio("sons/"+nome+".mp3");au.volume=.6;
-  au.play().then(()=>{SOM_OK[nome]=true}).catch(()=>{SOM_OK[nome]=false;fallback&&fallback()});
+  au.play().then(()=>{SOM_OK[nome]=true}).catch(()=>{SOM_OK[nome]=false;sint()});
 }
 const ALERTA_VISTO=new Set();
 function alertasDaEpoca(m,isPhoto){
