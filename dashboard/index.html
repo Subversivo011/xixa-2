@@ -92,6 +92,23 @@
         </div>
         <p class="empty" id="none" hidden>Nenhum cadastro encontrado.</p>
       </div>
+
+      <div class="card" id="fbCard" style="margin-top:18px">
+        <h2>Feedback do site <span id="fbCount" style="color:var(--text)"></span></h2>
+        <div class="tools">
+          <select id="fbTipo" aria-label="Filtrar por tipo" style="background:#070a14;border:1px solid var(--border);border-radius:10px;color:var(--text);font:inherit;padding:0 12px;min-height:44px">
+            <option value="">Todos os tipos</option>
+          </select>
+          <input type="search" id="fbQ" placeholder="Buscar na mensagem, contato ou página" aria-label="Buscar feedback">
+        </div>
+        <div class="tablewrap">
+          <table style="min-width:720px">
+            <thead><tr><th>Quando</th><th>Tipo</th><th>Mensagem</th><th>Contato</th><th>Página</th><th></th></tr></thead>
+            <tbody id="fbRows"></tbody>
+          </table>
+        </div>
+        <p class="empty" id="fbNone" hidden>Nenhum feedback ainda. Ele chega pelo botão "fala que eu te escuto" no rodapé do site.</p>
+      </div>
     </section>
   </div>
 
@@ -112,8 +129,36 @@
     return api('/api/admin/contribuidores').then(function (r) {
       if (r.status === 401) { logout(); $('loginMsg').textContent = 'Token inválido.'; return; }
       if (!r.ok) throw new Error('erro');
-      return r.json().then(function (j) { items = j.items; $('login').hidden = true; $('app').hidden = false; render(); });
+      return r.json().then(function (j) { items = j.items; $('login').hidden = true; $('app').hidden = false; render(); loadFeedback(); });
     }).catch(function () { $('loginMsg').textContent = 'Falha ao carregar. Tente novamente.'; });
+  }
+
+  var feedback = [];
+  var TIPOS = { ideia: 'Ideia', bug: 'Bug', elogio: 'Elogio', remocao: 'Remoção' };
+  function loadFeedback() {
+    return api('/api/admin/feedback').then(function (r) { return r.ok ? r.json() : { items: [] }; }).then(function (j) {
+      feedback = j.items || [];
+      var tipos = Array.from(new Set(feedback.map(function (f) { return f.tipo; })));
+      var sel = $('fbTipo'), cur = sel.value;
+      sel.innerHTML = '<option value="">Todos os tipos</option>' + tipos.map(function (t) { return '<option value="' + esc(t) + '">' + esc(TIPOS[t] || t) + '</option>'; }).join('');
+      sel.value = cur;
+      drawFeedback();
+    }).catch(function () {});
+  }
+  function drawFeedback() {
+    var q = $('fbQ').value.trim().toLowerCase(), t = $('fbTipo').value;
+    var list = feedback.filter(function (f) {
+      return (!t || f.tipo === t) && (!q || [f.msg, f.contato, f.pagina].join(' ').toLowerCase().indexOf(q) > -1);
+    });
+    $('fbCount').textContent = feedback.length ? '(' + feedback.length + ')' : '';
+    $('fbNone').hidden = list.length > 0;
+    $('fbRows').innerHTML = list.map(function (f) {
+      return '<tr><td style="white-space:nowrap">' + esc(new Date(f.criado_em).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' })) + '</td>' +
+        '<td><span class="tag">' + esc(TIPOS[f.tipo] || f.tipo) + '</span></td>' +
+        '<td style="white-space:pre-wrap;max-width:420px">' + esc(f.msg) + '</td>' +
+        '<td>' + esc(f.contato || '—') + '</td><td><small>' + esc(f.pagina || '—') + '</small></td>' +
+        '<td><button class="del" data-fb="' + esc(f.id) + '" type="button">Excluir</button></td></tr>';
+    }).join('');
   }
 
   function bars(el, entries) {
@@ -174,6 +219,15 @@
     if (!window.confirm('Excluir este cadastro? Não dá para desfazer.')) return;
     api('/api/admin/contribuidores/' + encodeURIComponent(btn.dataset.id), { method: 'DELETE' }).then(load);
   });
+
+  $('fbQ').addEventListener('input', drawFeedback);
+  $('fbTipo').addEventListener('change', drawFeedback);
+  $('fbRows').addEventListener('click', function (e) {
+    var btn = e.target.closest('[data-fb]'); if (!btn) return;
+    if (!window.confirm('Excluir este feedback? Não dá para desfazer.')) return;
+    api('/api/admin/feedback/' + encodeURIComponent(btn.dataset.fb), { method: 'DELETE' }).then(loadFeedback);
+  });
+  $('refresh').addEventListener('click', loadFeedback);
 
   if (token) load();
 })();

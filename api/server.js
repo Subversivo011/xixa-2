@@ -255,6 +255,11 @@ const server = http.createServer(async (req, res) => {
         });
         return res.end(csv);
       }
+      const delFb = url.pathname.match(/^\/api\/admin\/feedback\/(\d+)$/);
+      if (req.method === 'DELETE' && delFb) {
+        const r = await pool.query('DELETE FROM feedback WHERE id = $1', [delFb[1]]);
+        return send(res, r.rowCount ? 200 : 404, { ok: !!r.rowCount });
+      }
       if (req.method === 'GET' && url.pathname === '/api/admin/feedback') {
         const { rows } = await pool.query('SELECT * FROM feedback ORDER BY criado_em DESC LIMIT 1000');
         return send(res, 200, { items: rows });

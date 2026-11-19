@@ -614,7 +614,8 @@ Cadastro de quem quer ajudar o projeto, mais as rotas de votos, visualizações 
 | `/api/admin/contribuidores` | GET | Dashboard | Lista contribuidores (Bearer token) |
 | `/api/admin/contribuidores.csv` | GET | Dashboard | Exporta CSV (Bearer token) |
 | `/api/admin/contribuidores/:id` | DELETE | Dashboard | Exclui um contribuidor (Bearer token) |
-| `/api/admin/feedback` | GET | Admin | Lista os feedbacks (Bearer token). O dashboard ainda não exibe essa lista |
+| `/api/admin/feedback` | GET | Admin | Lista os feedbacks (Bearer token). Aparece no `/dashboard/`, com filtro por tipo e busca |
+| `/api/admin/feedback/:id` | DELETE | Admin | Exclui um feedback |
 
 **Segurança:** validação no servidor, Discord único, honeypot, rate limit por IP, CSV sem injeção de fórmula. Senha do banco, token admin e (opcionalmente) a chave do YouTube são lidos de arquivos de Docker secrets (`DB_PASSWORD_FILE`, `ADMIN_TOKEN_FILE`, `YT_API_KEY_FILE`), nunca do git. O dashboard tem `noindex`.
 

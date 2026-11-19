@@ -26,13 +26,10 @@ select:focus,input:focus,textarea:focus{outline:2px solid var(--brand);outline-o
 .tab[aria-selected=true]{color:var(--brand-ink);border-color:var(--brand)}
 .tab b{background:var(--brand);color:#fff;border-radius:999px;font:700 11px Inter;padding:1px 7px}
 .grid{display:grid;gap:14px}
-.g4{grid-template-columns:repeat(auto-fit,minmax(200px,1fr))}
-.g2{grid-template-columns:repeat(auto-fit,minmax(340px,1fr))}
+.g4{grid-template-columns:repeat(auto-fit,minmax(min(200px,100%),1fr))}
+.g2{grid-template-columns:repeat(auto-fit,minmax(min(340px,100%),1fr))}
 .card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px;min-width:0}
 .card h2{font-size:18px;letter-spacing:.8px;text-transform:uppercase;color:var(--mut);margin-bottom:12px;display:flex;justify-content:space-between;gap:8px;align-items:center}
-.kpi b{display:block;font:700 40px/1 Rajdhani}
-.kpi span{font:600 12px Inter;letter-spacing:1px;text-transform:uppercase;color:var(--mut)}
-.kpi em{font-style:normal;font-size:12px;color:var(--ok);margin-left:6px}
 .prog{height:10px;border-radius:6px;background:var(--sunk);border:1px solid var(--line);overflow:hidden}
 .prog i{display:block;height:100%;background:linear-gradient(90deg,var(--brand2),var(--brand-strong));border-radius:6px}
 .mini{font-size:12px;color:var(--mut)}
@@ -42,7 +39,6 @@ select:focus,input:focus,textarea:focus{outline:2px solid var(--brand);outline-o
 .quest.done b{color:var(--ok)}
 .badges{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px}
 .badge{border:1px solid var(--line);border-radius:12px;padding:10px;text-align:center;background:var(--panel2)}
-.badge .ic{font-size:28px;display:block}
 .badge b{font:700 14px Rajdhani;display:block;letter-spacing:.4px}
 .badge small{color:var(--mut);font-size:11px;line-height:1.3;display:block}
 .badge.off{opacity:.4;filter:grayscale(1)}
@@ -82,6 +78,31 @@ table.t td{padding:9px 10px;border-bottom:1px solid var(--line);vertical-align:m
 .toasts{position:fixed;right:16px;bottom:16px;display:grid;gap:8px;z-index:50}
 .toast{background:var(--panel);border:1px solid var(--brand);border-radius:12px;padding:10px 14px;box-shadow:var(--shadow);font-size:14px;max-width:340px;animation:in .25s ease-out}
 @keyframes in{from{opacity:0;transform:translateY(8px)}}
+
+.ic{width:1.15em;height:1.15em;flex:none;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;vertical-align:-.2em}
+:focus-visible{outline:2px solid var(--brand);outline-offset:2px;border-radius:8px}
+::selection{background:var(--brand);color:#fff}
+*{scrollbar-width:thin;scrollbar-color:var(--line2) transparent}
+td,.vote,.stats b,.todo b{font-variant-numeric:tabular-nums}
+.tabs{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
+.tab{white-space:nowrap}
+.todo{display:flex;justify-content:space-between;align-items:center;gap:12px;width:100%;text-align:left;padding:14px 4px;border-top:1px solid var(--line);font-size:15px}
+.todo:first-of-type{border-top:0}
+.todo b{font:700 26px/1 Rajdhani;margin-right:8px}
+.todo .go{display:inline-flex;gap:6px;align-items:center;font:700 13px Inter;color:var(--brand-ink);transition:gap .2s}
+.todo:hover .go{gap:10px}
+.todo.urgent b{color:var(--bad)}
+.stats{display:flex;gap:22px;flex-wrap:wrap;margin-top:14px;padding-top:12px;border-top:1px solid var(--line)}
+.stats div{font-size:13px;color:var(--mut)}
+.stats b{display:block;font:700 22px/1.1 Rajdhani;color:var(--txt)}
+.meter{display:inline-flex;gap:4px;vertical-align:middle;margin-right:6px}
+.meter i{width:26px;height:8px;border-radius:4px;background:var(--sunk);border:1px solid var(--line2)}
+.meter i.on{background:var(--ok);border-color:var(--ok)}
+.settle{animation:settle .6s cubic-bezier(.16,1,.3,1)}
+@keyframes settle{0%{transform:scale(1.015);box-shadow:0 0 0 3px var(--brand)}100%{transform:none;box-shadow:0 0 0 0 transparent}}
+.badge .ic{width:28px;height:28px;display:block;margin:0 auto 4px;color:var(--brand)}
+.b .ic,.tab .ic,.chip .ic,.vote .ic{width:1.05em;height:1.05em}
 @media (prefers-reduced-motion:reduce){*{animation:none!important}}
 [hidden]{display:none!important}
 @media (max-width:640px){.wrap{padding:14px 12px 60px}.log li{grid-template-columns:1fr}}
@@ -95,13 +116,13 @@ table.t td{padding:9px 10px;border-bottom:1px solid var(--line);vertical-align:m
     <span class="sp"></span>
     <label class="mini" for="who">Ver como</label>
     <select id="who" aria-label="Ver como"></select>
-    <button class="b" id="theme" type="button" aria-label="Alternar tema">◐ Tema</button>
+    <button class="b" id="theme" type="button">Tema claro/escuro</button>
     <button class="b" id="reset" type="button">Reiniciar exemplo</button>
   </header>
   <div class="demo">Tela de exemplo: dados fictícios e nada é gravado no servidor. Ela mostra como a moderação ao estilo wiki (histórico, patrulha, reverter, log) e a gamificação (XP, patentes, missões, selos) podem funcionar juntas. Cadastros reais de contribuidores ficam em <a href="/dashboard/">/dashboard</a>.</div>
 
-  <nav class="tabs" role="tablist" id="tabs"></nav>
-  <main id="view"></main>
+  <div class="tabs" role="tablist" id="tabs" aria-label="Seções do painel"></div>
+  <main id="view" role="tabpanel" tabindex="0"></main>
 </div>
 <div class="toasts" id="toasts" aria-live="polite"></div>
 
@@ -119,6 +140,29 @@ const RANKS=[
 const rankOf=xp=>RANKS.filter(r=>xp>=r.xp).pop();
 const rIdx=xp=>RANKS.indexOf(rankOf(xp));
 const nextRank=xp=>RANKS.find(r=>r.xp>xp);
+const IC={
+ home:'<path d="M3 11l9-8 9 8M5 10v10h14V10"/>',
+ inbox:'<path d="M3 13l3-8h12l3 8v6H3zM3 13h5l1 3h6l1-3h5"/>',
+ clock:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+ scroll:'<path d="M6 3h9l4 4v14H6zM14 3v5h5M9 13h7M9 17h7"/>',
+ users:'<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c0-3.6 2.9-6 6.5-6s6.5 2.4 6.5 6M16 5a3.5 3.5 0 010 6.5M18 14c2.2.6 3.5 2.6 3.5 6"/>',
+ list:'<path d="M8 6h12M8 12h12M8 18h12M4 6h.01M4 12h.01M4 18h.01"/>',
+ cog:'<circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M19.1 4.9L17 7M7 17l-2.1 2.1"/>',
+ check:'<path d="M4 12.5l5 5L20 6.5"/>',
+ x:'<path d="M5 5l14 14M19 5L5 19"/>',
+ undo:'<path d="M9 14L4 9l5-5M4 9h10a6 6 0 010 12h-3"/>',
+ edit:'<path d="M4 20h4L19 9l-4-4L4 16zM13.5 6.5l4 4"/>',
+ copy:'<rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V5a1 1 0 00-1-1H5a1 1 0 00-1 1v10a1 1 0 001 1h3"/>',
+ eye:'<path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>',
+ shield:'<path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/>',
+ search:'<circle cx="11" cy="11" r="6.5"/><path d="M16 16l5 5"/>',
+ scale:'<path d="M12 3v18M7 21h10M5 7h14"/><path d="M5 7l-3 7h6zM19 7l-3 7h6z"/>',
+ arrow:'<path d="M5 12h14M13 6l6 6-6 6"/>',
+ warn:'<path d="M12 3l10 18H2zM12 10v5M12 18h.01"/>',
+ up:'<path d="M6 15l6-6 6 6"/>',
+ down:'<path d="M6 9l6 6 6-6"/>'
+};
+const ic=n=>`<svg class="ic" viewBox="0 0 24 24" aria-hidden="true">${IC[n]}</svg>`;
 const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const $=id=>document.getElementById(id);
 const fmt=n=>n.toLocaleString("pt-BR");
@@ -166,12 +210,12 @@ const seedLog=()=>[
  ["ontem","<b>Gasanzin</b> pediu ajuste em \u201cCarreta Furacão 2\u201d (faltou ano)"]
 ];
 const BADGES=[
- {id:"eagle",ic:"🦅",n:"Olho de águia",d:"10 duplicados pegos",t:s=>s.stats.dups>=1,need:"1 duplicado pego"},
- {id:"guard",ic:"🛡️",n:"Guardião",d:"5 decisões em linha sem ser revertido",t:s=>s.stats.decisions>=3,need:"3 decisões"},
- {id:"patrol",ic:"🔎",n:"Patrulheiro",d:"Patrulhar 3 mudanças",t:s=>s.stats.patrols>=3,need:"3 patrulhas"},
- {id:"minerva",ic:"⚖️",n:"Voto de minerva",d:"Desempatar uma decisão",t:s=>s.stats.tiebreaks>=1,need:"1 desempate"},
- {id:"rollback",ic:"↩️",n:"Faxineiro",d:"Reverter um vandalismo",t:s=>s.stats.reverts>=1,need:"1 reversão"},
- {id:"law",ic:"📜",n:"Defensor dos autores",d:"Atender 1 pedido de remoção",t:s=>s.stats.takedowns>=1,need:"1 remoção"}
+ {id:"eagle",ic:"eye",n:"Olho de águia",d:"10 duplicados pegos",t:s=>s.stats.dups>=1,need:"1 duplicado pego"},
+ {id:"guard",ic:"shield",n:"Guardião",d:"5 decisões em linha sem ser revertido",t:s=>s.stats.decisions>=3,need:"3 decisões"},
+ {id:"patrol",ic:"search",n:"Patrulheiro",d:"Patrulhar 3 mudanças",t:s=>s.stats.patrols>=3,need:"3 patrulhas"},
+ {id:"minerva",ic:"scale",n:"Voto de minerva",d:"Desempatar uma decisão",t:s=>s.stats.tiebreaks>=1,need:"1 desempate"},
+ {id:"rollback",ic:"undo",n:"Faxineiro",d:"Reverter um vandalismo",t:s=>s.stats.reverts>=1,need:"1 reversão"},
+ {id:"law",ic:"scroll",n:"Defensor dos autores",d:"Atender 1 pedido de remoção",t:s=>s.stats.takedowns>=1,need:"1 remoção"}
 ];
 
 let S;
@@ -192,31 +236,34 @@ const rankPill=u=>pill(rankOf(u.xp));
 const byRank=n=>{const u=S.users.find(x=>x.n===n);return u?rankPill(u):'<span class="pill">Visitante</span>'};
 
 // ===== Telas =====
-const TABS=[["geral","🏠","Visão geral"],["fila","🗂️","Fila de envios"],["mud","🕑","Mudanças recentes"],["rem","📜","Remoções"],["usu","👥","Usuários e patentes"],["log","🧾","Log"],["regras","⚙️","Regras de XP"]];
+const TABS=[["geral","home","Visão geral"],["fila","inbox","Fila de envios"],["mud","clock","Mudanças recentes"],["rem","scroll","Remoções"],["usu","users","Usuários e patentes"],["log","list","Log"],["regras","cog","Regras de XP"]];
 function counts(){return{fila:S.queue.filter(q=>q.status==="open").length,mud:S.changes.filter(c=>!c.patrolled).length,rem:S.take.filter(t=>t.status==="open").length}}
-function renderTabs(){const c=counts();$("tabs").innerHTML=TABS.map(([id,ic,n])=>`<button class="tab" role="tab" aria-selected="${S.tab===id}" data-tab="${id}">${ic} ${n}${c[id]?` <b>${c[id]}</b>`:""}</button>`).join("")}
+function renderTabs(){const c=counts();$("tabs").innerHTML=TABS.map(([id,i,n])=>`<button class="tab" role="tab" id="tab-${id}" aria-controls="view" aria-selected="${S.tab===id}" tabindex="${S.tab===id?0:-1}" data-tab="${id}">${ic(i)} ${n}${c[id]?` <b>${c[id]}</b>`:""}</button>`).join("")}
 
 function viewGeral(){
   const u=me(),r=rankOf(u.xp),nx=nextRank(u.xp),c=counts(),pct=nx?Math.round((u.xp-r.xp)/(nx.xp-r.xp)*100):100;
-  const quests=[["Revisar 5 envios",S.stats.decisions,5,"+40 XP"],["Patrulhar 5 mudanças",S.stats.patrols,5,"+25 XP"],["Atender 1 remoção no prazo",S.stats.takedowns,1,"+30 XP"],["Zero decisões revertidas na semana",1,1,"+20 XP"]];
+  const urgent=S.take.filter(t=>t.status==="open"&&72-t.hours<=6).length;
+  const quests=[["Revisar 5 envios",S.stats.decisions,5,"+40 XP"],["Patrulhar 5 mudanças",S.stats.patrols,5,"+25 XP"],["Atender 1 remoção no prazo",S.stats.takedowns,1,"+30 XP"],["Nenhuma decisão revertida na semana",1,1,"+20 XP"]];
   const top=[...S.users].sort((a,b)=>b.xp-a.xp).slice(0,5);
-  return `<div class="grid g4">
-    <div class="card kpi"><b>${c.fila}</b><span>Envios aguardando</span></div>
-    <div class="card kpi"><b>${c.mud}</b><span>Mudanças a patrulhar</span></div>
-    <div class="card kpi"><b>${c.rem}</b><span>Remoções abertas</span></div>
-    <div class="card kpi"><b>${u.prec==null?"—":u.prec+"%"}</b><span>Sua precisão</span><em>${u.streak} dias seguidos</em></div>
-  </div>
-  <div class="grid g2" style="margin-top:14px">
-    <div class="card"><h2>Sua patente ${rankPill(u)}</h2>
+  const row=(tab,n,txt,go,cls)=>`<button class="todo${cls||""}" type="button" data-tab="${tab}"><span><b>${n}</b>${txt}</span><span class="go">${go} ${ic("arrow")}</span></button>`;
+  return `<div class="grid g2">
+    <section class="card"><h2>Sua vez</h2>
+      ${isMod(u)?row("fila",c.fila,c.fila===1?"envio aguardando voto":"envios aguardando voto","Revisar"):""}
+      ${isMod(u)?row("mud",c.mud,c.mud===1?"mudança a patrulhar":"mudanças a patrulhar","Patrulhar"):""}
+      ${row("rem",c.rem,(c.rem===1?"pedido de remoção":"pedidos de remoção")+(urgent?` (${urgent} perto do prazo)`:""),"Responder",urgent?" urgent":"")}
+      ${!isMod(u)?'<p class="mini" style="padding-top:8px">Moderar exige a patente Moderador. Troque em “Ver como”.</p>':""}
+    </section>
+    <section class="card"><h2>Sua patente ${rankPill(u)}</h2>
       <div style="display:flex;justify-content:space-between;font-size:14px;margin-bottom:6px"><b>${fmt(u.xp)} XP</b><span class="mini">${nx?`faltam ${fmt(nx.xp-u.xp)} para ${esc(nx.name)}`:"patente máxima"}</span></div>
-      <div class="prog" role="progressbar" aria-valuenow="${pct}" aria-valuemin="0" aria-valuemax="100"><i style="width:${pct}%"></i></div>
-      <p class="mini" style="margin-top:10px">Ganho nesta sessão: <b>${fmt(S.weekXp)} XP</b>. Decisões alinhadas ao consenso rendem XP; decisões revertidas custam reputação.</p></div>
-    <div class="card"><h2>Missões da semana</h2>${quests.map(q=>{const p=Math.min(100,Math.round(q[1]/q[2]*100)),d=q[1]>=q[2];return `<div class="quest${d?" done":""}"><b>${d?"✓ ":""}${q[0]}</b><span class="mini">${Math.min(q[1],q[2])}/${q[2]} · ${q[3]}</span><div class="prog"><i style="width:${p}%"></i></div></div>`}).join("")}</div>
+      <div class="prog" role="progressbar" aria-label="Progresso para a próxima patente" aria-valuenow="${pct}" aria-valuemin="0" aria-valuemax="100"><i style="width:${pct}%"></i></div>
+      <div class="stats"><div><b>${u.prec==null?"—":u.prec+"%"}</b>precisão</div><div><b>${u.streak}</b>dias seguidos</div><div><b>${fmt(S.weekXp)}</b>XP nesta sessão</div></div>
+    </section>
   </div>
   <div class="grid g2" style="margin-top:14px">
-    <div class="card"><h2>Selos</h2><div class="badges">${BADGES.map(b=>{const on=b.t(S);return `<div class="badge${on?"":" off"}" title="${on?"Conquistado":"Falta: "+b.need}"><span class="ic">${b.ic}</span><b>${b.n}</b><small>${b.d}</small></div>`}).join("")}</div></div>
-    <div class="card"><h2>Top moderadores</h2><div class="scroll"><table class="t"><tbody>${top.map((x,i)=>`<tr><td><b>${i+1}º</b></td><td>@${esc(x.n)}</td><td>${rankPill(x)}</td><td style="text-align:right"><b>${fmt(x.xp)}</b> XP</td></tr>`).join("")}</tbody></table></div></div>
-  </div>`;
+    <section class="card"><h2>Missões da semana</h2>${quests.map(q=>{const p=Math.min(100,Math.round(q[1]/q[2]*100)),d=q[1]>=q[2];return `<div class="quest${d?" done":""}"><b>${d?ic("check")+" ":""}${q[0]}</b><span class="mini">${Math.min(q[1],q[2])}/${q[2]} · ${q[3]}</span><div class="prog"><i style="width:${p}%"></i></div></div>`}).join("")}</section>
+    <section class="card"><h2>Top moderadores</h2><div class="scroll"><table class="t"><tbody>${top.map((x,i)=>`<tr><td><b>${i+1}º</b></td><td>@${esc(x.n)}</td><td>${rankPill(x)}</td><td style="text-align:right"><b>${fmt(x.xp)}</b> XP</td></tr>`).join("")}</tbody></table></div></section>
+  </div>
+  <section class="card" style="margin-top:14px"><h2>Selos</h2><div class="badges">${BADGES.map(b=>{const on=b.t(S);return `<div class="badge${on?"":" off"}" title="${on?"Conquistado":"Falta: "+b.need}">${ic(b.ic)}<b>${b.n}</b><small>${on?b.d:"Falta: "+b.need}</small></div>`}).join("")}</div></section>`;
 }
 
 function consensus(q){const y=q.votes.filter(v=>v[1]==="y").length,n=q.votes.filter(v=>v[1]==="n").length,d=q.votes.filter(v=>v[1]==="d").length;return{y,n,d}}
@@ -226,17 +273,17 @@ function viewFila(){
   const open=S.queue.filter(q=>q.status==="open"),done=S.queue.filter(q=>q.status!=="open");
   const card=q=>{
     const cs=consensus(q),mine=q.votes.find(v=>v[0]===S.who),tie=cs.y>=1&&cs.n>=1&&q.votes.length>=2;
-    const author=S.users.find(x=>x.n===q.by),canVote=!mine&&(!author||rIdx(author.xp)<rIdx(u.xp)||true)&&q.by!==S.who;
-    const sel=q.status==="open"?`<div class="votes">${q.votes.map(v=>`<span class="vote ${v[1]}">${v[1]==="y"?"✓ aprovou":v[1]==="n"?"✕ rejeitou":v[1]==="d"?"⧉ duplicado":"✎ ajuste"} · @${esc(v[0])}</span>`).join("")}<span class="mini">Consenso: ${Math.min(2,cs.y)}/2 aprovações · desempate com ${isDono(u)?"você":"Dono"}</span></div>`:"";
-    return `<article class="item${q.status!=="open"?" dec":""}" id="${q.id}">
+    const canVote=!mine&&q.by!==S.who;
+    const sel=q.status==="open"?`<div class="votes">${q.votes.map(v=>`<span class="vote ${v[1]}">${ic(v[1]==="y"?"check":v[1]==="n"?"x":v[1]==="d"?"copy":"edit")} ${v[1]==="y"?"aprovou":v[1]==="n"?"rejeitou":v[1]==="d"?"duplicado":"ajuste"} · @${esc(v[0])}</span>`).join("")}<span class="mini"><span class="meter" role="img" aria-label="${Math.min(2,cs.y)} de 2 aprovações"><i class="${cs.y>=1?"on":""}"></i><i class="${cs.y>=2?"on":""}"></i></span>${Math.min(2,cs.y)}/2 aprovações · desempate com ${isDono(u)?"você":"um Dono"}</span></div>`:"";
+    return `<article class="item${q.status!=="open"?" dec":""}${S.flash===q.id?" settle":""}" id="${q.id}">
      <div class="item-h"><h3>${esc(q.t)}</h3>${byRank(q.by)}</div>
      <div class="meta"><span>${q.y}</span><span>·</span><span>${esc(q.c)}</span><span>·</span><span>por @${esc(q.by)}</span><span>·</span><span>${esc(q.url)}</span></div>
      <p class="desc">${esc(q.d)}</p>
-     <div class="meta">${q.checks.map(c=>`<span class="chip ${c[0]}">${c[0]==="ok"?"✓":c[0]==="bad"?"✕":"!"} ${esc(c[1])}</span>`).join("")}</div>
+     <div class="meta">${q.checks.map(c=>`<span class="chip ${c[0]}">${ic(c[0]==="ok"?"check":c[0]==="bad"?"x":"warn")} ${esc(c[1])}</span>`).join("")}</div>
      ${q.status==="open"?sel:`<p class="mini"><b>${esc(q.result)}</b></p>`}
      ${q.status==="open"?(tie&&isDono(u)?`<div class="acts"><b class="mini">Voto de minerva:</b><button class="b ok" data-q="${q.id}" data-v="y">Aprovar</button><button class="b bad" data-q="${q.id}" data-v="n">Rejeitar</button></div>`
        :tie?`<p class="mini">Votos divididos: aguardando voto de minerva de um Dono de comunidade.</p>`
-       :canVote?`<div class="acts"><label class="mini" for="rs-${q.id}">Motivo (rejeitar/ajuste)</label><select id="rs-${q.id}">${REASONS.rej.concat(REASONS.adj).map(r=>`<option>${esc(r)}</option>`).join("")}</select><button class="b ok" data-q="${q.id}" data-v="y">✓ Aprovar</button><button class="b" data-q="${q.id}" data-v="a">✎ Pedir ajuste</button><button class="b" data-q="${q.id}" data-v="d">⧉ Duplicado</button><button class="b bad" data-q="${q.id}" data-v="n">✕ Rejeitar</button></div>`
+       :canVote?`<div class="acts"><label class="mini" for="rs-${q.id}">Motivo (rejeitar/ajuste)</label><select id="rs-${q.id}">${REASONS.rej.concat(REASONS.adj).map(r=>`<option>${esc(r)}</option>`).join("")}</select><button class="b ok" data-q="${q.id}" data-v="y">${ic("check")} Aprovar</button><button class="b" data-q="${q.id}" data-v="a">${ic("edit")} Pedir ajuste</button><button class="b" data-q="${q.id}" data-v="d">${ic("copy")} Duplicado</button><button class="b bad" data-q="${q.id}" data-v="n">${ic("x")} Rejeitar</button></div>`
        :`<p class="mini">${q.by===S.who?"Você não pode votar no seu próprio envio.":"Você já votou neste envio."}</p>`):""}
     </article>`};
   return (open.length?open.map(card).join(""):`<div class="empty">Fila zerada. Boa! Volte mais tarde para novos envios.</div>`)+(done.length?`<h2 style="margin:20px 0 10px;font-size:16px;color:var(--mut)">Decididos nesta sessão</h2>`+done.map(card).join(""):"");
@@ -248,7 +295,7 @@ function viewMud(){
   return `<div class="bar" style="margin-bottom:10px"><label class="mini" for="flt">Mostrar</label><select id="flt"><option value="pend"${f==="pend"?" selected":""}>Não patrulhadas</option><option value="sus"${f==="sus"?" selected":""}>Suspeitas</option><option value="all"${f==="all"?" selected":""}>Todas</option></select><span class="mini">Patrulhar = marcar que alguém conferiu a mudança. Reverter desfaz e pede um motivo.</span></div>`+
   (list.length?list.map(c=>`<article class="item${c.patrolled?" dec":""}"><div class="item-h"><h3>${esc(c.t)}</h3>${c.suspicious?'<span class="chip bad">Possível vandalismo</span>':""}${c.reverted?'<span class="chip warn">Revertida</span>':""}<span class="mini">${esc(c.ago)} · @${esc(c.who)}</span></div>
    <table class="diff"><thead><tr><th>Campo</th><th>Antes</th><th>Depois</th></tr></thead><tbody>${c.rows.map(r=>`<tr><td>${esc(r[0])}</td><td class="old">${esc(r[1])}</td><td class="new">${esc(r[2])}</td></tr>`).join("")}</tbody></table>
-   ${!c.patrolled&&isMod(u)?`<div class="acts"><button class="b ok" data-p="${c.id}">✓ Patrulhar (+${XP.patrol} XP)</button><label class="mini" for="rv-${c.id}">Motivo</label><select id="rv-${c.id}"><option>vandalismo</option><option>informação errada</option><option>fora do padrão</option></select><button class="b bad" data-r="${c.id}">↩ Reverter (+${XP.revert} XP)</button></div>`:c.patrolled?`<p class="mini">${c.reverted?"Revertida":"Patrulhada"} por @${esc(c.by||"—")}</p>`:`<p class="mini">Só Moderadores patrulham.</p>`}</article>`).join(""):`<div class="empty">Nada por aqui com esse filtro.</div>`);
+   ${!c.patrolled&&isMod(u)?`<div class="acts"><button class="b ok" data-p="${c.id}">${ic("check")} Patrulhar (+${XP.patrol} XP)</button><label class="mini" for="rv-${c.id}">Motivo</label><select id="rv-${c.id}"><option>vandalismo</option><option>informação errada</option><option>fora do padrão</option></select><button class="b bad" data-r="${c.id}">${ic("undo")} Reverter (+${XP.revert} XP)</button></div>`:c.patrolled?`<p class="mini">${c.reverted?"Revertida":"Patrulhada"} por @${esc(c.by||"—")}</p>`:`<p class="mini">Só Moderadores patrulham.</p>`}</article>`).join(""):`<div class="empty">Nada por aqui com esse filtro.</div>`);
 }
 
 function viewRem(){
@@ -266,7 +313,7 @@ function viewUsu(){
    ${[["Discado","Navegar, abrir pacotes e colecionar."],["Banda larga","Enviar vídeos ao acervo."],["Colaborador","Salvar link de virais sem vídeo."],["Moderador","Votar na fila, patrulhar, reverter, responder remoções."],["Dono de comunidade","Voto de minerva, promover e rebaixar até Moderador."],["Lenda da internet","Tudo, inclusive regras de XP e patentes acima de Moderador."]].map((x,i)=>`<tr><td>${pill(RANKS[i])}</td><td>${fmt(RANKS[i].xp)} XP</td><td>${x[1]}</td></tr>`).join("")}</tbody></table></div></div>
    <div class="card" style="margin-top:14px"><h2>Usuários</h2><div class="scroll"><table class="t"><thead><tr><th>Usuário</th><th>Patente</th><th>XP</th><th>Precisão</th><th>Decisões</th><th>Sequência</th><th></th></tr></thead><tbody>
    ${list.map(x=>`<tr><td><b>@${esc(x.n)}</b></td><td>${rankPill(x)}</td><td>${fmt(x.xp)}</td><td>${x.prec==null?"—":x.prec+"%"}</td><td>${x.dec}</td><td>${x.streak?x.streak+" d":"—"}</td>
-   <td>${isDono(u)&&x.n!==u.n&&rIdx(x.xp)<4?`<button class="b" data-up="${esc(x.n)}">▲ Promover</button> <button class="b bad" data-down="${esc(x.n)}">▼ Rebaixar</button>`:""}</td></tr>`).join("")}</tbody></table></div></div>`;
+   <td>${isDono(u)&&x.n!==u.n&&rIdx(x.xp)<4?`<button class="b" data-up="${esc(x.n)}">${ic("up")} Promover</button> <button class="b bad" data-down="${esc(x.n)}">${ic("down")} Rebaixar</button>`:""}</td></tr>`).join("")}</tbody></table></div></div>`;
 }
 
 function viewLog(){return `<div class="card"><h2>Log de ações (somente leitura)</h2><ul class="log">${S.log.map(l=>`<li><time>${esc(l.t)}</time><span>${l.h}</span></li>`).join("")}</ul></div>`}
@@ -279,13 +326,13 @@ function viewRegras(){
 function render(){
   $("who").innerHTML=S.users.filter(u=>isMod(u)).map(u=>`<option${u.n===S.who?" selected":""}>${esc(u.n)}</option>`).join("")+S.users.filter(u=>!isMod(u)).map(u=>`<option${u.n===S.who?" selected":""}>${esc(u.n)}</option>`).join("");
   renderTabs();
-  $("view").innerHTML=({geral:viewGeral,fila:viewFila,mud:viewMud,rem:viewRem,usu:viewUsu,log:viewLog,regras:viewRegras})[S.tab]();
-  save();
+  $("view").setAttribute("aria-labelledby","tab-"+S.tab);$("view").innerHTML=({geral:viewGeral,fila:viewFila,mud:viewMud,rem:viewRem,usu:viewUsu,log:viewLog,regras:viewRegras})[S.tab]();
+  S.flash=null;save();
 }
 
 // ===== Ações =====
 function decide(q,res,kind){
-  q.status="done";q.result=res;S.stats.decisions++;
+  q.status="done";q.result=res;S.flash=q.id;S.stats.decisions++;
   if(kind==="d")S.stats.dups++;
   q.votes.forEach(v=>{const aligned=(kind==="y"&&v[1]==="y")||(kind!=="y"&&v[1]!=="y");if(aligned)giveXp(v[0],XP.vote,"voto alinhado");});
   logAdd(res.replace(/^(\S+)/,"<b>$1</b>")+" · \u201c"+esc(q.t)+"\u201d");
@@ -321,6 +368,12 @@ document.addEventListener("click",e=>{
     logAdd("<b>"+esc(S.who)+"</b>: "+esc(x.result)+" — \u201c"+esc(x.t)+"\u201d");return render()}
   if(t.dataset.up||t.dataset.down){const n=t.dataset.up||t.dataset.down,x=S.users.find(y=>y.n===n),i=rIdx(x.xp),ni=Math.max(0,Math.min(3,i+(t.dataset.up?1:-1)));
     x.xp=RANKS[ni].xp;logAdd("<b>"+esc(S.who)+"</b> "+(t.dataset.up?"promoveu":"rebaixou")+" <b>"+esc(n)+"</b> a "+esc(RANKS[ni].name));toast(n+" agora é "+RANKS[ni].name);return render()}
+});
+document.addEventListener("keydown",e=>{
+  const t=e.target.closest&&e.target.closest(".tab");if(!t||!["ArrowRight","ArrowLeft","Home","End"].includes(e.key))return;
+  e.preventDefault();const ids=TABS.map(x=>x[0]);let i=ids.indexOf(S.tab);
+  i=e.key==="Home"?0:e.key==="End"?ids.length-1:(i+(e.key==="ArrowRight"?1:-1)+ids.length)%ids.length;
+  S.tab=ids[i];render();document.getElementById("tab-"+S.tab).focus();
 });
 document.addEventListener("change",e=>{
   if(e.target.id==="who"){S.who=e.target.value;if(S.tab==="fila"&&!isMod(me()))S.tab="geral";render()}
