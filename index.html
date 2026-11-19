@@ -3,14 +3,14 @@
 <head>
 <meta charset="utf-8">
 <script src="gate.js?v=20261119u"></script>
-<script src="cliente-economia.js?v=20261119z"></script>
+<script src="cliente-economia.js?v=20261120b"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>NÃO SALVO — Museu da Internet Brasileira</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preconnect" href="https://i.ytimg.com">
 <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Inter:wght@400;500;600;700&family=Baloo+2:wght@700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="theme.css?v=20261119v">
+<link rel="stylesheet" href="theme.css?v=20261120a">
 <link rel="stylesheet" href="viewer.css?v=20261119v">
 <script>try{var t=localStorage.getItem("ns_theme")}catch(e){}document.documentElement.dataset.theme=t==="dark"?"dark":"light"</script>
 <style>
@@ -215,10 +215,10 @@ main{display:flex;flex-direction:column}
 <div class="modal" id="modal" onclick="if(event.target===this)closeM()"><div class="box" id="box"></div></div>
 
 <form name="feedback" data-netlify="true" netlify-honeypot="bot-field" hidden><input name="tipo"><textarea name="msg"></textarea><input name="contato"><input name="pagina"><input name="bot-field"></form>
-<script src="common.js?v=20261119z"></script>
+<script src="common.js?v=20261120b"></script>
 <script src="data.js?v=20261119q"></script>
 <script src="player.js?v=20261119n"></script>
-<script src="viewer.js?v=20261119x"></script>
+<script src="viewer.js?v=20261120a"></script>
 <script src="alertas.js?v=20261119n"></script>
 <script>
 renderHeader("inicio",{search:true,sub:[]});
@@ -240,10 +240,6 @@ const SEED_QUEUE=[
  {id:"q4",t:"Carreta Furacão",y:2014,c:"Música",by:"zap_da_tia",rank:0,url:"https://www.youtube.com/watch?v=exemploCarreta",d:"Os personagens dançando em cima do trenzinho da alegria."},
  {id:"q5",t:"Nana Gouvêa posando no furacão",y:2012,c:"Fotos",by:"fotologueira",rank:1,url:"https://www.instagram.com/p/exemploNana/",d:"Ensaio de fotos em Nova York no meio da passagem de um furacão."}
 ];
-const RANK_USERS=[["Cid Cidoso",15420,247,104,2],
- ["SePPZAO",9640,231,101,4,0,"Moderador"],["Riba",9310,214,99,11],["Subversivo",8870,198,97,14],["yorkshiremaconhado",8640,192,96,22],["ad_moura",8420,187,95,16],["Dev_Gon",8050,176,94,15],["Gasanzin",7610,163,92,13],
- ["AteuDeGoianinha",7180,151,90,12],["Rulsso",6720,139,87,17],["cigarra_eletronica",6290,127,85,18],["maffeimafia",5830,114,82,19],["genery3",5360,102,80,20],["Velma",4980,93,78,21],
- ["ipsilva",4860,88,76,0],["bruninhotv",4720,84,74,1],["viralizador",4580,79,71,3],["faqo",4390,72,69,5],["lendariin",4180,66,64,6],["gatoNostalgico",2950,41,52,7],["fotologueira",420,6,23,8],["novato_2012",60,0,9,9]];
 
 const art=a=>(a.cuidado?`<span class="cdo-t" title="Selo de cuidado: contém conteúdo preconceituoso">${icon("care","in")}<b>Selo de cuidado</b><small>clique para saber mais</small></span>`:"")+((a.img||a.yt)?`<img class="th${a.cuidado?" cdo-blur":""}" src="${a.img||"https://i.ytimg.com/vi/"+a.yt+"/mqdefault.jpg"}" alt="" loading="lazy" decoding="async" width="320" height="180" onerror="this.remove()">`:"")+`<span class="ph">${a.art||icon(CAT_IC[a.c]||"video","art")}</span>`;
 let ALL=[];
@@ -531,16 +527,10 @@ function moderate(id,v){NS.modDone[id]=v;NS.modDoneAt=NS.modDoneAt||{};NS.modDon
 
 // ---- Ranking da galera ----
 function openRank(){
-  const me=NS.acct?[[NS.acct.user,ECO.xp,NS.approvedCount,(ECO.cartas&&ECO.cartas.distintas)||0,-1,true]]:[];
-  const list=[...RANK_USERS,...me].sort((a,b)=>b[1]-a[1]);
-  const ic=list.findIndex(u=>u[0]==="Cid Cidoso");if(ic>0)list.unshift(list.splice(ic,1)[0]); // o Cid é sempre o primeiro
   $("box").className="box";
-  $("box").innerHTML=`<div class="body"><h2 class="disp">${icon("ranking","h")}Ranking da galera</h2><p>Quem mais salvou a internet brasileira. Envio aprovado, moderação, link salvo e carta nova contam XP.</p>
-  ${list.map((u,i)=>{const r=rankOf(u[1]);const av=u[5]?NS.acct.av:{fur:(u[4]*3)%10,pat:u[4]%5,eye:u[4]%5,acc:(u[4]*2)%9,clo:u[4]%7,bg:u[4]%8};
-   return`<div class="rk ${u[5]?'me':''}"><b>${i+1}</b><span class="av">${catSVG(av)}</span><span>${escapeHtml(u[0])}${u[5]?" (você)":""}<span class="pt" style="color:${r.color};background:${r.color}22">${r.name}</span>${u[6]?`<span class="pt" style="color:${RANKS[3].color};background:${RANKS[3].color}22">${u[6]}</span>`:""}</span><small>${u[2]} envios<br>${u[3]} cartas</small><em>${fmt(u[1])} XP</em></div>`}).join("")}
-  ${NS.acct?"":`<p style="margin-top:12px">Crie sua conta pra aparecer no ranking. <button class="btn" onclick="closeM();openSignup()">${icon("cat")}Criar conta</button></p>`}
+  $("box").innerHTML=`<div class="body"><h2 class="disp">${icon("ranking","h")}Ranking da galera</h2><p>Quem mais salvou a internet brasileira. Pacote aberto, carta nova e coleção completa contam.</p><div id="rkBox"></div>
   <button class="btn ghost" onclick="closeM()" style="margin-top:12px">Fechar</button></div>`;
-  $("modal").classList.add("open");
+  $("modal").classList.add("open");carregarRanking($("rkBox"),"xp");
 }
 
 function renderAll(){SUB=SUB_ITEMS;renderNav();renderPulse();renderYears();renderCur();renderGrid();renderRail()}

@@ -46,6 +46,8 @@
     if (r.ok) return r.json;
     var texto = (r.json && (r.json.erro || r.json.error)) || '';
     var e = erro(r.status, texto);
+    if (r.json && typeof r.json.campo === 'string') e.campo = r.json.campo; // 422 do PATCH /api/eu: qual campo falhou
+    if (r.json && typeof r.json.tente_em_segundos === 'number') e.tente_em_segundos = r.json.tente_em_segundos; // 429 do apelido: quanto falta
     var quieto = opcoes && opcoes.silencioso;
     if (r.status === 401) { irParaEntrar(); throw e; }
     if (!quieto) {
@@ -76,6 +78,7 @@
     tipos: function (o) { return pedir('GET', '/api/pacotes/tipos', undefined, o); },
     comprar: function (p, o) { return pedir('POST', '/api/pacotes/comprar', p, o); },
     abrir: function (p, o) { return pedir('POST', '/api/pacotes/abrir', p, o); },
+    perfil: function (p, o) { return pedir('PATCH', '/api/eu', p, o); },
     reciclar: function (p, o) { return pedir('POST', '/api/album/reciclar', p, o); },
     ranking: function (metrica, limite, o) {
       return pedir('GET', '/api/ranking?metrica=' + encodeURIComponent(metrica || 'xp') + '&limite=' + encodeURIComponent(limite || 50), undefined, o);

@@ -500,3 +500,20 @@ img.cdo-blur{filter:blur(16px) saturate(.6);transform:scale(1.15)}
 .jjb.pego{animation:jjpop .7s ease forwards}
 @keyframes jjpop{40%{transform:scale(1.8) rotate(20deg);opacity:1}100%{transform:translateY(-60px) scale(.2);opacity:0}}
 @media(prefers-reduced-motion:reduce){.jjb.pego{animation:none;opacity:0}.jjb:hover{transform:none}}
+
+/* ranking (GET /api/ranking) */
+.rkx-tabs{display:flex;gap:6px;margin:10px 0 8px}
+.rkx-tabs button{padding:6px 14px;border-radius:999px;border:1px solid var(--line2);background:var(--panel);color:var(--txt);font:700 12.5px Inter,sans-serif;cursor:pointer}
+.rkx-tabs button.on{background:var(--brand-strong,#1597d3);border-color:var(--brand-strong,#1597d3);color:#fff}
+.rkx-lista{max-height:min(52vh,460px);overflow:auto}
+.rkx{display:grid;grid-template-columns:30px 36px minmax(0,1fr) auto;gap:10px;align-items:center;padding:9px 6px;border-bottom:1px solid var(--line);font-size:13px}
+.rkx.me{background:var(--brand-soft);border-radius:10px}
+.rkx>b{text-align:center;color:var(--mut);font-family:Rajdhani,Inter,sans-serif;font-size:16px}
+.rkx .av{width:34px;height:34px;border-radius:50%;overflow:hidden;display:grid;place-items:center;background:var(--brand-soft);color:var(--brand-ink);font-weight:800}
+.rkx .av svg,.rkx .av img{width:100%;height:100%;display:block;object-fit:cover}
+.rkx .nm{min-width:0}
+.rkx .nm .n{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:600}
+.rkx .pt{display:inline-block;margin-top:2px;font-size:10px;font-weight:800;letter-spacing:.6px;text-transform:uppercase;padding:2px 7px;border-radius:5px}
+.rkx em{font-style:normal;color:var(--brand-strong,#1597d3);font-weight:700;font-family:Rajdhani,Inter,sans-serif;font-size:16px;text-align:right;white-space:nowrap}
+.rkx-st{padding:22px 6px;color:var(--mut);text-align:center;font-size:14px}
+.rkx-bt{margin-top:10px;padding:7px 14px;border-radius:10px;border:0;background:var(--brand-strong,#1597d3);color:#fff;font:700 13px Inter,sans-serif;cursor:pointer}

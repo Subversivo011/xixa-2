@@ -3,14 +3,14 @@
 <head>
 <meta charset="utf-8">
 <script src="gate.js?v=20261119u"></script>
-<script src="cliente-economia.js?v=20261119z"></script>
+<script src="cliente-economia.js?v=20261120b"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Memepédia · NÃO SALVO</title>
 <meta name="description" content="Memepédia: a enciclopédia dos memes brasileiros, escrita pela comunidade do Não Salvo. De onde vieram, por que viralizaram, como são usados e onde estão hoje.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Inter:wght@400;500;600;700&family=Baloo+2:wght@700;800&family=Source+Serif+4:opsz,wght@8..60,500;8..60,700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="theme.css?v=20261119v">
+<link rel="stylesheet" href="theme.css?v=20261120a">
 <link rel="stylesheet" href="viewer.css?v=20261119v">
 <script>try{var t=localStorage.getItem("ns_theme")}catch(e){}document.documentElement.dataset.theme=t==="dark"?"dark":"light"</script>
 <style>
@@ -91,10 +91,10 @@
   <main class="wk-main" id="wm"></main>
 </div>
 
-<script src="common.js?v=20261119z"></script>
+<script src="common.js?v=20261120b"></script>
 <script src="data.js?v=20261119q"></script>
 <script src="player.js?v=20261119n"></script>
-<script src="viewer.js?v=20261119x"></script>
+<script src="viewer.js?v=20261120a"></script>
 <script src="alertas.js?v=20261119n"></script>
 <script>
 renderHeader("memepedia",{sub:[
@@ -161,7 +161,7 @@ function verbete(m){
       ${t?`<p>${escapeHtml(t.t)}${t.est?`<span class="est">estimativa pela época · ajude a confirmar</span>`:""}</p>${t.by?`<div class="cr">Escrito por ${escapeHtml(t.by)}${t.fonte?` · <a href="${escapeHtml(t.fonte)}" target="_blank" rel="noopener nofollow">fonte</a>`:""}${t.local?" · esperando moderação (só você vê)":""}</div>`:""}`:`<p class="vz">Ninguém escreveu esta parte ainda. ${dica}</p>`}
       <form class="wk-form" id="f-${c}" onsubmit="enviar(event,'${c}')"><textarea name="t" maxlength="2000" placeholder="${dica}" required minlength="10">${t&&!t.est&&!t.local&&c!=="origem"?escapeHtml(t.t):""}</textarea>
         <input name="fonte" type="url" placeholder="Fonte (link de notícia, vídeo original…), opcional"><input class="ch" name="bot-field" tabindex="-1" aria-hidden="true" style="display:none">
-        <div class="r"><button class="wk-btn" type="submit">Enviar para a moderação</button><button class="wk-btn gh" type="button" onclick="editar('${c}')">Cancelar</button><small>${NS.acct?`como <b>${escapeHtml(NS.acct.user)}</b>`:"precisa de conta"}</small></div><div class="msg"></div></form></section>`};
+        <div class="r"><button class="wk-btn" type="submit">Enviar para a moderação</button><button class="wk-btn gh" type="button" onclick="editar('${c}')">Cancelar</button><small>${temConta()?`como <b>${escapeHtml(meuApelido())}</b>`:"precisa de conta"}</small></div><div class="msg"></div></form></section>`};
   $("wm").innerHTML=`<div class="wk-bc"><a href="memepedia.html">Memepédia</a> › <a href="#" onclick="WK.ano='${k}';lista();return false">${yLab(k)}</a> › ${escapeHtml(m.t)}</div>
     <h1>${escapeHtml(m.t)}</h1><div class="wk-sub">Verbete da Memepédia · ${m.y} · ${escapeHtml(m.c)}</div>
     ${m.cuidado?`<div class="wk-care">${cuidadoHTML(m)}</div>`:""}
@@ -171,14 +171,14 @@ function verbete(m){
         <h3>${escapeHtml(m.t)}</h3><dl><dt>Ano</dt><dd>${m.y}</dd><dt>Tipo</dt><dd>${m.tipo==="foto"?"Foto":m.vert?"Vídeo vertical":"Vídeo"}</dd><dt>Categoria</dt><dd>${escapeHtml(m.c)}</dd><dt>Raridade</dt><dd>${escapeHtml(m.r)}</dd>${m.by?`<dt>Origem</dt><dd>${escapeHtml(m.by)}</dd>`:""}${m.canal?`<dt>Canal</dt><dd>${escapeHtml(m.canal)}</dd>`:""}${m.credit?`<dt>Imagem</dt><dd><a href="${escapeHtml(m.credit.url)}" target="_blank" rel="noopener">${escapeHtml(m.credit.by)}</a></dd>`:""}</dl>
         <button class="wk-play" onclick="ver('${m.id}')">${icon(m.tipo==="foto"?"photo":"video","in")}${m.tipo==="foto"?"Ver a foto":"Assistir"} no player da época</button></aside></div>`;
 }
-function editar(c){const f=$("f-"+c);if(!f)return;if(!NS.acct&&!f.classList.contains("open")){needAccount();return}f.classList.toggle("open");if(f.classList.contains("open"))f.t.focus()}
+function editar(c){const f=$("f-"+c);if(!f)return;if(!temConta()&&!f.classList.contains("open")){needAccount();return}f.classList.toggle("open");if(f.classList.contains("open"))f.t.focus()}
 async function enviar(ev,c){ev.preventDefault();const f=ev.target,m=MEMES.find(x=>x.id===decodeURIComponent(location.hash.slice(1)));if(!m)return;
-  if(!NS.acct){needAccount();return}
+  if(!temConta()){needAccount();return}
   const texto=f.t.value.trim(),fonte=f.fonte.value.trim(),out=f.querySelector(".msg"),bt=f.querySelector("button[type=submit]");
   if(texto.length<10){out.textContent="Escreva pelo menos 10 caracteres.";return}
   bt.disabled=true;out.textContent="Enviando…";
-  let ok=false;try{const r=await fetch("/api/memepedia",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({id:m.id,campo:c,texto,fonte,autor:NS.acct.user,"bot-field":f["bot-field"].value})});ok=r.ok;if(!r.ok&&r.status!==404&&r.status<500){const j=await r.json().catch(()=>null);out.textContent=(j&&j.erro)||"Não deu para enviar.";bt.disabled=false;return}}catch(e){}
-  NS.wikiSugs=NS.wikiSugs||[];NS.wikiSugs.push({id:"w"+Date.now(),meme:m.id,t:m.t,campo:c,texto,fonte,by:NS.acct.user,status:"pending",online:ok,ts:Date.now()});nsSave();
+  let ok=false;try{const r=await fetch("/api/memepedia",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({id:m.id,campo:c,texto,fonte,autor:meuApelido(),"bot-field":f["bot-field"].value})});ok=r.ok;if(!r.ok&&r.status!==404&&r.status<500){const j=await r.json().catch(()=>null);out.textContent=(j&&j.erro)||"Não deu para enviar.";bt.disabled=false;return}}catch(e){}
+  NS.wikiSugs=NS.wikiSugs||[];NS.wikiSugs.push({id:"w"+Date.now(),meme:m.id,t:m.t,campo:c,texto,fonte,by:meuApelido(),status:"pending",online:ok,ts:Date.now()});nsSave();
   bt.disabled=false;f.reset();f.classList.remove("open");
   toast(ok?"Enviado! Um moderador vai revisar antes de publicar.":"Salvo neste navegador. Vai para a moderação quando o site estiver no ar.",3600);
 }
