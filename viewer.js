@@ -121,7 +121,7 @@ function videoPage(m,rel){
 // ---- página da foto por rede social ----
 function photoPage(m,rel){
   const k=pEra(m.y),T=escapeHtml(m.t);
-  const img=m.img?`<img class="pimg" src="${escapeHtml(m.img)}" alt="${T}">`:`<div class="pimg ph" style="background:${vpGrad(m.t)}">${m.art||""}<small>foto do acervo</small></div>`;
+  const img=m.img?`<img class="pimg" src="${escapeHtml(m.img)}" alt="${T}" referrerpolicy="no-referrer">`:`<div class="pimg ph" style="background:${vpGrad(m.t)}">${m.art||""}<small>foto do acervo</small></div>`;
   const x=`<button class="vx" data-act="close" title="Fechar (Esc)">${icon("xmark")}</button>`;
   if(k==="fotolog")return`<div class="pg fotolog"><header><b class="fl">fotolog</b><span>${CANAL.toLowerCase().replace(" ","")}</span>${x}</header>
     <div class="flw"><main><div class="fr">${img}</div><h2>${T}</h2><p class="fx">${descTxt(m)}<br><i>~*~ postado em ${dNum(m.date)} ~*~ flash no espelho não ~*~</i></p>

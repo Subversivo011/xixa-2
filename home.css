@@ -163,3 +163,67 @@ button:hover>.thumb>.play,button:hover>.ct>.play,.tthumb:hover>.play,.card:hover
 .sd h6 .horns{top:-4px}
 .sd-logo .horns{top:3px;width:105%}
 .sd h6 .horns{top:-6px;width:150%}
+/* linha do tempo: navegação no próprio ano (só aparece no celular) */
+.cur-h .mnav,.mfoot{display:none}
+@media(max-width:860px){
+  .timeline{padding:16px 0 18px;border-radius:22px;overflow:hidden}
+  .timeline>.sec-title{padding:0 16px;margin-bottom:6px}
+  .timeline>.sec-title>span{font-size:11px;letter-spacing:1px}
+  .timeline>.sec-title a{font-size:12px;padding:4px 8px}
+  /* anos: faixa de pílulas que desliza com o dedo */
+  .years{gap:8px;padding:8px 16px 12px;justify-content:flex-start;scroll-snap-type:x proximity;scrollbar-width:none;-webkit-mask:linear-gradient(90deg,transparent,#000 16px,#000 calc(100% - 16px),transparent);mask:linear-gradient(90deg,transparent,#000 16px,#000 calc(100% - 16px),transparent)}
+  .years::-webkit-scrollbar{display:none}
+  .years::before{display:none}
+  .y{flex:0 0 auto;min-width:0;padding:8px 14px;border-radius:99px;font-size:15px;background:var(--sunk);box-shadow:0 0 0 1px var(--line);scroll-snap-align:center;color:var(--mut)}
+  .y::after{display:none}
+  .y.on{font-size:15px;background:var(--brand);color:#fff;box-shadow:0 4px 14px var(--glow)}
+  .stage{display:block;margin:0}
+  .side{display:none!important}
+  .cur{display:block;margin:0 12px;padding:16px 14px 14px;border-radius:18px}
+  .cur-h{display:grid;grid-template-columns:44px 1fr 44px;align-items:center;gap:8px;text-align:center}
+  .cur-h .mnav{display:grid;place-items:center;width:44px;height:44px;border-radius:50%;font-size:26px;line-height:1;background:var(--panel);box-shadow:0 0 0 1px var(--line);color:var(--brand)}
+  .cur-h .mnav:active{background:var(--brand);color:#fff}
+  .cur-h .mnav:disabled{opacity:.3}
+  .cur h2{font-size:40px;line-height:1}
+  .cur .lema{font-size:16px;margin-top:2px}
+  .cur p{text-align:center;font-size:13px;margin:10px 4px 14px}
+  .cur .dexp{display:none}
+  /* memes do ano: carrossel deslizante */
+  .mini{display:flex;gap:10px;overflow-x:auto;scroll-snap-type:x mandatory;margin:0 -14px;padding:2px 14px 10px;scrollbar-width:none}
+  .mini::-webkit-scrollbar{display:none}
+  .mini .card{flex:0 0 68%;scroll-snap-align:start}
+  .mini .card:hover{transform:none}
+  .mfoot{display:flex;flex-direction:column;align-items:center;gap:12px;margin-top:6px}
+  .mdots{display:flex;gap:4px;flex-wrap:wrap;justify-content:center}
+  .mdots i{width:6px;height:6px;border-radius:99px;background:var(--line2);transition:width .2s}
+  .mdots i.on{width:18px;background:var(--brand)}
+  .mexp{width:100%;justify-content:center}
+}
+/* celular: modais e ranking */
+.box .body>h2{padding-right:46px}
+@media(max-width:600px){
+  .box{max-height:calc(100vh - 20px);border-radius:16px}
+  .modal{padding:10px}
+  .box h2{font-size:24px;line-height:1.1}
+  .box h2 .ico.h{width:22px;height:22px}
+  .rk{grid-template-columns:20px 32px minmax(0,1fr) auto;gap:8px;padding:9px 2px}
+  .rk>small{display:none}
+  .rk>span:nth-child(3){display:flex;flex-wrap:wrap;align-items:center;gap:3px 4px;font-weight:600}
+  .rk .pt{margin-left:0;font-size:9px;padding:1px 6px}
+  .rk em{font-size:15px;white-space:nowrap}
+  .f .two{grid-template-columns:1fr}
+  .xclose{width:36px;height:36px;top:8px;right:8px}
+  .chips{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;margin:0 -14px 14px;padding:0 14px}
+  .chips::-webkit-scrollbar{display:none}
+  .chip{flex:none}
+  .grid{grid-template-columns:1fr 1fr;gap:12px}
+  .meta h3{font-size:13.5px}
+}
+/* logo sobe.desce: sem traço interno (contorno feito com sombra, uniforme) */
+.sd-logo,.sd-logo i,.sd-logo .su,.sd-logo .de{-webkit-text-stroke:0!important}
+.sd-logo .su{text-shadow:1.5px 0 #0b4fa0,-1.5px 0 #0b4fa0,0 1.5px #0b4fa0,0 -1.5px #0b4fa0,1px 1px #0b4fa0,-1px -1px #0b4fa0,1px -1px #0b4fa0,-1px 1px #0b4fa0,0 3px 0 #0b4fa055}
+.sd-logo i{text-shadow:1.5px 0 #4a5568,-1.5px 0 #4a5568,0 1.5px #4a5568,0 -1.5px #4a5568}
+.sd-logo .de{text-shadow:1.5px 0 #8a0f12,-1.5px 0 #8a0f12,0 1.5px #8a0f12,0 -1.5px #8a0f12,1px 1px #8a0f12,-1px -1px #8a0f12,1px -1px #8a0f12,-1px 1px #8a0f12,0 3px 0 #8a0f1255,0 0 16px #ff3b2f55}
+:root[data-theme="dark"] .sd-logo .su{text-shadow:0 0 14px #2a8fe066}
+:root[data-theme="dark"] .sd-logo .de{text-shadow:0 0 14px #ff3b2f88}
+:root[data-theme="dark"] .sd-logo i{text-shadow:none}

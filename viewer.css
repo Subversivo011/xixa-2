@@ -324,3 +324,23 @@ body.vw-open{overflow:hidden}
 .vw-win .pimg{display:block;width:100%;max-height:340px;object-fit:cover}
 .vw-win .pimg.ph{aspect-ratio:auto;height:300px;max-height:300px}
 .vw-win .fr{max-width:100%}
+/* celular: cabeçalhos de época numa linha só, sem barra de busca decorativa */
+@media(max-width:700px){
+  .vw-win .yh1 .sr,.vw-win .yh2 .sr,.vw-win .yh3 .sr,.vw-win .yh4 .sr,.vw-win .yh5 .sr,.vw-win .yh2 .up,.vw-win .yh3 .up,.vw-win .yh4 .lk>i,.vw-win .yh5 .lk>i{display:none!important}
+  .vw-win .yh2,.vw-win .yh3,.vw-win .yh4,.vw-win .yh5{flex-wrap:nowrap;justify-content:space-between;padding:8px 12px}
+  .vw-win .yh1 .t1{flex-wrap:nowrap}
+  .vw-win .yh1 .lk a{display:none}
+  .vw-win .yh1 .lk{font-size:0}
+  .vw-win .yl{height:24px}
+  .vw-win .lk{display:flex;align-items:center;gap:6px;margin-left:auto}
+  .vw-win h1{font-size:18px!important;line-height:1.25}
+  .vw-win .vbs .vb{flex:1}
+  .vw-win .xtb span:first-child{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .vw-win .xmn{overflow:hidden;white-space:nowrap}
+  .lan{top:auto!important;bottom:12px!important;right:auto!important;left:12px!important;padding:4px 8px;font-size:9px!important;flex-direction:row;gap:8px;align-items:center}
+  .lan>span:nth-of-type(1),.lan>small{display:none}
+  .etoast{left:10px;right:10px;bottom:10px;max-width:none}
+  .dial>div{width:calc(100vw - 28px)!important;max-width:360px}
+}
+@media(max-width:700px){.vw-e0 .lan{bottom:46px!important}}
+.vw-win img.pimg{object-fit:contain;background:#00000010}
