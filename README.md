@@ -496,6 +496,8 @@ naosalvo-2/
 ├── data.js                 # MEMES (59), YEAR_INFO (2004 a 2020+) e COLLECTIONS (8 coleções, 109 cartas)
 ├── player.js               # Player do YouTube
 ├── viewer.js / viewer.css  # Tela de vídeo e foto no visual de cada época, votos e sons
+├── alertas.js              # Alertas de época sorteados no player (MSN, Orkut, WhatsApp, Pix…)
+├── sons/                   # MP3 opcionais dos alertas (ver sons/LEIA-ME.md); sem arquivo, o som é sintetizado
 ├── theme.css               # Tokens de cor, tema claro/escuro, cabeçalho, menus e rodapé
 ├── home.css                # Estilos dos blocos da home
 ├── album.css               # Estilos do álbum e da abertura de pacotes

@@ -209,6 +209,7 @@ function openViewer(m,opt={}){
   paint();
   loadVotes(m.id).then(d=>{if(d&&VW&&VW.m===m){tot=d;paint()}});
   if(isPhoto)initComments(el,m);
+  if(isPhoto)VW.toastT=setTimeout(()=>{if(VW&&VW.m===m&&typeof alertaDaEpoca==="function")alertaDaEpoca(el,m,true)},2500);
   async function vote(v){const mine=myVote(m.id),from=mine.v,to=from===v?0:v;mine.v=to;nsSave();sndClick();
     if(tot.local)tot=localTotals(m.id);else{if(from===1)tot.up--;if(from===-1)tot.down--;if(to===1)tot.up++;if(to===-1)tot.down++}
     paint();const r=await sendVote(m.id,{from,to});if(r&&VW&&VW.m===m){tot=r;paint()}}
@@ -222,7 +223,7 @@ function openViewer(m,opt={}){
     // imersão: discada, lan house, avisos da época
     const hooks={};
     if(discada(m.y))hooks.beforeStart=()=>dialUp(el);
-    const tz=TOAST(m.y);if(tz)hooks.onPlay=()=>{if(VW.toasted)return;VW.toasted=1;VW.toastT=setTimeout(()=>{if(!VW)return;tz.s();const t=document.createElement("div");t.className="etoast "+tz.t;t.innerHTML=`<b>${tz.t==="msn"?icon("user","in"):tz.t==="scrap"?icon("comment","in"):icon("comment","in")}</b><span>${tz.h}</span>`;el.appendChild(t);setTimeout(()=>t.remove(),6500)},4000)};
+    hooks.onPlay=()=>{if(!VW||VW.toasted)return;VW.toasted=1;VW.toastT=setTimeout(()=>{if(VW&&VW.m===m&&typeof alertaDaEpoca==="function")alertaDaEpoca(el,m,false)},4000)};
     VW.player=initPlayer(el.querySelector(".vp"),m,rel,id=>opt.onPick&&opt.onPick(id),hooks);
     if(lanhouse(m.y)){const b=document.createElement("div");b.className="lan";let s=29*60+59;b.innerHTML=`<b>LAN HOUSE</b><span>Máquina 07</span><span class="lt"></span><small>R$ 1,50/hora</small>`;el.appendChild(b);const lt=b.querySelector(".lt");
       const tick=()=>{lt.textContent="Tempo restante "+String(Math.floor(s/60)).padStart(2,"0")+":"+String(s%60).padStart(2,"0");if(s>0)s--};tick();VW.clock=setInterval(tick,1000)}
