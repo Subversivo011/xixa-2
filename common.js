@@ -97,7 +97,7 @@ function sgShuffle(){sgO={fur:rnd(SG.fur.length),pat:rnd(SG.pat.length),eye:rnd(
 const NS_KEY="naosalvo2_state";
 
 // ---- Economia: o servidor é a autoridade (moedas, XP, patente, cartas, pacotes) ----
-// O navegador só mostra o que a API devolve (api-cliente.js). Nada de economia é calculado nem guardado aqui.
+// O navegador só mostra o que a API devolve (cliente-economia.js). Nada de economia é calculado nem guardado aqui.
 const RARITIES=["Comum","Relevante","Raro","Relíquia","Lendário","Mítico"];
 
 // ---- Patentes: só para mostrar a lista e liberar telas do protótipo (a patente do usuário vem do servidor) ----
@@ -157,7 +157,7 @@ function avisoEconomiaOff(on){
 async function iniciarEconomia(){
   if(economiaEmCurso)return;economiaEmCurso=true;
   try{
-    try{await carregarSessao()}catch(e){if(e&&e.status===401)return;throw e} // 401: o api-cliente já redirecionou
+    try{await carregarSessao()}catch(e){if(e&&e.status===401)return;throw e} // 401: o cliente-economia já redirecionou
     if(!SESSAO)throw {status:0};
     try{await Api.visita()}catch(e){if(e&&e.status===401)return} // a visita do dia não derruba a tela se falhar
     await atualizarCarteira();
