@@ -58,7 +58,7 @@ async function login(perfil, { voltar = '/album.html', code = 'c' + Math.random(
   const sess = nome_valor(cb.cookies, 'ns_sessao');
   return { ini, cb, cookie: sess, token: sess && decodeURIComponent(sess.split('=')[1]), state };
 }
-const perfilDe = (id, nome = 'Fulano') => ({ id, username: nome.toLowerCase(), global_name: nome });
+const perfilDe = (id, nome = 'Fulano', avatar = undefined) => ({ id, username: nome.toLowerCase(), global_name: nome, ...(avatar !== undefined ? { avatar } : {}) });
 const eu = (cookie, extra = {}) => s.get('/api/eu', { headers: { Cookie: cookie, ...extra } });
 const csrfDe = async (cookie) => (await eu(cookie)).json.csrf;
 let idDc = 100000;
@@ -320,4 +320,65 @@ test('economia com a sessão do login: carteira e visita funcionam (o stub não 
   const c = await s.get('/api/carteira', { headers: { Cookie: r.cookie } });
   assert.equal(c.json.xp, 10); assert.equal(c.json.usuario.apelido, 'Economia_Real');
   assert.equal((await eu(r.cookie)).json.xp, 10);
+});
+
+// ---- foto de perfil ----
+const avatarDoBanco = async (id) => (await q("SELECT avatar_url FROM contas_oauth WHERE provedor = 'discord' AND provedor_id = $1", [id]))[0].avatar_url;
+
+test('foto de perfil: login com avatar grava a URL montada no servidor e /api/eu devolve', { skip }, async () => {
+  const id = novoId();
+  const r = await login(perfilDe(id, 'Com Foto', 'abc123def456'));
+  const esperada = `https://cdn.discordapp.com/avatars/${id}/abc123def456.png?size=128`;
+  assert.equal(await avatarDoBanco(id), esperada);
+  assert.equal((await eu(r.cookie)).json.usuario.avatar_url, esperada);
+});
+
+test('foto de perfil: sem avatar (null ou campo ausente) = null no banco e em /api/eu; nunca avatar padrão', { skip }, async () => {
+  for (const av of [null, undefined]) {
+    const id = novoId();
+    const r = await login(perfilDe(id, 'Sem Foto', av));
+    assert.equal(await avatarDoBanco(id), null);
+    const e = (await eu(r.cookie)).json;
+    assert.equal(e.usuario.avatar_url, null);
+    assert.ok(e.usuario.avatar_gato.fur !== undefined, 'o gato continua lá');
+  }
+});
+
+test('foto de perfil: hash inválido ou malicioso vira null (nada de URL crua do Discord)', { skip }, async () => {
+  for (const ruim of ['../../x', 'ABC', 'a b', 'https://evil.com/a.png', 'x'.repeat(70)]) {
+    const id = novoId();
+    const r = await login(perfilDe(id, 'Hash Ruim', ruim));
+    assert.equal(r.cb.status, 302);
+    assert.ok(r.cookie, 'o login em si funciona');
+    assert.equal(await avatarDoBanco(id), null, ruim);
+    assert.equal((await eu(r.cookie)).json.usuario.avatar_url, null);
+  }
+});
+
+test('foto de perfil: trocou a foto no Discord, o próximo login atualiza; removeu a foto, volta a null', { skip }, async () => {
+  const id = novoId();
+  const a = await login(perfilDe(id, 'Troca Foto', 'aaaa1111'));
+  assert.match((await eu(a.cookie)).json.usuario.avatar_url, /\/aaaa1111\.png\?size=128$/);
+  const b = await login(perfilDe(id, 'Troca Foto', 'bbbb2222'));
+  assert.match((await eu(b.cookie)).json.usuario.avatar_url, /\/bbbb2222\.png\?size=128$/);
+  assert.equal((await q("SELECT count(*)::int AS n FROM contas_oauth WHERE provedor_id = $1", [id]))[0].n, 1);
+  const c = await login(perfilDe(id, 'Troca Foto', null));
+  assert.equal((await eu(c.cookie)).json.usuario.avatar_url, null);
+});
+
+test('foto de perfil: nenhum parâmetro do cliente altera avatar_url', { skip }, async () => {
+  const id = novoId();
+  const r = await login(perfilDe(id, 'Sem Injecao', 'cccc3333'));
+  const antes = await avatarDoBanco(id);
+  const csrf = await csrfDe(r.cookie);
+  await s.post('/api/visita', { avatar_url: 'https://evil.com/x.png' }, { headers: { Cookie: r.cookie, 'X-CSRF': csrf } });
+  await s.get('/api/eu?avatar_url=https://evil.com/x.png', { headers: { Cookie: r.cookie } });
+  await s.get('/api/auth/discord?avatar_url=https://evil.com/x.png&voltar=/', { headers: ip() });
+  assert.equal(await avatarDoBanco(id), antes);
+  assert.equal((await eu(r.cookie, { 'X-Avatar-Url': 'https://evil.com/x.png' })).json.usuario.avatar_url, antes);
+});
+
+test('usuário do stub (sem conta Discord): avatar_url null', { skip }, async () => {
+  const stubUser = await s.get('/api/eu', { headers: { 'X-Test-User': 'stub-sem-foto' } });
+  assert.equal(stubUser.status, 200); assert.equal(stubUser.json.usuario.avatar_url, null);
 });
