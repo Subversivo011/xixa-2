@@ -484,3 +484,8 @@ body.vw-open{overflow:hidden}
 @media(max-width:700px){.etoast{left:10px;right:10px;bottom:10px;max-width:none;min-width:0}}
 [data-act="share"]{cursor:pointer}
 .xrt .xsh{margin-top:8px;display:inline-flex;align-items:center;gap:4px;font:11px Tahoma,Arial,sans-serif;padding:3px 10px;background:linear-gradient(#fff,#e3e3db);border:1px solid #7f9db9;border-radius:3px;cursor:pointer}
+/* aviso do envio de link (vale também no álbum) */
+.vw .lbx .chk{margin-top:6px;padding:7px 9px;border-radius:4px;font-size:12px;border:1px solid #bbb;background:#f6f6f6;color:#333}
+.vw .lbx .chk.ok{border-color:#2f9a2a;background:#eaf7e8;color:#1d6b19}
+.vw .lbx .chk.bad{border-color:#c33;background:#fdeaea;color:#a11}
+.vw .lbx .chk.warn{border-color:#c90;background:#fff6e0;color:#8a5a00}

@@ -45,6 +45,16 @@ await pool.query(`
     criado_em TIMESTAMPTZ NOT NULL DEFAULT now()
   );
   CREATE INDEX IF NOT EXISTS comentarios_meme_idx ON comentarios (meme_id, criado_em);
+  CREATE TABLE IF NOT EXISTS links_sugeridos (
+    id          BIGSERIAL PRIMARY KEY,
+    meme_id     TEXT NOT NULL,
+    yt          TEXT NOT NULL,
+    autor       TEXT NOT NULL,
+    status      TEXT NOT NULL DEFAULT 'pendente',
+    criado_em   TIMESTAMPTZ NOT NULL DEFAULT now(),
+    revisado_em TIMESTAMPTZ
+  );
+  CREATE UNIQUE INDEX IF NOT EXISTS links_sugeridos_unico ON links_sugeridos (meme_id, yt);
 `);
 
 const VOTE_ID = /^[a-z0-9-]{1,80}$/;
@@ -268,6 +278,28 @@ const server = http.createServer(async (req, res) => {
       return send(res, 201, { id: +rows[0].id, autor, texto, em: rows[0].criado_em });
     }
 
+    // links do YouTube enviados pela comunidade para vídeos sem original (moderador aprova no /dashboard/)
+    if (req.method === 'GET' && url.pathname === '/api/links/aprovados') {
+      const { rows } = await pool.query(
+        "SELECT DISTINCT ON (meme_id) meme_id, yt FROM links_sugeridos WHERE status = 'aprovado' ORDER BY meme_id, revisado_em DESC");
+      const out = {}; rows.forEach((r) => { out[r.meme_id] = r.yt; });
+      return send(res, 200, out, { 'Cache-Control': 'public, max-age=120' });
+    }
+
+    if (req.method === 'POST' && url.pathname === '/api/links') {
+      if (limited('l:' + ip, 10)) return send(res, 429, { erro: 'Muitos envios seguidos. Aguarde um pouco.' });
+      let b;
+      try { b = JSON.parse(await readBody(req)); } catch { return send(res, 400, { erro: 'json inválido' }); }
+      if (b['bot-field']) return send(res, 201, { ok: true });
+      const id = String(b.id || ''), yt = String(b.yt || ''), autor = clean(b.autor, 20);
+      if (!VOTE_ID.test(id)) return send(res, 400, { erro: 'id inválido' });
+      if (!/^[\w-]{11}$/.test(yt)) return send(res, 422, { erro: 'Link do YouTube inválido.' });
+      if (!/^[\w.\-]{3,20}$/.test(autor)) return send(res, 422, { erro: 'Nome de usuário inválido.' });
+      const r = await pool.query(
+        'INSERT INTO links_sugeridos (meme_id, yt, autor) VALUES ($1,$2,$3) ON CONFLICT (meme_id, yt) DO NOTHING RETURNING id', [id, yt, autor]);
+      return send(res, r.rowCount ? 201 : 200, { ok: true, repetido: !r.rowCount });
+    }
+
     if (url.pathname.startsWith('/api/admin/')) {
       if (!isAdmin(req)) return send(res, 401, { error: 'Token inválido.' }, { 'WWW-Authenticate': 'Bearer' });
 
@@ -298,6 +330,19 @@ const server = http.createServer(async (req, res) => {
       const delCm = url.pathname.match(/^\/api\/admin\/comentarios\/(\d+)$/);
       if (req.method === 'DELETE' && delCm) {
         const r = await pool.query('DELETE FROM comentarios WHERE id = $1', [delCm[1]]);
+        return send(res, r.rowCount ? 200 : 404, { ok: !!r.rowCount });
+      }
+      if (req.method === 'GET' && url.pathname === '/api/admin/links') {
+        const { rows } = await pool.query('SELECT * FROM links_sugeridos ORDER BY (status = \'pendente\') DESC, criado_em DESC LIMIT 1000');
+        return send(res, 200, { items: rows });
+      }
+      const revLk = url.pathname.match(/^\/api\/admin\/links\/(\d+)$/);
+      if (req.method === 'POST' && revLk) {
+        let b;
+        try { b = JSON.parse(await readBody(req)); } catch { return send(res, 400, { erro: 'json inválido' }); }
+        const st = b.status === 'aprovado' ? 'aprovado' : b.status === 'recusado' ? 'recusado' : null;
+        if (!st) return send(res, 400, { erro: 'status inválido' });
+        const r = await pool.query('UPDATE links_sugeridos SET status = $1, revisado_em = now() WHERE id = $2', [st, revLk[1]]);
         return send(res, r.rowCount ? 200 : 404, { ok: !!r.rowCount });
       }
       if (req.method === 'GET' && url.pathname === '/api/admin/feedback') {

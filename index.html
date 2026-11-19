@@ -8,8 +8,8 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preconnect" href="https://i.ytimg.com">
 <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Inter:wght@400;500;600;700&family=Baloo+2:wght@700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="theme.css?v=20261119a">
-<link rel="stylesheet" href="viewer.css?v=20261119c">
+<link rel="stylesheet" href="theme.css?v=20261119d">
+<link rel="stylesheet" href="viewer.css?v=20261119d">
 <script>try{var t=localStorage.getItem("ns_theme")}catch(e){}document.documentElement.dataset.theme=t==="dark"?"dark":"light"</script>
 <style>
 main{padding:24px 28px 60px;max-width:1280px;margin:0 auto}
@@ -159,7 +159,7 @@ main{display:flex;flex-direction:column}
 .top,.cur{grid-template-columns:1fr}.stage{grid-template-columns:1fr}.side{display:none}.facts{grid-template-columns:1fr 1fr}.rail{grid-template-columns:1fr 1fr}.rail .card:nth-child(3){display:none}main{padding:16px 14px 40px}}
 @media(max-width:600px){.f .two{grid-template-columns:1fr}.today{grid-template-columns:110px 1fr}.box .body{padding:16px}}
 </style>
-<link rel="stylesheet" href="home.css?v=20261119a">
+<link rel="stylesheet" href="home.css?v=20261119d">
 </head>
 <body class="home">
 <div class="rays-wrap" aria-hidden="true"><div class="rays" id="rays"></div></div>
@@ -213,11 +213,11 @@ main{display:flex;flex-direction:column}
 <div class="modal" id="modal" onclick="if(event.target===this)closeM()"><div class="box" id="box"></div></div>
 
 <form name="feedback" data-netlify="true" netlify-honeypot="bot-field" hidden><input name="tipo"><textarea name="msg"></textarea><input name="contato"><input name="pagina"><input name="bot-field"></form>
-<script src="common.js?v=20261119a"></script>
-<script src="data.js?v=20261119c"></script>
-<script src="player.js?v=20261119c"></script>
-<script src="viewer.js?v=20261119c"></script>
-<script src="alertas.js?v=20261119b"></script>
+<script src="common.js?v=20261119d"></script>
+<script src="data.js?v=20261119d"></script>
+<script src="player.js?v=20261119d"></script>
+<script src="viewer.js?v=20261119d"></script>
+<script src="alertas.js?v=20261119d"></script>
 <script>
 renderHeader("inicio",{search:true,sub:[]});
 document.querySelectorAll("[data-ic]").forEach(e=>e.outerHTML=icon(e.dataset.ic));
@@ -446,10 +446,21 @@ function openMod(){
   $("box").className="box";
   $("box").innerHTML=`<div class="body"><h2 class="disp">${icon("moderation","h")}Fila de moderação</h2><p>Quem tem patente mais alta modera quem tem patente mais baixa. Cada moderação vale +15 XP.</p>
   ${mine.length?`<h4 class="h4">SEUS ENVIOS</h4>${mine.map(s=>`<div class="mine"><span>${icon(CAT_IC[s.c]||"video","in")}${escapeHtml(s.t)} <small>(${s.ticket})</small></span><span class="st-${s.status}">${s.status==="approved"?"aprovado · +"+REWARD.approved+" moedas":"aguardando moderação"}</span></div>`).join("")}<div style="height:14px"></div>`:""}
+  ${linksQ(canMod)}
   <h4 class="h4">ENVIOS DA COMUNIDADE</h4>${qs}
   <button class="btn ghost" onclick="closeM()" style="margin-top:6px">Fechar</button></div>`;
   $("modal").classList.add("open");
 }
+// links do YouTube enviados para vídeos sem original (no site real, o moderador aprova em /dashboard/)
+function linksQ(canMod){
+  const L=(NS.linkSugs||[]).slice().reverse();if(!L.length)return"";
+  return `<h4 class="h4">LINKS DE VÍDEO ENVIADOS</h4>${L.map(x=>`<div class="q ${x.status!=="pending"?"done":""}"><h4>${icon("link","in")}${escapeHtml(x.t)}</h4>
+    <div class="by">por <b>${escapeHtml(x.by)}</b> · <a href="https://www.youtube.com/watch?v=${x.yt}" target="_blank" rel="noopener">youtu.be/${x.yt}</a></div>
+    <div class="act">${x.status==="ok"?'<span class="st-approved">Aprovado: o vídeo já aparece no acervo</span>':x.status==="no"?'<span class="st-pending">Recusado</span>':canMod?`<button class="btn" onclick="moderarLink('${x.id}','ok')">${icon("check")}Aprovar</button><button class="btn ghost" onclick="moderarLink('${x.id}','no')">${icon("xmark")}Recusar</button>`:`<span style="font-size:12px;color:var(--mut)">${icon("clock","in")}Aguardando um moderador</span>`}</div></div>`).join("")}`;
+}
+function moderarLink(id,v){const x=(NS.linkSugs||[]).find(z=>z.id===id);if(!x)return;x.status=v;
+  if(v==="ok"){NS.links[x.meme]="https://youtu.be/"+x.yt;if(NS.acct&&x.by===NS.acct.user){NS.coins+=REWARD.oldLink;addXP(XP_GAIN.oldLink)}}
+  nsSave();addXP(15);buildAll();renderAll();openMod();toast(v==="ok"?"Link aprovado: o vídeo entrou no acervo.":"Link recusado.")}
 function moderate(id,v){NS.modDone[id]=v;NS.modDoneAt=NS.modDoneAt||{};NS.modDoneAt[id]=nsToday();nsSave();addXP(15);buildAll();renderAll();openMod();toast(v==="ok"?"Aprovado e adicionado ao acervo":"Recusado")}
 
 // ---- Ranking da galera ----

@@ -71,7 +71,7 @@ const headBar=e=>{
   return`<header class="yh5"><i class="mn">${icon("menu")}</i>${logo}<div class="sr"><input placeholder="Pesquisar"><button>${icon("search")}</button><i class="mc">${icon("mic")}</i></div><div class="lk"><i>${icon("upload")}</i><i>${icon("bell")}</i>${snd}${x}</div></header>`;
 };
 const btns=y=>`<div class="vbs"><button class="vb" data-act="year">Ver o ano ${y}</button><button class="vb sec" data-act="close">Fechar</button></div>`;
-const linkBox=m=>m.yt||m.url?"":`<div class="lbx"><b>Este viral ainda está sem o vídeo original.</b> Tem o link? Salve aqui e ganhe +${REWARD.oldLink} moedas.<div class="in"><input class="ol" placeholder="https://youtube.com/watch?v=…"><button data-act="savelink">Salvar</button></div><div class="olm"></div></div>`;
+const linkBox=m=>m.yt?"":`<div class="lbx"><b>Vídeo original não encontrado.</b> Conhece o link no YouTube? Envie para a moderação conferir. Se for aprovado, você ganha +${REWARD.oldLink} moedas.<div class="in"><input class="ol" placeholder="https://youtube.com/watch?v=…"><button data-act="savelink">Enviar para a moderação</button></div><div class="olm"></div></div>`;
 const descTxt=m=>escapeHtml(m.d||"");
 
 // ---- notas: estrelas (2004–2009) ou curtidas (2010+) ----
@@ -178,6 +178,25 @@ function initComments(el,m){
   loadCmts(m.id).then(d=>{if(d&&VW&&VW.m===m){online=true;list=d.concat(localCmts(m.id).filter(c=>c.local));render()}});
 }
 
+// ---- links sugeridos pela comunidade (moderador aprova) ----
+function ytDoLink(u){u=(u||"").trim();if(!u)return"";try{const x=new URL(/^https?:\/\//i.test(u)?u:"https://"+u);const h=x.hostname.replace(/^(www|m|mobile|music)\./,"");const p=x.pathname.replace(/\/+$/,"");
+  let id="";if(h==="youtu.be")id=p.slice(1);else if(h.endsWith("youtube.com")){id=x.searchParams.get("v")||"";const mm=p.match(/\/(shorts|embed|live|v)\/([\w-]{11})/);if(!id&&mm)id=mm[2]}
+  id=(id||"").slice(0,11);return /^[\w-]{11}$/.test(id)?id:""}catch(e){return""}}
+function enviarLinkSugerido(m,u){
+  if(!NS.acct){needAccount();return'<div class="chk bad">Entre na sua conta para enviar o link.</div>'}
+  const yt=ytDoLink(u);if(!yt)return'<div class="chk bad">Cole um link do YouTube (youtube.com/watch?v=… ou youtu.be/…).</div>';
+  NS.linkSugs=NS.linkSugs||[];
+  if(NS.linkSugs.some(x=>x.meme===m.id&&x.yt===yt))return'<div class="chk warn">Você já enviou esse link. Ele está na fila da moderação.</div>';
+  const sug={id:"l"+Date.now(),meme:m.id,t:m.t,yt,by:NS.acct.user,status:"pending",ts:Date.now()};
+  return apiPost("/api/links",{id:m.id,yt,autor:NS.acct.user,"bot-field":""}).then(r=>{sug.online=!!r;NS.linkSugs.push(sug);nsSave();
+    return`<div class="chk ok">Link enviado! Um moderador vai conferir${r?"":" (salvo neste navegador até o site estar no ar)"}. Se for aprovado, o vídeo aparece aqui e você ganha +${REWARD.oldLink} moedas.</div>`});
+}
+// links aprovados pelos moderadores entram no acervo para todo mundo
+const LINKS_OK={};
+apiGet("/api/links/aprovados").then(d=>{if(!d||typeof d!=="object")return;let n=0;
+  for(const [id,yt] of Object.entries(d)){if(!/^[\w-]{11}$/.test(yt))continue;LINKS_OK[id]=yt;const m=(typeof MEMES!=="undefined"?MEMES:[]).find(x=>x.id===id);if(m&&!m.yt){m.yt=yt;n++}}
+  if(n&&typeof buildAll==="function"){buildAll();if(typeof renderAll==="function")renderAll()}});
+
 // compartilhar: sempre o link do vídeo original no YouTube
 async function compartilharYT(m){
   if(!m.yt){toast("Este meme ainda não tem o vídeo original do YouTube.",2800);return}
@@ -205,7 +224,8 @@ function openViewer(m,opt={}){
     else if(act==="year"){const y=m.y;closeViewer();opt.onYear&&opt.onYear(y)}
     else if(act==="share")compartilharYT(m);
     else if(act==="snd"){SND.on=!SND.on;try{localStorage.setItem("ns_snd",SND.on?"1":"0")}catch(e){}a.innerHTML=icon(SND.on?"volume":"mute")+"<span>Sons da época</span>"}
-    else if(act==="savelink"){const u=el.querySelector(".ol").value.trim(),r=opt.onSaveLink?opt.onSaveLink(u):"";el.querySelector(".olm").innerHTML=r||""}
+    else if(act==="savelink"){const u=el.querySelector(".ol").value.trim(),out=el.querySelector(".olm");const r=enviarLinkSugerido(m,u);
+      if(r&&r.then){out.innerHTML='<div class="chk">Enviando…</div>';r.then(h=>{out.innerHTML=h||"";if(h&&h.includes("chk ok"))el.querySelector(".ol").value=""})}else out.innerHTML=r||""}
     else if(a.dataset.like){vote(+a.dataset.like)}
     else if(a.dataset.star){rate(+a.dataset.star)}
   });
