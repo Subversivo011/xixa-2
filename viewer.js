@@ -77,7 +77,7 @@ const headBar=e=>{
   return`<header class="yh5"><i class="mn">${icon("menu")}</i>${logo}<div class="sr"><input placeholder="Pesquisar"><button>${icon("search")}</button><i class="mc">${icon("mic")}</i></div><div class="lk"><i>${icon("upload")}</i><i>${icon("bell")}</i>${snd}${x}</div></header>`;
 };
 const btns=y=>`<div class="vbs"><button class="vb" data-act="year">Ver o ano ${y}</button><button class="vb mp" data-act="wiki">${icon("book","in")}Memepédia</button><button class="vb sec" data-act="close">Fechar</button></div>`;
-const linkBox=m=>m.yt?"":`<div class="lbx"><b>Vídeo original não encontrado.</b> Conhece o link no YouTube? Envie para a moderação conferir. Se for aprovado, você ganha +${REWARD.oldLink} moedas.<div class="in"><input class="ol" placeholder="https://youtube.com/watch?v=…"><button data-act="savelink">Enviar para a moderação</button></div><div class="olm"></div></div>`;
+const linkBox=m=>m.yt?"":`<div class="lbx"><b>Vídeo original não encontrado.</b> Conhece o link no YouTube? Envie para a moderação conferir.<div class="in"><input class="ol" placeholder="https://youtube.com/watch?v=…"><button data-act="savelink">Enviar para a moderação</button></div><div class="olm"></div></div>`;
 const descTxt=m=>escapeHtml(m.d||"");
 
 // ---- notas: estrelas (2004–2009) ou curtidas (2010+) ----
@@ -208,7 +208,7 @@ function enviarLinkSugerido(m,u){
   if(NS.linkSugs.some(x=>x.meme===m.id&&x.yt===yt))return'<div class="chk warn">Você já enviou esse link. Ele está na fila da moderação.</div>';
   const sug={id:"l"+Date.now(),meme:m.id,t:m.t,yt,by:NS.acct.user,status:"pending",ts:Date.now()};
   return apiPost("/api/links",{id:m.id,yt,autor:NS.acct.user,"bot-field":""}).then(r=>{sug.online=!!r;NS.linkSugs.push(sug);nsSave();
-    return`<div class="chk ok">Link enviado! Um moderador vai conferir${r?"":" (salvo neste navegador até o site estar no ar)"}. Se for aprovado, o vídeo aparece aqui e você ganha +${REWARD.oldLink} moedas.</div>`});
+    return`<div class="chk ok">Link enviado! Um moderador vai conferir${r?"":" (salvo neste navegador até o site estar no ar)"}. Se for aprovado, o vídeo aparece aqui.</div>`});
 }
 // links aprovados pelos moderadores entram no acervo para todo mundo
 const LINKS_OK={};

@@ -608,9 +608,9 @@ function esconderJujuba(){
   if(getComputedStyle(el).position==="static")el.style.position="relative";
   const b=document.createElement("button");b.className="jjb";b.type="button";b.title="?";b.setAttribute("aria-label","Uma jujuba?");b.innerHTML=JUJUBA_SVG;
   b.style[j.canto[0]]="8px";b.style[j.canto[1]]="6px";
-  b.onclick=ev=>{ev.preventDefault();ev.stopPropagation();NS.jujuba=nsToday();NS.jujubas=(NS.jujubas||0)+1;NS.coins+=50;addXP(10);nsSave();renderWallet();
+  b.onclick=ev=>{ev.preventDefault();ev.stopPropagation();NS.jujuba=nsToday();NS.jujubas=(NS.jujubas||0)+1;nsSave();
     b.classList.add("pego");setTimeout(()=>b.remove(),700);
-    toast(NS.jujubas===1?"🍬 Você achou a jujuba escondida! +50 moedas. Amanhã ela se esconde em outro lugar do site.":`🍬 Jujuba nº ${NS.jujubas} encontrada! +50 moedas.`,4200)};
+    toast(NS.jujubas===1?"🍬 Você achou a jujuba escondida! Amanhã ela se esconde em outro lugar do site.":`🍬 Jujuba nº ${NS.jujubas} encontrada!`,4200)};
   el.appendChild(b);
 }
 if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",()=>setTimeout(esconderJujuba,400));else setTimeout(esconderJujuba,400);
