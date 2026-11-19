@@ -287,3 +287,8 @@ button:hover>.thumb>.play,button:hover>.ct>.play,.tthumb:hover>.play,.card:hover
 .jjb svg{width:100%;height:100%;display:block}
 .jjb.pego{animation:jjpop .7s ease forwards}
 @keyframes jjpop{40%{transform:scale(1.8) rotate(20deg);opacity:1}100%{transform:translateY(-60px) scale(.2);opacity:0}}
+/* faixa explicativa mais perto do rodapé (sem grudar) */
+.facts{margin-top:110px!important}
+main:has(.facts){padding-bottom:22px!important}
+body:has(main .facts) .nsft2{margin-top:22px!important}
+@media(max-width:760px){.facts{margin-top:70px!important}main:has(.facts){padding-bottom:16px!important}body:has(main .facts) .nsft2{margin-top:18px!important}}
