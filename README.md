@@ -624,6 +624,8 @@ Cadastro de quem quer ajudar o projeto, mais as rotas de votos, visualizações 
 ---
 
 ### 🤝 Como Contribuir
+**Créditos das imagens:** fotos de terceiros ficam hospedadas em `memes/` com crédito e fonte registrados em [`docs/CREDITOS-IMAGENS.md`](docs/CREDITOS-IMAGENS.md) (direitos dos autores originais; remoção sob pedido).
+
 **Contribuidores:** [@willianjack0](https://github.com/willianjack0) · [@Subversivo011](https://github.com/Subversivo011) (protótipo de telas, álbum e player).
 
 Consulte os responsáveis pelo repositório (`@SePPZAO`, `@cidcidoso`) para alinhamento nas issues e branches de desenvolvimento.

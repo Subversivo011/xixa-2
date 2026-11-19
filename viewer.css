@@ -344,3 +344,6 @@ body.vw-open{overflow:hidden}
 }
 @media(max-width:700px){.vw-e0 .lan{bottom:46px!important}}
 .vw-win img.pimg{object-fit:contain;background:#00000010}
+
+.pcred{display:block;margin-top:6px;font-size:12px;color:var(--mut);line-height:1.4}
+.pcred a{color:var(--brand-ink);text-underline-offset:2px}
