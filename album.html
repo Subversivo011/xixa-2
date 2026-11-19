@@ -2,14 +2,14 @@
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8">
-<script src="gate.js?v=20261119u"></script>
-<script src="cliente-economia.js?v=20261120b"></script>
+<script src="gate.js?v=20261120c"></script>
+<script src="cliente-economia.js?v=20261120c"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>NÃO SALVO — Álbum de Figurinhas da Internet</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Inter:wght@400;500;600;700&family=Baloo+2:wght@700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="theme.css?v=20261120a">
+<link rel="stylesheet" href="theme.css?v=20261120c">
 <link rel="stylesheet" href="viewer.css?v=20261120c">
 <script>try{var t=localStorage.getItem("ns_theme")}catch(e){}document.documentElement.dataset.theme=t==="dark"?"dark":"light"</script>
 <style>
@@ -195,10 +195,10 @@
 <div class="modal" id="modal" onclick="if(event.target===this)closeModal()"><div class="mbox" id="mbox"></div></div>
 
 <form name="feedback" data-netlify="true" netlify-honeypot="bot-field" hidden><input name="tipo"><textarea name="msg"></textarea><input name="contato"><input name="pagina"><input name="bot-field"></form>
-<script src="common.js?v=20261120b"></script>
+<script src="common.js?v=20261120c"></script>
 <script src="data.js?v=20261119q"></script>
 <script src="player.js?v=20261119n"></script>
-<script src="viewer.js?v=20261120c"></script>
+<script src="viewer.js?v=20261120d"></script>
 <script src="alertas.js?v=20261119n"></script>
 <script>
 renderHeader("album",{sub:[
@@ -298,6 +298,7 @@ function watch(id){const m=MEMES.find(x=>x.id===id);if(!m)return;closeModal();co
 // ---- moedas: repetida vira moeda (o servidor converte e paga) ----
 async function reciclarRepetidas(corpo){
   if(packOpen||abrindo)return;
+  if(ECO.convidado)return avisoLogin("converter repetidas");
   try{
     const r=await Api.reciclar(corpo);
     toast(`+${fmt(r.moedas_ganhas)} 🪙 (${r.convertidas} repetida${r.convertidas>1?"s":""} convertida${r.convertidas>1?"s":""})`);
@@ -315,8 +316,8 @@ const convertAll=()=>reciclarRepetidas({todas:true});
 // ---- pacotes (estoque vem de /api/carteira; sorteio e resultado vêm do servidor) ----
 const invCount=()=>(ECO.pacotes||[]).reduce((n,p)=>n+p.quantidade,0);
 function renderFab(){
-
   const n=invCount(),f=$("pfab");if(!f)return;
+  if(ECO.convidado){f.classList.add("empty");f.innerHTML=`<span class="pf-pack"><span class="pf-crimp"></span>${icon("pack")}<span class="pf-crimp b"></span></span><span class="pf-t"><b>Entre para jogar</b><small>álbum, moedas e pacotes precisam de conta</small></span>`;return}
   f.classList.toggle("empty",!n);
   f.innerHTML=`<span class="pf-pack"><span class="pf-crimp"></span>${icon("pack")}<span class="pf-crimp b"></span></span>
    <span class="pf-t"><b>${n?"Abrir pacote":"Sem pacotes"}</b><small>${n?`${n} ${n>1?"pacotes esperando":"pacote esperando"}`:"Próximo grátis amanhã · ver loja"}</small></span>${n?`<span class="pf-n">${n}</span>`:""}`;
@@ -324,6 +325,7 @@ function renderFab(){
 function bumpFab(){const f=$("pfab");f.classList.remove("bump");void f.offsetWidth;f.classList.add("bump")}
 function packFab(){
   if(abrindo||packOpen)return;
+  if(ECO.convidado)return avisoLogin("abrir pacotes");
   if(!economiaPronta()){if(ECO.indisponivel)iniciarEconomia();return}
   if(!invCount())return openShop();
   if(invCount()===1)return abrirTipo(ECO.pacotes[0].tipo,ECO.pacotes[0].colecao_id);
@@ -358,6 +360,7 @@ function packArt(a,colecaoId,mini){
 let abrindo=false;
 async function abrirTipo(tipo,colecaoId){
   if(abrindo||packOpen)return;
+  if(ECO.convidado)return avisoLogin("abrir pacotes");
   abrindo=true;holdWallet(true);
   let r;
   try{r=await Api.abrir({tipo,colecao_id:colecaoId||null})}
@@ -390,6 +393,7 @@ function checkAll(){const s=$("pkS"),b=$("pkB");if(!s||!b)return;const f=[...doc
 function revealAll(b){const f=[...document.querySelectorAll(".flip")];if(f.every(x=>x.classList.contains("f"))){closeModal();return}f.forEach((x,i)=>setTimeout(()=>flipOne(x),i*260))}
 
 async function openShop(){
+  if(ECO.convidado)return avisoLogin("comprar pacotes");
   if(!economiaPronta()){if(ECO.indisponivel)iniciarEconomia();return}
   if(!TIPOS.length)await carregarTipos();
   const lojaTipos=TIPOS.filter(p=>p.comprar);
@@ -411,6 +415,8 @@ document.addEventListener("keydown",e=>{if(e.key==="Escape")closeModal();if(docu
 function onAccountChange(){renderAll()}
 // chamado por renderWallet (common.js) a cada redesenho da carteira; durante a revelação renderWallet nem chega aqui
 function onWalletRendered(){renderCols()}
+// convidado: o álbum fica vazio e o aviso explica o porquê (sem redirecionar)
+function onConvidado(){renderAll();setTimeout(()=>toast("Entre para ver o seu álbum, as moedas e os pacotes.",5000),500)}
 // sessão, visita e carteira prontas (common.js): busca álbum e tipos e desenha
 async function onEconomiaPronta(){
   let albumOk=true;

@@ -79,3 +79,10 @@ body.entrar::before{background:radial-gradient(1100px 620px at 50% -10%,var(--bg
   .ent-discord,.ent-novo summary .seta{transition:none}
   .ent-discord:hover{transform:none}
 }
+
+/* modo convidado */
+.ent-conv{display:flex;align-items:center;justify-content:center;width:100%;min-height:48px;margin-top:14px;padding:10px 18px;border-radius:14px;background:transparent;color:var(--txt);border:2px solid var(--line2);font:700 15px Inter,sans-serif;cursor:pointer;transition:background .15s,border-color .15s}
+.ent-conv:hover{background:var(--brand-soft);border-color:var(--brand)}
+.ent-conv:focus-visible{outline:3px solid #ffbf00;outline-offset:3px}
+.ent-convnota{margin:8px 0 0;font-size:12.5px;color:var(--mut);line-height:1.5}
+@media (prefers-reduced-motion:reduce){.ent-conv{transition:none}}

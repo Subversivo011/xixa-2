@@ -10,8 +10,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@600;700&family=Inter:wght@400;500;600;700;800&family=Baloo+2:wght@800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="theme.css?v=20261120a">
-<link rel="stylesheet" href="entrar.css?v=20261119x">
+<link rel="stylesheet" href="theme.css?v=20261120c">
+<link rel="stylesheet" href="entrar.css?v=20261120c">
 <!-- esta tela não carrega o script da barreira de login (senão entra em laço de redirecionamento) -->
 <script>try{var t=localStorage.getItem("ns_theme")}catch(e){}document.documentElement.dataset.theme=t==="dark"?"dark":"light"</script>
 </head>
@@ -37,6 +37,9 @@
       <span class="discando" aria-hidden="true">Discando para o Discord…</span>
     </a>
     <p class="ent-seg">Usamos o Discord só para saber quem é você. Nada é postado no seu nome.</p>
+
+    <button type="button" class="ent-conv" id="convidado" aria-describedby="convnota">Continuar sem login</button>
+    <p class="ent-convnota" id="convnota">Sem login você pode navegar, mas álbum, moedas, pacotes e perfil precisam de conta.</p>
 
     <details class="ent-novo">
       <summary>
@@ -80,6 +83,8 @@
   var a=document.getElementById("entrar");
   a.href="/api/auth/discord?voltar="+encodeURIComponent(v);
   a.addEventListener("click",function(){a.classList.add("indo");a.setAttribute("aria-busy","true")});
+  // modo convidado: grava a marca e volta para a página de origem (o gate.js e o cliente de economia respeitam a marca)
+  document.getElementById("convidado").addEventListener("click",function(){try{localStorage.setItem("ns_convidado","1")}catch(e){}location.href=v});
   // ao voltar pelo "voltar" do navegador, o botão não fica preso em "discando"
   addEventListener("pageshow",function(){a.classList.remove("indo");a.removeAttribute("aria-busy")});
   var m=q.get("login");
@@ -91,7 +96,7 @@
   var pinta=function(){var esc=html.dataset.theme==="dark";tb.setAttribute("aria-checked",String(esc));tb.title=esc?"Modo escuro ativo · clique para o modo claro":"Modo claro ativo · clique para o modo escuro"};
   pinta();tb.addEventListener("click",function(){html.dataset.theme=html.dataset.theme==="dark"?"light":"dark";try{localStorage.setItem("ns_theme",html.dataset.theme)}catch(e){}pinta()});
   // já logado? volta para onde estava
-  fetch("/api/eu",{credentials:"same-origin",cache:"no-store"}).then(function(r){if(r.ok)location.replace(v)}).catch(function(){});
+  fetch("/api/eu",{credentials:"same-origin",cache:"no-store"}).then(function(r){if(r.ok){try{localStorage.removeItem("ns_convidado")}catch(e){}location.replace(v)}}).catch(function(){});
 })();
 </script>
 </body>

@@ -1,7 +1,9 @@
 // Cliente da API (economia e sessão). Carregado no <head>, depois de gate.js, antes de common.js.
 // - fetch com cookie de sessão (same-origin), JSON e header X-CSRF vindo de GET /api/eu (em cache; renova em 403).
 // - erros normalizados: a promessa rejeita com { status, erro } (status 0 = sem conexão).
-// - 401: manda para /entrar.html?voltar=<página>. 402, 429 e 503 mostram um aviso (toast) claro.
+// - 401: manda para /entrar.html?voltar=<página>, EXCETO no modo convidado (localStorage.ns_convidado="1"): aí não redireciona
+//   (sem laço) e o chamador decide o que mostrar. 402, 429 e 503 mostram um aviso (toast) claro.
+// - sessão válida em GET /api/eu apaga a marca de convidado (quem logou volta ao fluxo normal).
 // Passe { silencioso: true } no último argumento para não mostrar o aviso (o erro continua sendo lançado).
 (function () {
   var csrf = null;
@@ -9,8 +11,11 @@
 
   function aviso(msg) { if (typeof toast === 'function') toast(msg, 3600); }
 
+  function convidado() { try { return localStorage.getItem('ns_convidado') === '1'; } catch (e) { return false; } }
+  function limparConvidado() { try { localStorage.removeItem('ns_convidado'); } catch (e) { /* sem storage */ } }
+
   function irParaEntrar() {
-    if (redirecionando) return;
+    if (convidado() || redirecionando) return;
     redirecionando = true;
     var vai = location.pathname + location.search + location.hash;
     location.replace('/entrar.html?voltar=' + encodeURIComponent(vai));
@@ -67,10 +72,12 @@
       throw e;
     }
     if (r.json && r.json.csrf) csrf = r.json.csrf;
+    limparConvidado();
     return r.json;
   }
 
   window.Api = {
+    convidado: convidado,
     eu: eu,
     carteira: function (o) { return pedir('GET', '/api/carteira', undefined, o); },
     album: function (o) { return pedir('GET', '/api/album', undefined, o); },

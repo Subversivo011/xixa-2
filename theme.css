@@ -517,3 +517,5 @@ img.cdo-blur{filter:blur(16px) saturate(.6);transform:scale(1.15)}
 .rkx em{font-style:normal;color:var(--brand-strong,#1597d3);font-weight:700;font-family:Rajdhani,Inter,sans-serif;font-size:16px;text-align:right;white-space:nowrap}
 .rkx-st{padding:22px 6px;color:var(--mut);text-align:center;font-size:14px}
 .rkx-bt{margin-top:10px;padding:7px 14px;border-radius:10px;border:0;background:var(--brand-strong,#1597d3);color:#fff;font:700 13px Inter,sans-serif;cursor:pointer}
+
+#login-dialog .lg-msg{margin:-4px 0 14px;padding:9px 11px;border-radius:8px;background:var(--brand-soft);color:var(--txt);font-weight:700}
