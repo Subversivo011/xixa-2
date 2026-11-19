@@ -93,7 +93,7 @@ function videoPage(m,rel){
       <div class="xmn"><span>Arquivo</span><span>Exibir</span><span>Reproduzir</span><span>Ferramentas</span><span>Ajuda</span></div>
       <div class="xbody">${pl}</div>
       <div class="xinfo"><h2>${T}</h2><p>${descTxt(m)}</p><div class="xmeta">Recebido por e-mail em ${dNum(m.date)} · ${escapeHtml(m.c)} · ${vw}</div>
-        <div class="xrt"><b>Gostou? Dê sua nota antes de encaminhar para 10 amigos:</b><div data-rt></div></div>${linkBox(m)}${btns(m.y)}</div></div>
+        <div class="xrt"><b>Gostou? Dê sua nota antes de encaminhar para 10 amigos:</b><div data-rt></div><button class="xsh" data-act="share">${icon("mail","in")}Encaminhar link</button></div>${linkBox(m)}${btns(m.y)}</div></div>
     <div class="xtask"><span class="xstart">iniciar</span><span class="xt on">${icon("video","xi")}Reprodutor de Mídia</span><span class="xtray">${icon("culture","xi")}Conectado a 52,0 Kbps <b data-clock></b></span></div></div>`;
   const chan=(k)=>{
     if(k===1)return`<div class="cb1"><img src="${AV}" alt=""><div><small>De:</small> <a>${CANAL}</a><br><small>Adicionado: ${dExt(m.date)}</small><br><span class="vs1">${icon("check","in")}Inscrito</span></div><p>${descTxt(m)}</p><dl><dt>Categoria:</dt><dd><a>${escapeHtml(m.c)}</a></dd><dt>Tags:</dt><dd><a>meme</a> <a>${m.y}</a> <a>viral</a> <a>naosalvo</a></dd></dl></div>`;
@@ -101,20 +101,20 @@ function videoPage(m,rel){
   };
   if(e===1)return`<div class="ytp e1">${headBar(1)}<div class="yc"><main><h1>${T}</h1>${pl}
     <div class="ub1"><div data-rt></div><div class="vw1">Exibições: <b>${vw}</b></div></div>
-    <div class="tabs1"><a>Compartilhar</a><a>Favoritos</a><a>Adicionar a listas</a><a>Sinalizar</a></div>${chan(1)}${linkBox(m)}${btns(m.y)}</main></div></div>`;
+    <div class="tabs1"><a data-act="share">Compartilhar</a><a>Favoritos</a><a>Adicionar a listas</a><a>Sinalizar</a></div>${chan(1)}${linkBox(m)}${btns(m.y)}</main></div></div>`;
   if(e===2)return`<div class="ytp e2">${headBar(2)}<div class="yc"><main><h1>${T}</h1>${pl}
     <div class="ub2"><div data-rt></div><div class="vw2">${vw}</div></div>
-    <div class="tabs2"><a>${icon("heart","in")}Favorito</a><a>${icon("share","in")}Compartilhar</a><a>Listas de reprodução</a><a>Sinalizar</a></div>${chan(2)}${linkBox(m)}${btns(m.y)}</main></div></div>`;
+    <div class="tabs2"><a>${icon("heart","in")}Favorito</a><a data-act="share">${icon("share","in")}Compartilhar</a><a>Listas de reprodução</a><a>Sinalizar</a></div>${chan(2)}${linkBox(m)}${btns(m.y)}</main></div></div>`;
   if(e===3)return`<div class="ytp e3">${headBar(3)}<div class="yc"><main><h1>${T}</h1>${pl}
     <div class="ub3"><div class="cr"><img src="${AV}" alt=""><a>${CANAL}</a><span class="vs3">${icon("check","in")}Inscrito</span></div><div class="vw3">${vw}</div></div>
-    <div class="ac3"><div data-rt></div><span class="a">Adicionar a</span><span class="a">Compartilhar</span></div>
+    <div class="ac3"><div data-rt></div><span class="a">Adicionar a</span><span class="a" data-act="share">Compartilhar</span></div>
     <div class="ds3"><b>Enviado em ${dExt(m.date)}</b><p>${descTxt(m)}</p><small>Categoria: <a>${escapeHtml(m.c)}</a></small></div>${linkBox(m)}${btns(m.y)}</main></div></div>`;
   if(e===4)return`<div class="ytp e4">${headBar(4)}<div class="yc"><main>${pl}<h1>${T}</h1>
     <div class="ub4"><div class="cr"><img src="${AV}" alt=""><div><a>${CANAL}</a></div><span class="vs4">${icon("check","in")}Inscrito</span></div><div class="vw4">${vw}</div></div>
-    <div class="ac4"><span>${icon("share","in")}Compartilhar</span><span>${icon("more","in")}Mais</span><div data-rt></div></div>
+    <div class="ac4"><span data-act="share">${icon("share","in")}Compartilhar</span><span>${icon("more","in")}Mais</span><div data-rt></div></div>
     <div class="ds4"><b>Publicado em ${dExt(m.date)}</b><p>${descTxt(m)}</p><small>Categoria <a>${escapeHtml(m.c)}</a></small></div>${linkBox(m)}${btns(m.y)}</main></div></div>`;
   return`<div class="ytp e5">${headBar(5)}<div class="yc"><main>${pl}<h1>${T}</h1>
-    <div class="ub5"><div class="cr"><img src="${AV}" alt=""><div><a>${CANAL} ${icon("check","vf")}</a></div><span class="vs5">${icon("bell","in")}Inscrito</span></div><div class="ac5"><div data-rt></div><span class="p">${icon("share","in")}Compartilhar</span><span class="p">${icon("more","in")}</span></div></div>
+    <div class="ub5"><div class="cr"><img src="${AV}" alt=""><div><a>${CANAL} ${icon("check","vf")}</a></div><span class="vs5">${icon("bell","in")}Inscrito</span></div><div class="ac5"><div data-rt></div><span class="p" data-act="share">${icon("share","in")}Compartilhar</span><span class="p">${icon("more","in")}</span></div></div>
     <div class="ds5"><b>${vw} ${ago(m.y)}</b> <span class="tg">#${escapeHtml(m.c.toLowerCase())} #meme #${m.y}</span><p>${descTxt(m)}</p></div>${linkBox(m)}${btns(m.y)}</main></div></div>`;
 }
 
@@ -178,6 +178,14 @@ function initComments(el,m){
   loadCmts(m.id).then(d=>{if(d&&VW&&VW.m===m){online=true;list=d.concat(localCmts(m.id).filter(c=>c.local));render()}});
 }
 
+// compartilhar: sempre o link do vídeo original no YouTube
+async function compartilharYT(m){
+  if(!m.yt){toast("Este meme ainda não tem o vídeo original do YouTube.",2800);return}
+  const url="https://www.youtube.com/watch?v="+m.yt;
+  if(navigator.share&&matchMedia("(pointer:coarse)").matches){try{await navigator.share({title:m.t,url});return}catch(e){if(e&&e.name==="AbortError")return}}
+  try{await navigator.clipboard.writeText(url);toast("Link do YouTube copiado: "+url,3200)}catch(e){prompt("Copie o link do YouTube:",url)}
+}
+
 // ---- abrir / fechar ----
 let VW=null;
 function closeViewer(){if(!VW)return;VW.player&&VW.player.stop();clearInterval(VW.clock);clearTimeout(VW.toastT);VW.el.remove();document.body.classList.remove("vw-open");document.removeEventListener("keydown",VW.key);const cb=VW.onClose;VW=null;cb&&cb()}
@@ -195,6 +203,7 @@ function openViewer(m,opt={}){
     const act=a.dataset.act;
     if(act==="close")closeViewer();
     else if(act==="year"){const y=m.y;closeViewer();opt.onYear&&opt.onYear(y)}
+    else if(act==="share")compartilharYT(m);
     else if(act==="snd"){SND.on=!SND.on;try{localStorage.setItem("ns_snd",SND.on?"1":"0")}catch(e){}a.innerHTML=icon(SND.on?"volume":"mute")+"<span>Sons da época</span>"}
     else if(act==="savelink"){const u=el.querySelector(".ol").value.trim(),r=opt.onSaveLink?opt.onSaveLink(u):"";el.querySelector(".olm").innerHTML=r||""}
     else if(a.dataset.like){vote(+a.dataset.like)}

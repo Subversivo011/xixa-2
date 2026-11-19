@@ -482,3 +482,5 @@ body.vw-open{overflow:hidden}
 .etoast.tum{background:#36465d;color:#fff;font:13px "Helvetica Neue",Arial,sans-serif;border-radius:6px}
 .etoast.tum .ei{background:#fff;color:#36465d;border-radius:4px}.etoast.tum em{text-transform:lowercase}
 @media(max-width:700px){.etoast{left:10px;right:10px;bottom:10px;max-width:none;min-width:0}}
+[data-act="share"]{cursor:pointer}
+.xrt .xsh{margin-top:8px;display:inline-flex;align-items:center;gap:4px;font:11px Tahoma,Arial,sans-serif;padding:3px 10px;background:linear-gradient(#fff,#e3e3db);border:1px solid #7f9db9;border-radius:3px;cursor:pointer}
