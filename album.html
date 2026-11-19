@@ -7,8 +7,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Inter:wght@400;500;600;700&family=Baloo+2:wght@700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="theme.css?v=20261119n">
-<link rel="stylesheet" href="viewer.css?v=20261119n">
+<link rel="stylesheet" href="theme.css?v=20261119p">
+<link rel="stylesheet" href="viewer.css?v=20261119p">
 <script>try{var t=localStorage.getItem("ns_theme")}catch(e){}document.documentElement.dataset.theme=t==="dark"?"dark":"light"</script>
 <style>
 :root{--Comum:#8e939c;--Relevante:#2fbf5b;--Raro:#2f86ff;--Relíquia:#a35cff;--Lendário:#e8a317;--Mítico:#ff4a4a}
@@ -150,7 +150,7 @@
 @media(max-width:1100px){.layout{grid-template-columns:210px minmax(0,1fr)}.det{grid-column:1/-1;border:0;padding:0;position:static;max-width:380px;margin:0 auto}}
 @media(max-width:720px){.layout{grid-template-columns:1fr;padding:12px}.cards{grid-template-columns:repeat(2,1fr)}.album{padding-left:34px}.pack{grid-template-columns:repeat(3,1fr);gap:8px}}
 </style>
-<link rel="stylesheet" href="album.css?v=20261119n">
+<link rel="stylesheet" href="album.css?v=20261119p">
 </head>
 <body>
 
@@ -204,6 +204,7 @@ renderHeader("album",{sub:[
   {k:"shop",ic:"shop",label:"Loja",fn:()=>openShop()},
   {k:"conv",ic:"convert",label:"Converter repetidas",fn:()=>convertAll()},
   {k:"rank",ic:"ranking",label:"Ranking",fn:()=>openRank()},
+  {k:"tl",ic:"timeline",label:"Linha do tempo",href:"linha-do-tempo.html"},
   {k:"wiki",ic:"book",label:"Memepédia",href:"memepedia.html"}
 ]});
 setSubOn("cols");

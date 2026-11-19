@@ -8,8 +8,8 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preconnect" href="https://i.ytimg.com">
 <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Inter:wght@400;500;600;700&family=Baloo+2:wght@700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="theme.css?v=20261119n">
-<link rel="stylesheet" href="viewer.css?v=20261119n">
+<link rel="stylesheet" href="theme.css?v=20261119p">
+<link rel="stylesheet" href="viewer.css?v=20261119p">
 <script>try{var t=localStorage.getItem("ns_theme")}catch(e){}document.documentElement.dataset.theme=t==="dark"?"dark":"light"</script>
 <style>
 main{padding:24px 28px 60px;max-width:1280px;margin:0 auto}
@@ -159,7 +159,7 @@ main{display:flex;flex-direction:column}
 .top,.cur{grid-template-columns:1fr}.stage{grid-template-columns:1fr}.side{display:none}.facts{grid-template-columns:1fr 1fr}.rail{grid-template-columns:1fr 1fr}.rail .card:nth-child(3){display:none}main{padding:16px 14px 40px}}
 @media(max-width:600px){.f .two{grid-template-columns:1fr}.today{grid-template-columns:110px 1fr}.box .body{padding:16px}}
 </style>
-<link rel="stylesheet" href="home.css?v=20261119o">
+<link rel="stylesheet" href="home.css?v=20261119p">
 </head>
 <body class="home">
 <div class="rays-wrap" aria-hidden="true"><div class="rays" id="rays"></div></div>
@@ -171,7 +171,7 @@ main{display:flex;flex-direction:column}
       <div class="sun"><picture><source srcset="logo-hero.webp" type="image/webp"><img src="logo-hero.png" alt="Não Salvo" width="640" height="528" fetchpriority="high"></picture></div>
       <h1>E no fim, o plano do <em>Não Salvo</em> era salvar.</h1>
       <p>Um museu colaborativo de vídeos virais, memes e momentos inesquecíveis da nossa internet.</p>
-      <div class="btns"><button class="btn" onclick="go(2012,true)"><i data-ic="timeline"></i>Explorar por ano</button><button class="btn ghost" onclick="openSubmit()"><i data-ic="send"></i>Enviar meme</button></div>
+      <div class="btns"><a class="btn" href="linha-do-tempo.html"><i data-ic="timeline"></i>Explorar por ano</a><button class="btn ghost" onclick="openSubmit()"><i data-ic="send"></i>Enviar meme</button></div>
     </div>
     <div>
       <div class="sec-title"><span><i data-ic="star"></i>Clássicos da internet brasileira</span><a onclick="setView('todos')">Ver todos →</a></div>
@@ -262,7 +262,7 @@ const card=(a,big)=>`<button class="card" onclick="openM('${a.id}')">
 const addCard=y=>`<button class="card add" onclick="openSubmit('${y}')"><div class="thumb"><span>＋</span></div><div class="meta"><h3>Salvar um viral de ${y}</h3><small>+${REWARD.approved} moedas se aprovado</small></div></button>`;
 
 const SUB_ITEMS=[
-  {k:"tl",ic:"timeline",label:"Linha do tempo",fn:()=>{$("tl").scrollIntoView({behavior:"smooth"})}},
+  {k:"tl",ic:"timeline",label:"Linha do tempo",href:"linha-do-tempo.html"},
   {k:"cat",ic:"categories",label:"Categorias",dd:1,fn:(e,b)=>openPop(b,[{ic:"all",label:"Todas",fn:()=>pickCat("Todas")},...[...new Set(ALL.map(a=>a.c))].map(c=>({ic:CAT_IC[c]||"video",label:c,note:ALL.filter(a=>a.c===c).length+"",fn:()=>pickCat(c)}))])},
   {k:"rand",ic:"random",label:"Aleatório",fn:()=>randomPick()},
   {k:"rank",ic:"ranking",label:"Ranking",fn:()=>openRank()},
@@ -354,7 +354,7 @@ function renderCur(){
   const el=$("cur");el.classList.remove("fade");void el.offsetWidth;el.classList.add("fade");
   const items=prevDoAno(cur);
   const fill=items.map(a=>card(a));while(fill.length<3)fill.push(addCard(parseInt(cur)));
-  const exp=`setView('ano');$('browse').scrollIntoView({behavior:'smooth'})`;
+  const exp=`location.href='linha-do-tempo.html#'+encodeURIComponent('${cur}')`;
   el.innerHTML=`<div class="cur-t"><div class="cur-h"><button class="mnav" ${p?`onclick="go('${p}')"`:"disabled"} aria-label="Ano anterior">‹</button><div><h2 class="disp">${yLab(cur)}</h2><div class="lema">${d.lema}</div></div><button class="mnav" ${n?`onclick="go('${n}')"`:"disabled"} aria-label="Próximo ano">›</button></div>
     <p>${d.txt}</p><button class="btn dexp" onclick="${exp}">Explorar ${yLab(cur)} →</button></div>
     <div class="mini">${fill.join("")}</div>
