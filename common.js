@@ -185,7 +185,10 @@ function submitSignup(){
 }
 function updateAccount(){
   const el=document.getElementById("acct");if(!el)return;const a=NS.acct;
-  el.innerHTML=a?`<button class="sg-acct" onclick="openSignup()"><span class="sg-av">${catSVG(a.av)}</span><span>${escapeHtml(a.user)}<b>Gato nível ${rankIdx(NS.xp)+1}</b></span></button>`:`<button class="sg-cta" onclick="openSignup()">${icon("cat")}<span class="lg">CRIAR CONTA</span><span class="sh">ENTRAR</span></button>`;
+  el.innerHTML=a?`<button class="sg-acct" onclick="openSignup()"><span class="sg-av">${catSVG(a.av)}</span><span>${escapeHtml(a.user)}<b>Gato nível ${rankIdx(NS.xp)+1}</b></span></button>`:`<div class="account-actions">
+    <button type="button" class="account-login" onclick="document.getElementById('login-dialog').showModal()">${icon("login")}Entrar</button>
+    <button type="button" onclick="openSignup()">${icon("user")}Criar conta</button>
+  </div>`;
 }
 const needAccount=()=>{if(NS.acct)return false;toast("Crie sua conta (e seu gatinho) primeiro 🐱");openSignup();return true};
 
@@ -212,6 +215,7 @@ function testDay(){NS.dayOffset=(NS.dayOffset||0)+1;nsSave();location.reload()}
 
 // ---- Ícones dos menus (SVG próprios, traço único) ----
 const ICONS={
+ login:'<path d="M14 4h5a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1h-5M3 12h12m-5-5 5 5-5 5"/>',
  home:'<path d="M3 11.5 12 4l9 7.5"/><path d="M5.5 10v9.5h5v-5.5h3v5.5h5V10"/>',
  timeline:'<path d="M3 12h18"/><circle cx="6" cy="12" r="1.9" fill="currentColor"/><circle cx="12" cy="12" r="1.9" fill="currentColor"/><circle cx="18" cy="12" r="1.9" fill="currentColor"/><path d="M6 8.5V5M12 15.5V19M18 8.5V5"/>',
  categories:'<rect x="3.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="3.5" width="7" height="7" rx="3.5"/><rect x="3.5" y="13.5" width="7" height="7" rx="3.5"/><rect x="13.5" y="13.5" width="7" height="7" rx="1.5"/>',
@@ -279,7 +283,7 @@ function renderHeader(page,opt={}){
   const hd=document.createElement("header");hd.className="hd";
   hd.innerHTML=`<a class="brand" href="index.html" aria-label="Não Salvo — início"><img src="logo-word.png" alt="Não Salvo"><small>Museu da internet brasileira</small></a>
    <div class="tools">${opt.search?`<label class="srch">${icon("search","s-ic")}<input id="q" type="search" placeholder="Buscar memes, anos, categorias…" aria-label="Buscar"></label>`:""}
-   <div id="wallet"></div><div id="acct"></div><button class="tsw" id="themeB" role="switch" aria-label="Modo escuro" onclick="toggleTheme()"><span class="t-l">${icon("sun")}<b class="lb">Claro</b></span><span class="t-d">${icon("moon")}<b class="lb">Escuro</b></span></button></div>`;
+   <div id="wallet"></div><div id="acct"></div><button class="tsw" id="themeB" role="switch" aria-label="Modo escuro" onclick="toggleTheme()">${icon("sun","t-l")}${icon("moon","t-d")}</button></div>`;
   document.body.prepend(hd);
   if(opt.sub){const n=document.createElement("nav");n.className="sub";n.id="sub";n.setAttribute("aria-label","Menu");hd.after(n);renderSub(opt.sub)}
   setTheme(document.documentElement.dataset.theme||"light");
@@ -339,6 +343,10 @@ function openPop(anchor,items){
     </div>
   </div>
 </div>`;document.body.appendChild(d.firstElementChild);
+  document.body.insertAdjacentHTML("beforeend",`<dialog id="login-dialog" aria-labelledby="login-heading">
+    <h2 id="login-heading">Entrar</h2><p>Em construção. Ainda em fase de testes.</p>
+    <form method="dialog"><button>Fechar</button></form>
+  </dialog>`);
   document.addEventListener("keydown",e=>{if(e.key==="Escape"){closeSignup();const t=document.getElementById("tp");t&&t.classList.remove("open");const p=document.getElementById("pop");p&&p.classList.remove("open")}});
 })();
 
