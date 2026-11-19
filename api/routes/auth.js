@@ -66,7 +66,7 @@ export default function registrar(r) {
     if (usuario.banido) return para('banido'); // conta suspensa: sem sessão
 
     const sessao = await criarSessao(pool, { usuarioId: usuario.id, ip, userAgent: req.headers['user-agent'] });
-    return redirecionar(res, voltar, [
+    return redirecionar(res, caminhoSeguro(voltar), [
       limpaState,
       montarCookie(COOKIE_SESSAO, sessao.token, { maxAge: sessao.maxAge, secure: auth.cookieSecure })
     ]);

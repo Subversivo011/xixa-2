@@ -23,22 +23,47 @@ export function lerConfigDiscord(env = process.env) {
 }
 
 // ---- redirect de volta: só caminhos relativos do próprio site ----
-/** Devolve o caminho se for seguro (começa com um "/" só, sem esquema, sem barra invertida, sem controle); senão "/". */
+const CONTROLE = /[\u0000-\u0020\u007f-\u009f\u2028\u2029]/; // controle, espaço, CR/LF, NEL, separadores de linha
+
+function decodificar(s) { try { return decodeURIComponent(s); } catch { return null; } }
+
+/**
+ * Devolve o MESMO valor se for um caminho relativo do próprio site; senão `padrao` ("/").
+ * Nunca devolve uma versão "normalizada": o que não é inequívoco é recusado.
+ * Recusa: o que não começa com um "/" só; "//" em qualquer ponto do caminho (inclusive depois de decodificar %2f);
+ * segmentos "." e ".." (inclusive %2e); barra invertida (inclusive %5c); espaço, controle e CR/LF (inclusive %0d%0a);
+ * esquema/host; valores > 300 caracteres. A decodificação é conferida em até 2 níveis (%252f).
+ */
 export function caminhoSeguro(valor, padrao = '/') {
   if (typeof valor !== 'string' || valor.length === 0 || valor.length > 300) return padrao;
-  if (!valor.startsWith('/') || valor.startsWith('//') || valor.includes('\\') || /[\u0000-\u001f\u007f\s]/.test(valor)) return padrao;
+  if (!valor.startsWith('/') || valor.startsWith('//')) return padrao;
+  const bruto = valor.split(/[?#]/, 1)[0]; // caminho sem query e hash
+  let nivel = valor;
+  let nivelCaminho = bruto;
+  for (let n = 0; n < 3; n++) {  // bruto, decodificado 1x, decodificado 2x
+    if (nivel.includes('\\') || CONTROLE.test(nivel)) return padrao;
+    if (nivelCaminho.includes('//')) return padrao;
+    if (nivelCaminho.split('/').some((seg) => seg === '.' || seg === '..')) return padrao;
+    if (!nivelCaminho.startsWith('/')) return padrao;
+    const proximo = decodificar(nivel), proximoCaminho = decodificar(nivelCaminho);
+    if (proximo === null || proximoCaminho === null) return n === 0 ? padrao : valor; // %-inválido no 1º nível = recusa
+    if (proximo === nivel) break;
+    nivel = proximo; nivelCaminho = proximoCaminho;
+  }
   try {
     const u = new URL(valor, 'https://site.invalid');
     if (u.origin !== 'https://site.invalid') return padrao;
+    if (u.pathname !== bruto && u.pathname !== encodeURI(decodificar(bruto) ?? bruto)) return padrao; // o navegador reescreveria o caminho
   } catch { return padrao; }
   return valor;
 }
 
-/** Acrescenta ?chave=valor a um caminho já validado (respeita query e #hash existentes). */
+/** Acrescenta ?chave=valor a um caminho já validado e REVALIDA o resultado; se não passar, cai em "/?chave=valor". */
 export function comParametro(caminho, chave, valor) {
-  const u = new URL(caminho, 'https://site.invalid');
+  const u = new URL(caminhoSeguro(caminho), 'https://site.invalid');
   u.searchParams.set(chave, valor);
-  return u.pathname + u.search + u.hash;
+  const montado = u.pathname + u.search + u.hash;
+  return caminhoSeguro(montado, null) ?? `/?${new URLSearchParams({ [chave]: valor })}`;
 }
 
 // ---- state anti-CSRF (cookie ns_oauth = "<state>.<voltar em base64url>") ----
@@ -57,7 +82,7 @@ export function stateConfere(esperado, recebido) {
 export function urlDeAutorizacao(cfg, state) {
   const p = new URLSearchParams({
     client_id: cfg.clientId, redirect_uri: cfg.redirectUri, response_type: 'code',
-    scope: cfg.exigirMembro ? 'identify guilds' : 'identify', state, prompt: 'none'
+    scope: cfg.exigirMembro ? 'identify guilds' : 'identify', state
   });
   return `${AUTORIZAR}?${p}`;
 }

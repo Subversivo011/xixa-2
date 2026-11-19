@@ -68,6 +68,9 @@ test('login completo: cria usuário, conta OAuth e sessão; volta para a página
   const id = novoId();
   const r = await login(perfilDe(id, 'Zé Fulano'), { voltar: '/album.html?aba=2' });
   assert.equal(r.ini.status, 302);
+  // primeiro login de quem nunca autorizou o app: o Discord precisa poder mostrar a tela de consentimento (sem prompt=none)
+  assert.equal(new URL(r.ini.headers.get('location')).searchParams.has('prompt'), false);
+  assert.equal((await q("SELECT count(*)::int AS n FROM contas_oauth WHERE provedor_id = $1", [id]))[0].n, 1);
   assert.equal(r.cb.status, 302); assert.equal(r.cb.headers.get('location'), '/album.html?aba=2');
   // cookie de sessão: httpOnly, Secure, SameSite=Lax; state de uso único apagado
   const bruto = r.cb.cookies.find((c) => c.startsWith('ns_sessao='));
@@ -159,7 +162,7 @@ test('o segredo do app só vai no Authorization Basic da troca do code; nunca na
 });
 
 test('open redirect: destino externo no início OU no cookie adulterado volta para "/"', { skip }, async () => {
-  for (const ruim of ['https://evil.com', '//evil.com/x', '/\\evil.com']) {
+  for (const ruim of ['https://evil.com', '//evil.com/x', '/\\evil.com', '/a/..//evil.com', '/..//evil.com', '/.//evil.com', '%2f%2fevil.com']) {
     const r = await login(perfilDe(novoId(), 'Redirect'), { voltar: ruim });
     assert.equal(r.cb.headers.get('location'), '/', ruim);
   }

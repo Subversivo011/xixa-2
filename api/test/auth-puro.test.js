@@ -21,10 +21,26 @@ const poolFalso = { query: async () => { throw new Error('não deveria tocar no 
 test('open redirect: só caminhos relativos do próprio site passam', () => {
   for (const ok of ['/', '/album.html', '/album.html?x=1#topo', '/memes/2008', '/a/b/c?d=e']) assert.equal(caminhoSeguro(ok), ok, ok);
   const ruins = ['https://evil.com', 'http://evil.com/x', '//evil.com', '///evil.com', '/\\evil.com', '\\\\evil.com', '/\\/evil.com',
+    // vetores do gate: o URL normaliza, mas o Location sairia como //evil.com
+    '/a/..//evil.com', '/..//evil.com', '/.//evil.com', '/a//evil.com', '/a/./b', '/a/../b', '/..', '/.', '/a/..', '/%2e%2e//evil.com', '/%2E/x', '/a/%2e%2e/b',
+    '%2f%2fevil.com', '/%2f%2fevil.com', '/%2F/evil.com', '/a%2f%2fevil.com', '/%252f%252fevil.com', '/a%5cevil.com', '/%5cevil.com', '/%5Cevil.com',
+    '/a%0d%0aSet-Cookie:x=1', '/a%0aLocation:%20x', '/%00', '/a%09b', '/a%20b', '/a\u2028b', '/%',
     'javascript:alert(1)', 'data:text/html,x', 'evil.com', 'album.html', '', ' /album', '/a b', '/a\nb', '/a\r\nLocation: x', '/\tevil', 'HTTPS://evil.com',
     '/' + 'a'.repeat(400), null, undefined, 42, {}];
   for (const r of ruins) assert.equal(caminhoSeguro(r), '/', JSON.stringify(r));
   assert.equal(caminhoSeguro('//evil.com', '/inicio'), '/inicio');
+});
+
+test('comParametro: resultado final é revalidado e nunca vira host externo', () => {
+  const lixo = ['/a/..//evil.com', '/..//evil.com', '/.//evil.com', '//evil.com', '/\\evil.com', '%2f%2fevil.com', 'https://evil.com', 'javascript:alert(1)', '/%2f%2fevil.com'];
+  for (const v of lixo) {
+    const out = comParametro(v, 'login', 'negado');
+    assert.equal(out, '/?login=negado', v);
+    assert.ok(!out.startsWith('//'));
+    assert.equal(new URL(out, 'https://site.exemplo').origin, 'https://site.exemplo', v);
+  }
+  // entrada boa segue boa e sem normalização surpresa
+  assert.equal(comParametro('/album.html?a=1#t', 'login', 'erro'), '/album.html?a=1&login=erro#t');
 });
 
 test('comParametro preserva query e hash', () => {
@@ -41,6 +57,12 @@ test('state: empacota/desempacota, confere em tempo constante e recusa diferente
   assert.equal(desempacotarState('sem-ponto'), null); assert.equal(desempacotarState(''), null); assert.equal(desempacotarState(undefined), null);
   assert.ok(stateConfere(s, s));
   assert.ok(!stateConfere(s, s + 'x')); assert.ok(!stateConfere(s, 'outro')); assert.ok(!stateConfere('', '')); assert.ok(!stateConfere(s, null));
+});
+
+test('URL de autorização: sem prompt (primeiro login do usuário pede consentimento normalmente)', () => {
+  const u = new URL(urlDeAutorizacao(CFG, 'ST'));
+  assert.equal(u.searchParams.has('prompt'), false);
+  assert.ok(!u.search.includes('prompt'));
 });
 
 test('URL de autorização: scope identify, state e redirect_uri; guilds só quando exige membro', () => {
@@ -166,6 +188,19 @@ test('callback: usuário cancelou no Discord = volta para a página com ?login=n
   const ck = encodeURIComponent(empacotarState('ok-state', '/album.html'));
   const r = await s.get('/api/auth/discord/callback?error=access_denied&state=ok-state', { headers: { 'X-Forwarded-For': '10.9.2.1', Cookie: 'ns_oauth=' + ck } });
   assert.equal(r.status, 302); assert.equal(r.headers.get('location'), '/album.html?login=negado');
+  await s.fechar();
+});
+
+test('callback: cookie adulterado com vetores de open redirect NUNCA gera Location fora do site', async () => {
+  const s = await servidor(poolFalso, { auth: { discord: CFG } });
+  let n = 0;
+  for (const v of ['/a/..//evil.com', '/..//evil.com', '/.//evil.com', '//evil.com', '/\\evil.com', '%2f%2fevil.com', 'https://evil.com', 'javascript:alert(1)']) {
+    const ck = encodeURIComponent(empacotarState('st', v));
+    const r = await s.get('/api/auth/discord/callback?error=access_denied&state=st', { headers: { 'X-Forwarded-For': `10.9.5.${++n}`, Cookie: 'ns_oauth=' + ck } });
+    const loc = r.headers.get('location');
+    assert.equal(loc, '/?login=negado', v);
+    assert.equal(new URL(loc, 'https://site.exemplo').origin, 'https://site.exemplo', v);
+  }
   await s.fechar();
 });
 
