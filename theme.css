@@ -83,10 +83,12 @@ a{color:inherit}
 .pop button small{margin-left:auto;color:var(--faint);font-size:11px}
 
 /* carteira (moedas + patente) */
-.wl{display:flex;align-items:center;gap:12px;background:var(--sunk);border:1px solid var(--line);border-radius:12px;padding:6px 12px;color:var(--txt);cursor:pointer;text-align:left;height:40px}
+#wallet{min-width:0}
+.wl{display:flex;align-items:center;gap:10px;max-width:100%;background:var(--sunk);border:1px solid var(--line);border-radius:12px;padding:4px 10px;color:var(--txt);cursor:pointer;text-align:left;min-height:40px}
 .wl:hover{border-color:var(--brand)}
 .wl-c{font-family:Rajdhani,sans-serif;font-size:18px;white-space:nowrap;font-weight:700}.wl-c b{color:var(--gold)}
-.wl-r{display:flex;flex-direction:column;min-width:118px;font-size:11px;line-height:1.15}
+.wl-r{display:flex;flex-direction:column;min-width:0;font-size:11px;line-height:1.15}
+.wl-r em,.wl-r small{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .wl-r em{font-style:normal;font-weight:800;letter-spacing:.4px;text-transform:uppercase;font-size:10px}
 .wl-r i{display:block;height:4px;border-radius:2px;background:var(--line);margin:3px 0;overflow:hidden}.wl-r s{display:block;height:100%}
 .wl-r small{color:var(--mut);font-size:10px}

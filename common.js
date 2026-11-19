@@ -149,13 +149,18 @@ function toast(m,ms){let t=document.getElementById("toast");if(!t){t=document.cr
 function escapeHtml(s){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
 const fmt=n=>Number(n).toLocaleString("pt-BR");
 
+const compactCoins=new Intl.NumberFormat("pt-BR",{notation:"compact",maximumSignificantDigits:3});
+
 function renderWallet(){
   const el=document.getElementById("wallet");if(!el)return;
   const r=rankOf(NS.xp),nx=nextRank(NS.xp);
   const pct=nx?Math.round((NS.xp-r.xp)/(nx.xp-r.xp)*100):100;
-  el.innerHTML=`<button class="wl" onclick="openTestPanel()" title="Moedas, XP e patente — clique para o modo teste">
-    <span class="wl-c">${icon("coin")}<b>${fmt(NS.coins)}</b></span>
-    <span class="wl-r"><em style="color:${r.color}">${r.name}</em><i><s style="width:${pct}%;background:${r.color}"></s></i><small>${fmt(NS.xp)} XP${nx?` · ${fmt(nx.xp-NS.xp)} p/ ${nx.name}`:""}</small></span></button>`;
+  const balance=fmt(NS.coins);
+  const progress=`${fmt(NS.xp)} XP${nx?` · ${fmt(nx.xp-NS.xp)} p/ ${nx.name}`:""}`;
+  const description=`${balance} moedas · ${r.name} · ${progress}`;
+  el.innerHTML=`<button class="wl" onclick="openTestPanel()" title="${description}" aria-label="Abrir perfil: ${description}">
+    <span class="wl-c">${icon("coin")}<b>${NS.coins>=10000?compactCoins.format(NS.coins):balance}</b></span>
+    <span class="wl-r"><em style="color:${r.color}">${r.name}</em><i><s style="width:${pct}%;background:${r.color}"></s></i><small>${progress}</small></span></button>`;
   updateAccount();
 }
 
