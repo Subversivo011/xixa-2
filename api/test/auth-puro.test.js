@@ -8,7 +8,7 @@ import { join } from 'node:path';
 import { createHash } from 'node:crypto';
 import {
   caminhoSeguro, comParametro, empacotarState, desempacotarState, stateConfere, novoState, urlDeAutorizacao,
-  gerarApelido, gatoInicial, lerConfigDiscord, chaveDoState, VALIDADE_STATE_S
+  gerarApelido, gatoInicial, lerConfigDiscord, chaveDoState, VALIDADE_STATE_S, urlDoAvatar, buscarPerfil
 } from '../auth/discord.js';
 import { hashToken, csrfDe, novoToken } from '../auth/sessao.js';
 import { lerCookies, montarCookie, apagarCookie } from '../lib/cookies.js';
@@ -333,4 +333,30 @@ test('rate limit não é burlável com X-Forwarded-For forjado à esquerda', asy
   const outro = await s.get('/api/auth/discord', { headers: { 'X-Forwarded-For': '6.6.6.1, 203.0.113.100, 172.70.1.1' } });
   assert.equal(outro.status, 302); // outro cliente real não é afetado
   await s.fechar();
+});
+
+// ---- foto de perfil ----
+test('urlDoAvatar: monta a URL do CDN no servidor, sempre png e tamanho 128', () => {
+  assert.equal(urlDoAvatar('123456789012345678', 'abcdef0123456789abcdef0123456789'), 'https://cdn.discordapp.com/avatars/123456789012345678/abcdef0123456789abcdef0123456789.png?size=128');
+  // avatar animado (a_): continua png, nunca gif
+  assert.equal(urlDoAvatar('12345', 'a_0123abcd'), 'https://cdn.discordapp.com/avatars/12345/a_0123abcd.png?size=128');
+});
+
+test('urlDoAvatar: sem avatar, hash ou id fora do formato = null (nada vindo do Discord vira URL)', () => {
+  const id = '123456789012345678';
+  for (const h of [null, undefined, '', 42, {}, [], 'ABCDEF', 'ab cd', 'ab/../cd', 'ab?x=1', 'ab#x', 'abc.png', 'http://evil.com/x', 'g', 'ab\ncd', 'a'.repeat(65), '../../x'])
+    assert.equal(urlDoAvatar(id, h), null, JSON.stringify(h));
+  for (const i of ['', '1234', '1'.repeat(26), '12a45', '123/456', null, 12345678, '12345 ', '../123456'])
+    assert.equal(urlDoAvatar(i, 'abc123'), null, JSON.stringify(i));
+});
+
+test('buscarPerfil: avatar_url vem de id+hash validados; campo avatar_url/banner crus do Discord são ignorados', async () => {
+  const resp = (corpo) => async () => ({ ok: true, status: 200, json: async () => corpo });
+  const bom = await buscarPerfil('tok', resp({ id: '123456789012345', username: 'zeca', global_name: 'Zeca', avatar: 'abc123', avatar_url: 'https://evil.com/x.png', banner: 'zzz' }));
+  assert.equal(bom.avatar_url, 'https://cdn.discordapp.com/avatars/123456789012345/abc123.png?size=128');
+  assert.deepEqual(Object.keys(bom).sort(), ['avatar_url', 'global_name', 'id', 'username']);
+  assert.equal((await buscarPerfil('tok', resp({ id: '123456789012345', username: 'z', avatar: null }))).avatar_url, null);       // sem foto
+  assert.equal((await buscarPerfil('tok', resp({ id: '123456789012345', username: 'z' }))).avatar_url, null);                      // campo ausente
+  assert.equal((await buscarPerfil('tok', resp({ id: '123456789012345', username: 'z', avatar: 'HASH/../ruim' }))).avatar_url, null); // hash inválido
+  assert.equal((await buscarPerfil('tok', resp({ id: '123456789012345', username: 'z', avatar: 'https://evil.com/a.png' }))).avatar_url, null);
 });

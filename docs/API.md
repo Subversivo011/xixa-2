@@ -50,7 +50,117 @@ OAuth2 do Discord (scope `identify`). Quem usa: o site abre `/api/auth/discord?v
 | `GET /api/auth/discord?voltar=/caminho` | Gera um `state` aleatório, guarda no cookie `ns_oauth` (httpOnly, 10 min, só viaja para `/api/auth`) e redireciona (302) ao Discord. `voltar` só aceita **caminho relativo do próprio site**; qualquer outra coisa (`https://…`, `//…`, `/\\…`, `javascript:`) vira `/` |
 | `GET /api/auth/discord/callback` | Confere o `state` com o cookie (`400` se faltar ou divergir), troca o `code`, lê `/users/@me`, cria ou atualiza `usuarios` + `contas_oauth`, abre a sessão e redireciona para `voltar` (revalidado). Falhas voltam para a mesma página com `?login=` **`negado`** (cancelou no Discord), **`erro`** (Discord recusou o code), **`banido`** (conta suspensa: não abre sessão), **`nao_membro`** (só se `DISCORD_EXIGIR_MEMBRO=1`) |
 | `POST /api/auth/sair` | Apaga a sessão no banco e limpa o cookie. Exige `X-CSRF`. Sem sessão, só limpa o cookie |
-| 🔒 `GET /api/eu` | `{ usuario: { id, apelido, avatar_gato }, patente, proxima_patente, moedas, xp, csrf }`. `401` se não estiver logado. **O `csrf` daqui vai no header `X-CSRF` das chamadas que alteram dados** |
+| 🔒 `GET /api/eu` | `{ usuario: { id, apelido, avatar_gato, avatar_url }, patente, proxima_patente, moedas, xp, csrf }`. `avatar_url` é a foto do Discord (ver abaixo) ou `null`. `401` se não estiver logado. **O `csrf` daqui vai no header `X-CSRF` das chamadas que alteram dados** |
+
+**Foto de perfil.** A cada login o servidor lê `id` e `avatar` (hash) de `/users/@me` e grava em `contas_oauth.avatar_url` (migração 012) a URL **montada por ele**: `https://cdn.discordapp.com/avatars/<id>/<hash>.png?size=128`. Sempre `.png` (inclusive avatar animado, hash `a_…`), nunca o avatar padrão do Discord. `id` precisa casar `^[0-9]{5,25}# API
+
+Node puro + Postgres (`api/`). Rotas por assunto em `api/routes/`, roteador em `api/lib/router.js`, montagem em `api/app.js`. Respostas em JSON; erros em `{ erro }` (rotas novas e comunidade) ou `{ error }` (formulário de contribuidores e admin, formato antigo mantido).
+
+## Saúde
+
+| Rota | Resposta |
+|---|---|
+| `GET /api/health` | `200 { ok: true, banco: "ok" }`; `503 { ok: false, banco: "falha" }` se o banco não responder em 2 s |
+
+## Acervo (público, cache de 60 s)
+
+Só memes com `status = 'publicado'`. Fonte da verdade: Postgres (carga inicial em `api/seed/acervo.js`).
+
+| Rota | Descrição |
+|---|---|
+| `GET /api/memes` | `{ total, itens[] }`. Filtros: `ano`, `categoria`, `raridade`, `limite` (máx. 500), `offset`. Ordem: ano, data, id |
+| `GET /api/memes/:id` | Um meme (`400` id inválido, `404` inexistente ou não publicado) |
+| `GET /api/eras` | `{ itens[] }` com `ano`, `ano_fim` (`null` na era aberta "2020+"), `rotulo`, `lema`, `texto` |
+| `GET /api/categorias` | `{ itens[] }` com `nome`, `icone`, `emoji`, `total` de memes publicados |
+
+Cada meme: `id, titulo, ano, data, categoria, tipo, raridade, emoji, descricao, autor, duracao, youtube_id, adicionado_em, midias[]`; cada mídia: `tipo` (`imagem` ou `video_arquivo`), `caminho`, `origem_url`, `credito_por`, `credito_url`, `largura`, `altura`.
+
+## Economia (servidor é a autoridade)
+
+Moedas, XP e cartas só mudam por chamadas da API, dentro de uma transação que trava a linha do usuário. Saldo e XP são a **soma do razão** (`movimentos_moeda`, `eventos_xp`); `usuarios.moedas` e `usuarios.xp` são cache atualizado na mesma transação. Valores de recompensa e de repetidas vêm de `regras_economia`; preço, chances e garantia de cada pacote vêm de `pacotes_tipo`. Regras de negócio: `docs/subversivo011/economia-e-escassez.md`.
+
+Sem o acervo carregado (seed não rodou) ou sem as regras de economia, `abrir` e a carteira respondem `503 { erro: "serviço indisponível, tente mais tarde" }`; o detalhe (o que falta e o que rodar) vai só para o log do servidor. Nada é gravado.
+
+Rotas marcadas com 🔒 exigem usuário (ver **Login com Discord e sessão**). Erros de regra: `{ erro }` com 400, 402 (moedas insuficientes), 404 ou 409. Até 60 ações de escrita por usuário a cada 10 min (429).
+
+| Rota | Descrição |
+|---|---|
+| 🔒 `GET /api/carteira` | `moedas`, `xp` (do razão), `patente` e `proxima_patente`, `pacotes` no estoque, resumo das `cartas` e `valor_das_repetidas` |
+| 🔒 `GET /api/album` | Coleções com todas as cartas e a `quantidade` que o usuário tem; `tenho`, `total`, `completa` |
+| 🔒 `POST /api/visita` | Visita do dia (fuso de `regras_economia.limites`): +XP, pacote diário (acumula até 7) e, **na primeira visita da conta** (ainda não existe cadastro), o pacote de boas-vindas. Idempotente por dia |
+| 🔒 `POST /api/pacotes/comprar` | `{ tipo, colecao_id? }` (`colecao_id` só no pacote da coleção). Cobra no razão e guarda no estoque. `402` sem moedas; pacote grátis não se compra |
+| 🔒 `POST /api/pacotes/abrir` | `{ estoque_id }` ou `{ tipo, colecao_id? }` (abre o mais antigo). Sorteia no servidor, grava em `pacotes_abertos` (com a `semente`, que reproduz o sorteio) e credita cartas, XP e o bônus de coleção completa numa só transação. Devolve `cartas[]` (com `nova`), `xp_ganho`, `moedas_ganhas`, `colecoes_completas`, `carteira` |
+| 🔒 `POST /api/album/reciclar` | `{ carta_id }` ou `{ todas: true }`. **É o único jeito de uma repetida virar moeda**: abrir pacote só soma a carta ao inventário (`quantidade`) e informa `valor_das_repetidas`, sem pagar. Converte repetidas em moedas (sempre fica 1 de cada). `409` se não houver repetida |
+| `GET /api/ranking?metrica=xp\|cartas&limite=50` | Público. `xp` soma os eventos do razão; `cartas` conta cartas distintas. Banidos ficam de fora |
+
+Idempotência do razão: visita do dia, carta nova e coleção completa têm índice único por usuário e referência, então retry ou corrida nunca pagam duas vezes.
+
+## Login com Discord e sessão
+
+OAuth2 do Discord (scope `identify`). Quem usa: o site abre `/api/auth/discord?voltar=/album.html`, o usuário autoriza no Discord e volta para a página de origem já logado.
+
+| Rota | Descrição |
+|---|---|
+| `GET /api/auth/discord?voltar=/caminho` | Gera um `state` aleatório, guarda no cookie `ns_oauth` (httpOnly, 10 min, só viaja para `/api/auth`) e redireciona (302) ao Discord. `voltar` só aceita **caminho relativo do próprio site**; qualquer outra coisa (`https://…`, `//…`, `/\\…`, `javascript:`) vira `/` |
+| `GET /api/auth/discord/callback` | Confere o `state` com o cookie (`400` se faltar ou divergir), troca o `code`, lê `/users/@me`, cria ou atualiza `usuarios` + `contas_oauth`, abre a sessão e redireciona para `voltar` (revalidado). Falhas voltam para a mesma página com `?login=` **`negado`** (cancelou no Discord), **`erro`** (Discord recusou o code), **`banido`** (conta suspensa: não abre sessão), **`nao_membro`** (só se `DISCORD_EXIGIR_MEMBRO=1`) |
+| `POST /api/auth/sair` | Apaga a sessão no banco e limpa o cookie. Exige `X-CSRF`. Sem sessão, só limpa o cookie |
+| 🔒 `GET /api/eu` | `{ usuario: { id, apelido, avatar_gato, avatar_url }, patente, proxima_patente, moedas, xp, csrf }`. `avatar_url` é a foto do Discord (ver abaixo) ou `null`. `401` se não estiver logado. **O `csrf` daqui vai no header `X-CSRF` das chamadas que alteram dados** |
+
+ e o hash `^[a-f0-9_]{1,64}# API
+
+Node puro + Postgres (`api/`). Rotas por assunto em `api/routes/`, roteador em `api/lib/router.js`, montagem em `api/app.js`. Respostas em JSON; erros em `{ erro }` (rotas novas e comunidade) ou `{ error }` (formulário de contribuidores e admin, formato antigo mantido).
+
+## Saúde
+
+| Rota | Resposta |
+|---|---|
+| `GET /api/health` | `200 { ok: true, banco: "ok" }`; `503 { ok: false, banco: "falha" }` se o banco não responder em 2 s |
+
+## Acervo (público, cache de 60 s)
+
+Só memes com `status = 'publicado'`. Fonte da verdade: Postgres (carga inicial em `api/seed/acervo.js`).
+
+| Rota | Descrição |
+|---|---|
+| `GET /api/memes` | `{ total, itens[] }`. Filtros: `ano`, `categoria`, `raridade`, `limite` (máx. 500), `offset`. Ordem: ano, data, id |
+| `GET /api/memes/:id` | Um meme (`400` id inválido, `404` inexistente ou não publicado) |
+| `GET /api/eras` | `{ itens[] }` com `ano`, `ano_fim` (`null` na era aberta "2020+"), `rotulo`, `lema`, `texto` |
+| `GET /api/categorias` | `{ itens[] }` com `nome`, `icone`, `emoji`, `total` de memes publicados |
+
+Cada meme: `id, titulo, ano, data, categoria, tipo, raridade, emoji, descricao, autor, duracao, youtube_id, adicionado_em, midias[]`; cada mídia: `tipo` (`imagem` ou `video_arquivo`), `caminho`, `origem_url`, `credito_por`, `credito_url`, `largura`, `altura`.
+
+## Economia (servidor é a autoridade)
+
+Moedas, XP e cartas só mudam por chamadas da API, dentro de uma transação que trava a linha do usuário. Saldo e XP são a **soma do razão** (`movimentos_moeda`, `eventos_xp`); `usuarios.moedas` e `usuarios.xp` são cache atualizado na mesma transação. Valores de recompensa e de repetidas vêm de `regras_economia`; preço, chances e garantia de cada pacote vêm de `pacotes_tipo`. Regras de negócio: `docs/subversivo011/economia-e-escassez.md`.
+
+Sem o acervo carregado (seed não rodou) ou sem as regras de economia, `abrir` e a carteira respondem `503 { erro: "serviço indisponível, tente mais tarde" }`; o detalhe (o que falta e o que rodar) vai só para o log do servidor. Nada é gravado.
+
+Rotas marcadas com 🔒 exigem usuário (ver **Login com Discord e sessão**). Erros de regra: `{ erro }` com 400, 402 (moedas insuficientes), 404 ou 409. Até 60 ações de escrita por usuário a cada 10 min (429).
+
+| Rota | Descrição |
+|---|---|
+| 🔒 `GET /api/carteira` | `moedas`, `xp` (do razão), `patente` e `proxima_patente`, `pacotes` no estoque, resumo das `cartas` e `valor_das_repetidas` |
+| 🔒 `GET /api/album` | Coleções com todas as cartas e a `quantidade` que o usuário tem; `tenho`, `total`, `completa` |
+| 🔒 `POST /api/visita` | Visita do dia (fuso de `regras_economia.limites`): +XP, pacote diário (acumula até 7) e, **na primeira visita da conta** (ainda não existe cadastro), o pacote de boas-vindas. Idempotente por dia |
+| 🔒 `POST /api/pacotes/comprar` | `{ tipo, colecao_id? }` (`colecao_id` só no pacote da coleção). Cobra no razão e guarda no estoque. `402` sem moedas; pacote grátis não se compra |
+| 🔒 `POST /api/pacotes/abrir` | `{ estoque_id }` ou `{ tipo, colecao_id? }` (abre o mais antigo). Sorteia no servidor, grava em `pacotes_abertos` (com a `semente`, que reproduz o sorteio) e credita cartas, XP e o bônus de coleção completa numa só transação. Devolve `cartas[]` (com `nova`), `xp_ganho`, `moedas_ganhas`, `colecoes_completas`, `carteira` |
+| 🔒 `POST /api/album/reciclar` | `{ carta_id }` ou `{ todas: true }`. **É o único jeito de uma repetida virar moeda**: abrir pacote só soma a carta ao inventário (`quantidade`) e informa `valor_das_repetidas`, sem pagar. Converte repetidas em moedas (sempre fica 1 de cada). `409` se não houver repetida |
+| `GET /api/ranking?metrica=xp\|cartas&limite=50` | Público. `xp` soma os eventos do razão; `cartas` conta cartas distintas. Banidos ficam de fora |
+
+Idempotência do razão: visita do dia, carta nova e coleção completa têm índice único por usuário e referência, então retry ou corrida nunca pagam duas vezes.
+
+## Login com Discord e sessão
+
+OAuth2 do Discord (scope `identify`). Quem usa: o site abre `/api/auth/discord?voltar=/album.html`, o usuário autoriza no Discord e volta para a página de origem já logado.
+
+| Rota | Descrição |
+|---|---|
+| `GET /api/auth/discord?voltar=/caminho` | Gera um `state` aleatório, guarda no cookie `ns_oauth` (httpOnly, 10 min, só viaja para `/api/auth`) e redireciona (302) ao Discord. `voltar` só aceita **caminho relativo do próprio site**; qualquer outra coisa (`https://…`, `//…`, `/\\…`, `javascript:`) vira `/` |
+| `GET /api/auth/discord/callback` | Confere o `state` com o cookie (`400` se faltar ou divergir), troca o `code`, lê `/users/@me`, cria ou atualiza `usuarios` + `contas_oauth`, abre a sessão e redireciona para `voltar` (revalidado). Falhas voltam para a mesma página com `?login=` **`negado`** (cancelou no Discord), **`erro`** (Discord recusou o code), **`banido`** (conta suspensa: não abre sessão), **`nao_membro`** (só se `DISCORD_EXIGIR_MEMBRO=1`) |
+| `POST /api/auth/sair` | Apaga a sessão no banco e limpa o cookie. Exige `X-CSRF`. Sem sessão, só limpa o cookie |
+| 🔒 `GET /api/eu` | `{ usuario: { id, apelido, avatar_gato, avatar_url }, patente, proxima_patente, moedas, xp, csrf }`. `avatar_url` é a foto do Discord (ver abaixo) ou `null`. `401` se não estiver logado. **O `csrf` daqui vai no header `X-CSRF` das chamadas que alteram dados** |
+
+; qualquer outra coisa (ou ausência de foto) grava `null`. Nenhuma URL crua do Discord e nenhum parâmetro do cliente entram na coluna. Quem trocou ou removeu a foto no Discord tem a URL atualizada (ou zerada) no login seguinte, no mesmo `UPDATE` do nome de exibição. Usuários sem conta Discord (stub de teste) têm `avatar_url: null`; o gato (`avatar_gato`) continua existindo para todos.
 
 **State assinado.** O cookie `ns_oauth` é `<state>.<destino>.<emitido em>.<hmac>`: HMAC-SHA256 com chave derivada do client secret. O servidor recusa (`400`) assinatura inválida, destino adulterado, cookie com mais de 10 minutos (validado no servidor, não só pelo `Max-Age`) ou emitido "no futuro". O `state` também precisa bater com o da URL de volta.
 
