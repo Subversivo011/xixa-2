@@ -196,8 +196,35 @@ function submitSignup(){
   if(isNew)toast(chat?"Bem-vindo! Por ser do Xet da live do Cid, você já entra como Banda larga":"Conta criada! Seu gatinho já está no ranking",3200);
   if(typeof onAccountChange==="function")onAccountChange();
 }
+// ---- Sessão do servidor (login com Discord): GET /api/eu ----
+let SESSAO=null;
+async function carregarSessao(){
+  try{
+    const r=await fetch("/api/eu",{credentials:"same-origin",cache:"no-store"});
+    SESSAO=r.ok?await r.json():null;
+  }catch(e){SESSAO=null}
+  updateAccount();
+}
+async function sairDaConta(){
+  try{await fetch("/api/auth/sair",{method:"POST",credentials:"same-origin",headers:{"X-CSRF":(SESSAO&&SESSAO.csrf)||""}})}catch(e){}
+  SESSAO=null;location.reload();
+}
+const LOGIN_MSG={negado:"Login cancelado no Discord.",erro:"Não foi possível entrar com o Discord. Tente de novo.",banido:"Esta conta não pode entrar.",nao_membro:"Para entrar, você precisa ser membro do servidor do Discord da comunidade."};
+function avisoDeLogin(){
+  try{
+    const u=new URL(location.href),m=u.searchParams.get("login");if(!m)return;
+    u.searchParams.delete("login");history.replaceState(null,"",u.pathname+(u.search||"")+u.hash);
+    setTimeout(()=>toast(LOGIN_MSG[m]||LOGIN_MSG.erro,5000),400);
+  }catch(e){}
+}
+document.addEventListener("DOMContentLoaded",()=>{carregarSessao();avisoDeLogin()});
+function contaSessaoHTML(){
+  const u=SESSAO.usuario,p=SESSAO.patente&&SESSAO.patente.nome?SESSAO.patente.nome:"";
+  return `<div class="account-actions"><span class="sg-acct" title="Conectado com o Discord"><span class="sg-av">${escapeHtml(String(u.apelido||"?").charAt(0).toUpperCase())}</span><span>${escapeHtml(u.apelido)}${p?"<b>"+escapeHtml(p)+"</b>":""}</span></span><button type="button" onclick="sairDaConta()">Sair</button></div>`;
+}
 function updateAccount(){
   const el=document.getElementById("acct");if(!el)return;const a=NS.acct;
+  if(SESSAO&&SESSAO.usuario){el.innerHTML=contaSessaoHTML();return}
   el.innerHTML=a?`<button class="sg-acct" onclick="openSignup()"><span class="sg-av">${catSVG(a.av)}</span><span>${escapeHtml(a.user)}<b>Gato nível ${rankIdx(NS.xp)+1}</b></span></button>`:`<div class="account-actions">
     <button type="button" class="account-login" onclick="openLogin()">${icon("login")}Login</button>
   </div>`;
