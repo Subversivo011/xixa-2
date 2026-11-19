@@ -172,6 +172,7 @@ function localCmts(id){NS.cmts=NS.cmts||{};return NS.cmts[id]||(NS.cmts[id]=[])}
 async function loadCmts(id){const d=await apiGet("/api/comentarios?id="+encodeURIComponent(id));return d&&Array.isArray(d.itens)?d.itens:null}
 function initComments(el,m){
   const box=el.querySelector("[data-cmts]");if(!box)return;
+  if(m.cuidado){box.innerHTML=`<div class="ce cdo-off-txt">${icon("care","in")}Comentários desativados neste meme (selo de cuidado).</div>`;return}
   const k0=pEra(m.y),k=k0==="ig15"?"ig":k0,T=CMT_TXT[k];let list=localCmts(m.id).slice(),online=false;
   const render=()=>{const ncm=el.querySelector("[data-ncm]");if(ncm)ncm.textContent=list.length?`(${list.length})`:"";
     const me=meuApelido();
@@ -216,8 +217,8 @@ apiGet("/api/links/aprovados").then(d=>{if(!d||typeof d!=="object")return;let n=
   for(const [id,yt] of Object.entries(d)){if(!/^[\w-]{11}$/.test(yt))continue;LINKS_OK[id]=yt;const m=(typeof MEMES!=="undefined"?MEMES:[]).find(x=>x.id===id);if(m&&!m.yt){m.yt=yt;n++}}
   if(n&&typeof buildAll==="function"){buildAll();if(typeof renderAll==="function")renderAll()}});
 
-// compartilhar: sempre o link do vídeo original no YouTube
-async function compartilharYT(m){
+// compartilhar: sempre o link do vídeo original no YouTube (desligado em memes com selo de cuidado)
+async function compartilharYT(m){if(m.cuidado){avisoCuidadoOff();return}
   if(!m.yt){toast("Este meme ainda não tem o vídeo original do YouTube.",2800);return}
   const url="https://www.youtube.com/watch?v="+m.yt;
   if(navigator.share&&matchMedia("(pointer:coarse)").matches){try{await navigator.share({title:m.t,url});return}catch(e){if(e&&e.name==="AbortError")return}}
@@ -240,6 +241,7 @@ function openViewer(m,opt={}){
   VW={el,m,onClose:opt.onClose};VW.fit=()=>encaixarJanela(el);VW.rs=()=>VW&&VW.fit();addEventListener("resize",VW.rs);requestAnimationFrame(VW.fit);[250,800,1600].forEach(t=>setTimeout(()=>VW&&VW.el===el&&VW.fit(),t));
   VW.key=ev=>{if(ev.key==="Escape"&&!el.querySelector(".dial"))closeViewer()};document.addEventListener("keydown",VW.key);
   el.addEventListener("click",ev=>{if(ev.target===el){closeViewer();return}const a=ev.target.closest("[data-act],[data-id],[data-like],[data-star]");if(!a)return;
+    if(m.cuidado&&(a.dataset.like||a.dataset.star||a.dataset.act==="share")){ev.preventDefault();avisoCuidadoOff();return}
     if(a.dataset.id){ev.preventDefault();sndClick();opt.onPick&&opt.onPick(a.dataset.id);return}
     const act=a.dataset.act;
     if(act==="close")closeViewer();
@@ -255,10 +257,11 @@ function openViewer(m,opt={}){
   });
   // notas e visualizações
   const e=isPhoto?null:vEra(m.y);let tot=localTotals(m.id);
-  const paint=()=>{const mine=myVote(m.id);
+  let paint=()=>{const mine=myVote(m.id);
     if(isPhoto){const n=tot.up;el.querySelectorAll("[data-like-photo]").forEach(b=>b.innerHTML=`<button class="plk ${mine.v===1?"on":""}" data-like="1">${icon("heart")}${pEra(m.y)==="fotolog"?`<span>${mine.v===1?"Flog favoritado":"Favoritar este flog"} (${fmt(n)})</span>`:pEra(m.y)==="orkut"?`<span>${mine.v===1?"Você curtiu":"Curtir"} · ${fmt(n)}</span>`:""}</button>`);
       const l=el.querySelector("[data-likes]");if(l)l.textContent=`${fmt(n)} curtida${n===1?"":"s"}`;const no=el.querySelector("[data-notes]");if(no)no.textContent=`${fmt(n)} nota${n===1?"":"s"}`;return}
     const rt=el.querySelector("[data-rt]");if(rt)rt.innerHTML=m.vert?`<button class="tkl ${mine.v===1?"on":""}" data-like="1">${icon("heart")}<small>${short(tot.up)}</small></button>`:ratingHTML(e,tot,mine)};
+  if(m.cuidado){el.classList.add("vw-cdo");const p0=paint;paint=()=>{p0();travarCuidado(el)};const xb=el.querySelector(".xrt>b");if(xb)xb.textContent="Avaliação e compartilhamento desativados neste meme (selo de cuidado)."}
   paint();
   loadVotes(m.id).then(d=>{if(d&&VW&&VW.m===m){tot=d;paint()}});
   if(isPhoto)initComments(el,m);
@@ -326,6 +329,12 @@ function cuidadoHTML(m,curto){const c=CUIDADO[m.cuidado.tipo]||CUIDADO.racismo;
    <p>O Não Salvo é um museu da internet brasileira. Este registro fica aqui como memória: na época, muita gente achava esse tipo de piada “normal”. Hoje sabemos que não é. Isso não é humor, é preconceito.</p>
    <p class="cdo-lei"><b>É crime.</b> ${c.lei}</p>
    <div class="cdo-orgs"><small>Quem luta contra isso:</small>${c.orgs.map(([n,u])=>`<a href="${u}" target="_blank" rel="noopener">${icon("extlink","in")}${n}</a>`).join("")}</div>`}`}
+// memes com selo de cuidado: sem nota, sem curtida, sem comentário e sem compartilhar
+const CDO_OFF="Desativado: meme com selo de cuidado";
+function avisoCuidadoOff(){toast("Neste meme não dá para avaliar, curtir, comentar nem compartilhar (selo de cuidado).",3200)}
+function travarCuidado(el){
+  el.querySelectorAll("[data-rt] button,[data-like-photo] button,[data-act=share],.tkr .tki").forEach(b=>{b.setAttribute("aria-disabled","true");b.title=CDO_OFF;b.classList.add("cdo-off")});
+  el.querySelectorAll("[data-stars] small").forEach(x=>x.textContent="Avaliação desativada")}
 function montarCuidado(el,m){
   const w=el.querySelector(".vw-win");if(!w)return;
   const box=document.createElement("div");box.className="cdo";
