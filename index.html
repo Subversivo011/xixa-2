@@ -168,10 +168,10 @@ main{display:flex;flex-direction:column}
 <main>
   <section class="top">
     <div class="hero">
-      <div class="sun"><picture><source srcset="logo-hero.webp" type="image/webp"><img src="logo-hero.png" alt="Não Salvo" width="640" height="528" fetchpriority="high"></picture></div>
+      <div class="sun"><picture><source srcset="logo-hero.webp?v=4" type="image/webp"><img src="logo-hero.png?v=4" alt="Não Salvo" width="640" height="528" fetchpriority="high"></picture></div>
       <h1>E no fim, o plano do <em>Não Salvo</em> era salvar.</h1>
       <p>Um museu colaborativo de vídeos virais, memes e momentos inesquecíveis da nossa internet.</p>
-      <div class="btns"><button class="btn" onclick="go(2012,true)"><i data-ic="timeline"></i>Explorar por ano</button><button class="btn ghost" onclick="openSubmit()"><i data-ic="send"></i>Enviar meme</button></div>
+      <div class="btns"><a class="btn" href="linha-do-tempo.html"><i data-ic="timeline"></i>Explorar por ano</a><button class="btn ghost" onclick="openSubmit()"><i data-ic="send"></i>Enviar meme</button></div>
     </div>
     <div>
       <div class="sec-title"><span><i data-ic="star"></i>Clássicos da internet brasileira</span><a onclick="setView('todos')">Ver todos →</a></div>
@@ -213,7 +213,7 @@ main{display:flex;flex-direction:column}
 <div class="modal" id="modal" onclick="if(event.target===this)closeM()"><div class="box" id="box"></div></div>
 
 <form name="feedback" data-netlify="true" netlify-honeypot="bot-field" hidden><input name="tipo"><textarea name="msg"></textarea><input name="contato"><input name="pagina"><input name="bot-field"></form>
-<script src="common.js?v=20261119n"></script>
+<script src="common.js?v=20261119r"></script>
 <script src="data.js?v=20261119q"></script>
 <script src="player.js?v=20261119n"></script>
 <script src="viewer.js?v=20261119n"></script>
@@ -262,7 +262,7 @@ const card=(a,big)=>`<button class="card" onclick="openM('${a.id}')">
 const addCard=y=>`<button class="card add" onclick="openSubmit('${y}')"><div class="thumb"><span>＋</span></div><div class="meta"><h3>Salvar um viral de ${y}</h3><small>+${REWARD.approved} moedas se aprovado</small></div></button>`;
 
 const SUB_ITEMS=[
-  {k:"tl",ic:"timeline",label:"Linha do tempo",fn:()=>{$("tl").scrollIntoView({behavior:"smooth"})}},
+  {k:"tl",ic:"timeline",label:"Linha do tempo",href:"linha-do-tempo.html"},
   {k:"cat",ic:"categories",label:"Categorias",dd:1,fn:(e,b)=>openPop(b,[{ic:"all",label:"Todas",fn:()=>pickCat("Todas")},...[...new Set(ALL.map(a=>a.c))].map(c=>({ic:CAT_IC[c]||"video",label:c,note:ALL.filter(a=>a.c===c).length+"",fn:()=>pickCat(c)}))])},
   {k:"rand",ic:"random",label:"Aleatório",fn:()=>randomPick()},
   {k:"rank",ic:"ranking",label:"Ranking",fn:()=>openRank()},
@@ -354,7 +354,7 @@ function renderCur(){
   const el=$("cur");el.classList.remove("fade");void el.offsetWidth;el.classList.add("fade");
   const items=prevDoAno(cur);
   const fill=items.map(a=>card(a));while(fill.length<3)fill.push(addCard(parseInt(cur)));
-  const exp=`setView('ano');$('browse').scrollIntoView({behavior:'smooth'})`;
+  const exp=`location.href='linha-do-tempo.html#'+encodeURIComponent('${cur}')`;
   el.innerHTML=`<div class="cur-t"><div class="cur-h"><button class="mnav" ${p?`onclick="go('${p}')"`:"disabled"} aria-label="Ano anterior">‹</button><div><h2 class="disp">${yLab(cur)}</h2><div class="lema">${d.lema}</div></div><button class="mnav" ${n?`onclick="go('${n}')"`:"disabled"} aria-label="Próximo ano">›</button></div>
     <p>${d.txt}</p><button class="btn dexp" onclick="${exp}">Explorar ${yLab(cur)} →</button></div>
     <div class="mini">${fill.join("")}</div>
@@ -567,7 +567,7 @@ document.addEventListener("keydown",e=>{
 });
 const t0=Date.now();setInterval(()=>{const m=Math.floor((Date.now()-t0)/60000);$("timer").textContent=m+"m explorando a história da internet"},15000);
 $("timer").textContent="0m explorando a história da internet";
-const h=decodeURIComponent(location.hash.slice(1)).replace("mais","+");if(YEAR_INFO[h])cur=h;else if(/^\d{4}$/.test(h))cur=yKey(h);
+const h=decodeURIComponent(location.hash.slice(1)).replace("mais","+");if(Object.hasOwn(YEAR_INFO,h))cur=h;else if(/^\d{4}$/.test(h))cur=yKey(h);
 renderWallet();renderAll();scheduleApprovals();
 if(["rank","mod","send","rand","tl","todos"].includes(h))setTimeout(()=>{ftGo(h);history.replaceState(null,"",location.pathname)},300);
 // centraliza os raios do fundo no logo

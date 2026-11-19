@@ -462,13 +462,13 @@ ${[0,1,2,3,4,5,6,7].map(i=>{const a=(i/8)*Math.PI*1.6-Math.PI*1.3;return`<circle
 <circle cx="80" cy="102" r="6" fill="#7a0f22"/>
 <path d="M22 58c-4-18 10-30 26-30h64c16 0 30 12 26 30l-4 8c-2 4-6 5-10 3l-14-6c-4-2-5-5-4-9l2-6H52l2 6c1 4 0 7-4 9l-14 6c-4 2-8 1-10-3z" fill="url(#phg)" stroke="#7a0f22" stroke-width="3"/>
 <path d="M40 34c10-4 70-4 80 0" stroke="#fff8" stroke-width="3" fill="none" stroke-linecap="round"/></svg>`;
-function nsPage(){return /album\.html/.test(location.pathname)?"album":"index"}
+function nsPage(){const p=location.pathname;return /album\.html/.test(p)?"album":/(memepedia|linha-do-tempo)\.html/.test(p)?"outra":"index"}
 function ftGo(k){
   const onIdx=nsPage()==="index";
   const fns={rank:"openRank",mod:"openMod",send:"openSubmit",rand:"randomPick"};
   if(k==="feedback")return openFeedback();
   if(onIdx&&fns[k]&&typeof window[fns[k]]==="function")return window[fns[k]]();
-  if(onIdx&&k==="tl"){document.getElementById("tl").scrollIntoView({behavior:"smooth"});return}
+  if(k==="tl"){location.href="linha-do-tempo.html";return}
   if(onIdx&&k==="todos"&&typeof setView==="function")return setView("todos");
   if(onIdx&&k==="top")return window.scrollTo({top:0,behavior:"smooth"});
   location.href=k==="album"?"album.html":"index.html#"+k;

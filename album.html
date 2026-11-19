@@ -193,7 +193,7 @@
 <div class="modal" id="modal" onclick="if(event.target===this)closeModal()"><div class="mbox" id="mbox"></div></div>
 
 <form name="feedback" data-netlify="true" netlify-honeypot="bot-field" hidden><input name="tipo"><textarea name="msg"></textarea><input name="contato"><input name="pagina"><input name="bot-field"></form>
-<script src="common.js?v=20261119n"></script>
+<script src="common.js?v=20261119r"></script>
 <script src="data.js?v=20261119q"></script>
 <script src="player.js?v=20261119n"></script>
 <script src="viewer.js?v=20261119n"></script>
@@ -204,6 +204,7 @@ renderHeader("album",{sub:[
   {k:"shop",ic:"shop",label:"Loja",fn:()=>openShop()},
   {k:"conv",ic:"convert",label:"Converter repetidas",fn:()=>convertAll()},
   {k:"rank",ic:"ranking",label:"Ranking",fn:()=>openRank()},
+  {k:"tl",ic:"timeline",label:"Linha do tempo",href:"linha-do-tempo.html"},
   {k:"wiki",ic:"book",label:"Memepédia",href:"memepedia.html"}
 ]});
 setSubOn("cols");
