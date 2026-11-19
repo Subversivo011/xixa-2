@@ -64,3 +64,15 @@ HAVING count(*) > 1;
 ```
 
 Se aparecer alguma linha: faça o `pg_dump`, apague as repetidas deixando a de menor `id` de cada grupo e recalcule `usuarios.xp` e `usuarios.moedas` como soma do razão antes de subir. As consultas ignoram `ref` NULL de propósito: NULL é distinto no índice único, então essas linhas não impedem a 008.
+
+## Limpeza de eventos_meme_ip (anti-spam do Sobe.Desce)
+
+`eventos_meme_ip` guarda quem já contou visita/clique no dia (HMAC do IP, migração 009) e crescia sem limite; só o dia corrente importa. `api/lib/limpeza.js` apaga linhas com `dia < hoje - 2` (fuso America/Sao_Paulo; fica hoje + 2 dias de margem):
+
+- Roda no boot da API (`server.js`) e depois a cada 6h (`setInterval(...).unref()`). Em cada réplica: o DELETE é idempotente, rodar duas vezes só custa uma consulta vazia.
+- Em lotes de 5000 linhas (um DELETE por lote, transação curta, sem lock longo) até esgotar; teto de 2000 lotes por execução.
+- Nunca derruba a API: erro vira log `limpeza de eventos_meme_ip falhou: ...`; sucesso com linhas apagadas loga `limpeza: N linhas antigas removidas`.
+- Migração 011 cria `eventos_meme_ip_dia_idx (dia)` para achar as linhas antigas sem varrer a tabela (a PK começa por `meme_id`). No primeiro deploy a tabela pode ter muitas linhas acumuladas: o `CREATE INDEX` comum bloqueia INSERTs (`/api/eventos`) enquanto roda. Em produção, confira antes `SELECT count(*) FROM eventos_meme_ip`; se passar de alguns milhões, crie o índice antes à mão com `CREATE INDEX CONCURRENTLY eventos_meme_ip_dia_idx ON eventos_meme_ip (dia)` (a migração 011 usa `IF NOT EXISTS`, então segue sem erro).
+- Manual: `DELETE FROM eventos_meme_ip WHERE dia < (now() AT TIME ZONE America/Sao_Paulo)::date - 2;`
+
+O hash do IP (`api/lib/ip.js`, HMAC-SHA256 com o token de admin, 32 hex) é único para eventos, links e memepédia. **Não mude o algoritmo nem o token de admin sem avisar**: trocar o token invalida o anti-spam do dia (inofensivo, mas conta de novo).
