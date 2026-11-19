@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <script src="gate.js?v=20261119u"></script>
-<script src="api-cliente.js?v=20261119x"></script>
+<script src="api-cliente.js?v=20261119y"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>NÃO SALVO — Álbum de Figurinhas da Internet</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -195,7 +195,7 @@
 <div class="modal" id="modal" onclick="if(event.target===this)closeModal()"><div class="mbox" id="mbox"></div></div>
 
 <form name="feedback" data-netlify="true" netlify-honeypot="bot-field" hidden><input name="tipo"><textarea name="msg"></textarea><input name="contato"><input name="pagina"><input name="bot-field"></form>
-<script src="common.js?v=20261119x"></script>
+<script src="common.js?v=20261119y"></script>
 <script src="data.js?v=20261119q"></script>
 <script src="player.js?v=20261119n"></script>
 <script src="viewer.js?v=20261119x"></script>
@@ -323,7 +323,8 @@ function renderFab(){
 }
 function bumpFab(){const f=$("pfab");f.classList.remove("bump");void f.offsetWidth;f.classList.add("bump")}
 function packFab(){
-  if(!ECO.pronto||abrindo||packOpen)return;
+  if(abrindo||packOpen)return;
+  if(!economiaPronta()){if(ECO.indisponivel)iniciarEconomia();return}
   if(!invCount())return openShop();
   if(invCount()===1)return abrirTipo(ECO.pacotes[0].tipo,ECO.pacotes[0].colecao_id);
   openInv();
@@ -364,7 +365,7 @@ async function abrirTipo(tipo,colecaoId){
     abrindo=false;walletHold=false;
     if(e.status===0)toast("Sem conexão. Tente de novo.");
     else if(e.status===404||e.status===409){toast(e.erro||"Pacote não encontrado no seu estoque");try{await atualizarCarteira()}catch(_){}renderAll()}
-    else if(![401,429,503].includes(e.status))toast(e.erro||"Não foi possível abrir o pacote");
+    else if(![401,402,429,503].includes(e.status))toast(e.erro||"Não foi possível abrir o pacote");
     renderWallet();return;
   }
   abrindo=false;mostrarPacote(r,colecaoId||null);
@@ -389,6 +390,7 @@ function checkAll(){const s=$("pkS"),b=$("pkB");if(!s||!b)return;const f=[...doc
 function revealAll(b){const f=[...document.querySelectorAll(".flip")];if(f.every(x=>x.classList.contains("f"))){closeModal();return}f.forEach((x,i)=>setTimeout(()=>flipOne(x),i*260))}
 
 async function openShop(){
+  if(!economiaPronta()){if(ECO.indisponivel)iniciarEconomia();return}
   if(!TIPOS.length)await carregarTipos();
   const lojaTipos=TIPOS.filter(p=>p.comprar);
   if(!lojaTipos.length){openModal(`<h3>Loja de pacotes</h3><p>A loja não está disponível agora. Tente de novo daqui a pouco.</p><button class="mclose" onclick="closeModal()">FECHAR</button>`);return}
@@ -396,7 +398,7 @@ async function openShop(){
   openModal(`<h3>Loja de pacotes</h3><p>Você tem <b style="color:var(--gold)">🪙 ${fmt(ECO.moedas)}</b>${dupsTotal()?` e mais <b style="color:var(--gold)">🪙 ${fmt(dupsTotal())}</b> em repetidas para converter`:""}. Cada pacote vai pro seu estoque, para abrir quando quiser.</p>
   <div class="shop">${lojaTipos.map(p=>`<div class="sp" style="--pg:${escapeHtml(p.gradiente||GRAD_PADRAO)}"><div class="ph">${icon(p.icone||"pack")}</div><h4>${escapeHtml(p.nome)}</h4><p>${escapeHtml(p.descricao||"")}</p>
    ${p.escopo==="colecao"?`<select id="shopCol">${COLLECTIONS.map((c,k)=>`<option value="${escapeHtml(c.id)}" ${k===ci?"selected":""}>${escapeHtml(c.n)}</option>`).join("")}</select>`:""}
-   ${bar(p.chances)}<button ${ECO.moedas<p.preco?"disabled":""} onclick="buyPack(${escapeHtml(JSON.stringify(p.id))})">${icon("coin")}Comprar · ${p.preco}</button></div>`).join("")}</div>
+   ${bar(p.chances)}<button ${ECO.moedas<p.preco?"disabled":""} onclick="buyPack(${escapeHtml(JSON.stringify(p.id))})">${icon("coin")}Comprar · ${fmt(p.preco)}</button></div>`).join("")}</div>
   <table class="tbl"><tr><th>Como ganhar moedas</th></tr>
    <tr><td>Converter cartas repetidas (sempre fica 1 de cada)</td></tr><tr><td>Completar uma coleção</td></tr></table>
   <div style="display:flex;gap:10px;justify-content:center"><button class="mclose" style="margin:16px 0 0" onclick="closeModal()">FECHAR</button>${dupsTotal()?`<button class="mclose" style="margin:16px 0 0;background:var(--sunk);color:var(--gold);box-shadow:none;border:1px solid var(--gold)" onclick="convertAll().then(openShop)">♻ CONVERTER REPETIDAS</button>`:""}</div>`);
@@ -413,10 +415,12 @@ function onAccountChange(){renderAll()}
 function onWalletRendered(){renderCols()}
 // sessão, visita e carteira prontas (common.js): busca álbum e tipos e desenha
 async function onEconomiaPronta(){
-  await Promise.all([carregarAlbum().catch(()=>{}),carregarTipos()]);
+  let albumOk=true;
+  await Promise.all([carregarAlbum().catch(()=>{albumOk=false}),carregarTipos()]);
+  if(!albumOk){ECO.indisponivel=true;avisoEconomiaOff(true)}
   const first=CARDS.find(c=>owned(c));if(first){ci=first.ci;sel=first.id}
   renderAll();
-  if(invCount())setTimeout(()=>{bumpFab();toast(ECO.pacotes.some(p=>p.tipo==="boas")?"Seu pacote de boas-vindas está esperando!":`Você tem ${invCount()} pacote${invCount()>1?"s":""} para abrir`,3200)},600);
+  if(invCount())setTimeout(()=>{bumpFab();const t=$("toast");if(!albumOk||(t&&t.style.display==="block"))return;toast(ECO.pacotes.some(p=>p.tipo==="boas")?"Seu pacote de boas-vindas está esperando!":`Você tem ${invCount()} pacote${invCount()>1?"s":""} para abrir`,3200)},600);
 }
 const first=CARDS.find(c=>owned(c));if(first){ci=first.ci;sel=first.id}
 renderWallet();renderAll();

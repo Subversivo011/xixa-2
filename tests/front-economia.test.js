@@ -55,7 +55,7 @@ function criarApi(over = {}) {
   const st = {
     moedas: 123, xp: 200, patente: PAT, proxima: PROX,
     pacotes: [{ tipo: "boas", nome: "Boas-vindas", colecao_id: null, quantidade: 1 }],
-    qtd: {}, valorRepetidas: 0, comprar402: false, carteiraStatus: 200, log: [], ...over
+    qtd: {}, valorRepetidas: 0, comprar402: false, abrir402: false, euStatus: 200, carteiraStatus: 200, log: [], ...over
   };
   const n = (k) => st.log.filter((x) => x === k).length;
   const carteira = () => ({
@@ -72,12 +72,14 @@ function criarApi(over = {}) {
       const req = route.request(), u = new URL(req.url()), p = u.pathname, m = req.method();
       const chave = `${m} ${p}`;
       st.log.push(chave);
+      if (p === "/api/eu" && st.euStatus !== 200) return json(route, st.euStatus, { erro: "falhou" });
       if (p === "/api/eu") return json(route, 200, { usuario: { id: 1, apelido: "teste", avatar_gato: null, avatar_url: null }, patente: st.patente, proxima_patente: st.proxima, moedas: st.moedas, xp: st.xp, csrf: "tok" });
       if (p === "/api/carteira") return st.carteiraStatus === 200 ? json(route, 200, carteira()) : json(route, st.carteiraStatus, { erro: "não autenticado" });
       if (p === "/api/album") return json(route, 200, album());
       if (p === "/api/visita") return json(route, 200, { dia: "2026-11-19", primeira_visita_do_dia: true, xp_ganho: 10, pacotes_ganhos: [], carteira: { xp: st.xp, moedas: st.moedas } });
       if (p === "/api/pacotes/tipos") return json(route, 200, { itens: TIPOS });
       if (p === "/api/pacotes/comprar") return st.comprar402 ? json(route, 402, { erro: "moedas insuficientes" }) : json(route, 201, { estoque_id: 1, tipo: "classico", carteira: { xp: st.xp, moedas: st.moedas } });
+      if (p === "/api/pacotes/abrir" && st.abrir402) return json(route, 402, { erro: "moedas insuficientes" });
       if (p === "/api/pacotes/abrir") {
         st.corpoAbrir = JSON.parse(req.postData() || "{}");
         const col = COLECOES[0];
@@ -260,5 +262,40 @@ test("animação NOVA! é desligada com prefers-reduced-motion", opts, async () 
   await page.click(".flip");
   const anim = await page.$eval(".slot.rev > .new", (e) => getComputedStyle(e).animationName);
   assert.strictEqual(anim, "none");
+  await ctx.close();
+});
+
+test("/api/eu com 5xx: avisa que a economia está indisponível e \"Tentar de novo\" recupera", opts, async () => {
+  const { ctx, page, api, erros } = await abrirPagina("/album.html", { euStatus: 503 });
+  await page.waitForSelector("#ecooff button");
+  assert.match(await page.textContent("#ecooff"), /servidor/);
+  await page.click("#pfab");
+  await page.waitForFunction(() => /Servidor indispon/.test(document.getElementById("toast")?.textContent || ""));
+  api.st.euStatus = 200;
+  await page.click("#ecooff button");
+  await esperarEconomia(page);
+  await page.waitForFunction(() => !document.getElementById("ecooff"));
+  assert.match(await carteiraTxt(page), /Banda larga/);
+  assert.ok(erros.every((e) => !/pageerror/.test(e)), erros.join("|"));
+  await ctx.close();
+});
+
+test("Salvar viral antes da economia carregar não mostra \"precisa de XP\" errado", opts, async () => {
+  const { ctx, page } = await abrirPagina("/index.html", { euStatus: 503 });
+  await page.waitForSelector("#ecooff button");
+  await page.evaluate(() => { NS.acct = { user: "t", email: "", via: "email", av: {}, chat: false }; openSubmit(); });
+  await page.waitForFunction(() => /Servidor indispon|Carregando/.test(document.getElementById("toast")?.textContent || ""));
+  assert.ok(!(await page.evaluate(() => document.getElementById("modal").classList.contains("open"))), "modal não deveria abrir");
+  await ctx.close();
+});
+
+test("402 ao abrir pacote não dispara toast genérico por cima", opts, async () => {
+  const { ctx, page } = await abrirPagina("/album.html", { abrir402: true });
+  await esperarEconomia(page);
+  await page.waitForFunction(() => invCount() === 1);
+  await page.click("#pfab");
+  await page.waitForFunction(() => /Moedas insuficientes/.test(document.getElementById("toast")?.textContent || ""));
+  await page.waitForTimeout(400);
+  assert.match(await page.textContent("#toast"), /Moedas insuficientes/);
   await ctx.close();
 });

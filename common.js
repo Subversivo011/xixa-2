@@ -122,6 +122,7 @@ function nsToday(){return new Date().toISOString().slice(0,10)}
 
 // ---- Carteira (vem de GET /api/carteira) ----
 let ECO={pronto:false,moedas:0,xp:0,patente:null,proxima_patente:null,pacotes:[],cartas:null,valor_das_repetidas:0};
+const economiaPronta=()=>{if(ECO.pronto)return true;toast(ECO.indisponivel?"Servidor indisponível. Use “Tentar de novo” e espere carregar.":"Carregando a sua conta… tente de novo em instantes.");return false};
 const nivelPatente=()=>{const i=ECO.patente?RANKS.findIndex(k=>k.id===ECO.patente.id):0;return i<0?0:i};
 async function atualizarCarteira(){
   const antes=ECO.pronto&&ECO.patente?ECO.patente.id:null;
@@ -141,15 +142,32 @@ async function holdWallet(on){
   renderWallet();
 }
 // visita do dia: 1 vez por carregamento, depois que a sessão existe; o servidor é idempotente por dia
-let visitaFeita=false;
+// Se o servidor cair (5xx ou rede), avisa e oferece "Tentar de novo" em vez de deixar a tela vazia sem explicação.
+let economiaEmCurso=false;
+function avisoEconomiaOff(on){
+  let b=document.getElementById("ecooff");
+  if(!on){if(b)b.remove();return}
+  if(b)return;
+  b=document.createElement("div");b.id="ecooff";b.setAttribute("role","alert");
+  b.style.cssText="position:fixed;left:50%;bottom:16px;transform:translateX(-50%);z-index:9999;background:var(--panel,#fff);color:var(--txt,#111);border:1px solid var(--line2,#bbb);border-radius:12px;padding:10px 14px;box-shadow:0 8px 30px #0004;display:flex;gap:12px;align-items:center;font:600 14px Inter,sans-serif;max-width:calc(100vw - 24px)";
+  b.innerHTML='<span>Não consegui falar com o servidor: moedas, álbum e pacotes estão indisponíveis.</span><button type="button" style="flex:none;padding:7px 12px;border-radius:8px;border:0;background:var(--brand,#1597d3);color:#fff;font:700 13px Inter,sans-serif;cursor:pointer">Tentar de novo</button>';
+  b.querySelector("button").onclick=()=>iniciarEconomia();
+  document.body.appendChild(b);
+}
 async function iniciarEconomia(){
-  if(visitaFeita)return;visitaFeita=true;
-  try{await carregarSessao()}catch(e){return}
-  if(!SESSAO)return;
-  try{await Api.visita()}catch(e){}
-  try{await atualizarCarteira()}catch(e){}
-  renderWallet();
-  if(typeof onEconomiaPronta==="function")onEconomiaPronta();
+  if(economiaEmCurso)return;economiaEmCurso=true;
+  try{
+    try{await carregarSessao()}catch(e){if(e&&e.status===401)return;throw e} // 401: o api-cliente já redirecionou
+    if(!SESSAO)throw {status:0};
+    try{await Api.visita()}catch(e){if(e&&e.status===401)return} // a visita do dia não derruba a tela se falhar
+    await atualizarCarteira();
+    ECO.indisponivel=false;avisoEconomiaOff(false);
+    renderWallet();
+    if(typeof onEconomiaPronta==="function")await onEconomiaPronta();
+  }catch(e){
+    if(e&&e.status===401)return;
+    ECO.indisponivel=true;renderWallet();avisoEconomiaOff(true);
+  }finally{economiaEmCurso=false}
 }
 
 
@@ -165,7 +183,7 @@ function renderWallet(){
   if(walletHold)return;
   const el=document.getElementById("wallet");if(!el)return;
   const p=ECO.patente,nx=ECO.proxima_patente;
-  const nome=p?p.nome:"…",cor=p?p.cor:"#9aa3b2";
+  const nome=p?p.nome:"…",cor=escapeHtml(p?p.cor:"#9aa3b2");
   const pct=!p?0:nx?Math.max(0,Math.min(100,Math.round((ECO.xp-p.xp_minimo)/(nx.xp_minimo-p.xp_minimo)*100))):100;
   const balance=fmt(ECO.moedas);
   const progress=`${fmt(ECO.xp)} XP${nx?` · ${fmt(nx.faltam)} p/ ${escapeHtml(nx.nome)}`:""}`;
@@ -197,13 +215,13 @@ function submitSignup(){
   const isNew=!NS.acct;
   NS.acct={user:u,email:sgM==="email"?e:"",via:sgM,av:{...sgO},chat};
   nsSave();closeSignup();renderWallet();
-  if(isNew)toast(chat?"Bem-vindo! Por ser do Xet da live do Cid, você já entra como Banda larga":"Conta criada! Seu gatinho já está no ranking",3200);
+  if(isNew)toast("Conta criada! Seu gatinho já está no ranking",3200);
   if(typeof onAccountChange==="function")onAccountChange();
 }
 // ---- Sessão do servidor (login com Discord): GET /api/eu ----
 let SESSAO=null;
 async function carregarSessao(){
-  try{SESSAO=await Api.eu()}catch(e){SESSAO=null}
+  try{SESSAO=await Api.eu()}catch(e){SESSAO=null;updateAccount();throw e}
   updateAccount();
 }
 async function sairDaConta(){
@@ -249,7 +267,7 @@ function openTestPanel(){
    <h3>Seu perfil</h3>
    <div class="tp-kv"><span>Moedas</span><b>🪙 ${fmt(ECO.moedas)}</b></div>
    <div class="tp-kv"><span>XP</span><b>${fmt(ECO.xp)}</b></div>
-   <div class="tp-kv"><span>Patente</span><b style="color:${p.cor}">${escapeHtml(p.nome)}</b></div>
+   <div class="tp-kv"><span>Patente</span><b style="color:${escapeHtml(p.cor)}">${escapeHtml(p.nome)}</b></div>
    <div class="tp-kv"><span>Envios aprovados</span><b>${NS.approvedCount}</b></div>
    <h4>Patentes</h4>${RANKS.map(k=>`<div class="tp-rk ${ECO.patente&&k.id===ECO.patente.id?'on':''}"><i style="background:${k.color}"></i><b>${k.name}</b><small>${fmt(k.xp)} XP · ${k.can}</small></div>`).join("")}
    <div class="tp-btns"><button onclick="if(window.confirmReset!==1){window.confirmReset=1;this.textContent='Clique de novo p/ confirmar';return}localStorage.removeItem(NS_KEY);location.reload()">↺ Limpar dados deste navegador</button></div>
@@ -444,7 +462,7 @@ function openPop(anchor,items){
         <div class="sg-fl"><input class="t" id="sgE" type="email" placeholder=" " autocomplete="email"><label for="sgE">E-mail</label></div>
         <div class="sg-fl"><input class="t" id="sgP" type="password" placeholder=" " autocomplete="new-password"><label for="sgP">Senha (mín. 6 caracteres)</label></div>
       </div>
-      <label class="sg-chk"><input type="checkbox" id="sgChat"><span class="bx">${icon("check")}</span><span>Sou do Xet da live do Cid<small>Já entra como Banda larga e pode enviar memes</small></span></label>
+      <label class="sg-chk"><input type="checkbox" id="sgChat"><span class="bx">${icon("check")}</span><span>Sou do Xet da live do Cid<small>Faço parte da comunidade da live</small></span></label>
       <div class="sg-err" id="sgErr"></div>
       <button class="sg-go" onclick="submitSignup()"><span id="sgGoT">Criar conta</span> →</button>
       <p class="sg-note">Protótipo: nenhuma conta real é criada. Avatar, moedas e cartas ficam salvos só neste navegador, e a senha não é guardada.</p>
@@ -587,7 +605,7 @@ function registrarEvento(id,tipo){
 
 // ---- easter-egg: a jujuba escondida ----
 // Todo dia uma jujuba se esconde num cantinho de UMA página do site (início, linha do tempo, Memepédia ou álbum).
-// Quem acha ganha 50 moedas (1 vez por dia). O lugar muda todo dia e é igual para todo mundo.
+// Quem acha vê um aviso (1 vez por dia), sem prêmio por enquanto: a recompensa volta quando o servidor decidir (Fase 3). O lugar muda todo dia e é igual para todo mundo.
 const JUJUBA_SVG='<svg viewBox="0 0 40 40" aria-hidden="true"><defs><radialGradient id="jjg" cx="35%" cy="30%" r="70%"><stop offset="0" stop-color="#fff6"/><stop offset=".25" stop-color="#ff5ca8"/><stop offset="1" stop-color="#c2185b"/></radialGradient></defs><path d="M8 26c0-9 5-17 12-17s12 8 12 17c0 4-5 6-12 6s-12-2-12-6z" fill="url(#jjg)"/><g fill="#fff" opacity=".85"><circle cx="15" cy="20" r="1.1"/><circle cx="22" cy="16" r="1"/><circle cx="26" cy="23" r="1.1"/><circle cx="18" cy="27" r="1"/><circle cx="12" cy="25" r=".9"/></g></svg>';
 // esconderijos que não são redesenhados pela página, cada um com o canto livre (sem cobrir texto)
 const JUJUBA_LUGARES={

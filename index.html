@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <script src="gate.js?v=20261119u"></script>
-<script src="api-cliente.js?v=20261119x"></script>
+<script src="api-cliente.js?v=20261119y"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>NÃO SALVO — Museu da Internet Brasileira</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -215,7 +215,7 @@ main{display:flex;flex-direction:column}
 <div class="modal" id="modal" onclick="if(event.target===this)closeM()"><div class="box" id="box"></div></div>
 
 <form name="feedback" data-netlify="true" netlify-honeypot="bot-field" hidden><input name="tipo"><textarea name="msg"></textarea><input name="contato"><input name="pagina"><input name="bot-field"></form>
-<script src="common.js?v=20261119x"></script>
+<script src="common.js?v=20261119y"></script>
 <script src="data.js?v=20261119q"></script>
 <script src="player.js?v=20261119n"></script>
 <script src="viewer.js?v=20261119x"></script>
@@ -431,6 +431,7 @@ function dupCheck(url,name){
 // ---- Enviar meme ----
 function openSubmit(y){
   if(needAccount())return;
+  if(!economiaPronta())return;
   $("box").className="box form";
   if(nivelPatente()<1){
     $("box").innerHTML=`<div class="body lock"><div class="big">${icon("lock","big")}</div><h3>Enviar meme é a partir de <span style="color:${RANKS[1].color}">Banda larga</span></h3>
@@ -476,6 +477,7 @@ function scheduleApprovals(){NS.subs.filter(s=>s.status==="pending").forEach(s=>
 
 // ---- Salvar link de viral antigo (+5) ----
 function saveOldLink(id,u){
+  if(!ECO.pronto)return`<div class="chk warn">Carregando a sua patente… tente de novo em instantes.</div>`;
   if(nivelPatente()<2)return`<div class="chk bad">Salvar link é a partir da patente Colaborador (${fmt(RANKS[2].xp)} XP). Você tem ${fmt(ECO.xp)} XP.</div>`;
   const key=normUrl(u);
   if(!key||!/^https?:\/\//i.test(u)&&!u.includes("."))return`<div class="chk bad">Cole um link válido.</div>`;
@@ -486,6 +488,7 @@ function saveOldLink(id,u){
 
 // ---- Moderação: patente maior modera patente menor ----
 function openMod(){
+  if(!economiaPronta())return;
   const r=nivelPatente(),canMod=r>=3;
   const mine=NS.subs.slice().reverse();
   const qs=SEED_QUEUE.map(q=>{const st=NS.modDone[q.id];const best=ALL.filter(a=>!a.by||a.id!==q.id).map(a=>({a,s:sim(q.t,a.t)})).sort((x,y)=>y.s-x.s)[0];
@@ -495,7 +498,7 @@ function openMod(){
      <div class="by">Ticket #${300+parseInt(q.id.slice(1))} · por <b>${q.by}</b> <span style="color:${RANKS[q.rank].color}">(${RANKS[q.rank].name})</span> · ${escapeHtml(normUrl(q.url))}</div><p>${escapeHtml(q.d)}</p>${flag}
      <div class="act">${st?`<span class="${st==='ok'?'st-approved':'st-pending'}">${st==='ok'?'Aprovado por você':'Recusado por você'}</span>`:canMod&&lower?`<button class="btn" onclick="moderate('${q.id}','ok')">${icon("check")}Aprovar</button><button class="btn ghost" onclick="moderate('${q.id}','no')">${icon("xmark")}Recusar${best&&best.s>=.55?" (duplicata)":""}</button>`:`<span style="font-size:12px;color:var(--mut)">${icon("lock","in")}${canMod?"Só quem tem patente maior que a do autor pode moderar.":`Moderação é a partir de <b style="color:${RANKS[3].color}">Moderador</b> (${fmt(RANKS[3].xp)} XP).`}</span>`}</div></div>`}).join("");
   $("box").className="box";
-  $("box").innerHTML=`<div class="body"><h2 class="disp">${icon("moderation","h")}Fila de moderação</h2><p>Quem tem patente mais alta modera quem tem patente mais baixa. Cada moderação vale +15 XP.</p>
+  $("box").innerHTML=`<div class="body"><h2 class="disp">${icon("moderation","h")}Fila de moderação</h2><p>Quem tem patente mais alta modera quem tem patente mais baixa.</p>
   ${mine.length?`<h4 class="h4">SEUS ENVIOS</h4>${mine.map(s=>`<div class="mine"><span>${icon(CAT_IC[s.c]||"video","in")}${escapeHtml(s.t)} <small>(${s.ticket})</small></span><span class="st-${s.status}">${s.status==="approved"?"aprovado":"aguardando moderação"}</span></div>`).join("")}<div style="height:14px"></div>`:""}
   ${linksQ(canMod)}
   ${wikiQ(canMod)}
