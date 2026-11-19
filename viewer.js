@@ -126,19 +126,57 @@ function photoPage(m,rel){
   const x=`<button class="vx" data-act="close" title="Fechar (Esc)">${icon("xmark")}</button>`;
   if(k==="fotolog")return`<div class="pg fotolog"><header><b class="fl">fotolog</b><span>${CANAL.toLowerCase().replace(" ","")}</span>${x}</header>
     <div class="flw"><main><div class="fr">${img}</div><h2>${T}</h2><p class="fx">${descTxt(m)}<br><i>~*~ postado em ${dNum(m.date)} ~*~ flash no espelho não ~*~</i></p>
-      <div class="gb"><h4>livro de visitas</h4><div data-like-photo></div><div class="gbl">${relList(rel,4).map((r,i)=>`<div><b>${["xXJuuhXx","Lipe_Skt","Gabi*Fofa","DaniEmo"][i]}</b> disse: ${["aaaaaain q lindo!!! passa no meu flog? ;*","kkkkkkk mto bom, assina o meu tb","amei!!! add no msn?","tudo d bom! bjooo"][i]}</div>`).join("")}</div></div>${btns(m.y)}</main></div></div>`;
+      <div class="gb"><h4>livro de visitas</h4><div data-like-photo></div><div class="cmt" data-cmts></div></div>${btns(m.y)}</main></div></div>`;
   if(k==="orkut")return`<div class="pg orkut"><header><b class="ok">orkut</b><nav><a>Início</a><a>Perfil</a><a>Recados</a><a>Amigos</a><a>Comunidades</a></nav>${x}</header>
     <div class="okw"><aside class="okp"><img src="${AV}" alt=""><b>${CANAL}</b><small>masculino, enrolado, Brasil</small><a>recados</a><a>fotos</a><a>vídeos</a><a>depoimentos</a></aside>
     <main><div class="okb">Início › ${CANAL} › Álbuns › Memes ${m.y}</div><h2>${T}</h2><div class="okn"><a>« anterior</a><span>foto 1 de ${relList(rel,12).length+1}</span><a>próxima »</a></div><div class="okf">${img}</div><p>${descTxt(m)}</p><div data-like-photo></div>
-      <div class="okc"><h4>comentários</h4>${relList(rel,3).map((r,i)=>`<div><b>${["Carlinha ♥","Rafa","Tio Zé"][i]}:</b> ${["hahahaha mto bom! deixa um scrap pra mim :*","esse é clássico kkkkkkkkk","não entendi mas achei engraçado"][i]}</div>`).join("")}</div>${btns(m.y)}</main></div></div>`;
+      <div class="okc"><h4>comentários <span data-ncm></span></h4><div class="cmt" data-cmts></div></div>${btns(m.y)}</main></div></div>`;
   if(k==="tumblr")return`<div class="pg tumblr"><header><b class="tl">t</b><div class="sr"><input placeholder="Pesquisar no Tumblr"></div>${x}</header>
     <div class="tw"><main><div class="tpost"><img class="tav" src="${AV}" alt=""><div class="tc"><div class="tth"><b>naosalvo</b><span>Seguindo</span></div>${img}<div class="tcap"><b>${T}</b><p>${descTxt(m)}</p><small>#meme #${m.y} #brasil #naosalvo</small></div>
-      <div class="tf"><span data-notes></span><div class="ti"><i>${icon("share","in")}</i><i>${icon("comment","in")}</i><i>${icon("reblog","in")}</i><div data-like-photo></div></div></div></div></div>${btns(m.y)}</main></div></div>`;
+      <div class="tf"><span data-notes></span><div class="ti"><i>${icon("share","in")}</i><i>${icon("comment","in")}</i><i>${icon("reblog","in")}</i><div data-like-photo></div></div></div><div class="cmt" data-cmts></div></div></div>${btns(m.y)}</main></div></div>`;
   const old=k==="ig15";
   return`<div class="pg ig ${old?"ig15":"ig16"}"><header><b class="igl">${old?"Instagram":"Instagram"}</b><div class="sr"><input placeholder="Pesquisar"></div><div class="lk">${icon("heart","in")}${icon("user","in")}${x}</div></header>
     <div class="igw"><article><div class="igh"><img src="${AV}" alt=""><b>naosalvo</b>${old?`<span class="igt">${ago(m.y).replace("há ","")}</span>`:`<i>${icon("more","in")}</i>`}</div>${img}
       <div class="igb"><div data-like-photo></div><i>${icon("comment","in")}</i>${old?"":`<i>${icon("share","in")}</i><i class="bm">${icon("bookmark","in")}</i>`}</div>
-      <div class="igc"><b data-likes></b><p><b>naosalvo</b> ${T} — ${descTxt(m)}</p><small>${old?"":ago(m.y).toUpperCase()}</small><div class="igin">Adicione um comentário…</div></div>${btns(m.y)}</article></div></div>`;
+      <div class="igc"><b data-likes></b><p><b>naosalvo</b> ${T} — ${descTxt(m)}</p><div class="cmt" data-cmts></div><small>${old?"":ago(m.y).toUpperCase()}</small></div>${btns(m.y)}</article></div></div>`;
+}
+
+
+// ---- comentários da comunidade nas fotos ----
+const CMT_TXT={
+  fotolog:{ph:"Assine o livro de visitas…",bt:"assinar",vazio:"Ninguém assinou ainda. Seja o primeiro!",li:c=>`<b>${escapeHtml(c.autor)}</b> disse: ${escapeHtml(c.texto)} <small>${cmtData(c.em,"fotolog")}</small>`},
+  orkut:{ph:"escreva um comentário…",bt:"postar comentário",vazio:"nenhum comentário ainda",li:c=>`<b>${escapeHtml(c.autor)}:</b> ${escapeHtml(c.texto)} <small>${cmtData(c.em,"orkut")}</small>`},
+  tumblr:{ph:"Responder…",bt:"Responder",vazio:"Nenhuma resposta ainda.",li:c=>`<b>${escapeHtml(c.autor)}</b> ${escapeHtml(c.texto)}`},
+  ig:{ph:"Adicione um comentário…",bt:"Publicar",vazio:"",li:c=>`<b>${escapeHtml(c.autor)}</b> ${escapeHtml(c.texto)}`}
+};
+function cmtData(em,k){if(!em)return"";const d=new Date(em);if(isNaN(d))return"";return k==="orkut"?`(${d.toLocaleDateString("pt-BR")} ${d.toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit"})})`:d.toLocaleDateString("pt-BR")}
+function localCmts(id){NS.cmts=NS.cmts||{};return NS.cmts[id]||(NS.cmts[id]=[])}
+async function loadCmts(id){const d=await apiGet("/api/comentarios?id="+encodeURIComponent(id));return d&&Array.isArray(d.itens)?d.itens:null}
+function initComments(el,m){
+  const box=el.querySelector("[data-cmts]");if(!box)return;
+  const k0=pEra(m.y),k=k0==="ig15"?"ig":k0,T=CMT_TXT[k];let list=localCmts(m.id).slice(),online=false;
+  const render=()=>{const ncm=el.querySelector("[data-ncm]");if(ncm)ncm.textContent=list.length?`(${list.length})`:"";
+    const me=NS.acct?NS.acct.user:"";
+    box.innerHTML=`<div class="cl">${list.length?list.map(c=>`<div class="ci">${T.li(c)}</div>`).join(""):T.vazio?`<div class="ce">${T.vazio}</div>`:""}</div>
+      <form class="cf" autocomplete="off"><input class="ch" name="bot-field" tabindex="-1" aria-hidden="true">
+       ${k==="fotolog"||k==="orkut"?`<textarea name="t" rows="2" maxlength="300" placeholder="${T.ph}"></textarea>`:`<input name="t" maxlength="300" placeholder="${T.ph}">`}
+       <button type="submit">${T.bt}</button></form>
+      <div class="cn">${me?`comentando como <b>${escapeHtml(me)}</b>`:`<a data-act="login">entre na sua conta</a> para comentar`}</div>`;
+    const f=box.querySelector(".cf");
+    f.onsubmit=async ev=>{ev.preventDefault();const t=f.t.value.trim();if(!t)return;
+      if(!NS.acct){needAccount();return}
+      const btn=f.querySelector("button");btn.disabled=true;
+      const r=await apiPost("/api/comentarios",{id:m.id,autor:NS.acct.user,texto:t,"bot-field":f["bot-field"].value});
+      btn.disabled=false;
+      const c=r&&r.texto?r:{autor:NS.acct.user,texto:t,em:new Date().toISOString(),local:true};
+      if(!r){localCmts(m.id).push(c);nsSave()}
+      list.push(c);sndPop();render();const nf=box.querySelector(".cf [name=t]");nf&&nf.focus();
+      const cl=box.querySelector(".cl");cl.scrollTop=cl.scrollHeight;
+      if(!r)toast("Comentário salvo neste navegador. Ele vai para todos quando o site estiver no ar.",3200);};
+    const lg=box.querySelector('[data-act="login"]');if(lg)lg.onclick=e=>{e.stopPropagation();openSignup()};
+  };
+  render();
+  loadCmts(m.id).then(d=>{if(d&&VW&&VW.m===m){online=true;list=d.concat(localCmts(m.id).filter(c=>c.local));render()}});
 }
 
 // ---- abrir / fechar ----
@@ -166,11 +204,12 @@ function openViewer(m,opt={}){
   // notas e visualizações
   const e=isPhoto?null:vEra(m.y);let tot=localTotals(m.id);
   const paint=()=>{const mine=myVote(m.id);
-    if(isPhoto){const n=tot.up;el.querySelectorAll("[data-like-photo]").forEach(b=>b.innerHTML=`<button class="plk ${mine.v===1?"on":""}" data-like="1">${icon("heart")}${pEra(m.y)==="fotolog"?`<span>${mine.v===1?"Livro assinado":"Assinar o livro de visitas"} (${fmt(n)})</span>`:pEra(m.y)==="orkut"?`<span>${mine.v===1?"Você curtiu":"Curtir"} · ${fmt(n)}</span>`:""}</button>`);
+    if(isPhoto){const n=tot.up;el.querySelectorAll("[data-like-photo]").forEach(b=>b.innerHTML=`<button class="plk ${mine.v===1?"on":""}" data-like="1">${icon("heart")}${pEra(m.y)==="fotolog"?`<span>${mine.v===1?"Flog favoritado":"Favoritar este flog"} (${fmt(n)})</span>`:pEra(m.y)==="orkut"?`<span>${mine.v===1?"Você curtiu":"Curtir"} · ${fmt(n)}</span>`:""}</button>`);
       const l=el.querySelector("[data-likes]");if(l)l.textContent=`${fmt(n)} curtida${n===1?"":"s"}`;const no=el.querySelector("[data-notes]");if(no)no.textContent=`${fmt(n)} nota${n===1?"":"s"}`;return}
     const rt=el.querySelector("[data-rt]");if(rt)rt.innerHTML=ratingHTML(e,tot,mine)};
   paint();
   loadVotes(m.id).then(d=>{if(d&&VW&&VW.m===m){tot=d;paint()}});
+  if(isPhoto)initComments(el,m);
   async function vote(v){const mine=myVote(m.id),from=mine.v,to=from===v?0:v;mine.v=to;nsSave();sndClick();
     if(tot.local)tot=localTotals(m.id);else{if(from===1)tot.up--;if(from===-1)tot.down--;if(to===1)tot.up++;if(to===-1)tot.down++}
     paint();const r=await sendVote(m.id,{from,to});if(r&&VW&&VW.m===m){tot=r;paint()}}

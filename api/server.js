@@ -37,6 +37,14 @@ await pool.query(`
     pagina    TEXT,
     criado_em TIMESTAMPTZ NOT NULL DEFAULT now()
   );
+  CREATE TABLE IF NOT EXISTS comentarios (
+    id        BIGSERIAL PRIMARY KEY,
+    meme_id   TEXT NOT NULL,
+    autor     TEXT NOT NULL,
+    texto     TEXT NOT NULL,
+    criado_em TIMESTAMPTZ NOT NULL DEFAULT now()
+  );
+  CREATE INDEX IF NOT EXISTS comentarios_meme_idx ON comentarios (meme_id, criado_em);
 `);
 
 const VOTE_ID = /^[a-z0-9-]{1,80}$/;
@@ -237,6 +245,29 @@ const server = http.createServer(async (req, res) => {
       return send(res, 201, { ok: true });
     }
 
+    // comentários da comunidade nas fotos (livro de visitas, Orkut, Tumblr, Instagram)
+    if (req.method === 'GET' && url.pathname === '/api/comentarios') {
+      const id = url.searchParams.get('id') || '';
+      if (!VOTE_ID.test(id)) return send(res, 400, { erro: 'id inválido' });
+      const { rows } = await pool.query(
+        'SELECT id, autor, texto, criado_em FROM (SELECT * FROM comentarios WHERE meme_id = $1 ORDER BY criado_em DESC LIMIT 100) c ORDER BY criado_em ASC', [id]);
+      return send(res, 200, { itens: rows.map((r) => ({ id: +r.id, autor: r.autor, texto: r.texto, em: r.criado_em })) });
+    }
+
+    if (req.method === 'POST' && url.pathname === '/api/comentarios') {
+      if (limited('c:' + ip, 20)) return send(res, 429, { erro: 'Muitos comentários seguidos. Aguarde um pouco.' });
+      let b;
+      try { b = JSON.parse(await readBody(req)); } catch { return send(res, 400, { erro: 'json inválido' }); }
+      if (b['bot-field']) return send(res, 201, { ok: true });
+      const id = String(b.id || ''), autor = clean(b.autor, 20), texto = clean(b.texto, 300);
+      if (!VOTE_ID.test(id)) return send(res, 400, { erro: 'id inválido' });
+      if (!/^[\w.\-]{3,20}$/.test(autor)) return send(res, 422, { erro: 'Nome de usuário inválido.' });
+      if (texto.length < 1) return send(res, 422, { erro: 'Escreva alguma coisa.' });
+      const { rows } = await pool.query(
+        'INSERT INTO comentarios (meme_id, autor, texto) VALUES ($1,$2,$3) RETURNING id, criado_em', [id, autor, texto]);
+      return send(res, 201, { id: +rows[0].id, autor, texto, em: rows[0].criado_em });
+    }
+
     if (url.pathname.startsWith('/api/admin/')) {
       if (!isAdmin(req)) return send(res, 401, { error: 'Token inválido.' }, { 'WWW-Authenticate': 'Bearer' });
 
@@ -258,6 +289,15 @@ const server = http.createServer(async (req, res) => {
       const delFb = url.pathname.match(/^\/api\/admin\/feedback\/(\d+)$/);
       if (req.method === 'DELETE' && delFb) {
         const r = await pool.query('DELETE FROM feedback WHERE id = $1', [delFb[1]]);
+        return send(res, r.rowCount ? 200 : 404, { ok: !!r.rowCount });
+      }
+      if (req.method === 'GET' && url.pathname === '/api/admin/comentarios') {
+        const { rows } = await pool.query('SELECT * FROM comentarios ORDER BY criado_em DESC LIMIT 1000');
+        return send(res, 200, { items: rows });
+      }
+      const delCm = url.pathname.match(/^\/api\/admin\/comentarios\/(\d+)$/);
+      if (req.method === 'DELETE' && delCm) {
+        const r = await pool.query('DELETE FROM comentarios WHERE id = $1', [delCm[1]]);
         return send(res, r.rowCount ? 200 : 404, { ok: !!r.rowCount });
       }
       if (req.method === 'GET' && url.pathname === '/api/admin/feedback') {

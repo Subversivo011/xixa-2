@@ -611,15 +611,19 @@ Cadastro de quem quer ajudar o projeto, mais as rotas de votos, visualizações 
 | `/api/votos` | POST | `viewer.js` | Aplica o voto (`from`/`to` para curtidas, `starFrom`/`starTo` para estrelas) e devolve os totais (120 ações por 10 min por IP) |
 | `/api/yt-stats?ids=a,b` | GET | `viewer.js` | Visualizações e likes do YouTube (até 50 ids de 11 caracteres, cache de 6 horas). Sem `YT_API_KEY` devolve `{}` |
 | `/api/feedback` | POST | Rodapé (`common.js`) | Grava feedback (`tipo`, `msg`, `contato`, `pagina`; honeypot `bot-field`; 10 envios por 10 min por IP) |
+| `/api/comentarios?id=x` | GET | `viewer.js` (fotos) | Últimos 100 comentários da foto, do mais antigo ao mais novo (`autor`, `texto`, `em`) |
+| `/api/comentarios` | POST | `viewer.js` (fotos) | Grava um comentário (`id`, `autor` com 3–20 caracteres, `texto` até 300; honeypot `bot-field`; 20 por 10 min por IP). Sem API, fica salvo no navegador |
 | `/api/admin/contribuidores` | GET | Dashboard | Lista contribuidores (Bearer token) |
 | `/api/admin/contribuidores.csv` | GET | Dashboard | Exporta CSV (Bearer token) |
 | `/api/admin/contribuidores/:id` | DELETE | Dashboard | Exclui um contribuidor (Bearer token) |
 | `/api/admin/feedback` | GET | Admin | Lista os feedbacks (Bearer token). Aparece no `/dashboard/`, com filtro por tipo e busca |
 | `/api/admin/feedback/:id` | DELETE | Admin | Exclui um feedback |
+| `/api/admin/comentarios` | GET | Admin | Lista os comentários das fotos (Bearer token) |
+| `/api/admin/comentarios/:id` | DELETE | Admin | Apaga um comentário (moderação) |
 
 **Segurança:** validação no servidor, Discord único, honeypot, rate limit por IP, CSV sem injeção de fórmula. Senha do banco, token admin e (opcionalmente) a chave do YouTube são lidos de arquivos de Docker secrets (`DB_PASSWORD_FILE`, `ADMIN_TOKEN_FILE`, `YT_API_KEY_FILE`), nunca do git. O dashboard tem `noindex`.
 
-**Deploy (servidor 2):** `docker build -t naosalvo-api:latest ./api && docker build -t naosalvo-frontend:latest . && docker stack deploy -c docker-stack.yml naosalvo`. As tabelas `contribuidores`, `votos` e `feedback` são criadas pela API na primeira subida. O site fica em `naosalvo-local.fishlab.com.br`; o Traefik envia `/api` para a API (porta 3000) e o resto para o nginx.
+**Deploy (servidor 2):** `docker build -t naosalvo-api:latest ./api && docker build -t naosalvo-frontend:latest . && docker stack deploy -c docker-stack.yml naosalvo`. As tabelas `contribuidores`, `votos`, `feedback` e `comentarios` são criadas pela API na primeira subida. O site fica em `naosalvo-local.fishlab.com.br`; o Traefik envia `/api` para a API (porta 3000) e o resto para o nginx.
 
 ---
 
