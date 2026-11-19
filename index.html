@@ -8,8 +8,8 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preconnect" href="https://i.ytimg.com">
 <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Inter:wght@400;500;600;700&family=Baloo+2:wght@700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="theme.css?v=20261119i">
-<link rel="stylesheet" href="viewer.css?v=20261119i">
+<link rel="stylesheet" href="theme.css?v=20261119j">
+<link rel="stylesheet" href="viewer.css?v=20261119j">
 <script>try{var t=localStorage.getItem("ns_theme")}catch(e){}document.documentElement.dataset.theme=t==="dark"?"dark":"light"</script>
 <style>
 main{padding:24px 28px 60px;max-width:1280px;margin:0 auto}
@@ -159,7 +159,7 @@ main{display:flex;flex-direction:column}
 .top,.cur{grid-template-columns:1fr}.stage{grid-template-columns:1fr}.side{display:none}.facts{grid-template-columns:1fr 1fr}.rail{grid-template-columns:1fr 1fr}.rail .card:nth-child(3){display:none}main{padding:16px 14px 40px}}
 @media(max-width:600px){.f .two{grid-template-columns:1fr}.today{grid-template-columns:110px 1fr}.box .body{padding:16px}}
 </style>
-<link rel="stylesheet" href="home.css?v=20261119i">
+<link rel="stylesheet" href="home.css?v=20261119j">
 </head>
 <body class="home">
 <div class="rays-wrap" aria-hidden="true"><div class="rays" id="rays"></div></div>
@@ -213,11 +213,11 @@ main{display:flex;flex-direction:column}
 <div class="modal" id="modal" onclick="if(event.target===this)closeM()"><div class="box" id="box"></div></div>
 
 <form name="feedback" data-netlify="true" netlify-honeypot="bot-field" hidden><input name="tipo"><textarea name="msg"></textarea><input name="contato"><input name="pagina"><input name="bot-field"></form>
-<script src="common.js?v=20261119i"></script>
-<script src="data.js?v=20261119i"></script>
-<script src="player.js?v=20261119i"></script>
-<script src="viewer.js?v=20261119i"></script>
-<script src="alertas.js?v=20261119i"></script>
+<script src="common.js?v=20261119j"></script>
+<script src="data.js?v=20261119j"></script>
+<script src="player.js?v=20261119j"></script>
+<script src="viewer.js?v=20261119j"></script>
+<script src="alertas.js?v=20261119j"></script>
 <script>
 renderHeader("inicio",{search:true,sub:[]});
 document.querySelectorAll("[data-ic]").forEach(e=>e.outerHTML=icon(e.dataset.ic));
@@ -261,7 +261,6 @@ const card=(a,big)=>`<button class="card" onclick="openM('${a.id}')">
 const addCard=y=>`<button class="card add" onclick="openSubmit('${y}')"><div class="thumb"><span>＋</span></div><div class="meta"><h3>Salvar um viral de ${y}</h3><small>+${REWARD.approved} moedas se aprovado</small></div></button>`;
 
 const SUB_ITEMS=[
-  {k:"ano",ic:"home",label:"Início",fn:()=>{window.scrollTo({top:0,behavior:"smooth"});setView("ano")}},
   {k:"tl",ic:"timeline",label:"Linha do tempo",fn:()=>{$("tl").scrollIntoView({behavior:"smooth"})}},
   {k:"cat",ic:"categories",label:"Categorias",dd:1,fn:(e,b)=>openPop(b,[{ic:"all",label:"Todas",fn:()=>pickCat("Todas")},...[...new Set(ALL.map(a=>a.c))].map(c=>({ic:CAT_IC[c]||"video",label:c,note:ALL.filter(a=>a.c===c).length+"",fn:()=>pickCat(c)}))])},
   {k:"rand",ic:"random",label:"Aleatório",fn:()=>randomPick()},

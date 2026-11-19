@@ -7,8 +7,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Inter:wght@400;500;600;700&family=Baloo+2:wght@700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="theme.css?v=20261119i">
-<link rel="stylesheet" href="viewer.css?v=20261119i">
+<link rel="stylesheet" href="theme.css?v=20261119j">
+<link rel="stylesheet" href="viewer.css?v=20261119j">
 <script>try{var t=localStorage.getItem("ns_theme")}catch(e){}document.documentElement.dataset.theme=t==="dark"?"dark":"light"</script>
 <style>
 :root{--Comum:#8e939c;--Relevante:#2fbf5b;--Raro:#2f86ff;--Relíquia:#a35cff;--Lendário:#e8a317;--Mítico:#ff4a4a}
@@ -149,7 +149,7 @@
 @media(max-width:1100px){.layout{grid-template-columns:210px minmax(0,1fr)}.det{grid-column:1/-1;border:0;padding:0;position:static;max-width:380px;margin:0 auto}}
 @media(max-width:720px){.layout{grid-template-columns:1fr;padding:12px}.cards{grid-template-columns:repeat(2,1fr)}.album{padding-left:34px}.pack{grid-template-columns:repeat(3,1fr);gap:8px}}
 </style>
-<link rel="stylesheet" href="album.css?v=20261119i">
+<link rel="stylesheet" href="album.css?v=20261119j">
 </head>
 <body>
 
@@ -192,14 +192,13 @@
 <div class="modal" id="modal" onclick="if(event.target===this)closeModal()"><div class="mbox" id="mbox"></div></div>
 
 <form name="feedback" data-netlify="true" netlify-honeypot="bot-field" hidden><input name="tipo"><textarea name="msg"></textarea><input name="contato"><input name="pagina"><input name="bot-field"></form>
-<script src="common.js?v=20261119i"></script>
-<script src="data.js?v=20261119i"></script>
-<script src="player.js?v=20261119i"></script>
-<script src="viewer.js?v=20261119i"></script>
-<script src="alertas.js?v=20261119i"></script>
+<script src="common.js?v=20261119j"></script>
+<script src="data.js?v=20261119j"></script>
+<script src="player.js?v=20261119j"></script>
+<script src="viewer.js?v=20261119j"></script>
+<script src="alertas.js?v=20261119j"></script>
 <script>
 renderHeader("album",{sub:[
-  {k:"home",ic:"home",label:"Início",href:"index.html"},
   {k:"cols",ic:"collections",label:"Coleções",fn:()=>{setSubOn("cols");document.querySelector(".side").scrollIntoView({behavior:"smooth"})}},
   {k:"shop",ic:"shop",label:"Loja",fn:()=>openShop()},
   {k:"conv",ic:"convert",label:"Converter repetidas",fn:()=>convertAll()},

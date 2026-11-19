@@ -464,3 +464,10 @@ a[onclick]:not([href]):focus-visible{outline:2px solid var(--brand);outline-offs
   .nsft2 .fq-in .fq-logo{font-size:15px}
   .nsft2 .ft-boneco{height:110px}
 }
+
+/* Desktop: itens do menu distribuídos entre o logo e a área da conta */
+@media(min-width:1200px){
+  .hd .header-menu{gap:clamp(16px,2.5vw,40px)}
+  .hd .sub{flex:1;min-width:0;justify-content:space-evenly}
+  .hd .sub .sp{display:none}
+}
