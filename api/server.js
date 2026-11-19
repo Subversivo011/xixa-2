@@ -1,8 +1,9 @@
 // API do formulário de contribuidores — Node puro + pg. Segredos via *_FILE (Docker secrets).
 import http from 'node:http';
 import { readFileSync } from 'node:fs';
-import { timingSafeEqual } from 'node:crypto';
+import { timingSafeEqual, createHmac } from 'node:crypto';
 import pg from 'pg';
+import { migrar } from './migrate.js';
 
 const secret = (name) => {
   const file = process.env[name + '_FILE'];
@@ -21,31 +22,8 @@ const pool = new pg.Pool({
 
 const YT_KEY = secret('YT_API_KEY'); // opcional: sem chave, /api/yt-stats devolve {}
 
-await pool.query(`
-  CREATE TABLE IF NOT EXISTS votos (
-    id   TEXT PRIMARY KEY,
-    up   INT NOT NULL DEFAULT 0,
-    down INT NOT NULL DEFAULT 0,
-    sum  INT NOT NULL DEFAULT 0,
-    n    INT NOT NULL DEFAULT 0
-  );
-  CREATE TABLE IF NOT EXISTS feedback (
-    id        BIGSERIAL PRIMARY KEY,
-    tipo      TEXT NOT NULL,
-    msg       TEXT NOT NULL,
-    contato   TEXT,
-    pagina    TEXT,
-    criado_em TIMESTAMPTZ NOT NULL DEFAULT now()
-  );
-  CREATE TABLE IF NOT EXISTS comentarios (
-    id        BIGSERIAL PRIMARY KEY,
-    meme_id   TEXT NOT NULL,
-    autor     TEXT NOT NULL,
-    texto     TEXT NOT NULL,
-    criado_em TIMESTAMPTZ NOT NULL DEFAULT now()
-  );
-  CREATE INDEX IF NOT EXISTS comentarios_meme_idx ON comentarios (meme_id, criado_em);
-`);
+// esquema do banco: migrações numeradas em api/migrations/ (executor em migrate.js)
+await migrar(pool);
 
 const VOTE_ID = /^[a-z0-9-]{1,80}$/;
 const clampV = (v) => (v === 1 || v === -1 ? v : 0);
@@ -72,32 +50,6 @@ async function ytStats(ids) {
 const AREAS = ['Frontend', 'Backend', 'Design UI/UX', 'Ilustração / Arte', 'Motion / Animação',
   'Dados / Arquivamento', 'DevOps / Infra', 'Curadoria de conteúdo', 'Moderação / Comunidade', 'QA / Testes'];
 const EXPERIENCE = ['Menos de 1 ano', '1 a 3 anos', '3 a 5 anos', '5 a 10 anos', 'Mais de 10 anos'];
-
-// migração: versão anterior guardava e-mail; agora guarda usuário do Discord
-await pool.query(`
-  DO $$ BEGIN
-    IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'contribuidores' AND column_name = 'email') THEN
-      DROP INDEX IF EXISTS contribuidores_email_uq;
-      ALTER TABLE contribuidores RENAME COLUMN email TO discord;
-    END IF;
-  END $$;
-`);
-await pool.query(`
-  CREATE TABLE IF NOT EXISTS contribuidores (
-    id            BIGSERIAL PRIMARY KEY,
-    nome          TEXT NOT NULL,
-    nick          TEXT NOT NULL,
-    discord       TEXT NOT NULL,
-    areas         TEXT[] NOT NULL DEFAULT '{}',
-    area_outros   TEXT,
-    horas_semana  INT NOT NULL,
-    experiencia   TEXT NOT NULL,
-    ferramentas   TEXT NOT NULL,
-    mensagem      TEXT,
-    criado_em     TIMESTAMPTZ NOT NULL DEFAULT now()
-  );
-  CREATE UNIQUE INDEX IF NOT EXISTS contribuidores_discord_uq ON contribuidores (lower(discord));
-`);
 
 const send = (res, code, body, headers = {}) => {
   const isStr = typeof body === 'string';
@@ -126,6 +78,11 @@ const limited = (ip, max = 8) => {
   return list.length > max;
 };
 setInterval(() => { const now = Date.now(); for (const [k, v] of hits) if (!v.some((t) => now - t < 600_000)) hits.delete(k); }, 600_000).unref();
+
+// IP nunca vai puro para o banco: HMAC com o segredo do admin (sem segredo, cai num sal fixo)
+const hashIp = (ip) => createHmac('sha256', ADMIN_TOKEN || 'naosalvo').update(String(ip)).digest('hex').slice(0, 32);
+const LINKS_PENDENTES_POR_IP = 3;    // sugestões pendentes por meme e IP
+const LINKS_PENDENTES_POR_MEME = 20; // teto de pendentes por meme
 
 const clean = (v, max) => String(v ?? '').replace(/[\u0000-\u001f\u007f]/g, ' ').trim().slice(0, max);
 
@@ -198,7 +155,7 @@ const server = http.createServer(async (req, res) => {
       const out = {};
       ids.forEach((i) => { out[i] = emptyVote(); });
       if (ids.length) {
-        const { rows } = await pool.query('SELECT id, up, down, sum, n FROM votos WHERE id = ANY($1)', [ids]);
+        const { rows } = await pool.query('SELECT id, up, down, sum, n FROM votos_legado WHERE id = ANY($1)', [ids]);
         rows.forEach((r) => { out[r.id] = { up: r.up, down: r.down, sum: r.sum, n: r.n }; });
       }
       return send(res, 200, out);
@@ -221,9 +178,9 @@ const server = http.createServer(async (req, res) => {
         if (t) { dSum += t; dN++; }
       }
       const { rows } = await pool.query(
-        `INSERT INTO votos (id, up, down, sum, n) VALUES ($1, GREATEST($2,0), GREATEST($3,0), GREATEST($4,0), GREATEST($5,0))
-         ON CONFLICT (id) DO UPDATE SET up = GREATEST(votos.up + $2, 0), down = GREATEST(votos.down + $3, 0),
-           sum = GREATEST(votos.sum + $4, 0), n = GREATEST(votos.n + $5, 0)
+        `INSERT INTO votos_legado (id, up, down, sum, n) VALUES ($1, GREATEST($2,0), GREATEST($3,0), GREATEST($4,0), GREATEST($5,0))
+         ON CONFLICT (id) DO UPDATE SET up = GREATEST(votos_legado.up + $2, 0), down = GREATEST(votos_legado.down + $3, 0),
+           sum = GREATEST(votos_legado.sum + $4, 0), n = GREATEST(votos_legado.n + $5, 0)
          RETURNING up, down, sum, n`, [b.id, dUp, dDown, dSum, dN]);
       return send(res, 200, rows[0]);
     }
@@ -263,9 +220,50 @@ const server = http.createServer(async (req, res) => {
       if (!VOTE_ID.test(id)) return send(res, 400, { erro: 'id inválido' });
       if (!/^[\w.\-]{3,20}$/.test(autor)) return send(res, 422, { erro: 'Nome de usuário inválido.' });
       if (texto.length < 1) return send(res, 422, { erro: 'Escreva alguma coisa.' });
-      const { rows } = await pool.query(
-        'INSERT INTO comentarios (meme_id, autor, texto) VALUES ($1,$2,$3) RETURNING id, criado_em', [id, autor, texto]);
+      let rows;
+      try {
+        ({ rows } = await pool.query(
+          'INSERT INTO comentarios (meme_id, autor, texto) VALUES ($1,$2,$3) RETURNING id, criado_em', [id, autor, texto]));
+      } catch (e) {
+        if (e.code === '23503') return send(res, 404, { erro: 'meme não encontrado' }); // FK: meme_id inexistente
+        throw e;
+      }
       return send(res, 201, { id: +rows[0].id, autor, texto, em: rows[0].criado_em });
+    }
+
+    // links do YouTube enviados pela comunidade para vídeos sem original (moderador aprova no admin)
+    if (req.method === 'GET' && url.pathname === '/api/links/aprovados') {
+      const { rows } = await pool.query(
+        "SELECT DISTINCT ON (meme_id) meme_id, yt FROM links_sugeridos WHERE status = 'aprovado' ORDER BY meme_id, revisado_em DESC");
+      const out = {}; rows.forEach((r) => { out[r.meme_id] = r.yt; });
+      return send(res, 200, out, { 'Cache-Control': 'public, max-age=120' });
+    }
+
+    if (req.method === 'POST' && url.pathname === '/api/links') {
+      if (limited('l:' + ip, 10)) return send(res, 429, { erro: 'Muitos envios seguidos. Aguarde um pouco.' });
+      let b;
+      try { b = JSON.parse(await readBody(req)); } catch { return send(res, 400, { erro: 'json inválido' }); }
+      if (b['bot-field']) return send(res, 201, { ok: true });
+      const id = String(b.id || ''), yt = String(b.yt || ''), autor = clean(b.autor, 20);
+      if (!VOTE_ID.test(id)) return send(res, 400, { erro: 'id inválido' });
+      if (!/^[\w-]{11}$/.test(yt)) return send(res, 422, { erro: 'Link do YouTube inválido.' });
+      if (!/^[\w.\-]{3,20}$/.test(autor)) return send(res, 422, { erro: 'Nome de usuário inválido.' });
+      // anti-spam de pendentes: poucos por meme+IP e um teto por meme (o aprovado/recusado não conta)
+      const ipHash = hashIp(ip);
+      const { rows: [qt] } = await pool.query(
+        `SELECT count(*) FILTER (WHERE ip_hash = $2)::int AS do_ip, count(*)::int AS do_meme
+           FROM links_sugeridos WHERE meme_id = $1 AND status = 'pendente'`, [id, ipHash]);
+      if (qt.do_ip >= LINKS_PENDENTES_POR_IP) return send(res, 429, { erro: 'Você já tem sugestões pendentes para este vídeo. Aguarde a análise.' });
+      if (qt.do_meme >= LINKS_PENDENTES_POR_MEME) return send(res, 429, { erro: 'Este vídeo já tem muitas sugestões em análise. Tente mais tarde.' });
+      let r;
+      try {
+        r = await pool.query(
+          'INSERT INTO links_sugeridos (meme_id, yt, autor, ip_hash) VALUES ($1,$2,$3,$4) ON CONFLICT (meme_id, yt) DO NOTHING RETURNING id', [id, yt, autor, ipHash]);
+      } catch (e) {
+        if (e.code === '23503') return send(res, 404, { erro: 'meme não encontrado' }); // FK: meme_id inexistente
+        throw e;
+      }
+      return send(res, r.rowCount ? 201 : 200, { ok: true, repetido: !r.rowCount });
     }
 
     if (url.pathname.startsWith('/api/admin/')) {
@@ -298,6 +296,21 @@ const server = http.createServer(async (req, res) => {
       const delCm = url.pathname.match(/^\/api\/admin\/comentarios\/(\d+)$/);
       if (req.method === 'DELETE' && delCm) {
         const r = await pool.query('DELETE FROM comentarios WHERE id = $1', [delCm[1]]);
+        return send(res, r.rowCount ? 200 : 404, { ok: !!r.rowCount });
+      }
+      if (req.method === 'GET' && url.pathname === '/api/admin/links') {
+        const { rows } = await pool.query(
+          `SELECT id, meme_id, yt, autor, status, criado_em, revisado_em FROM links_sugeridos
+            ORDER BY (status = 'pendente') DESC, criado_em DESC LIMIT 1000`);
+        return send(res, 200, { items: rows });
+      }
+      const revLk = url.pathname.match(/^\/api\/admin\/links\/(\d+)$/);
+      if (req.method === 'POST' && revLk) {
+        let b;
+        try { b = JSON.parse(await readBody(req)); } catch { return send(res, 400, { erro: 'json inválido' }); }
+        const st = b.status === 'aprovado' ? 'aprovado' : b.status === 'recusado' ? 'recusado' : null;
+        if (!st) return send(res, 400, { erro: 'status inválido' });
+        const r = await pool.query('UPDATE links_sugeridos SET status = $1, revisado_em = now() WHERE id = $2', [st, revLk[1]]);
         return send(res, r.rowCount ? 200 : 404, { ok: !!r.rowCount });
       }
       if (req.method === 'GET' && url.pathname === '/api/admin/feedback') {
