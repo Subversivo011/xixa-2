@@ -73,10 +73,14 @@
 .lt-vazio{padding:30px;text-align:center;opacity:.8}
 .lt-mais{display:flex;justify-content:space-between;gap:12px;margin-top:20px}
 .lt-mais button{padding:11px 18px;border-radius:12px;font:700 13px Inter,sans-serif;cursor:pointer;border:1px solid transparent}
-.lt-tick{overflow:hidden;white-space:nowrap;font-size:12px;padding:6px 0}
-.lt-tick span{display:inline-block;padding-left:100%;animation:tick 26s linear infinite}
-@keyframes tick{to{transform:translateX(-100%)}}
-@media(prefers-reduced-motion:reduce){.lt-tick span{animation:none;padding-left:0}.lt-it{opacity:1;transform:none}}
+.lt-tick{display:flex;align-items:center;overflow:hidden;white-space:nowrap;font-size:12px}
+.lt-tick b{flex:none;position:relative;z-index:1;padding:6px 12px;font:800 10.5px Inter,sans-serif;letter-spacing:1px;text-transform:uppercase;background:inherit;box-shadow:6px 0 10px -4px #0003}
+.lt-tick .tk{flex:1;overflow:hidden;-webkit-mask-image:linear-gradient(90deg,transparent,#000 24px,#000 calc(100% - 24px),transparent);mask-image:linear-gradient(90deg,transparent,#000 24px,#000 calc(100% - 24px),transparent)}
+.lt-tick .tk span{display:inline-flex;gap:18px;padding:6px 0 6px 24px;animation:tick 90s linear infinite}
+.lt-tick:hover .tk span{animation-play-state:paused}
+@keyframes tick{to{transform:translateX(-50%)}}
+.lt-tick i{font-style:normal}
+@media(prefers-reduced-motion:reduce){.lt-tick .tk span{animation:none}.lt-it{opacity:1;transform:none}}
 @media(max-width:760px){
   .lt-wrap{padding:14px 12px 30px}
   .lt-hero{grid-template-columns:40px 1fr 40px;padding:22px 10px 20px;gap:6px}.lt-hero .nav{width:38px;height:38px}
@@ -317,7 +321,8 @@ function palco(){
   const F=L.filter(m=>ST.cat==="Todas"||m.c===ST.cat);
   const grupos=[];F.forEach(m=>{const d=m.date?new Date(m.date+"T12:00:00"):null;const g=d&&!isNaN(d)?(k.includes("–")?`${MES[d.getMonth()]} de ${d.getFullYear()}`:MES[d.getMonth()]):String(m.y);let x=grupos.find(z=>z.g===g);if(!x)grupos.push(x={g,its:[]});x.its.push(m)});
   const st=$("stage");st.className="lt-stage th-"+e;document.body.className=document.body.className.replace(/\bep-\w+/g,"").trim()+" ep-"+e;
-  st.innerHTML=`<div class="lt-tick" aria-hidden="true"><span>${escapeHtml(det[1])} · ${escapeHtml(det[1])}</span></div>
+  const nt=det[1].split(" · ").map(x=>`<i>${escapeHtml(x)}</i>`).join("<i>·</i>");
+  st.innerHTML=`<div class="lt-tick" aria-hidden="true"><b>${k.includes("–")?"Na época":"Em "+escapeHtml(k)}</b><div class="tk"><span>${Array(8).fill(nt+"<i>·</i>").join("")}</span></div></div>
    <div class="lt-hero"><button class="nav" ${p?`data-k="${p}"`:"disabled"} aria-label="Ano anterior">‹</button>
      <div><div class="lt-era">${EPOCA_NOME[e]} · ${EPOCA_ANOS[e]}</div><div class="lt-big">${escapeHtml(yLab(k))}</div><div class="lt-lema">${escapeHtml(info.lema)}</div>
       <p class="lt-sub">${L.length} ${L.length===1?"viral salvo":"virais salvos"} · ${escapeHtml(info.txt)}</p>${det[0]?`<span class="lt-deco">${escapeHtml(det[0])}</span>`:""}</div>
