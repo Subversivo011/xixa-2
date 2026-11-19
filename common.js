@@ -218,9 +218,15 @@ function avisoDeLogin(){
   }catch(e){}
 }
 document.addEventListener("DOMContentLoaded",()=>{carregarSessao();avisoDeLogin()});
+// foto do Discord (URL montada pelo servidor); se não houver ou falhar ao carregar, mostra a inicial do apelido
+function avatarSessaoHTML(u){
+  const ini=escapeHtml(String(u.apelido||"?").charAt(0).toUpperCase());
+  const url=typeof u.avatar_url==="string"&&/^https:\/\/cdn\.discordapp\.com\/avatars\/[0-9]+\/[a-f0-9_]+\.png/.test(u.avatar_url)?u.avatar_url:"";
+  return url?`<img src="${escapeHtml(url)}" alt="" width="28" height="28" referrerpolicy="no-referrer" decoding="async" onerror="this.replaceWith(document.createTextNode('${ini}'))">`:ini;
+}
 function contaSessaoHTML(){
   const u=SESSAO.usuario,p=SESSAO.patente&&SESSAO.patente.nome?SESSAO.patente.nome:"";
-  return `<div class="account-actions"><span class="sg-acct" title="Conectado com o Discord"><span class="sg-av">${escapeHtml(String(u.apelido||"?").charAt(0).toUpperCase())}</span><span>${escapeHtml(u.apelido)}${p?"<b>"+escapeHtml(p)+"</b>":""}</span></span><button type="button" onclick="sairDaConta()">Sair</button></div>`;
+  return `<div class="account-actions"><span class="sg-acct" title="Conectado com o Discord"><span class="sg-av">${avatarSessaoHTML(u)}</span><span>${escapeHtml(u.apelido)}${p?"<b>"+escapeHtml(p)+"</b>":""}</span></span><button type="button" onclick="sairDaConta()">Sair</button></div>`;
 }
 function updateAccount(){
   const el=document.getElementById("acct");if(!el)return;const a=NS.acct;
