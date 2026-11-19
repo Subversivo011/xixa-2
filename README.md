@@ -591,6 +591,18 @@ A paleta vem do logo (azul do céu e azul da marca) e o fundo tem raios de luz. 
 
 ---
 
+## Ambientes e branches
+
+| Ambiente | Endereço | Branch | Stack | Banco |
+|---|---|---|---|---|
+| Local (produção do protótipo) | `naosalvo-local.fishlab.com.br` | `main` | `naosalvo` (`docker-stack.yml`) | `naosalvo` |
+| Desenvolvimento | `naosalvo-dev.fishlab.com.br` | `dev` | `naosalvo-dev` (`docker-stack.dev.yml`) | `naosalvo_dev` |
+
+- `main` guarda o protótipo visual (tag `v0.1-prototipo`). `dev` é onde o banco, o back e a estrutura nova são montados e testados antes de chegar ao `main`.
+- Cada ambiente tem segredos próprios (`naosalvo_*` e `naosalvo_dev_*`) e imagens separadas (`:latest` e `:dev`).
+- Deploy do dev: `docker build -t naosalvo-api:dev ./api && docker build -t naosalvo-frontend:dev . && docker stack deploy -c docker-stack.dev.yml naosalvo-dev` (contexto `servidor2`).
+- DNS: o registro `naosalvo-dev` no Cloudflare deve apontar para o mesmo destino do `naosalvo-local` (com proxy).
+
 ## 7. Formulário de Contribuidores, Dashboard e API
 
 Cadastro de quem quer ajudar o projeto, mais as rotas de votos, visualizações e feedback do site. Os dados vão para um banco PostgreSQL próprio (`naosalvo`), no servidor 2.
