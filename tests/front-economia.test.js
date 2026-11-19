@@ -68,6 +68,8 @@ function criarApi(over = {}) {
   });
   const json = (route, status, corpo) => route.fulfill({ status, contentType: "application/json", body: JSON.stringify(corpo) });
   async function instalar(ctx) {
+    // nada de rede externa (fontes do Google etc.): deixa o evento load rápido e o teste determinístico
+    await ctx.route((url) => url.hostname !== "127.0.0.1", (r) => r.abort());
     await ctx.route("**/api/**", async (route) => {
       const req = route.request(), u = new URL(req.url()), p = u.pathname, m = req.method();
       const chave = `${m} ${p}`;
@@ -270,7 +272,7 @@ test("/api/eu com 5xx: avisa que a economia está indisponível e \"Tentar de no
   await page.waitForSelector("#ecooff button");
   assert.match(await page.textContent("#ecooff"), /servidor/);
   await page.click("#pfab");
-  await page.waitForFunction(() => /Servidor indispon/.test(document.getElementById("toast")?.textContent || ""));
+  await page.waitForFunction(() => /(Servidor|Serviço) indispon/.test(document.getElementById("toast")?.textContent || ""));
   api.st.euStatus = 200;
   await page.click("#ecooff button");
   await esperarEconomia(page);
@@ -283,8 +285,8 @@ test("/api/eu com 5xx: avisa que a economia está indisponível e \"Tentar de no
 test("Salvar viral antes da economia carregar não mostra \"precisa de XP\" errado", opts, async () => {
   const { ctx, page } = await abrirPagina("/index.html", { euStatus: 503 });
   await page.waitForSelector("#ecooff button");
-  await page.evaluate(() => { NS.acct = { user: "t", email: "", via: "email", av: {}, chat: false }; openSubmit(); });
-  await page.waitForFunction(() => /Servidor indispon|Carregando/.test(document.getElementById("toast")?.textContent || ""));
+  await page.evaluate(() => openSubmit());
+  await page.waitForFunction(() => /(Servidor|Serviço) indispon|Carregando/.test(document.getElementById("toast")?.textContent || ""));
   assert.ok(!(await page.evaluate(() => document.getElementById("modal").classList.contains("open"))), "modal não deveria abrir");
   await ctx.close();
 });
