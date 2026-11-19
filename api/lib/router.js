@@ -14,6 +14,7 @@ export function criarRouter({ pool, adminToken = '', autenticar = null, extras =
   const r = {
     get: (c, t, o) => add('GET', c, t, o),
     post: (c, t, o) => add('POST', c, t, o),
+    patch: (c, t, o) => add('PATCH', c, t, o),
     delete: (c, t, o) => add('DELETE', c, t, o),
     rotas
   };
