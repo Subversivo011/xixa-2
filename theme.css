@@ -93,9 +93,17 @@ a{color:inherit}
 .account-actions .account-login{border-color:var(--line2);background:var(--panel)}
 #login-dialog{margin:auto;width:min(340px,calc(100% - 32px));padding:22px;color:var(--txt);background:var(--panel);border:1px solid var(--line2);border-radius:12px}
 #login-dialog::backdrop{background:rgba(8,14,30,.55)}
-#login-dialog p{margin:10px 0 20px;color:var(--mut);font-size:14px;line-height:1.5}
+#login-dialog p{margin:10px 0 18px;color:var(--mut);font-size:14px;line-height:1.5}
 #login-dialog form{text-align:right}
 #login-dialog button{padding:6px 12px;border:1px solid var(--line2);border-radius:6px}
+#login-dialog .lg-nets{display:grid;gap:10px}
+#login-dialog .lg-net{display:flex;align-items:center;justify-content:center;gap:10px;min-height:44px;padding:10px 14px;border:1px solid var(--line2);border-radius:10px;background:var(--panel2);color:var(--txt);font-size:14px;font-weight:600;text-decoration:none}
+#login-dialog .lg-net:hover:not(:disabled){border-color:var(--brand);background:var(--brand-soft)}
+#login-dialog .lg-net:disabled{opacity:.55;cursor:not-allowed}
+#login-dialog .lg-net small{font-size:11px;font-weight:600;color:var(--mut)}
+#login-dialog .lg-new{margin:16px 0 4px;text-align:center;font-size:14px}
+#login-dialog .lg-link{min-height:44px;padding:0 4px;border:0;border-radius:0;background:none;color:var(--brand-ink);font-weight:700;text-decoration:underline;cursor:pointer}
+#login-dialog .lg-close{margin-top:8px}
 .sg-acct{display:flex;align-items:center;gap:9px;text-align:left;font-size:13px;line-height:1.15;font-weight:600}
 .sg-acct b{display:block;color:var(--brand);font-size:11px}
 .sg-av{width:40px;height:40px;border-radius:50%;overflow:hidden;border:2px solid var(--brand);display:block;flex:none}

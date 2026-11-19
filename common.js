@@ -199,10 +199,11 @@ function submitSignup(){
 function updateAccount(){
   const el=document.getElementById("acct");if(!el)return;const a=NS.acct;
   el.innerHTML=a?`<button class="sg-acct" onclick="openSignup()"><span class="sg-av">${catSVG(a.av)}</span><span>${escapeHtml(a.user)}<b>Gato nível ${rankIdx(NS.xp)+1}</b></span></button>`:`<div class="account-actions">
-    <button type="button" class="account-login" onclick="document.getElementById('login-dialog').showModal()">${icon("login")}Entrar</button>
-    <button type="button" onclick="openSignup()">${icon("user")}Criar conta</button>
+    <button type="button" class="account-login" onclick="openLogin()">${icon("login")}Login</button>
   </div>`;
 }
+function openLogin(){const dlg=document.getElementById("login-dialog");if(!dlg)return;const l=document.getElementById("lgDiscord");if(l)l.href="/api/auth/discord?voltar="+encodeURIComponent(location.pathname+location.search);dlg.showModal()}
+function closeLogin(){const dlg=document.getElementById("login-dialog");dlg&&dlg.open&&dlg.close()}
 const needAccount=()=>{if(NS.acct)return false;toast("Crie sua conta (e seu gatinho) primeiro 🐱");openSignup();return true};
 
 // ---- Modo teste (para demonstrar a progressão) ----
@@ -431,8 +432,14 @@ function openPop(anchor,items){
   </div>
 </div>`;document.body.appendChild(d.firstElementChild);
   document.body.insertAdjacentHTML("beforeend",`<dialog id="login-dialog" aria-labelledby="login-heading">
-    <h2 id="login-heading">Entrar</h2><p>Em construção. Ainda em fase de testes.</p>
-    <form method="dialog"><button>Fechar</button></form>
+    <h2 id="login-heading">Entrar no Não Salvo</h2>
+    <p>Entre com a sua rede para salvar o álbum, o XP e as moedas.</p>
+    <div class="lg-nets">
+      <a class="lg-net" id="lgDiscord" href="/api/auth/discord">${D}<span>Continuar com Discord</span></a>
+      <button type="button" class="lg-net" disabled aria-disabled="true">${G}<span>Google</span><small>em breve</small></button>
+    </div>
+    <p class="lg-new">Sou novo, <button type="button" class="lg-link" onclick="closeLogin();openSignup()">criar conta</button></p>
+    <form method="dialog" class="lg-close"><button>Fechar</button></form>
   </dialog>`);
   document.addEventListener("keydown",e=>{if(e.key==="Escape"){closeSignup();const t=document.getElementById("tp");t&&t.classList.remove("open");const p=document.getElementById("pop");p&&p.classList.remove("open")}});
 })();
