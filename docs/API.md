@@ -67,7 +67,11 @@ O login com Discord ainda não existe. Até lá, `api/auth-stub.js` é o **únic
 
 ## Rotas já existentes (comportamento inalterado)
 
-`/api/contribuidores`, `/api/votos` (agregado anônimo, tabela `votos_legado`), `/api/feedback`, `/api/comentarios`, `/api/links`, `/api/links/aprovados`, `/api/yt-stats` e `/api/admin/*` (token `Bearer`). Limites de uso por IP seguem em memória.
+`/api/contribuidores`, `/api/votos` (agregado anônimo, tabela `votos_legado`), `/api/feedback`, `/api/comentarios`, `/api/links`, `/api/links/aprovados`, `/api/yt-stats` e `/api/admin/*` (token `Bearer`).
+
+**Sobe.Desce** (migração 009): `POST /api/eventos` `{id, tipo: "visita"|"clique"}` conta 1 por meme, IP (HMAC) e dia; `GET /api/sobedesce?tipo=visitados|clicados&periodo=hoje|sempre` devolve `{sobe, desce}` (hoje: compara com ontem; sempre: mais e menos acessados).
+
+**Memepédia** (migração 010): `GET /api/memepedia[?id=]` (último texto aprovado de cada parte), `POST /api/memepedia` `{id, campo, texto, fonte?, autor}` entra como pendente; moderação em `GET /api/admin/memepedia` e `POST /api/admin/memepedia/:id {status}`. Campos: origem, porque, usos, rede, hoje, curiosidades. Limites de uso por IP seguem em memória.
 
 ## Testes
 

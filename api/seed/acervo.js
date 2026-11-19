@@ -80,12 +80,15 @@ export async function carregarAcervo(pool, { arquivo = ARQ_DATA, log = console.l
          ON CONFLICT (nome) DO UPDATE SET icone = EXCLUDED.icone, emoji = EXCLUDED.emoji, ordem = EXCLUDED.ordem`, [nome, icone, emoji, i]);
     }
 
+    const rotulos = Object.keys(YEAR_INFO).sort((a, b) => parseInt(a, 10) - parseInt(b, 10)); // chaves numéricas vêm antes no JS
     for (const [rotulo, e] of Object.entries(YEAR_INFO)) {
-      const ano = parseInt(rotulo, 10);                  // "2020+" -> 2020
+      const ano = parseInt(rotulo, 10);                  // "1995–1999" -> 1995, "2020+" -> 2020
+      const faixa = rotulo.match(/[–-](\d{4})$/);         // "1995–1999": termina em 1999
+      const fim = faixa ? Number(faixa[1]) : (rotulo.endsWith('+') || rotulo === rotulos[rotulos.length - 1]) ? null : ano;
       await cli.query(
         `INSERT INTO eras (ano, ano_fim, rotulo, lema, texto) VALUES ($1,$2,$3,$4,$5)
          ON CONFLICT (ano) DO UPDATE SET ano_fim = EXCLUDED.ano_fim, rotulo = EXCLUDED.rotulo, lema = EXCLUDED.lema, texto = EXCLUDED.texto`,
-        [ano, rotulo.endsWith('+') ? null : ano, rotulo, e.lema, e.txt]);
+        [ano, fim, e.rot || rotulo, e.lema, e.txt]);
     }
 
     for (const m of MEMES) {
