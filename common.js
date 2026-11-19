@@ -411,3 +411,15 @@ async function sendFeedback(e){
   return false;
 }
 if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",renderFooter);else renderFooter();
+
+// Links <a onclick> sem href não recebem foco do teclado: viram botões acessíveis.
+(function(){
+  function fix(root){
+    (root||document).querySelectorAll("a[onclick]:not([href])").forEach(a=>{
+      if(a.dataset.kb)return;a.dataset.kb="1";a.setAttribute("role","button");a.tabIndex=0;
+      a.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();a.click()}});
+    });
+  }
+  const run=()=>{fix();new MutationObserver(()=>fix()).observe(document.body,{childList:true,subtree:true})};
+  if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",run);else run();
+})();

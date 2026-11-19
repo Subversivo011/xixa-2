@@ -286,3 +286,27 @@ body.home::before{background:radial-gradient(1200px 620px at 50% -20%,var(--bg-g
 .ft-band-in{padding-top:58px}
 .nsft{margin-top:70px}
 @media(max-width:860px){.ft-wrap{padding:0 14px}.fq{grid-template-columns:56px 1fr;padding:12px 14px}.fq-go{grid-column:1/-1}.fq-logo{font-size:19px}.fq-l1{font-size:16px}.nsft{margin-top:40px}}
+
+/* ---------- celular: alvos de toque de 44px e texto legível ---------- */
+@media (max-width:760px){
+  .tsw,.wl,.sg-cta{height:44px}
+  .brand{min-height:44px;justify-content:center}
+  .sub button,.sub a{min-height:44px;padding:10px 16px;font-size:14px}
+  .srch input,.srch input:focus{min-height:44px;font-size:16px}
+  .sec-title a,.lnk,.fq-go{display:inline-flex;align-items:center;min-height:44px}
+  .y{min-height:44px}
+  .tag,.cx .tag{font-size:12px!important;letter-spacing:.4px}
+  .ft-legal button,.ft-legal small a{display:inline-flex;align-items:center;min-height:44px}
+  .btn,.chip,.sd-i,.sec-title a{min-height:44px}
+  small,.sh,.yr{font-size:12px!important}
+}
+a[onclick]:not([href]){cursor:pointer}
+a[onclick]:not([href]):focus-visible{outline:2px solid var(--brand);outline-offset:3px;border-radius:6px}
+
+/* tablet: o cabeçalho de desktop não cabe em 761–1100px, deixa quebrar linha */
+@media (min-width:761px) and (max-width:1100px){
+  .hd{flex-wrap:wrap;gap:10px 14px}
+  .tools{flex:1;justify-content:flex-end;flex-wrap:wrap}
+  .tsw .lb{display:none}
+  .wl-r{display:none}
+}
