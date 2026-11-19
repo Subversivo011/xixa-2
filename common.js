@@ -281,22 +281,89 @@ function renderHeader(page,opt={}){
    <div class="tools">${opt.search?`<label class="srch">${icon("search","s-ic")}<input id="q" type="search" placeholder="Buscar memes, anos, categorias…" aria-label="Buscar"></label>`:""}
    <div id="wallet"></div><div id="acct"></div><button class="tsw" id="themeB" role="switch" aria-label="Modo escuro" onclick="toggleTheme()"><span class="t-l">${icon("sun")}<b class="lb">Claro</b></span><span class="t-d">${icon("moon")}<b class="lb">Escuro</b></span></button></div>`;
   document.body.prepend(hd);
-  if(opt.sub){const n=document.createElement("nav");n.className="sub";n.id="sub";n.setAttribute("aria-label","Menu");hd.after(n);renderSub(opt.sub)}
+  const tools=hd.querySelector(".tools");
+  tools.insertAdjacentHTML("beforebegin",`<button type="button" class="hd-icon menu-toggle" aria-label="Menu principal" aria-expanded="false" aria-controls="header-menu">${icon("menu")}</button>
+    <div class="header-menu" id="header-menu">
+      <nav class="sub" id="sub" aria-label="Menu principal"></nav><div class="account-tools"></div>
+    </div>`);
+  hd.querySelector(".account-tools").append(hd.querySelector("#wallet"),hd.querySelector("#acct"));
+  renderSub(opt.sub);
+  const menu=hd.querySelector(".menu-toggle");
+  const panel=hd.querySelector(".header-menu");
+  const search=hd.querySelector(".srch");
+  const field=search?.querySelector("input");
+  if(search){
+    search.hidden=true;
+    search.insertAdjacentHTML("beforebegin",`<button type="button" class="hd-icon search-toggle" aria-label="Buscar no acervo" aria-expanded="false" aria-controls="q">${icon("search")}</button>`);
+    field.setAttribute("aria-label","Buscar no acervo");
+  }
+  const searchButton=hd.querySelector(".search-toggle");
+  function closeMenu(){
+    menu.setAttribute("aria-expanded","false");
+    hd.querySelector("#pop")?.remove();
+    hd.querySelector(".dd")?.setAttribute("aria-expanded","false");
+  }
+  function closeSearch(){
+    if(!field)return;
+    search.hidden=true;
+    searchButton.setAttribute("aria-expanded","false");
+  }
+  menu.onclick=()=>{
+    const opening=menu.getAttribute("aria-expanded")==="false";
+    closeMenu();
+    closeSearch();
+    menu.setAttribute("aria-expanded",String(opening));
+  };
+  if(searchButton)searchButton.onclick=()=>{
+    closeMenu();
+    if(!search.hidden)return closeSearch();
+    search.hidden=false;
+    searchButton.setAttribute("aria-expanded","true");
+    field.focus();
+  };
+  function dismissOutside(event){
+    if(!panel.contains(event.target) && !menu.contains(event.target))closeMenu();
+    if(!search?.contains(event.target) && !searchButton?.contains(event.target))closeSearch();
+  }
+  document.addEventListener("pointerdown",dismissOutside);
+  document.addEventListener("focusin",dismissOutside);
+  panel.addEventListener("click",event=>{
+    if(event.target.closest("button,a") && !event.target.closest(".dd")){
+      if(menu.getAttribute("aria-expanded")==="true")menu.focus();
+      closeMenu();
+    }
+  },true);
+  hd.addEventListener("keydown",event=>{
+    if(event.key!=="Escape")return;
+    if(field && !search.hidden){closeSearch();searchButton.focus()}
+    else if(hd.querySelector("#pop")){
+      const categories=hd.querySelector(".dd");
+      hd.querySelector("#pop").remove();
+      categories.setAttribute("aria-expanded","false");
+      categories.focus();
+    }
+    else if(menu.getAttribute("aria-expanded")==="true"){closeMenu();menu.focus()}
+  });
+  matchMedia("(max-width: 1199px)").addEventListener("change",()=>{closeMenu();closeSearch()});
   setTheme(document.documentElement.dataset.theme||"light");
-  const fix=()=>document.documentElement.style.setProperty("--hdh",(window.innerWidth>760?hd.offsetHeight:0)+"px");fix();addEventListener("resize",fix);
+  new ResizeObserver(()=>document.documentElement.style.setProperty("--hdh",hd.offsetHeight+"px")).observe(hd);
 }
 let SUB=[],subOn=null;
 function renderSub(items){if(items)SUB=items;const n=document.getElementById("sub");if(!n)return;
   n.innerHTML=SUB.map((x,i)=>x.sp?`<span class="sp"></span>`:x.href?`<a href="${x.href}" class="${x.k===subOn?"on":""} ${x.cta?"cta":""}"${x.k===subOn?' aria-current="page"':""}>${icon(x.ic)}${x.label}</a>`:`<button data-i="${i}" class="${x.k===subOn?"on":""} ${x.cta?"cta":""} ${x.dd?"dd":""}">${icon(x.ic)}${x.label}</button>`).join("");
+  n.querySelector(".dd")?.setAttribute("aria-expanded","false");
   n.querySelectorAll("button[data-i]").forEach(b=>b.onclick=e=>{const x=SUB[+b.dataset.i];x.fn&&x.fn(e,b)});
 }
 function setSubOn(k){subOn=k;renderSub()}
 function openPop(anchor,items){
-  let p=document.getElementById("pop");if(!p){p=document.createElement("div");p.id="pop";p.className="pop";document.body.appendChild(p);
-    document.addEventListener("click",e=>{if(!p.contains(e.target)&&!e.target.closest(".dd"))p.classList.remove("open")})}
+  const previous=document.getElementById("pop");
+  anchor.setAttribute("aria-expanded",String(!previous));
+  if(previous){previous.remove();return}
+  const p=document.createElement("div");p.id="pop";p.className="pop open";
+  anchor.after(p);
   p.innerHTML=items.map((x,i)=>`<button data-i="${i}">${x.ic?icon(x.ic):""}${x.label}${x.note?`<small>${x.note}</small>`:""}</button>`).join("");
   p.querySelectorAll("button").forEach(b=>b.onclick=()=>{p.classList.remove("open");items[+b.dataset.i].fn()});
-  const r=anchor.getBoundingClientRect();p.style.left=Math.min(r.left,innerWidth-240)+"px";p.style.top=(r.bottom+6)+"px";p.classList.toggle("open");
+  p.style.left=anchor.offsetLeft+"px";
 }
 
 // injeta o modal de cadastro
