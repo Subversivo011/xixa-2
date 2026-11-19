@@ -1,9 +1,10 @@
 // Perfil do usuário: apelido editável, gato (avatar padrão), foto do Discord opcional (usar_foto) e fim do cadastro.
 // O servidor valida tudo: nada do que vem do cliente entra no banco sem passar por lista fechada ou regra.
 import { ErroNegocio, MSG_INDISPONIVEL, transacao } from '../economia/servico.js';
+import { ehReservado, ESPERA_TROCA_HORAS } from './apelidos.js';
 
 export class ErroPerfil extends ErroNegocio {
-  constructor(status, mensagem, campo = null) { super(status, mensagem); this.campo = campo; }
+  constructor(status, mensagem, campo = null, extra = null) { super(status, mensagem); this.campo = campo; this.extra = extra; } // extra: campos a mais no corpo (ex.: tente_em_segundos)
 }
 
 // ---- lista fechada do gato: as opções do criador de gato (common.js: SG.fur/pat/eye/acc/clo/bg), tamanho de cada lista ----
@@ -32,6 +33,7 @@ export function validarApelido(v) {
   if (typeof v !== 'string') throw new ErroPerfil(422, 'apelido deve ser texto', 'apelido');
   const a = v.trim();
   if (!APELIDO.test(a)) throw new ErroPerfil(422, 'apelido: 3 a 20 caracteres, só letras, números, _ . -', 'apelido');
+  if (ehReservado(a)) throw new ErroPerfil(422, 'esse apelido é reservado, escolha outro', 'apelido');
   return a;
 }
 
@@ -72,14 +74,20 @@ export async function atualizarPerfil(pool, usuario, corpo) {
   }
 
   return transacao(pool, async (cli) => {
-    const { rows: [u] } = await cli.query('SELECT id, cadastro_completo_em FROM usuarios WHERE id = $1 FOR UPDATE', [usuario.id]);
+    // espera = segundos que faltam para poder trocar o apelido de novo (NULL = nunca trocou: primeira troca livre). Relógio do banco.
+    const { rows: [u] } = await cli.query(
+      `SELECT id, apelido, cadastro_completo_em,
+              CEIL(GREATEST(0, EXTRACT(EPOCH FROM (apelido_alterado_em + make_interval(hours => $2) - now()))))::int AS espera
+         FROM usuarios WHERE id = $1 FOR UPDATE`, [usuario.id, ESPERA_TROCA_HORAS]);
     if (!u) throw new ErroNegocio(401, 'usuário não encontrado');
     let pacote = null;
 
-    if (novo.apelido !== undefined) {
+    // mesmo valor = nada a fazer (não conta como troca e não gasta a janela)
+    if (novo.apelido !== undefined && novo.apelido !== u.apelido) {
+      if (u.espera > 0) throw new ErroPerfil(429, `você já trocou o apelido há pouco; tente de novo em ${Math.ceil(u.espera / 60)} min`, 'apelido', { tente_em_segundos: u.espera });
       const { rows: ocupado } = await cli.query('SELECT 1 FROM usuarios WHERE lower(apelido) = lower($1) AND id <> $2', [novo.apelido, u.id]);
       if (ocupado.length) throw new ErroPerfil(409, 'apelido já está em uso', 'apelido');
-      try { await cli.query('UPDATE usuarios SET apelido = $2 WHERE id = $1', [u.id, novo.apelido]); }
+      try { await cli.query('UPDATE usuarios SET apelido = $2, apelido_alterado_em = now() WHERE id = $1', [u.id, novo.apelido]); }
       catch (e) { if (e.code === '23505') throw new ErroPerfil(409, 'apelido já está em uso', 'apelido'); throw e; }
     }
 
