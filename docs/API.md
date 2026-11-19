@@ -113,6 +113,7 @@ Resposta `200`:
 
 - **Só dev e teste.** Quem manda o header vira aquele usuário. A guarda é uma **allowlist**: o stub só liga se `DB_NAME` é de teste/dev **por token** (`naosalvo_dev`, `naosalvo_test`, `test_x`, `dev_x` ou nome terminando em `test`/`dev`; `prod_devel` não vale) **e** `NODE_ENV` não é `production` (sem diferenciar maiúsculas). `NODE_ENV=test` sozinho não basta. Qualquer outro caso (`naosalvo`, `naosalvo_staging`, banco ausente, `NODE_ENV=Production`, `naosalvo` com `NODE_ENV=test`) faz a API **recusar subir**, com erro claro, antes de tocar no banco. Nunca coloque `AUTH_STUB` em `docker-stack.yml`.
 - Em produção as rotas 🔒 só aceitam a sessão do login Discord.
+- O stub identifica o usuário **pelo apelido** do header: depois de `PATCH /api/eu { apelido }` o mesmo usuário passa a ser chamado pelo apelido novo. Com sessão (cookie) a identidade é o id e isso não acontece.
 
 ### Fora do escopo deste PR (anotado)
 
@@ -132,9 +133,9 @@ Resposta `200`:
 
 ### Em aberto (implementado como no protótipo; confirmar com o grupo antes de divulgar)
 
-2. **Preço do pacote Clássico (150 moedas)**: número da simulação, ainda não validado pelo grupo. Fica em `pacotes_tipo.preco`.
-3. **Pacote diário acumula até 7** e o "dia" segue `America/Sao_Paulo` (`regras_economia.limites`).
-4. **Sem tiragem numerada nos Míticos** (é recomendação do documento de economia, não implementada).
+1. **Preço do pacote Clássico (150 moedas)**: número da simulação, ainda não validado pelo grupo. Fica em `pacotes_tipo.preco`.
+2. **Pacote diário acumula até 7** e o "dia" segue `America/Sao_Paulo` (`regras_economia.limites`).
+3. **Sem tiragem numerada nos Míticos** (é recomendação do documento de economia, não implementada).
 
 ## Configuração
 

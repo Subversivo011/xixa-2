@@ -382,3 +382,17 @@ test('usuário do stub (sem conta Discord): avatar_url null', { skip }, async ()
   const stubUser = await s.get('/api/eu', { headers: { 'X-Test-User': 'stub-sem-foto' } });
   assert.equal(stubUser.status, 200); assert.equal(stubUser.json.usuario.avatar_url, null);
 });
+
+// ---- PATCH /api/eu com sessão: CSRF ----
+test('PATCH /api/eu com cookie de sessão exige X-CSRF e Origin do site; o apelido novo vale pela sessão (id)', { skip }, async () => {
+  const r = await login(perfilDe(novoId(), 'Perfil Csrf'));
+  const csrf = await csrfDe(r.cookie);
+  const patch = (corpo, headers) => s.patch('/api/eu', corpo, { headers: { Cookie: r.cookie, ...headers } });
+  assert.equal((await patch({ apelido: 'SemCsrf' }, {})).status, 403);
+  assert.equal((await patch({ apelido: 'SemCsrf' }, { 'X-CSRF': 'forjado' })).status, 403);
+  assert.equal((await patch({ apelido: 'SemCsrf' }, { 'X-CSRF': csrf, Origin: 'https://evil.com' })).status, 403);
+  assert.equal((await eu(r.cookie)).json.usuario.apelido, 'Perfil_Csrf', 'nada mudou');
+  const ok = await patch({ apelido: 'ComCsrf' + ipN, avatar_gato: { fur: 1, pat: 0, eye: 2, acc: 3, clo: 0, bg: 4 } }, { 'X-CSRF': csrf, Origin: SITE });
+  assert.equal(ok.status, 200); assert.equal(ok.json.usuario.apelido, 'ComCsrf' + ipN); assert.ok(ok.json.pacote_boas_vindas);
+  assert.equal((await eu(r.cookie)).json.usuario.apelido, 'ComCsrf' + ipN, 'a sessão segue o usuário pelo id, mesmo com apelido novo');
+});
