@@ -2,15 +2,15 @@
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8">
-<script src="gate.js?v=20261119u"></script>
-<script src="cliente-economia.js?v=20261120b"></script>
+<script src="gate.js?v=20261120c"></script>
+<script src="cliente-economia.js?v=20261120c"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>NÃO SALVO — Museu da Internet Brasileira</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preconnect" href="https://i.ytimg.com">
 <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Inter:wght@400;500;600;700&family=Baloo+2:wght@700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="theme.css?v=20261120a">
+<link rel="stylesheet" href="theme.css?v=20261120c">
 <link rel="stylesheet" href="viewer.css?v=20261120c">
 <script>try{var t=localStorage.getItem("ns_theme")}catch(e){}document.documentElement.dataset.theme=t==="dark"?"dark":"light"</script>
 <style>
@@ -215,10 +215,10 @@ main{display:flex;flex-direction:column}
 <div class="modal" id="modal" onclick="if(event.target===this)closeM()"><div class="box" id="box"></div></div>
 
 <form name="feedback" data-netlify="true" netlify-honeypot="bot-field" hidden><input name="tipo"><textarea name="msg"></textarea><input name="contato"><input name="pagina"><input name="bot-field"></form>
-<script src="common.js?v=20261120b"></script>
+<script src="common.js?v=20261120c"></script>
 <script src="data.js?v=20261119q"></script>
 <script src="player.js?v=20261119n"></script>
-<script src="viewer.js?v=20261120c"></script>
+<script src="viewer.js?v=20261120d"></script>
 <script src="alertas.js?v=20261119n"></script>
 <script>
 renderHeader("inicio",{search:true,sub:[]});
@@ -426,8 +426,8 @@ function dupCheck(url,name){
 
 // ---- Enviar meme ----
 function openSubmit(y){
-  if(needAccount())return;
-  if(!economiaPronta())return;
+  if(needAccount("enviar um meme"))return;
+  if(!economiaPronta("enviar um meme"))return;
   $("box").className="box form";
   if(nivelPatente()<1){
     $("box").innerHTML=`<div class="body lock"><div class="big">${icon("lock","big")}</div><h3>Enviar meme é a partir de <span style="color:${RANKS[1].color}">Banda larga</span></h3>
@@ -473,6 +473,7 @@ function scheduleApprovals(){NS.subs.filter(s=>s.status==="pending").forEach(s=>
 
 // ---- Salvar link de viral antigo (+5) ----
 function saveOldLink(id,u){
+  if(needAccount("salvar o link"))return`<div class="chk bad">Entre na sua conta para salvar o link.</div>`;
   if(!ECO.pronto)return`<div class="chk warn">Carregando a sua patente… tente de novo em instantes.</div>`;
   if(nivelPatente()<2)return`<div class="chk bad">Salvar link é a partir da patente Colaborador (${fmt(RANKS[2].xp)} XP). Você tem ${fmt(ECO.xp)} XP.</div>`;
   const key=normUrl(u);
@@ -484,7 +485,7 @@ function saveOldLink(id,u){
 
 // ---- Moderação: patente maior modera patente menor ----
 function openMod(){
-  if(!economiaPronta())return;
+  if(!economiaPronta("moderar"))return;
   const r=nivelPatente(),canMod=r>=3;
   const mine=NS.subs.slice().reverse();
   const qs=SEED_QUEUE.map(q=>{const st=NS.modDone[q.id];const best=ALL.filter(a=>!a.by||a.id!==q.id).map(a=>({a,s:sim(q.t,a.t)})).sort((x,y)=>y.s-x.s)[0];

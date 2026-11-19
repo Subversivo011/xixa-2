@@ -121,8 +121,8 @@ function nsSave(){try{localStorage.setItem(NS_KEY,JSON.stringify(NS))}catch(e){}
 function nsToday(){return new Date().toISOString().slice(0,10)}
 
 // ---- Carteira (vem de GET /api/carteira) ----
-let ECO={pronto:false,moedas:0,xp:0,patente:null,proxima_patente:null,pacotes:[],cartas:null,valor_das_repetidas:0};
-const economiaPronta=()=>{if(ECO.pronto)return true;toast(ECO.indisponivel?"Servidor indisponível. Use “Tentar de novo” e espere carregar.":"Carregando a sua conta… tente de novo em instantes.");return false};
+let ECO={convidado:false,pronto:false,moedas:0,xp:0,patente:null,proxima_patente:null,pacotes:[],cartas:null,valor_das_repetidas:0};
+const economiaPronta=(acao)=>{if(ECO.pronto)return true;if(ECO.convidado){avisoLogin(acao||"usar a sua conta");return false}toast(ECO.indisponivel?"Servidor indisponível. Use “Tentar de novo” e espere carregar.":"Carregando a sua conta… tente de novo em instantes.");return false};
 const nivelPatente=()=>{const i=ECO.patente?RANKS.findIndex(k=>k.id===ECO.patente.id):0;return i<0?0:i};
 async function atualizarCarteira(){
   const antes=ECO.pronto&&ECO.patente?ECO.patente.id:null;
@@ -143,6 +143,17 @@ async function holdWallet(on){
 }
 // visita do dia: 1 vez por carregamento, depois que a sessão existe; o servidor é idempotente por dia
 // Se o servidor cair (5xx ou rede), avisa e oferece "Tentar de novo" em vez de deixar a tela vazia sem explicação.
+// Convidado (marca ns_convidado): navega, mas álbum, moedas, pacotes e perfil exigem conta. Sem laço de redirecionamento.
+function entrarComoConvidado(){
+  ECO.convidado=true;ECO.pronto=false;SESSAO=null;
+  renderWallet();updateAccount();
+  if(typeof onConvidado==="function")onConvidado();
+}
+// aviso "Entre para <ação>" com atalho para o login (abre o diálogo de login)
+function avisoLogin(acao){
+  toast(`Entre para ${acao}.`,3200);
+  openLogin(`Entre para ${acao}.`);
+}
 let economiaEmCurso=false;
 function avisoEconomiaOff(on){
   let b=document.getElementById("ecooff");
@@ -157,7 +168,10 @@ function avisoEconomiaOff(on){
 async function iniciarEconomia(){
   if(economiaEmCurso)return;economiaEmCurso=true;
   try{
-    try{await carregarSessao()}catch(e){if(e&&e.status===401)return;throw e} // 401: o cliente-economia já redirecionou
+    try{await carregarSessao()}catch(e){
+      if(e&&e.status===401){if(Api.convidado())entrarComoConvidado();return} // 401: sem marca o cliente já redirecionou
+      throw e;
+    }
     if(!SESSAO)throw {status:0};
     try{await Api.visita()}catch(e){if(e&&e.status===401)return} // a visita do dia não derruba a tela se falhar
     await atualizarCarteira();
@@ -184,6 +198,14 @@ const compactCoins=new Intl.NumberFormat("pt-BR",{notation:"compact",maximumSign
 function renderWallet(){
   if(walletHold)return;
   const el=document.getElementById("wallet");if(!el)return;
+  if(ECO.convidado){
+    el.innerHTML=`<button class="wl" onclick="avisoLogin('ver as suas moedas e a sua patente')" title="Entre para guardar moedas e XP" aria-label="Convidado: entre para ver moedas e patente">
+    <span class="wl-c">${icon("coin")}<b>0</b></span>
+    <span class="wl-r"><em style="color:#9aa3b2">Convidado</em><i><s style="width:0%;background:#9aa3b2"></s></i><small>Entre para guardar moedas e XP</small></span></button>`;
+    updateAccount();
+    if(typeof onWalletRendered==="function")onWalletRendered();
+    return;
+  }
   const p=ECO.patente,nx=ECO.proxima_patente;
   const nome=p?p.nome:"…",cor=escapeHtml(p?p.cor:"#9aa3b2");
   const pct=!p?0:nx?Math.max(0,Math.min(100,Math.round((ECO.xp-p.xp_minimo)/(nx.xp_minimo-p.xp_minimo)*100))):100;
@@ -203,7 +225,7 @@ const meuApelido=()=>(SESSAO&&SESSAO.usuario&&SESSAO.usuario.apelido)||"";
 // avatar_gato válido: 6 chaves inteiras dentro da faixa (nunca decidir cadastro por avatar_gato.length)
 const GATO_FAIXA={fur:10,pat:5,eye:5,acc:9,clo:8,bg:8};
 const gatoValido=o=>!!o&&typeof o==="object"&&Object.keys(GATO_FAIXA).every(k=>Number.isInteger(o[k])&&o[k]>=0&&o[k]<GATO_FAIXA[k]);
-const FOTO_DISCORD=/^https:\/\/cdn\.discordapp\.com\/avatars\/[0-9]+\/[a-f0-9_]+\.png/;
+const FOTO_DISCORD=/^https:\/\/cdn\.discordapp\.com\/avatars\/[0-9]+\/[a-f0-9_]+\.png(\?size=[0-9]{1,4})?$/;
 const APELIDO_OK=/^[A-Za-z0-9_.-]{3,20}$/;
 let sgSalvando=false;
 function sgErros(campo,msg){
@@ -213,7 +235,7 @@ function sgErros(campo,msg){
 }
 function openSignup(){
   const u=SESSAO&&SESSAO.usuario;
-  if(!u){openLogin();return}
+  if(!u){avisoLogin("editar o perfil");return}
   sgO=gatoValido(u.avatar_gato)?{fur:u.avatar_gato.fur,pat:u.avatar_gato.pat,eye:u.avatar_gato.eye,acc:u.avatar_gato.acc,clo:u.avatar_gato.clo,bg:u.avatar_gato.bg}:{fur:0,pat:1,eye:0,acc:0,clo:0,bg:0};
   document.getElementById("sgU").value=u.apelido||"";
   const temFoto=typeof u.avatar_url==="string"&&FOTO_DISCORD.test(u.avatar_url);
@@ -245,7 +267,9 @@ async function submitSignup(){
     if(e.status===0)return sgErros("","Sem conexão. Tente de novo.");
     if(e.status===429&&e.campo==="apelido"){
       // o PATCH é tudo ou nada: nada foi salvo. Dá para salvar só o gato voltando o apelido para o atual.
-      const s=Number(e.tente_em_segundos)||0,t=s>=3600?Math.ceil(s/3600)+" h":Math.max(1,Math.ceil(s/60))+" min";
+      const s=Number(e.tente_em_segundos);
+      if(!(s>0))return sgErros("apelido",`Você trocou o apelido há pouco e ainda não dá para trocar de novo. Para salvar só o gato, volte o apelido para “${u.apelido}”.`);
+      const t=s>=3600?Math.ceil(s/3600)+" h":Math.max(1,Math.ceil(s/60))+" min";
       return sgErros("apelido",`Você trocou o apelido há pouco: dá para trocar de novo em ${t}. Para salvar só o gato, volte o apelido para “${u.apelido}”.`);
     }
     if(e.status===429)return sgErros("","Muitas alterações seguidas. Aguarde um pouco.");
@@ -330,13 +354,13 @@ function updateAccount(){
     <button type="button" class="account-login" onclick="openLogin()">${icon("login")}Login</button>
   </div>`;
 }
-function openLogin(){const dlg=document.getElementById("login-dialog");if(!dlg)return;const l=document.getElementById("lgDiscord");if(l)l.href="/api/auth/discord?voltar="+encodeURIComponent(location.pathname+location.search);dlg.showModal()}
+function openLogin(msg){const dlg=document.getElementById("login-dialog");if(!dlg)return;const m=document.getElementById("lgMsg");if(m){m.textContent=typeof msg==="string"?msg:"";m.hidden=!(typeof msg==="string"&&msg)}const l=document.getElementById("lgDiscord");if(l)l.href="/api/auth/discord?voltar="+encodeURIComponent(location.pathname+location.search);dlg.showModal()}
 function closeLogin(){const dlg=document.getElementById("login-dialog");dlg&&dlg.open&&dlg.close()}
-const needAccount=()=>{
+const needAccount=(acao)=>{
   if(temConta())return false;
   if(!SESSAO&&ECO.indisponivel){toast("Servidor indisponível. Use “Tentar de novo” e espere carregar.");return true}
   if(SESSAO&&SESSAO.usuario){toast("Crie o seu gatinho primeiro 🐱");openSignup()}
-  else{toast("Entre na sua conta primeiro");openLogin()}
+  else avisoLogin(acao||"continuar");
   return true;
 };
 
@@ -554,6 +578,7 @@ function openPop(anchor,items){
 </div>`;document.body.appendChild(d.firstElementChild);
   document.body.insertAdjacentHTML("beforeend",`<dialog id="login-dialog" aria-labelledby="login-heading">
     <h2 id="login-heading">Entrar no Não Salvo</h2>
+    <p class="lg-msg" id="lgMsg" role="status" hidden></p>
     <p>Entre com a sua rede para salvar o álbum, o XP e as moedas.</p>
     <div class="lg-nets">
       <a class="lg-net" id="lgDiscord" href="/api/auth/discord">${D}<span>Continuar com Discord</span></a>

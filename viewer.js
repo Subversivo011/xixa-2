@@ -182,7 +182,7 @@ function initComments(el,m){
       <div class="cn">${me?`comentando como <b>${escapeHtml(me)}</b>`:`<a data-act="login">entre na sua conta</a> para comentar`}</div>`;
     const f=box.querySelector(".cf");
     f.onsubmit=async ev=>{ev.preventDefault();const t=f.t.value.trim();if(!t)return;
-      if(!temConta()){needAccount();return}
+      if(!temConta()){needAccount("comentar");return}
       const btn=f.querySelector("button");btn.disabled=true;
       const r=await apiPost("/api/comentarios",{id:m.id,autor:meuApelido(),texto:t,"bot-field":f["bot-field"].value});
       btn.disabled=false;
@@ -202,7 +202,7 @@ function ytDoLink(u){u=(u||"").trim();if(!u)return"";try{const x=new URL(/^https
   let id="";if(h==="youtu.be")id=p.slice(1);else if(h.endsWith("youtube.com")){id=x.searchParams.get("v")||"";const mm=p.match(/\/(shorts|embed|live|v)\/([\w-]{11})/);if(!id&&mm)id=mm[2]}
   id=(id||"").slice(0,11);return /^[\w-]{11}$/.test(id)?id:""}catch(e){return""}}
 function enviarLinkSugerido(m,u){
-  if(!temConta()){needAccount();return'<div class="chk bad">Entre na sua conta para enviar o link.</div>'}
+  if(!temConta()){needAccount("enviar o link");return'<div class="chk bad">Entre na sua conta para enviar o link.</div>'}
   const yt=ytDoLink(u);if(!yt)return'<div class="chk bad">Cole um link do YouTube (youtube.com/watch?v=… ou youtu.be/…).</div>';
   NS.linkSugs=NS.linkSugs||[];
   if(NS.linkSugs.some(x=>x.meme===m.id&&x.yt===yt))return'<div class="chk warn">Você já enviou esse link. Ele está na fila da moderação.</div>';
