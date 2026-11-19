@@ -8,8 +8,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Inter:wght@400;500;600;700&family=Baloo+2:wght@700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="theme.css?v=20261119u">
-<link rel="stylesheet" href="viewer.css?v=20261119n">
+<link rel="stylesheet" href="theme.css?v=20261119v">
+<link rel="stylesheet" href="viewer.css?v=20261119v">
 <script>try{var t=localStorage.getItem("ns_theme")}catch(e){}document.documentElement.dataset.theme=t==="dark"?"dark":"light"</script>
 <style>
 :root{--Comum:#8e939c;--Relevante:#2fbf5b;--Raro:#2f86ff;--Relíquia:#a35cff;--Lendário:#e8a317;--Mítico:#ff4a4a}
@@ -194,10 +194,10 @@
 <div class="modal" id="modal" onclick="if(event.target===this)closeModal()"><div class="mbox" id="mbox"></div></div>
 
 <form name="feedback" data-netlify="true" netlify-honeypot="bot-field" hidden><input name="tipo"><textarea name="msg"></textarea><input name="contato"><input name="pagina"><input name="bot-field"></form>
-<script src="common.js?v=20261119u"></script>
+<script src="common.js?v=20261119v"></script>
 <script src="data.js?v=20261119q"></script>
 <script src="player.js?v=20261119n"></script>
-<script src="viewer.js?v=20261119n"></script>
+<script src="viewer.js?v=20261119v"></script>
 <script src="alertas.js?v=20261119n"></script>
 <script>
 renderHeader("album",{sub:[
@@ -290,7 +290,7 @@ let vpl=null;
 // fim da revelação (todas viradas ou pacote fechado): só agora carteira, XP, patente e o álbum atrás aparecem
 function settlePack(){if(!packOpen)return;packOpen=false;holdWallet(false);renderAll()}
 function closeModal(){vpl&&vpl.stop();$("modal").classList.remove("open");settlePack()}
-function watch(id){const m=MEMES.find(x=>x.id===id);if(!m)return;closeModal();const rel=MEMES.filter(x=>x.id!==m.id).sort((p,q)=>Math.abs(p.y-m.y)-Math.abs(q.y-m.y));openViewer(m,{related:rel,onPick:watch,onYear:y=>{location.href="index.html#"+y}})}
+function watch(id){const m=MEMES.find(x=>x.id===id);if(!m)return;closeModal();const rel=MEMES.filter(x=>x.id!==m.id).sort((p,q)=>Math.abs(p.y-m.y)-Math.abs(q.y-m.y));openViewer(m,{related:rel,onPick:watch,onYear:y=>{location.href="linha-do-tempo.html#"+y}})}
 
 // ---- moedas: repetida vira moeda ----
 function convertOne(id){const c=byId[id];if(owned(c)<2)return;NS.owned[id]--;addCoins(DUP_VALUE[c.r],`(${c.name} repetida)`);renderAll()}
