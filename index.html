@@ -8,8 +8,8 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preconnect" href="https://i.ytimg.com">
 <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Inter:wght@400;500;600;700&family=Baloo+2:wght@700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="theme.css?v=20261118f">
-<link rel="stylesheet" href="viewer.css?v=20261118f">
+<link rel="stylesheet" href="theme.css?v=20261118g">
+<link rel="stylesheet" href="viewer.css?v=20261118g">
 <script>try{var t=localStorage.getItem("ns_theme")}catch(e){}document.documentElement.dataset.theme=t==="dark"?"dark":"light"</script>
 <style>
 main{padding:24px 28px 60px;max-width:1280px;margin:0 auto}
@@ -159,7 +159,7 @@ main{display:flex;flex-direction:column}
 .top,.cur{grid-template-columns:1fr}.stage{grid-template-columns:1fr}.side{display:none}.facts{grid-template-columns:1fr 1fr}.rail{grid-template-columns:1fr 1fr}.rail .card:nth-child(3){display:none}main{padding:16px 14px 40px}}
 @media(max-width:600px){.f .two{grid-template-columns:1fr}.today{grid-template-columns:110px 1fr}.box .body{padding:16px}}
 </style>
-<link rel="stylesheet" href="home.css?v=20261118f">
+<link rel="stylesheet" href="home.css?v=20261118g">
 </head>
 <body class="home">
 <div class="rays-wrap" aria-hidden="true"><div class="rays" id="rays"></div></div>
@@ -171,7 +171,7 @@ main{display:flex;flex-direction:column}
       <div class="sun"><picture><source srcset="logo-hero.webp" type="image/webp"><img src="logo-hero.png" alt="Não Salvo" width="640" height="528" fetchpriority="high"></picture></div>
       <h1>E no fim, o plano do <em>Não Salvo</em> era salvar.</h1>
       <p>Um museu colaborativo de vídeos virais, memes e momentos inesquecíveis da nossa internet.</p>
-      <div class="btns"><button class="btn" onclick="go(2012,true)"><i data-ic="timeline"></i>Explorar por ano</button><button class="btn ghost" onclick="openSubmit()"><i data-ic="send"></i>Enviar vídeo</button></div>
+      <div class="btns"><button class="btn" onclick="go(2012,true)"><i data-ic="timeline"></i>Explorar por ano</button><button class="btn ghost" onclick="openSubmit()"><i data-ic="send"></i>Enviar meme</button></div>
     </div>
     <div>
       <div class="sec-title"><span><i data-ic="star"></i>Clássicos da internet brasileira</span><a onclick="setView('todos')">Ver todos →</a></div>
@@ -196,7 +196,7 @@ main{display:flex;flex-direction:column}
   </section>
 
   <section id="browse">
-    <div class="sec-title"><span id="browseTitle">Todos os registros</span><a onclick="openSubmit()"><i data-ic="send"></i>Enviar vídeo</a></div>
+    <div class="sec-title"><span id="browseTitle">Todos os registros</span><a onclick="openSubmit()"><i data-ic="send"></i>Enviar meme</a></div>
     <div class="chips" id="chips"></div>
     <div class="grid" id="grid"></div>
   </section>
@@ -213,10 +213,10 @@ main{display:flex;flex-direction:column}
 <div class="modal" id="modal" onclick="if(event.target===this)closeM()"><div class="box" id="box"></div></div>
 
 <form name="feedback" data-netlify="true" netlify-honeypot="bot-field" hidden><input name="tipo"><textarea name="msg"></textarea><input name="contato"><input name="pagina"><input name="bot-field"></form>
-<script src="common.js?v=20261118f"></script>
-<script src="data.js?v=20261118f"></script>
-<script src="player.js?v=20261118f"></script>
-<script src="viewer.js?v=20261118f"></script>
+<script src="common.js?v=20261118g"></script>
+<script src="data.js?v=20261118g"></script>
+<script src="player.js?v=20261118g"></script>
+<script src="viewer.js?v=20261118g"></script>
 <script>
 renderHeader("inicio",{search:true,sub:[]});
 document.querySelectorAll("[data-ic]").forEach(e=>e.outerHTML=icon(e.dataset.ic));
@@ -268,7 +268,7 @@ const SUB_ITEMS=[
   {k:"album",ic:"album",label:"Álbum de figurinhas",href:"album.html"},
   {k:"mod",ic:"moderation",label:"Moderação",fn:()=>openMod()},
   {sp:1},
-  {k:"send",ic:"send",label:"Enviar vídeo",cta:1,fn:()=>openSubmit()}
+  {k:"send",ic:"send",label:"Enviar meme",cta:1,fn:()=>openSubmit()}
 ];
 function renderNav(){setSubOn(view==="todos"?"cat":view)}
 function pickCat(c){query="";$("q").value="";cat=c;view=c==="Todas"?"todos":"cat";renderNav();renderGrid();$("browse").scrollIntoView({behavior:"smooth"})}
@@ -325,7 +325,7 @@ function renderGrid(){
   $("browseTitle").textContent=title;
   const cats=["Todas",...new Set(ALL.map(a=>a.c))];
   $("chips").innerHTML=cats.map(c=>`<button class="chip ${c===cat?'on':''}" onclick="cat='${c}';renderGrid()">${c==="Todas"?icon("all","in")+c:icon(CAT_IC[c]||"video","in")+c}</button>`).join("");
-  $("grid").innerHTML=list.length?list.map(a=>card(a,true)).join(""):`<p style="color:var(--mut)">Nada por aqui ainda. Que tal ser o primeiro a salvar? <button class="btn" style="margin-left:8px" onclick="openSubmit()">＋ Enviar vídeo</button></p>`;
+  $("grid").innerHTML=list.length?list.map(a=>card(a,true)).join(""):`<p style="color:var(--mut)">Nada por aqui ainda. Que tal ser o primeiro a salvar? <button class="btn" style="margin-left:8px" onclick="openSubmit()">＋ Enviar meme</button></p>`;
 }
 (function swipe(){let x0=null,y0=0;const c=()=>document.getElementById("cur");
   document.addEventListener("touchstart",e=>{if(innerWidth>860||!c()||!c().contains(e.target)||e.target.closest(".mini"))return;x0=e.touches[0].clientX;y0=e.touches[0].clientY},{passive:true});
@@ -376,12 +376,12 @@ function dupCheck(url,name){
   return{lvl:key||name?"ok":"",key};
 }
 
-// ---- Enviar vídeo ----
+// ---- Enviar meme ----
 function openSubmit(y){
   if(needAccount())return;
   $("box").className="box form";
   if(rankIdx(NS.xp)<1){
-    $("box").innerHTML=`<div class="body lock"><div class="big">${icon("lock","big")}</div><h3>Enviar vídeo é a partir de <span style="color:${RANKS[1].color}">Banda larga</span></h3>
+    $("box").innerHTML=`<div class="body lock"><div class="big">${icon("lock","big")}</div><h3>Enviar meme é a partir de <span style="color:${RANKS[1].color}">Banda larga</span></h3>
     <p>Pra não virar bagunça, quem acabou de chegar ainda não envia virais. Você precisa de <b>${fmt(RANKS[1].xp)} XP</b> (tem ${fmt(NS.xp)}).<br>Ganhe XP visitando todo dia (+${XP_GAIN.visit}), abrindo pacotes (+${XP_GAIN.pack}) e completando o álbum. Quem é do Xet da live do Cid já entra como Banda larga.</p>
     <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap"><a class="btn" href="album.html" style="text-decoration:none">${icon("pack")}ABRIR PACOTE</a><button class="btn ghost" onclick="openSignup()">Sou do Xet</button><button class="btn ghost" onclick="closeM()">Fechar</button></div></div>`;
     $("modal").classList.add("open");return;
@@ -406,7 +406,7 @@ function liveCheck(){
   if(r.lvl==="ok"){el.innerHTML=`<div class="chk ok">${icon("check","in")}Nada igual no acervo nem na fila. ${r.key&&r.key.includes(":")?`Link reconhecido como <b>${r.key}</b>.`:""}</div>`;return}
   const h=r.hit,where=h.where==="acervo"?`já está no acervo`:`já tem ticket ${h.ticket||""} na fila de moderação`;
   if(r.lvl==="bad")el.innerHTML=`<div class="chk bad">${icon("xmark","in")}<b>${escapeHtml(h.t)}</b> ${where} (mesmo ${r.why}${r.s?`, ${Math.round(r.s*100)}% parecido`:""}). Não vamos abrir ticket repetido. ${h.where==="acervo"?`<button onclick="openM('${h.id}')">Ver no acervo</button>`:""}</div>`;
-  else el.innerHTML=`<div class="chk warn">${icon("alert","in")}Parece com <b>${escapeHtml(h.t)}</b> (${Math.round(r.s*100)}% parecido), que ${where}. É outro vídeo?<label><input type="checkbox" id="sOk"> Não é o mesmo, enviar assim mesmo</label></div>`;
+  else el.innerHTML=`<div class="chk warn">${icon("alert","in")}Parece com <b>${escapeHtml(h.t)}</b> (${Math.round(r.s*100)}% parecido), que ${where}. É outro meme?<label><input type="checkbox" id="sOk"> Não é o mesmo, enviar assim mesmo</label></div>`;
 }
 function sendSub(){
   const url=$("sU").value.trim(),t=$("sN").value.trim(),y=+$("sY").value,c=$("sC").value,d=$("sD").value.trim();

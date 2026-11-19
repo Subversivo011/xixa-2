@@ -107,7 +107,7 @@ const PACK_SIZE=5;
 // ---- Patentes (quem tem patente maior modera quem tem menor) ----
 const RANKS=[
  {id:"discado",name:"Discado",xp:0,color:"#9aa3b2",can:"Navega no acervo, abre pacotes e coleciona cartas."},
- {id:"banda",name:"Banda larga",xp:150,color:"#2fbf5b",can:"Pode enviar vídeos para o acervo."},
+ {id:"banda",name:"Banda larga",xp:150,color:"#2fbf5b",can:"Pode enviar memes (vídeos e fotos) para o acervo."},
  {id:"colab",name:"Colaborador",xp:500,color:"#2f86ff",can:"Pode salvar o link de virais antigos que estão sem vídeo."},
  {id:"mod",name:"Moderador",xp:1500,color:"#a855f7",can:"Modera envios de quem tem patente menor."},
  {id:"dono",name:"Dono de comunidade",xp:4000,color:"#f5b70a",can:"Selo dourado no perfil e voto de minerva na moderação."},
@@ -321,7 +321,7 @@ function openPop(anchor,items){
         <div class="sg-fl"><input class="t" id="sgE" type="email" placeholder=" " autocomplete="email"><label for="sgE">E-mail</label></div>
         <div class="sg-fl"><input class="t" id="sgP" type="password" placeholder=" " autocomplete="new-password"><label for="sgP">Senha (mín. 6 caracteres)</label></div>
       </div>
-      <label class="sg-chk"><input type="checkbox" id="sgChat"><span class="bx">${icon("check")}</span><span>Sou do Xet da live do Cid<small>Já entra como Banda larga e pode enviar vídeos</small></span></label>
+      <label class="sg-chk"><input type="checkbox" id="sgChat"><span class="bx">${icon("check")}</span><span>Sou do Xet da live do Cid<small>Já entra como Banda larga e pode enviar memes</small></span></label>
       <div class="sg-err" id="sgErr"></div>
       <button class="sg-go" onclick="submitSignup()"><span id="sgGoT">Criar conta</span> →</button>
       <p class="sg-note">Protótipo: nenhuma conta real é criada. Avatar, moedas e cartas ficam salvos só neste navegador, e a senha não é guardada.</p>
@@ -382,18 +382,18 @@ function renderFooter(){
   if(document.getElementById("nsft"))return;
   const f=document.createElement("footer");f.id="nsft";f.className="nsft";
   f.innerHTML=`<div class="ft-wrap">
-    <button class="fq" onclick="openFeedback()" aria-label="Enviar feedback">
-      <span class="fq-art">${PHONE_SVG}</span>
+    <div class="fq">
+      <button class="fq-art" onclick="openFeedback()" aria-label="Mandar feedback">${PHONE_SVG}</button>
       <span class="fq-txt"><span class="fq-logo">fala<i>.</i>que<i>.</i>eu<i>.</i>te<i>.</i>escut<span class="fq-o">o</span></span>
-        <span class="fq-l1">feedback?</span><span class="fq-l2">a pessoa amada em 7 dias?</span><span class="fq-l3">ajoelha e envia.</span></span>
-      <span class="fq-go">${icon("send")}Mandar feedback</span>
-    </button>
+        <span class="fq-l1">feedback? <em>Quer contribuir com ideias?</em></span><span class="fq-l2">a pessoa amada em 7 dias?</span><span class="fq-l3">ajoelha e envia.</span></span>
+      <span class="fq-acts"><button class="fq-go" onclick="openFeedback()">${icon("send")}Mandar feedback</button><a class="fq-go alt" href="/contribuir/">${icon("user")}Quero contribuir com ideias</a></span>
+    </div>
   </div>
   <div class="ft-band"><div class="ft-band-in">
     <div class="ft-legal">${socialHTML()}<b>Aviso legal</b>
       <p>O Não Salvo é apenas um compilado de vídeos e fotos que já estão publicados na internet. Não hospedamos nenhum vídeo: todos são exibidos direto do YouTube, pelo player oficial, e continuam pertencendo aos seus autores e canais de origem. As fotos e marcas citadas pertencem aos seus respectivos donos.</p>
       <p>É dono de algum conteúdo e quer que ele saia daqui? <button onclick="openFeedback('remocao')">Peça a remoção</button> e a gente tira.</p>
-      <small>© ${new Date().getFullYear()} Não Salvo · projeto de fã, sem fins lucrativos · <a href="/contribuir/">Quero contribuir</a></small></div>
+      <small>© ${new Date().getFullYear()} Não Salvo · projeto de fã, sem fins lucrativos</small></div>
     <img class="ft-boneco" src="boneco.png?v=2" alt="" width="478" height="600">
   </div></div>`;
   document.body.appendChild(f);

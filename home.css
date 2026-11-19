@@ -227,3 +227,10 @@ button:hover>.thumb>.play,button:hover>.ct>.play,.tthumb:hover>.play,.card:hover
 :root[data-theme="dark"] .sd-logo .su{text-shadow:0 0 14px #2a8fe066}
 :root[data-theme="dark"] .sd-logo .de{text-shadow:0 0 14px #ff3b2f88}
 :root[data-theme="dark"] .sd-logo i{text-shadow:none}
+/* logo do topo: sem filtros (no Safari do iPhone o drop-shadow/blur numa camada animada desenhava um quadrado claro) */
+.hero .sun::after{filter:none!important;inset:0!important;background:radial-gradient(closest-side,color-mix(in srgb,var(--brand2) 22%,transparent),transparent 72%)!important}
+:root[data-theme="light"] .hero .sun::after{background:radial-gradient(closest-side,#ffffffb0,transparent 72%)!important}
+.hero .sun picture{will-change:auto!important;backface-visibility:visible!important}
+.hero .sun img{filter:none!important}
+.hero .sun::before{content:"";position:absolute;left:18%;right:18%;bottom:2%;height:9%;border-radius:50%;background:radial-gradient(closest-side,#00000038,transparent);z-index:0;animation:shd 4.6s cubic-bezier(.45,0,.55,1) infinite}
+@keyframes shd{50%{transform:scaleX(.9);opacity:.75}}
