@@ -277,7 +277,7 @@ function openViewer(m,opt={}){
     if(discada(m.y))hooks.beforeStart=()=>dialUp(el);
     hooks.onPlay=()=>{if(!VW||VW.toasted)return;VW.toasted=1;if(typeof registrarEvento==="function")registrarEvento(m.id,"clique");VW.toastT=setTimeout(()=>{if(VW&&VW.m===m&&typeof alertaDaEpoca==="function")alertaDaEpoca(el,m,false)},4000)};
     VW.player=initPlayer(el.querySelector(".vp"),m,rel,id=>opt.onPick&&opt.onPick(id),hooks);
-    if(lanhouse(m.y)){const b=document.createElement("div");b.className="lan";let s=29*60+59;b.innerHTML=`<b>LAN HOUSE</b><span>Máquina 07</span><span class="lt"></span><small>R$ 1,50/hora</small>`;el.querySelector(".vw-win").appendChild(b);const lt=b.querySelector(".lt");
+    if(lanhouse(m.y)){const b=document.createElement("div");b.className="lan";let s=29*60+59;b.innerHTML=`<b>LAN HOUSE</b><span>Máquina 07</span><span class="lt"></span><small>R$ 1,50/hora</small>`;el.querySelector(".vw-win").prepend(b);const lt=b.querySelector(".lt");
       const tick=()=>{lt.textContent="Tempo restante "+String(Math.floor(s/60)).padStart(2,"0")+":"+String(s%60).padStart(2,"0");if(s>0)s--};tick();VW.clock=setInterval(tick,1000)}
     const ck=el.querySelector("[data-clock]");if(ck){const f=()=>ck.textContent=new Date().toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit"});f();VW.clock=setInterval(f,30000)}
   }

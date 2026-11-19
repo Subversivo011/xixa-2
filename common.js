@@ -579,3 +579,34 @@ function registrarEvento(id,tipo){
     Object.keys(dias).sort().slice(0,-3).forEach(x=>delete dias[x]);nsSave()}
   try{fetch("/api/eventos",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({id,tipo}),keepalive:true}).catch(()=>{})}catch(err){}
 }
+
+
+// ---- easter-egg: a jujuba escondida ----
+// Todo dia uma jujuba se esconde num cantinho de UMA página do site (início, linha do tempo, Memepédia ou álbum).
+// Quem acha ganha 50 moedas (1 vez por dia). O lugar muda todo dia e é igual para todo mundo.
+const JUJUBA_SVG='<svg viewBox="0 0 40 40" aria-hidden="true"><defs><radialGradient id="jjg" cx="35%" cy="30%" r="70%"><stop offset="0" stop-color="#fff6"/><stop offset=".25" stop-color="#ff5ca8"/><stop offset="1" stop-color="#c2185b"/></radialGradient></defs><path d="M8 26c0-9 5-17 12-17s12 8 12 17c0 4-5 6-12 6s-12-2-12-6z" fill="url(#jjg)"/><g fill="#fff" opacity=".85"><circle cx="15" cy="20" r="1.1"/><circle cx="22" cy="16" r="1"/><circle cx="26" cy="23" r="1.1"/><circle cx="18" cy="27" r="1"/><circle cx="12" cy="25" r=".9"/></g></svg>';
+// esconderijos que não são redesenhados pela página, cada um com o canto livre (sem cobrir texto)
+const JUJUBA_LUGARES={
+  index:[[".hero .sun","left","bottom"],[".sdp","right","bottom"],[".facts","right","top"],[".pulse .panel:first-child","right","bottom"]],
+  linha:[[".lt-top","right","top"],[".lt-rail","right","bottom"]],
+  memepedia:[[".wk-logo","right","top"]],
+  album:[[".side .tot","right","top"],[".side .wallet","right","top"]]
+};
+function paginaDaJujuba(){const p=location.pathname;return /album\.html/.test(p)?"album":/memepedia\.html/.test(p)?"memepedia":/linha-do-tempo\.html/.test(p)?"linha":"index"}
+function jujubaDeHoje(){const d=nsToday();let h=7;for(const c of d)h=(h*131+c.charCodeAt(0))>>>0;
+  const pags=Object.keys(JUJUBA_LUGARES),pg=pags[h%pags.length],L=JUJUBA_LUGARES[pg];
+  const h2=Math.imul(h^(h>>>13),2654435761)>>>0,x=L[h2%L.length];
+  return{pagina:pg,lugar:x[0],canto:[x[1],x[2]],todos:L.map(y=>y[0])}}
+function esconderJujuba(){
+  if(document.querySelector(".jjb")||NS.jujuba===nsToday())return;
+  const j=jujubaDeHoje();if(j.pagina!==paginaDaJujuba())return;
+  const el=document.querySelector(j.lugar)||j.todos.map(q=>document.querySelector(q)).find(Boolean)||document.getElementById("nsft");if(!el)return;
+  if(getComputedStyle(el).position==="static")el.style.position="relative";
+  const b=document.createElement("button");b.className="jjb";b.type="button";b.title="?";b.setAttribute("aria-label","Uma jujuba?");b.innerHTML=JUJUBA_SVG;
+  b.style[j.canto[0]]="8px";b.style[j.canto[1]]="6px";
+  b.onclick=ev=>{ev.preventDefault();ev.stopPropagation();NS.jujuba=nsToday();NS.jujubas=(NS.jujubas||0)+1;NS.coins+=50;addXP(10);nsSave();renderWallet();
+    b.classList.add("pego");setTimeout(()=>b.remove(),700);
+    toast(NS.jujubas===1?"🍬 Você achou a jujuba escondida! +50 moedas. Amanhã ela se esconde em outro lugar do site.":`🍬 Jujuba nº ${NS.jujubas} encontrada! +50 moedas.`,4200)};
+  el.appendChild(b);
+}
+if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",()=>setTimeout(esconderJujuba,400));else setTimeout(esconderJujuba,400);

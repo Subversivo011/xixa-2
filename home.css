@@ -280,13 +280,6 @@ button:hover>.thumb>.play,button:hover>.ct>.play,.tthumb:hover>.play,.card:hover
 .sd-load{grid-column:1/-1;font-size:12px;color:var(--mut);padding:10px 0}
 .sd-nota{font-size:10.5px;color:var(--faint);margin-top:8px}
 @media(max-width:420px){.sd-pl{display:none}}
-/* jujuba escondida (easter-egg) */
-#cur{position:relative}
-.jjb{position:absolute;right:10px;bottom:8px;width:22px;height:22px;padding:0;border:0;background:none;cursor:pointer;opacity:.55;z-index:3;transition:transform .2s,opacity .2s;filter:drop-shadow(0 1px 1px #0003)}
-.jjb:hover{opacity:1;transform:scale(1.35) rotate(-12deg)}
-.jjb svg{width:100%;height:100%;display:block}
-.jjb.pego{animation:jjpop .7s ease forwards}
-@keyframes jjpop{40%{transform:scale(1.8) rotate(20deg);opacity:1}100%{transform:translateY(-60px) scale(.2);opacity:0}}
 /* faixa explicativa mais perto do rodapé (sem grudar) */
 .facts{margin-top:110px!important}
 main:has(.facts){padding-bottom:22px!important}

@@ -488,3 +488,11 @@ img.cdo-blur{filter:blur(16px) saturate(.6);transform:scale(1.15)}
 .cdo-t b{font:700 11px/1.1 Inter,system-ui,sans-serif;letter-spacing:.6px;text-transform:uppercase}
 .cdo-t small{font-size:10px;opacity:.85}
 .em .cdo-t small,.em .cdo-t b{display:none}
+
+/* jujuba escondida (easter-egg, qualquer página) */
+.jjb{position:absolute;width:22px;height:22px;padding:0;border:0;background:none;cursor:pointer;opacity:.55;z-index:5;transition:transform .2s,opacity .2s;filter:drop-shadow(0 1px 1px #0003)}
+.jjb:hover,.jjb:focus-visible{opacity:1;transform:scale(1.35) rotate(-12deg)}
+.jjb svg{width:100%;height:100%;display:block}
+.jjb.pego{animation:jjpop .7s ease forwards}
+@keyframes jjpop{40%{transform:scale(1.8) rotate(20deg);opacity:1}100%{transform:translateY(-60px) scale(.2);opacity:0}}
+@media(prefers-reduced-motion:reduce){.jjb.pego{animation:none;opacity:0}.jjb:hover{transform:none}}
