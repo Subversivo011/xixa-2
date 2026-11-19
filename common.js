@@ -96,58 +96,80 @@ function sgShuffle(){sgO={fur:rnd(SG.fur.length),pat:rnd(SG.pat.length),eye:rnd(
 // =====================================================================
 const NS_KEY="naosalvo2_state";
 
-// ---- Economia (números da proposta do grupo) ----
+// ---- Economia: o servidor é a autoridade (moedas, XP, patente, cartas, pacotes) ----
+// O navegador só mostra o que a API devolve (api-cliente.js). Nada de economia é calculado nem guardado aqui.
 const RARITIES=["Comum","Relevante","Raro","Relíquia","Lendário","Mítico"];
-const DUP_VALUE={Comum:5,Relevante:10,Raro:20,"Relíquia":40,"Lendário":80,"Mítico":150}; // carta repetida vira moeda
-const ODDS={Comum:44,Relevante:26,Raro:15,"Relíquia":9,"Lendário":5,"Mítico":1};          // chance por carta no pacote
-const REWARD={approved:25,oldLink:5,collection:100};                                      // moedas
-const XP_GAIN={visit:10,pack:5,approved:50,oldLink:10,collection:100,newCard:{Comum:2,Relevante:4,Raro:8,"Relíquia":15,"Lendário":30,"Mítico":60}};
-const PACK_SIZE=5;
 
-// ---- Patentes (quem tem patente maior modera quem tem menor) ----
+// ---- Patentes: só para mostrar a lista e liberar telas do protótipo (a patente do usuário vem do servidor) ----
 const RANKS=[
  {id:"discado",name:"Discado",xp:0,color:"#9aa3b2",can:"Navega no acervo, abre pacotes e coleciona cartas."},
- {id:"banda",name:"Banda larga",xp:150,color:"#2fbf5b",can:"Pode enviar memes (vídeos e fotos) para o acervo."},
- {id:"colab",name:"Colaborador",xp:500,color:"#2f86ff",can:"Pode salvar o link de virais antigos que estão sem vídeo."},
- {id:"mod",name:"Moderador",xp:1500,color:"#a855f7",can:"Modera envios de quem tem patente menor."},
+ {id:"banda_larga",name:"Banda larga",xp:150,color:"#2fbf5b",can:"Pode enviar memes (vídeos e fotos) para o acervo."},
+ {id:"colaborador",name:"Colaborador",xp:500,color:"#2f86ff",can:"Pode salvar o link de virais antigos que estão sem vídeo."},
+ {id:"moderador",name:"Moderador",xp:1500,color:"#a855f7",can:"Modera envios de quem tem patente menor."},
  {id:"dono",name:"Dono de comunidade",xp:4000,color:"#f5b70a",can:"Selo dourado no perfil e voto de minerva na moderação."},
  {id:"lenda",name:"Lenda da internet",xp:10000,color:"#ff3b47",can:"Selo vermelho de lenda. Respeito máximo."}
 ];
-const rankOf=xp=>{let r=RANKS[0];RANKS.forEach(k=>{if(xp>=k.xp)r=k});return r};
-const rankIdx=xp=>RANKS.indexOf(rankOf(xp));
-const nextRank=xp=>RANKS.find(k=>k.xp>xp);
+const rankOf=xp=>{let r=RANKS[0];RANKS.forEach(k=>{if(xp>=k.xp)r=k});return r}; // só para usuários de exemplo (fila/ranking de mentira)
 
-// ---- Estado ----
-function nsFresh(){return{acct:null,xp:0,coins:0,owned:{},completed:{},daily:{d:"",used:false},welcome:false,lastVisit:"",streak:0,subs:[],links:{},dayOffset:0,approvedCount:0,modDone:{}}}
+// ---- Estado local (NÃO é economia): conta de protótipo, envios, links, votos, comentários, favorita ----
+// Chaves antigas de economia que ficaram no localStorage são descartadas (decisão: servidor manda, sem importar).
+const ECON_ANTIGA=["xp","coins","owned","completed","daily","welcome","lastVisit","streak","inv","dayOffset"];
+function nsFresh(){return{acct:null,subs:[],links:{},approvedCount:0,modDone:{}}}
 let NS=nsFresh();
-try{const s=JSON.parse(localStorage.getItem(NS_KEY)||"null");if(s)NS=Object.assign(nsFresh(),s)}catch(e){}
+try{const s=JSON.parse(localStorage.getItem(NS_KEY)||"null");if(s){const sujo=ECON_ANTIGA.some(k=>k in s);ECON_ANTIGA.forEach(k=>delete s[k]);NS=Object.assign(nsFresh(),s);if(sujo)localStorage.setItem(NS_KEY,JSON.stringify(NS))}}catch(e){}
 function nsSave(){try{localStorage.setItem(NS_KEY,JSON.stringify(NS))}catch(e){}}
-function nsToday(){const d=new Date();d.setDate(d.getDate()+(NS.dayOffset||0));return d.toISOString().slice(0,10)}
+function nsToday(){return new Date().toISOString().slice(0,10)}
 
-// visita diária: XP + sequência (o pacote grátis do dia é aberto no álbum)
-(function dailyVisit(){
-  const t=nsToday();if(NS.lastVisit===t)return;
-  const y=new Date(t);y.setDate(y.getDate()-1);
-  NS.streak=NS.lastVisit===y.toISOString().slice(0,10)?NS.streak+1:1;
-  NS.lastVisit=t;NS.xp+=XP_GAIN.visit;nsSave();
-})();
-// estoque de pacotes fechados: boas-vindas (1x) + 1 grátis por dia (acumula até 7) + comprados na loja
-(function grantPacks(){
-  if(!Array.isArray(NS.inv))NS.inv=[];
-  if(!NS.welcome){NS.welcome=true;NS.inv.push({id:"boas"})}
-  const t=nsToday();
-  if(NS.daily.d!==t){NS.daily={d:t,used:true};if(NS.inv.filter(p=>p.id==="diario").length<7)NS.inv.push({id:"diario"})}
-  nsSave();
-})();
+// ---- Carteira (vem de GET /api/carteira) ----
+let ECO={pronto:false,moedas:0,xp:0,patente:null,proxima_patente:null,pacotes:[],cartas:null,valor_das_repetidas:0};
+const economiaPronta=()=>{if(ECO.pronto)return true;toast(ECO.indisponivel?"Servidor indisponível. Use “Tentar de novo” e espere carregar.":"Carregando a sua conta… tente de novo em instantes.");return false};
+const nivelPatente=()=>{const i=ECO.patente?RANKS.findIndex(k=>k.id===ECO.patente.id):0;return i<0?0:i};
+async function atualizarCarteira(){
+  const antes=ECO.pronto&&ECO.patente?ECO.patente.id:null;
+  const c=await Api.carteira();
+  ECO=Object.assign(ECO,c,{pronto:true});
+  if(antes&&ECO.patente&&ECO.patente.id!==antes)showRankToast(ECO.patente);
+  return ECO;
+}
+// Revelação em curso (ex.: abrir pacote): quem está revelando liga holdWallet(true). Enquanto isso nada é
+// buscado nem redesenhado (a carteira entregaria o resultado). holdWallet(false) busca a carteira, desenha
+// e só então mostra o aviso de nova patente (se mudou).
+let walletHold=false;
+function showRankToast(r){setTimeout(()=>toast(`🎖️ Nova patente: ${r.nome}!`,4200),600)}
+async function holdWallet(on){
+  walletHold=!!on;if(walletHold)return;
+  try{await atualizarCarteira()}catch(e){}
+  renderWallet();
+}
+// visita do dia: 1 vez por carregamento, depois que a sessão existe; o servidor é idempotente por dia
+// Se o servidor cair (5xx ou rede), avisa e oferece "Tentar de novo" em vez de deixar a tela vazia sem explicação.
+let economiaEmCurso=false;
+function avisoEconomiaOff(on){
+  let b=document.getElementById("ecooff");
+  if(!on){if(b)b.remove();return}
+  if(b)return;
+  b=document.createElement("div");b.id="ecooff";b.setAttribute("role","alert");
+  b.style.cssText="position:fixed;left:50%;bottom:16px;transform:translateX(-50%);z-index:9999;background:var(--panel,#fff);color:var(--txt,#111);border:1px solid var(--line2,#bbb);border-radius:12px;padding:10px 14px;box-shadow:0 8px 30px #0004;display:flex;gap:12px;align-items:center;font:600 14px Inter,sans-serif;max-width:calc(100vw - 24px)";
+  b.innerHTML='<span>Não consegui falar com o servidor: moedas, álbum e pacotes estão indisponíveis.</span><button type="button" style="flex:none;padding:7px 12px;border-radius:8px;border:0;background:var(--brand,#1597d3);color:#fff;font:700 13px Inter,sans-serif;cursor:pointer">Tentar de novo</button>';
+  b.querySelector("button").onclick=()=>iniciarEconomia();
+  document.body.appendChild(b);
+}
+async function iniciarEconomia(){
+  if(economiaEmCurso)return;economiaEmCurso=true;
+  try{
+    try{await carregarSessao()}catch(e){if(e&&e.status===401)return;throw e} // 401: o api-cliente já redirecionou
+    if(!SESSAO)throw {status:0};
+    try{await Api.visita()}catch(e){if(e&&e.status===401)return} // a visita do dia não derruba a tela se falhar
+    await atualizarCarteira();
+    ECO.indisponivel=false;avisoEconomiaOff(false);
+    renderWallet();
+    if(typeof onEconomiaPronta==="function")await onEconomiaPronta();
+  }catch(e){
+    if(e&&e.status===401)return;
+    ECO.indisponivel=true;renderWallet();avisoEconomiaOff(true);
+  }finally{economiaEmCurso=false}
+}
 
-// Revelação em curso (ex.: abrir pacote): quem está revelando liga holdWallet(true). Enquanto isso o estado
-// (NS, nsSave) muda na hora, mas a carteira não é redesenhada e o aviso de patente fica na fila.
-// holdWallet(false) desenha a carteira e mostra o aviso.
-let walletHold=false,pendingRank=null;
-function showRankToast(r){setTimeout(()=>toast(`🎖️ Nova patente: ${r.name}! ${r.can}`,4200),600)}
-function holdWallet(on){walletHold=!!on;if(walletHold)return;renderWallet();if(pendingRank){const r=pendingRank;pendingRank=null;showRankToast(r)}}
-function addXP(n){const before=rankOf(NS.xp);NS.xp+=n;const after=rankOf(NS.xp);nsSave();if(after!==before){if(walletHold)pendingRank=after;else showRankToast(after)}renderWallet()}
-function addCoins(n,why){NS.coins+=n;nsSave();renderWallet();if(why)toast(`+${n} 🪙 ${why}`)}
 
 // ---- UI compartilhada ----
 function toast(m,ms){let t=document.getElementById("toast");if(!t){t=document.createElement("div");t.id="toast";t.className="toast";document.body.appendChild(t)}
@@ -160,14 +182,15 @@ const compactCoins=new Intl.NumberFormat("pt-BR",{notation:"compact",maximumSign
 function renderWallet(){
   if(walletHold)return;
   const el=document.getElementById("wallet");if(!el)return;
-  const r=rankOf(NS.xp),nx=nextRank(NS.xp);
-  const pct=nx?Math.round((NS.xp-r.xp)/(nx.xp-r.xp)*100):100;
-  const balance=fmt(NS.coins);
-  const progress=`${fmt(NS.xp)} XP${nx?` · ${fmt(nx.xp-NS.xp)} p/ ${nx.name}`:""}`;
-  const description=`${balance} moedas · ${r.name} · ${progress}`;
+  const p=ECO.patente,nx=ECO.proxima_patente;
+  const nome=p?p.nome:"…",cor=escapeHtml(p?p.cor:"#9aa3b2");
+  const pct=!p?0:nx?Math.max(0,Math.min(100,Math.round((ECO.xp-p.xp_minimo)/(nx.xp_minimo-p.xp_minimo)*100))):100;
+  const balance=fmt(ECO.moedas);
+  const progress=`${fmt(ECO.xp)} XP${nx?` · ${fmt(nx.faltam)} p/ ${escapeHtml(nx.nome)}`:""}`;
+  const description=`${balance} moedas · ${nome} · ${progress}`;
   el.innerHTML=`<button class="wl" onclick="openTestPanel()" title="${description}" aria-label="Abrir perfil: ${description}">
-    <span class="wl-c">${icon("coin")}<b>${NS.coins>=10000?compactCoins.format(NS.coins):balance}</b></span>
-    <span class="wl-r"><em style="color:${r.color}">${r.name}</em><i><s style="width:${pct}%;background:${r.color}"></s></i><small>${progress}</small></span></button>`;
+    <span class="wl-c">${icon("coin")}<b>${ECO.moedas>=10000?compactCoins.format(ECO.moedas):balance}</b></span>
+    <span class="wl-r"><em style="color:${cor}">${escapeHtml(nome)}</em><i><s style="width:${pct}%;background:${cor}"></s></i><small>${progress}</small></span></button>`;
   updateAccount();
   if(typeof onWalletRendered==="function")onWalletRendered();
 }
@@ -191,18 +214,14 @@ function submitSignup(){
     if(!NS.acct&&p.length<6)return er.textContent="A senha precisa de pelo menos 6 caracteres.";}
   const isNew=!NS.acct;
   NS.acct={user:u,email:sgM==="email"?e:"",via:sgM,av:{...sgO},chat};
-  if(chat&&NS.xp<RANKS[1].xp)NS.xp=RANKS[1].xp; // quem é do chat já entra com patente maior
   nsSave();closeSignup();renderWallet();
-  if(isNew)toast(chat?"Bem-vindo! Por ser do Xet da live do Cid, você já entra como Banda larga":"Conta criada! Seu gatinho já está no ranking",3200);
+  if(isNew)toast("Conta criada! Seu gatinho já está no ranking",3200);
   if(typeof onAccountChange==="function")onAccountChange();
 }
 // ---- Sessão do servidor (login com Discord): GET /api/eu ----
 let SESSAO=null;
 async function carregarSessao(){
-  try{
-    const r=await fetch("/api/eu",{credentials:"same-origin",cache:"no-store"});
-    SESSAO=r.ok?await r.json():null;
-  }catch(e){SESSAO=null}
+  try{SESSAO=await Api.eu()}catch(e){SESSAO=null;updateAccount();throw e}
   updateAccount();
 }
 async function sairDaConta(){
@@ -217,7 +236,7 @@ function avisoDeLogin(){
     setTimeout(()=>toast(LOGIN_MSG[m]||LOGIN_MSG.erro,5000),400);
   }catch(e){}
 }
-document.addEventListener("DOMContentLoaded",()=>{carregarSessao();avisoDeLogin()});
+document.addEventListener("DOMContentLoaded",()=>{iniciarEconomia();avisoDeLogin()});
 // foto do Discord (URL montada pelo servidor); se não houver ou falhar ao carregar, mostra a inicial do apelido
 function avatarSessaoHTML(u){
   const ini=escapeHtml(String(u.apelido||"?").charAt(0).toUpperCase());
@@ -231,7 +250,7 @@ function contaSessaoHTML(){
 function updateAccount(){
   const el=document.getElementById("acct");if(!el)return;const a=NS.acct;
   if(SESSAO&&SESSAO.usuario){el.innerHTML=contaSessaoHTML();return}
-  el.innerHTML=a?`<button class="sg-acct" onclick="openSignup()"><span class="sg-av">${catSVG(a.av)}</span><span>${escapeHtml(a.user)}<b>Gato nível ${rankIdx(NS.xp)+1}</b></span></button>`:`<div class="account-actions">
+  el.innerHTML=a?`<button class="sg-acct" onclick="openSignup()"><span class="sg-av">${catSVG(a.av)}</span><span>${escapeHtml(a.user)}<b>Gato nível ${nivelPatente()+1}</b></span></button>`:`<div class="account-actions">
     <button type="button" class="account-login" onclick="openLogin()">${icon("login")}Login</button>
   </div>`;
 }
@@ -243,21 +262,18 @@ const needAccount=()=>{if(NS.acct)return false;toast("Crie sua conta (e seu gati
 function openTestPanel(){
   let m=document.getElementById("tp");
   if(!m){m=document.createElement("div");m.id="tp";m.onclick=e=>{if(e.target===m)m.classList.remove("open")};document.body.appendChild(m)}
-  const r=rankOf(NS.xp);
+  const p=ECO.patente||{nome:"…",cor:"#9aa3b2"};
   m.innerHTML=`<div class="tp-box"><button class="sg-x" onclick="document.getElementById('tp').classList.remove('open')">×</button>
    <h3>Seu perfil</h3>
-   <div class="tp-kv"><span>Moedas</span><b>🪙 ${fmt(NS.coins)}</b></div>
-   <div class="tp-kv"><span>XP</span><b>${fmt(NS.xp)}</b></div>
-   <div class="tp-kv"><span>Patente</span><b style="color:${r.color}">${r.name}</b></div>
-   <div class="tp-kv"><span>Sequência de visitas</span><b>${NS.streak} dia(s)</b></div>
+   <div class="tp-kv"><span>Moedas</span><b>🪙 ${fmt(ECO.moedas)}</b></div>
+   <div class="tp-kv"><span>XP</span><b>${fmt(ECO.xp)}</b></div>
+   <div class="tp-kv"><span>Patente</span><b style="color:${escapeHtml(p.cor)}">${escapeHtml(p.nome)}</b></div>
    <div class="tp-kv"><span>Envios aprovados</span><b>${NS.approvedCount}</b></div>
-   <h4>Patentes</h4>${RANKS.map(k=>`<div class="tp-rk ${k===r?'on':''}"><i style="background:${k.color}"></i><b>${k.name}</b><small>${fmt(k.xp)} XP · ${k.can}</small></div>`).join("")}
-   <h4>Modo teste do protótipo</h4>
-   <div class="tp-btns"><button onclick="testDay()">⏭ Avançar 1 dia</button><button onclick="addXP(500);openTestPanel()">+500 XP</button><button onclick="addCoins(300);openTestPanel()">+300 🪙</button><button onclick="if(window.confirmReset!==1){window.confirmReset=1;this.textContent='Clique de novo p/ confirmar';return}localStorage.removeItem(NS_KEY);location.reload()">↺ Zerar tudo</button></div>
-   <p class="tp-note">Avançar o dia libera um novo pacote grátis no álbum.</p></div>`;
+   <h4>Patentes</h4>${RANKS.map(k=>`<div class="tp-rk ${ECO.patente&&k.id===ECO.patente.id?'on':''}"><i style="background:${k.color}"></i><b>${k.name}</b><small>${fmt(k.xp)} XP · ${k.can}</small></div>`).join("")}
+   <div class="tp-btns"><button onclick="if(window.confirmReset!==1){window.confirmReset=1;this.textContent='Clique de novo p/ confirmar';return}localStorage.removeItem(NS_KEY);location.reload()">↺ Limpar dados deste navegador</button></div>
+   <p class="tp-note">Moedas, XP e cartas ficam no servidor, ligados à sua conta do Discord.</p></div>`;
   m.classList.add("open");
 }
-function testDay(){NS.dayOffset=(NS.dayOffset||0)+1;nsSave();location.reload()}
 
 
 // ---- Ícones dos menus (SVG próprios, traço único) ----
@@ -446,7 +462,7 @@ function openPop(anchor,items){
         <div class="sg-fl"><input class="t" id="sgE" type="email" placeholder=" " autocomplete="email"><label for="sgE">E-mail</label></div>
         <div class="sg-fl"><input class="t" id="sgP" type="password" placeholder=" " autocomplete="new-password"><label for="sgP">Senha (mín. 6 caracteres)</label></div>
       </div>
-      <label class="sg-chk"><input type="checkbox" id="sgChat"><span class="bx">${icon("check")}</span><span>Sou do Xet da live do Cid<small>Já entra como Banda larga e pode enviar memes</small></span></label>
+      <label class="sg-chk"><input type="checkbox" id="sgChat"><span class="bx">${icon("check")}</span><span>Sou do Xet da live do Cid<small>Faço parte da comunidade da live</small></span></label>
       <div class="sg-err" id="sgErr"></div>
       <button class="sg-go" onclick="submitSignup()"><span id="sgGoT">Criar conta</span> →</button>
       <p class="sg-note">Protótipo: nenhuma conta real é criada. Avatar, moedas e cartas ficam salvos só neste navegador, e a senha não é guardada.</p>
@@ -589,7 +605,7 @@ function registrarEvento(id,tipo){
 
 // ---- easter-egg: a jujuba escondida ----
 // Todo dia uma jujuba se esconde num cantinho de UMA página do site (início, linha do tempo, Memepédia ou álbum).
-// Quem acha ganha 50 moedas (1 vez por dia). O lugar muda todo dia e é igual para todo mundo.
+// Quem acha vê um aviso (1 vez por dia), sem prêmio por enquanto: a recompensa volta quando o servidor decidir (Fase 3). O lugar muda todo dia e é igual para todo mundo.
 const JUJUBA_SVG='<svg viewBox="0 0 40 40" aria-hidden="true"><defs><radialGradient id="jjg" cx="35%" cy="30%" r="70%"><stop offset="0" stop-color="#fff6"/><stop offset=".25" stop-color="#ff5ca8"/><stop offset="1" stop-color="#c2185b"/></radialGradient></defs><path d="M8 26c0-9 5-17 12-17s12 8 12 17c0 4-5 6-12 6s-12-2-12-6z" fill="url(#jjg)"/><g fill="#fff" opacity=".85"><circle cx="15" cy="20" r="1.1"/><circle cx="22" cy="16" r="1"/><circle cx="26" cy="23" r="1.1"/><circle cx="18" cy="27" r="1"/><circle cx="12" cy="25" r=".9"/></g></svg>';
 // esconderijos que não são redesenhados pela página, cada um com o canto livre (sem cobrir texto)
 const JUJUBA_LUGARES={
@@ -610,9 +626,9 @@ function esconderJujuba(){
   if(getComputedStyle(el).position==="static")el.style.position="relative";
   const b=document.createElement("button");b.className="jjb";b.type="button";b.title="?";b.setAttribute("aria-label","Uma jujuba?");b.innerHTML=JUJUBA_SVG;
   b.style[j.canto[0]]="8px";b.style[j.canto[1]]="6px";
-  b.onclick=ev=>{ev.preventDefault();ev.stopPropagation();NS.jujuba=nsToday();NS.jujubas=(NS.jujubas||0)+1;NS.coins+=50;addXP(10);nsSave();renderWallet();
+  b.onclick=ev=>{ev.preventDefault();ev.stopPropagation();NS.jujuba=nsToday();NS.jujubas=(NS.jujubas||0)+1;nsSave();
     b.classList.add("pego");setTimeout(()=>b.remove(),700);
-    toast(NS.jujubas===1?"🍬 Você achou a jujuba escondida! +50 moedas. Amanhã ela se esconde em outro lugar do site.":`🍬 Jujuba nº ${NS.jujubas} encontrada! +50 moedas.`,4200)};
+    toast(NS.jujubas===1?"🍬 Você achou a jujuba escondida! Amanhã ela se esconde em outro lugar do site.":`🍬 Jujuba nº ${NS.jujubas} encontrada!`,4200)};
   el.appendChild(b);
 }
 if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",()=>setTimeout(esconderJujuba,400));else setTimeout(esconderJujuba,400);

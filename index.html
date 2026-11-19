@@ -3,6 +3,7 @@
 <head>
 <meta charset="utf-8">
 <script src="gate.js?v=20261119u"></script>
+<script src="api-cliente.js?v=20261119y"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>NÃO SALVO — Museu da Internet Brasileira</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -214,10 +215,10 @@ main{display:flex;flex-direction:column}
 <div class="modal" id="modal" onclick="if(event.target===this)closeM()"><div class="box" id="box"></div></div>
 
 <form name="feedback" data-netlify="true" netlify-honeypot="bot-field" hidden><input name="tipo"><textarea name="msg"></textarea><input name="contato"><input name="pagina"><input name="bot-field"></form>
-<script src="common.js?v=20261119v"></script>
+<script src="common.js?v=20261119y"></script>
 <script src="data.js?v=20261119q"></script>
 <script src="player.js?v=20261119n"></script>
-<script src="viewer.js?v=20261119v"></script>
+<script src="viewer.js?v=20261119x"></script>
 <script src="alertas.js?v=20261119n"></script>
 <script>
 renderHeader("inicio",{search:true,sub:[]});
@@ -260,7 +261,7 @@ const $=id=>document.getElementById(id);
 const card=(a,big)=>`<button class="card" onclick="openM('${a.id}')">
   <div class="thumb" style="background:${grad(a.t)}"><i>${a.y}</i>${art(a)}${PLAY}</div>
   <div class="meta"><h3>${escapeHtml(a.t)}</h3>${big?`<small>${a.c}${a.mine?" · enviado por você":""}</small><br>`:""}<span class="tag ${a.r}">${a.r}</span></div></button>`;
-const addCard=y=>`<button class="card add" onclick="openSubmit('${y}')"><div class="thumb"><span>＋</span></div><div class="meta"><h3>Salvar um viral de ${y}</h3><small>+${REWARD.approved} moedas se aprovado</small></div></button>`;
+const addCard=y=>`<button class="card add" onclick="openSubmit('${y}')"><div class="thumb"><span>＋</span></div><div class="meta"><h3>Salvar um viral de ${y}</h3><small>enviar para a moderação</small></div></button>`;
 
 const SUB_ITEMS=[
   {k:"tl",ic:"timeline",label:"Linha do tempo",href:"linha-do-tempo.html"},
@@ -430,16 +431,17 @@ function dupCheck(url,name){
 // ---- Enviar meme ----
 function openSubmit(y){
   if(needAccount())return;
+  if(!economiaPronta())return;
   $("box").className="box form";
-  if(rankIdx(NS.xp)<1){
+  if(nivelPatente()<1){
     $("box").innerHTML=`<div class="body lock"><div class="big">${icon("lock","big")}</div><h3>Enviar meme é a partir de <span style="color:${RANKS[1].color}">Banda larga</span></h3>
-    <p>Pra não virar bagunça, quem acabou de chegar ainda não envia virais. Você precisa de <b>${fmt(RANKS[1].xp)} XP</b> (tem ${fmt(NS.xp)}).<br>Ganhe XP visitando todo dia (+${XP_GAIN.visit}), abrindo pacotes (+${XP_GAIN.pack}) e completando o álbum. Quem é do Xet da live do Cid já entra como Banda larga.</p>
-    <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap"><a class="btn" href="album.html" style="text-decoration:none">${icon("pack")}ABRIR PACOTE</a><button class="btn ghost" onclick="openSignup()">Sou do Xet</button><button class="btn ghost" onclick="closeM()">Fechar</button></div></div>`;
+    <p>Pra não virar bagunça, quem acabou de chegar ainda não envia virais. Você precisa de <b>${fmt(RANKS[1].xp)} XP</b> (tem ${fmt(ECO.xp)}).<br>Ganhe XP visitando todo dia, abrindo pacotes e completando o álbum.</p>
+    <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap"><a class="btn" href="album.html" style="text-decoration:none">${icon("pack")}ABRIR PACOTE</a><button class="btn ghost" onclick="closeM()">Fechar</button></div></div>`;
     $("modal").classList.add("open");return;
   }
   const yrs=[];for(let i=2026;i>=1998;i--)yrs.push(i);
   $("box").innerHTML=`<div class="body f"><h2 class="disp">${icon("cloud","h")}Salvar viral no acervo</h2>
-   <p style="margin:4px 0 0">Se o link ou o nome já existir, não abre ticket novo. Aprovado pela moderação = <b>+${REWARD.approved} moedas</b> e +${XP_GAIN.approved} XP.</p>
+   <p style="margin:4px 0 0">Se o link ou o nome já existir, não abre ticket novo.</p>
    <label>Link original (YouTube, TikTok, X, Instagram…)</label><input id="sU" placeholder="https://www.youtube.com/watch?v=…" oninput="liveCheck()">
    <label>Nome do meme / viral</label><input id="sN" placeholder="ex: Luiza que está no Canadá" oninput="liveCheck()">
    <div class="two"><div><label>Ano que viralizou</label><select id="sY">${yrs.map(v=>`<option ${String(v)===String(y||"")?"selected":""}>${v}</option>`).join("")}</select></div>
@@ -469,23 +471,25 @@ function sendSub(){
   NS.subs.push({id:"s"+Date.now(),t,url,key:normUrl(url),y,c,d:d||"Enviado pela comunidade.",e:CAT_EMO[c],status:"pending",ts:Date.now(),ticket});nsSave();
   closeM();toast(`Envio recebido! Ticket ${ticket} na fila da moderação ⏳`,3000);scheduleApprovals();
 }
-function approveMine(s){s.status="approved";s.approvedAt=nsToday();s.by=null;NS.approvedCount++;NS.coins+=REWARD.approved;nsSave();addXP(XP_GAIN.approved);
-  buildAll();renderAll();toast(`“${s.t}” foi aprovado pela moderação: +${REWARD.approved} moedas e +${XP_GAIN.approved} XP`,3800)}
+function approveMine(s){s.status="approved";s.approvedAt=nsToday();s.by=null;NS.approvedCount++;nsSave();
+  buildAll();renderAll();toast(`“${s.t}” foi aprovado pela moderação`,3800)}
 function scheduleApprovals(){NS.subs.filter(s=>s.status==="pending").forEach(s=>{const wait=Math.max(1500,8000-(Date.now()-s.ts));clearTimeout(s._t);setTimeout(()=>{const x=NS.subs.find(z=>z.id===s.id);if(x&&x.status==="pending")approveMine(x)},wait)})}
 
 // ---- Salvar link de viral antigo (+5) ----
 function saveOldLink(id,u){
-  if(rankIdx(NS.xp)<2)return`<div class="chk bad">Salvar link é a partir da patente Colaborador (${fmt(RANKS[2].xp)} XP). Você tem ${fmt(NS.xp)} XP.</div>`;
+  if(!ECO.pronto)return`<div class="chk warn">Carregando a sua patente… tente de novo em instantes.</div>`;
+  if(nivelPatente()<2)return`<div class="chk bad">Salvar link é a partir da patente Colaborador (${fmt(RANKS[2].xp)} XP). Você tem ${fmt(ECO.xp)} XP.</div>`;
   const key=normUrl(u);
   if(!key||!/^https?:\/\//i.test(u)&&!u.includes("."))return`<div class="chk bad">Cole um link válido.</div>`;
   const hit=pool().find(x=>x.key&&x.key===key);
   if(hit)return`<div class="chk bad">Esse link já está salvo em <b>${escapeHtml(hit.t)}</b>.</div>`;
-  NS.links[id]=u;NS.coins+=REWARD.oldLink;nsSave();addXP(XP_GAIN.oldLink);buildAll();renderAll();openM(id);toast(`Link salvo! +${REWARD.oldLink} moedas`);return"";
+  NS.links[id]=u;nsSave();buildAll();renderAll();openM(id);toast("Link salvo!");return"";
 }
 
 // ---- Moderação: patente maior modera patente menor ----
 function openMod(){
-  const r=rankIdx(NS.xp),canMod=r>=3;
+  if(!economiaPronta())return;
+  const r=nivelPatente(),canMod=r>=3;
   const mine=NS.subs.slice().reverse();
   const qs=SEED_QUEUE.map(q=>{const st=NS.modDone[q.id];const best=ALL.filter(a=>!a.by||a.id!==q.id).map(a=>({a,s:sim(q.t,a.t)})).sort((x,y)=>y.s-x.s)[0];
     const flag=best&&best.s>=.55?`<div class="flag">${icon("alert","in")}Possível duplicata de “${escapeHtml(best.a.t)}” (${Math.round(best.s*100)}% parecido)</div>`:"";
@@ -494,8 +498,8 @@ function openMod(){
      <div class="by">Ticket #${300+parseInt(q.id.slice(1))} · por <b>${q.by}</b> <span style="color:${RANKS[q.rank].color}">(${RANKS[q.rank].name})</span> · ${escapeHtml(normUrl(q.url))}</div><p>${escapeHtml(q.d)}</p>${flag}
      <div class="act">${st?`<span class="${st==='ok'?'st-approved':'st-pending'}">${st==='ok'?'Aprovado por você':'Recusado por você'}</span>`:canMod&&lower?`<button class="btn" onclick="moderate('${q.id}','ok')">${icon("check")}Aprovar</button><button class="btn ghost" onclick="moderate('${q.id}','no')">${icon("xmark")}Recusar${best&&best.s>=.55?" (duplicata)":""}</button>`:`<span style="font-size:12px;color:var(--mut)">${icon("lock","in")}${canMod?"Só quem tem patente maior que a do autor pode moderar.":`Moderação é a partir de <b style="color:${RANKS[3].color}">Moderador</b> (${fmt(RANKS[3].xp)} XP).`}</span>`}</div></div>`}).join("");
   $("box").className="box";
-  $("box").innerHTML=`<div class="body"><h2 class="disp">${icon("moderation","h")}Fila de moderação</h2><p>Quem tem patente mais alta modera quem tem patente mais baixa. Cada moderação vale +15 XP.</p>
-  ${mine.length?`<h4 class="h4">SEUS ENVIOS</h4>${mine.map(s=>`<div class="mine"><span>${icon(CAT_IC[s.c]||"video","in")}${escapeHtml(s.t)} <small>(${s.ticket})</small></span><span class="st-${s.status}">${s.status==="approved"?"aprovado · +"+REWARD.approved+" moedas":"aguardando moderação"}</span></div>`).join("")}<div style="height:14px"></div>`:""}
+  $("box").innerHTML=`<div class="body"><h2 class="disp">${icon("moderation","h")}Fila de moderação</h2><p>Quem tem patente mais alta modera quem tem patente mais baixa.</p>
+  ${mine.length?`<h4 class="h4">SEUS ENVIOS</h4>${mine.map(s=>`<div class="mine"><span>${icon(CAT_IC[s.c]||"video","in")}${escapeHtml(s.t)} <small>(${s.ticket})</small></span><span class="st-${s.status}">${s.status==="approved"?"aprovado":"aguardando moderação"}</span></div>`).join("")}<div style="height:14px"></div>`:""}
   ${linksQ(canMod)}
   ${wikiQ(canMod)}
   <h4 class="h4">ENVIOS DA COMUNIDADE</h4>${qs}
@@ -521,13 +525,13 @@ function moderarWiki(id,v){const x=(NS.wikiSugs||[]).find(z=>z.id===id);if(!x)re
   if(v==="ok"){NS.wiki=NS.wiki||{};(NS.wiki[x.meme]=NS.wiki[x.meme]||{})[x.campo]={texto:x.texto,autor:x.by,fonte:x.fonte}}
   nsSave();openMod()}
 function moderarLink(id,v){const x=(NS.linkSugs||[]).find(z=>z.id===id);if(!x)return;x.status=v;
-  if(v==="ok"){NS.links[x.meme]="https://youtu.be/"+x.yt;if(NS.acct&&x.by===NS.acct.user){NS.coins+=REWARD.oldLink;addXP(XP_GAIN.oldLink)}}
-  nsSave();addXP(15);buildAll();renderAll();openMod();toast(v==="ok"?"Link aprovado: o vídeo entrou no acervo.":"Link recusado.")}
-function moderate(id,v){NS.modDone[id]=v;NS.modDoneAt=NS.modDoneAt||{};NS.modDoneAt[id]=nsToday();nsSave();addXP(15);buildAll();renderAll();openMod();toast(v==="ok"?"Aprovado e adicionado ao acervo":"Recusado")}
+  if(v==="ok"){NS.links[x.meme]="https://youtu.be/"+x.yt;}
+  nsSave();buildAll();renderAll();openMod();toast(v==="ok"?"Link aprovado: o vídeo entrou no acervo.":"Link recusado.")}
+function moderate(id,v){NS.modDone[id]=v;NS.modDoneAt=NS.modDoneAt||{};NS.modDoneAt[id]=nsToday();nsSave();buildAll();renderAll();openMod();toast(v==="ok"?"Aprovado e adicionado ao acervo":"Recusado")}
 
 // ---- Ranking da galera ----
 function openRank(){
-  const me=NS.acct?[[NS.acct.user,NS.xp,NS.approvedCount,Object.keys(NS.owned).length,-1,true]]:[];
+  const me=NS.acct?[[NS.acct.user,ECO.xp,NS.approvedCount,(ECO.cartas&&ECO.cartas.distintas)||0,-1,true]]:[];
   const list=[...RANK_USERS,...me].sort((a,b)=>b[1]-a[1]);
   const ic=list.findIndex(u=>u[0]==="Cid Cidoso");if(ic>0)list.unshift(list.splice(ic,1)[0]); // o Cid é sempre o primeiro
   $("box").className="box";
