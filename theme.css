@@ -310,3 +310,41 @@ a[onclick]:not([href]):focus-visible{outline:2px solid var(--brand);outline-offs
   .tsw .lb{display:none}
   .wl-r{display:none}
 }
+/* rodapé: feedback separado da faixa (nem grudado, nem longe) */
+.ft-wrap{margin-bottom:0;padding-bottom:22px}
+.ft-band-in{padding-top:30px}
+.nsft{margin-top:56px}
+/* redes sociais */
+.soc{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:22px}
+.soc-t{font-size:11px;letter-spacing:1.4px;text-transform:uppercase;color:#ffd23f;font-weight:800;margin-right:4px;width:100%}
+.sb{width:44px;height:44px;border-radius:12px;display:grid;place-items:center;color:#fff;transition:transform .15s,box-shadow .15s;box-shadow:0 4px 12px #0004}
+.sb svg{width:22px;height:22px}
+.sb:hover{transform:translateY(-3px)}
+.sb.s-tw{background:#9146FF}
+.sb.s-x{background:#000;box-shadow:0 0 0 1px #ffffff30,0 4px 12px #0004}
+.sb.s-ig{background:radial-gradient(circle at 30% 107%,#fdf497 0%,#fdf497 5%,#fd5949 45%,#d6249f 60%,#285AEB 90%)}
+.sb.s-yt{background:#FF0000;cursor:pointer}
+.ytw{position:relative}
+.ytpop{position:absolute;left:0;bottom:54px;z-index:5;width:290px;background:#fff;color:#111;border-radius:16px;padding:10px;box-shadow:0 18px 40px #0007;display:none}
+.ytw.open .ytpop{display:block;animation:sgIn .2s ease}
+.ytpop b{display:block;font-size:11px;letter-spacing:1px;text-transform:uppercase;color:#666;padding:4px 8px 8px}
+.ytpop a{display:flex;gap:10px;align-items:center;padding:8px;border-radius:10px;color:#111;text-decoration:none}
+.ytpop a:hover{background:#f2f2f2}
+.yi{width:36px;height:36px;border-radius:50%;background:#FF0000;color:#fff;display:grid;place-items:center;flex:none}.yi svg{width:18px;height:18px}
+.ytpop em{display:block;font-style:normal;font-weight:700;font-size:13.5px}
+.ytpop small{display:block;font-size:11.5px;color:#666}
+@media(max-width:860px){.nsft{margin-top:36px}.ft-wrap{padding-bottom:18px}.ytpop{width:min(290px,calc(100vw - 40px))}}
+/* celular: avisos no topo (não cobrem botões nem modais) e popup do YouTube como folha */
+@media(max-width:760px){
+  #toast{top:calc(env(safe-area-inset-top,0px) + 12px)!important;bottom:auto!important;left:12px!important;right:12px!important;transform:none!important;max-width:none!important;text-align:center}
+  .ytw{position:static}
+  .ytpop{position:fixed;left:12px;right:12px;bottom:12px;width:auto;z-index:80;padding:12px}
+  .ytpop a{padding:12px 8px}
+  .sb{width:48px;height:48px}
+}
+/* ícones sociais: não herdam a regra de botões do aviso legal no celular */
+.ft-legal .soc .sb{display:grid;place-items:center;width:44px;height:44px;min-height:0;padding:0}
+.ft-legal .soc .sb svg{width:22px;height:22px;flex:none}
+.ft-legal .soc .ytw{display:inline-block}
+.ytpop svg{width:18px;height:18px}
+@media(max-width:760px){.ft-legal .soc .sb{width:48px;height:48px}}

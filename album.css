@@ -178,4 +178,4 @@
 .rings i{display:block;width:44px;height:12px;border-radius:99px;background:linear-gradient(180deg,#f4f7fb,#b7c0cf 55%,#7d8798);box-shadow:0 2px 3px #0005,inset 0 1px 0 #fff}
 @media(max-width:720px){.rings{left:6px;width:30px}.rings i{width:30px;height:9px}}
 .layout{padding-bottom:120px}
-@media(max-width:720px){.layout>.album{order:-1}.layout>.det{order:0}.layout>.side{order:1}#toast{bottom:96px!important}}
+@media(max-width:720px){.layout>.album{order:-1}.layout>.det{order:0}.layout>.side{order:1}}

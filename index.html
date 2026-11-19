@@ -8,8 +8,8 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preconnect" href="https://i.ytimg.com">
 <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Inter:wght@400;500;600;700&family=Baloo+2:wght@700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="theme.css?v=20261118d">
-<link rel="stylesheet" href="viewer.css?v=20261118d">
+<link rel="stylesheet" href="theme.css?v=20261118e">
+<link rel="stylesheet" href="viewer.css?v=20261118e">
 <script>try{var t=localStorage.getItem("ns_theme")}catch(e){}document.documentElement.dataset.theme=t==="dark"?"dark":"light"</script>
 <style>
 main{padding:24px 28px 60px;max-width:1280px;margin:0 auto}
@@ -159,7 +159,7 @@ main{display:flex;flex-direction:column}
 .top,.cur{grid-template-columns:1fr}.stage{grid-template-columns:1fr}.side{display:none}.facts{grid-template-columns:1fr 1fr}.rail{grid-template-columns:1fr 1fr}.rail .card:nth-child(3){display:none}main{padding:16px 14px 40px}}
 @media(max-width:600px){.f .two{grid-template-columns:1fr}.today{grid-template-columns:110px 1fr}.box .body{padding:16px}}
 </style>
-<link rel="stylesheet" href="home.css?v=20261118d">
+<link rel="stylesheet" href="home.css?v=20261118e">
 </head>
 <body class="home">
 <div class="rays-wrap" aria-hidden="true"><div class="rays" id="rays"></div></div>
@@ -213,10 +213,10 @@ main{display:flex;flex-direction:column}
 <div class="modal" id="modal" onclick="if(event.target===this)closeM()"><div class="box" id="box"></div></div>
 
 <form name="feedback" data-netlify="true" netlify-honeypot="bot-field" hidden><input name="tipo"><textarea name="msg"></textarea><input name="contato"><input name="pagina"><input name="bot-field"></form>
-<script src="common.js?v=20261118d"></script>
-<script src="data.js?v=20261118d"></script>
-<script src="player.js?v=20261118d"></script>
-<script src="viewer.js?v=20261118d"></script>
+<script src="common.js?v=20261118e"></script>
+<script src="data.js?v=20261118e"></script>
+<script src="player.js?v=20261118e"></script>
+<script src="viewer.js?v=20261118e"></script>
 <script>
 renderHeader("inicio",{search:true,sub:[]});
 document.querySelectorAll("[data-ic]").forEach(e=>e.outerHTML=icon(e.dataset.ic));
@@ -237,7 +237,7 @@ const SEED_QUEUE=[
  {id:"q5",t:"Nana Gouvêa posando no furacão",y:2012,c:"Fotos",by:"fotologueira",rank:1,url:"https://www.instagram.com/p/exemploNana/",d:"Ensaio de fotos em Nova York no meio da passagem de um furacão."}
 ];
 const RANK_USERS=[["Cid Cidoso",15420,247,104,2],
- ["SePPZAO",9640,231,101,4,0,"Moderador"],["Riba",9310,214,99,11],["Subversivo",8870,198,97,14],["ad_moura",8420,187,95,16],["Dev_Gon",8050,176,94,15],["Gasanzin",7610,163,92,13],
+ ["SePPZAO",9640,231,101,4,0,"Moderador"],["Riba",9310,214,99,11],["Subversivo",8870,198,97,14],["yorkshiremaconhado",8640,192,96,22],["ad_moura",8420,187,95,16],["Dev_Gon",8050,176,94,15],["Gasanzin",7610,163,92,13],
  ["AteuDeGoianinha",7180,151,90,12],["Rulsso",6720,139,87,17],["cigarra_eletronica",6290,127,85,18],["maffeimafia",5830,114,82,19],["genery3",5360,102,80,20],["Velma",4980,93,78,21],
  ["ipsilva",4860,88,76,0],["bruninhotv",4720,84,74,1],["viralizador",4580,79,71,3],["faqo",4390,72,69,5],["lendariin",4180,66,64,6],["gatoNostalgico",2950,41,52,7],["fotologueira",420,6,23,8],["novato_2012",60,0,9,9]];
 
@@ -292,7 +292,7 @@ function renderPulse(){
   const up=[...sc].sort((p,q)=>q.h-p.h).slice(0,5),dn=[...sc].sort((p,q)=>p.h-q.h).slice(0,5);
   const li=(h,u)=>`<button class="sd-i ${u?"up":"dn"}" onclick="openM('${h.x.id}')">${icon(u?"arrowUp":"arrowDown")}<span><u>${escapeHtml(h.x.t)}</u><small>${u?"+"+Math.round(40+h.h*240):"−"+Math.round(10+(1-h.h)*60)}%</small></span></button>`;
   $("hot").innerHTML=`<div class="sd-h"><span class="sd-logo"><span class="su">sobe</span><i>.</i><span class="de">desc<span class="ee">e${HORNS}</span></span></span><span class="sd-clip">${icon("clipboard")}</span></div>
-    <div class="sd"><div><h6 class="up">${icon("arrowUp")}sobe</h6>${up.map(h=>li(h,1)).join("")}</div><div><h6 class="dn">${icon("arrowDown")}<span class="de">desc<span class="ee">e${HORNS}</span></span></h6>${dn.map(h=>li(h,0)).join("")}</div></div>`;
+    <div class="sd"><div><h6 class="up">${icon("arrowUp")}sobe</h6>${up.map(h=>li(h,1)).join("")}</div><div><h6 class="dn">${icon("arrowDown")}desce</h6>${dn.map(h=>li(h,0)).join("")}</div></div>`;
   const lat=[...ALL].sort((p,q)=>(q.added||"").localeCompare(p.added||"")).slice(0,5);
   $("latest").innerHTML=lat.map(x=>{const days=Math.max(0,Math.round((new Date(t)-new Date(x.added))/864e5));return`<button class="row lt" onclick="openM('${x.id}')"><span class="em" style="background:${grad(x.t)}">${art(x)}</span><span>${escapeHtml(x.t)}<small>${x.y} · ${x.mine?"enviado por você":x.by?"por "+x.by:"acervo"}</small></span><em class="nw">${days===0?"hoje":days===1?"ontem":"há "+days+"d"}</em></button>`}).join("");
 }
@@ -310,9 +310,11 @@ function renderCur(){
   const el=$("cur");el.classList.remove("fade");void el.offsetWidth;el.classList.add("fade");
   const items=ALL.filter(a=>yKey(a.y)===cur).sort((a,b)=>b.views-a.views).slice(0,3);
   const fill=items.map(a=>card(a));while(fill.length<3)fill.push(addCard(cur==="2020+"?2020:cur));
-  el.innerHTML=`<div class="cur-t"><h2 class="disp">${cur}</h2><div class="lema">${d.lema}</div>
-    <p>${d.txt}</p><button class="btn" onclick="setView('ano');$('browse').scrollIntoView({behavior:'smooth'})">Explorar ${cur} →</button></div>
-    <div class="mini">${fill.join("")}</div>`;
+  const exp=`setView('ano');$('browse').scrollIntoView({behavior:'smooth'})`;
+  el.innerHTML=`<div class="cur-t"><div class="cur-h"><button class="mnav" ${p?`onclick="go('${p}')"`:"disabled"} aria-label="Ano anterior">‹</button><div><h2 class="disp">${cur}</h2><div class="lema">${d.lema}</div></div><button class="mnav" ${n?`onclick="go('${n}')"`:"disabled"} aria-label="Próximo ano">›</button></div>
+    <p>${d.txt}</p><button class="btn dexp" onclick="${exp}">Explorar ${cur} →</button></div>
+    <div class="mini">${fill.join("")}</div>
+    <div class="mfoot"><span class="mdots">${KEYS.map(k=>`<i class="${k===cur?"on":""}"></i>`).join("")}</span><button class="btn mexp" onclick="${exp}">Ver tudo de ${cur} →</button></div>`;
 }
 function renderGrid(){
   let list=ALL,title="Todos os registros";
@@ -325,6 +327,9 @@ function renderGrid(){
   $("chips").innerHTML=cats.map(c=>`<button class="chip ${c===cat?'on':''}" onclick="cat='${c}';renderGrid()">${c==="Todas"?icon("all","in")+c:icon(CAT_IC[c]||"video","in")+c}</button>`).join("");
   $("grid").innerHTML=list.length?list.map(a=>card(a,true)).join(""):`<p style="color:var(--mut)">Nada por aqui ainda. Que tal ser o primeiro a salvar? <button class="btn" style="margin-left:8px" onclick="openSubmit()">＋ Enviar vídeo</button></p>`;
 }
+(function swipe(){let x0=null,y0=0;const c=()=>document.getElementById("cur");
+  document.addEventListener("touchstart",e=>{if(innerWidth>860||!c()||!c().contains(e.target)||e.target.closest(".mini"))return;x0=e.touches[0].clientX;y0=e.touches[0].clientY},{passive:true});
+  document.addEventListener("touchend",e=>{if(x0===null)return;const dx=e.changedTouches[0].clientX-x0,dy=e.changedTouches[0].clientY-y0;x0=null;if(Math.abs(dx)<50||Math.abs(dy)>Math.abs(dx))return;const i=KEYS.indexOf(cur),k=KEYS[i+(dx<0?1:-1)];if(k)go(k)},{passive:true});})();
 function go(y,scroll){cur=String(y);view="ano";query="";$("q").value="";cat="Todas";renderNav();renderYears();renderCur();renderGrid();if(scroll)$("tl").scrollIntoView({behavior:"smooth"})}
 
 // ---- Modal do meme com o player da época ----
