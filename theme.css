@@ -407,6 +407,7 @@ a[onclick]:not([href]):focus-visible{outline:2px solid var(--brand);outline-offs
   .hd .sub .pop{position:static;box-shadow:none;max-height:none;margin-inline:8px}
   .account-tools{flex-wrap:wrap;border-top:1px solid var(--line);margin-top:8px;padding:8px 4px 0;justify-content:space-between}
   .wl-r{display:none}
+}
 /* fala.que.eu.te.escuto: feedback + contribuir com ideias */
 .fq{max-width:760px;cursor:default}
 .fq:hover{transform:none;box-shadow:0 10px 26px #0000002e}
