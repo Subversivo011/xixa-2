@@ -27,24 +27,25 @@ function playerHTML(m,bare){
   if(e.id===4) under=`<div class="u4"><h4>${escapeHtml(m.t)}</h4><div class="u4r"><span class="av4">🐱</span><span class="ch">acervo_naosalvo</span><button class="sub4">Inscrever-se <em>${fmt(Math.round(likes*3))}</em></button><b class="vw">${views} visualizações</b></div><div class="u4l"><span>👍 ${fmt(likes)}</span><span>👎 ${fmt(dis)}</span><i><s style="width:94%"></s></i></div></div>`;
   if(e.id===5) under=`<div class="u5"><h4>${escapeHtml(m.t)}</h4><div class="u5r"><span class="av4">🐱</span><span class="ch">acervo_naosalvo<small>${fmt(Math.round(likes*3))} inscritos</small></span><button class="sub5">Inscrever-se</button><span class="pill">👍 ${fmt(likes)} │ 👎</span><span class="pill">↗ Compartilhar</span></div><div class="u5d"><b>${views} visualizações · há ${yearsAgo} anos</b></div></div>`;
   if(bare)under="";
-  return `<div class="vp vp-e${e.id}${bare?" bare":""}">
+  return `<div class="vp vp-e${e.id}${bare?" bare":""}${m.yt?"":" vp-noyt"}">
    ${e.id===0&&!bare?`<div class="vp-title"><span>▶ Reproduzindo: ${slug}.wmv</span><span>_ □ ×</span></div>`:""}
    <div class="vp-stage">
     <div class="vp-screen" style="background:${vpGrad(m.t)}">${m.yt?`<img class="vp-thumb" src="https://i.ytimg.com/vi/${m.yt}/hqdefault.jpg" alt="" onerror="this.remove()">`:m.img?`<img class="vp-thumb" src="${escapeHtml(m.img)}" alt="" onerror="this.remove()">`:""}${m.yt||m.img?"":`<span class="vp-emo">${m.e}</span>`}<div class="vp-noise"></div>
       ${m.yt?`<button class="vp-big" data-a="play">▶</button>`:`<div class="vp-off"><b>Vídeo original fora do ar</b><small>Conhece o link no YouTube? Mande pelo campo abaixo do vídeo.</small></div>`}<div class="vp-buf"><span></span>${e.id<=1?"Carregando… (conexão discada?)":"Carregando…"}</div><div class="vp-end"></div></div>
-    <div class="vp-bar"><button class="vp-pp" data-a="play">▶</button><div class="vp-track"><i class="vp-load"></i><i class="vp-prog"></i><b class="vp-knob"></b></div>
-      <span class="vp-time">0:00 / ${m.yt?"--:--":mmss(m.dur||47)}</span>${q?`<span class="vp-q">${q}</span>`:""}<button class="vp-ic vp-mute" title="Som">🔊</button>${e.id>=4?'<span class="vp-ic">⚙</span>':''}<button class="vp-ic vp-fs" title="Tela cheia">⛶</button></div>
+    <div class="vp-bar">${m.yt?`<button class="vp-pp" data-a="play">▶</button>`:""}<div class="vp-track"><i class="vp-load"></i><i class="vp-prog"></i><b class="vp-knob"></b></div>
+      <span class="vp-time">${m.yt?"0:00 / --:--":"--:--"}</span>${q?`<span class="vp-q">${q}</span>`:""}${m.yt?`<button class="vp-ic vp-mute" title="Som">🔊</button>`:""}${e.id>=4?'<span class="vp-ic">⚙</span>':''}${m.yt?`<button class="vp-ic vp-fs" title="Tela cheia">⛶</button>`:""}</div>
    </div>${under}
    ${bare?"":`<div class="vp-era">📼 ${e.name} · ${e.note}${m.yt?` · <a class="vp-ytl" href="https://www.youtube.com/watch?v=${m.yt}" target="_blank" rel="noopener">Assistir no YouTube ↗</a>`:" · vídeo original ainda não encontrado"}</div>`}</div>`;
 }
 
-// reprodução: vídeo real do YouTube dentro do visual da época (quando o meme tem link);
-// sem link, simula a reprodução com a arte do meme
+// reprodução: vídeo real do YouTube dentro do visual da época (quando o meme tem link).
+// Sem link não há o que tocar: o player fica parado com o aviso "fora do ar".
 function initPlayer(root,m,related,onPick,hooks){
+  if(!m.yt)return {stop:()=>{}};
   hooks=hooks||{};
   const e=eraOf(m.y),$q=s=>root.querySelector(s);
   const prog=$q(".vp-prog"),knob=$q(".vp-knob"),time=$q(".vp-time"),scr=$q(".vp-screen"),pp=$q(".vp-pp"),load=$q(".vp-load");
-  let t=0,dur=m.yt?0:(m.dur||47),playing=false,started=false,muted=false;
+  let t=0,dur=0,playing=false,started=false,muted=false;
   const draw=()=>{const p=dur?t/dur*100:0;prog.style.width=p+"%";knob.style.left=p+"%";time.textContent=mmss(t)+" / "+(dur?mmss(dur):"--:--")};
   const setPlaying=v=>{playing=v;scr.classList.toggle("playing",v);pp.textContent=v?"❚❚":(scr.classList.contains("ended")?"↻":"▶")};
   function endScreen(){setPlaying(false);scr.classList.add("ended");pp.textContent="↻";
@@ -88,15 +89,6 @@ function initPlayer(root,m,related,onPick,hooks){
     api={play:()=>{if(!started){if(hooks.beforeStart&&!hooks._ok){started=true;hooks.beforeStart().then(()=>{hooks._ok=1;started=false;api.play()});return}return start()}send("playVideo")},pause:()=>send("pauseVideo"),seek:s=>{t=s;draw();send("seekTo",[s,true])},
       mute:v=>send(v?"mute":"unMute"),
       stop:()=>{removeEventListener("message",onMsg);clearTimeout(timer);clearInterval(poke);send("pauseVideo");if(ifr){ifr.remove();ifr=null}}};
-  } else {
-    // ---- simulação (sem vídeo original) ----
-    let raf=0,last=0;
-    const tick=now=>{if(!playing)return;t=Math.min(dur,t+(now-last)/1000*4);last=now;draw();if(t>=dur){endScreen();return}raf=requestAnimationFrame(tick)};
-    const go=()=>{setPlaying(true);last=performance.now();raf=requestAnimationFrame(tick)};
-    api={play:()=>{if(t>=dur){t=0;scr.classList.remove("ended")}
-        if(!started&&hooks.beforeStart&&!hooks._ok){started=true;hooks.beforeStart().then(()=>{hooks._ok=1;started=false;api.play()});return}
-        if(!started){hooks.onPlay&&hooks.onPlay();started=true;scr.classList.add("buffering");load.style.width="100%";setTimeout(()=>{scr.classList.remove("buffering");go()},e.id<=1?1600:e.id<=3?700:250);return}go()},
-      pause:()=>{setPlaying(false);cancelAnimationFrame(raf)},seek:s=>{t=s;draw()},mute:()=>{},stop:()=>{cancelAnimationFrame(raf);playing=false}};
   }
   const toggle=()=>{if(scr.classList.contains("ended")&&!scr.classList.contains("ytfail")){scr.classList.remove("ended");api.seek(0);api.play();return}playing?api.pause():api.play()};
   root.querySelectorAll(".vp-big,.vp-pp").forEach(b=>b.onclick=ev=>{ev.stopPropagation();toggle()});
@@ -113,8 +105,7 @@ const PLAYER_CSS=`
 .vp-stage{position:relative}
 .vp-screen{position:relative;aspect-ratio:16/9;display:grid;place-items:center;overflow:hidden;cursor:pointer;background:#000}
 .vp-emo{font-size:clamp(60px,12vw,110px);filter:drop-shadow(0 6px 16px #000a);transition:filter .3s}
-.vp-screen.playing .vp-emo{animation:vpb 1.1s ease-in-out infinite}
-@keyframes vpb{0%,100%{transform:translateY(0) rotate(-3deg)}50%{transform:translateY(-10px) rotate(3deg) scale(1.06)}}
+.vp-noyt .vp-screen{cursor:default}.vp-noyt .vp-track{opacity:.4;cursor:default}
 .vp-noise{position:absolute;inset:0;pointer-events:none;opacity:0}
 .vp-off{position:absolute;z-index:4;left:50%;top:50%;transform:translate(-50%,-50%);max-width:82%;text-align:center;background:#000c;color:#fff;padding:12px 16px;border-radius:10px;font:13px Arial,sans-serif;display:flex;flex-direction:column;gap:4px}.vp-off small{opacity:.8;font-size:11.5px}
 .vp-big{position:absolute;width:74px;height:52px;border-radius:14px;background:#000a;color:#fff;font-size:24px;border:0;cursor:pointer}
