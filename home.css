@@ -227,3 +227,11 @@ button:hover>.thumb>.play,button:hover>.ct>.play,.tthumb:hover>.play,.card:hover
 :root[data-theme="dark"] .sd-logo .su{text-shadow:0 0 14px #2a8fe066}
 :root[data-theme="dark"] .sd-logo .de{text-shadow:0 0 14px #ff3b2f88}
 :root[data-theme="dark"] .sd-logo i{text-shadow:none}
+
+/* celular: anos com bolinha sobre a linha, igual ao desktop (substitui as pílulas) */
+@media(max-width:860px){
+  .timeline .years{gap:0;padding:14px 16px 6px;align-items:flex-end;justify-content:flex-start}
+  .timeline .y{flex:0 0 auto;min-width:60px;min-height:48px;padding:0 6px 22px;border-radius:0;background:none;box-shadow:none;font-size:14px;color:var(--mut)}
+  .timeline .y::after{display:block}
+  .timeline .y.on{font-size:26px;background:none;box-shadow:none;color:var(--brand-ink)}
+}
