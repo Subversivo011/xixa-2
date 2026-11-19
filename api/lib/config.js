@@ -13,3 +13,13 @@ export const segredo = (nome, env = process.env) => {
   const arq = env[nome + '_FILE'];
   return arq ? readFileSync(arq, 'utf8').trim() : (env[nome] || '');
 };
+
+/**
+ * Quantos proxies confiáveis ficam entre o cliente e a API (TRUSTED_PROXY_HOPS, padrão 2: Cloudflare e Traefik).
+ * 0 = não confia em X-Forwarded-For (usa o IP do socket). Inteiro de 0 a 10; valor inválido = 2.
+ */
+export function saltosDeProxy(env = process.env) {
+  const bruto = String(env.TRUSTED_PROXY_HOPS ?? '').trim();
+  if (!/^\d+$/.test(bruto)) return 2;
+  return Math.min(Number(bruto), 10);
+}

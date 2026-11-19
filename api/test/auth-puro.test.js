@@ -8,14 +8,17 @@ import { join } from 'node:path';
 import { createHash } from 'node:crypto';
 import {
   caminhoSeguro, comParametro, empacotarState, desempacotarState, stateConfere, novoState, urlDeAutorizacao,
-  gerarApelido, gatoInicial, lerConfigDiscord
+  gerarApelido, gatoInicial, lerConfigDiscord, chaveDoState, VALIDADE_STATE_S
 } from '../auth/discord.js';
 import { hashToken, csrfDe, novoToken } from '../auth/sessao.js';
 import { lerCookies, montarCookie, apagarCookie } from '../lib/cookies.js';
 import { verificarCsrf } from '../lib/csrf.js';
+import { extrairIp } from '../lib/http.js';
+import { saltosDeProxy } from '../lib/config.js';
 import { servidor } from './helpers.js';
 
 const CFG = { clientId: '111', clientSecret: 'segredo-do-app', redirectUri: 'https://naosalvo-dev.fishlab.com.br/api/auth/discord/callback', guildId: null, exigirMembro: false };
+const K = chaveDoState(CFG);
 const poolFalso = { query: async () => { throw new Error('não deveria tocar no banco'); } };
 
 test('open redirect: só caminhos relativos do próprio site passam', () => {
@@ -52,11 +55,45 @@ test('comParametro preserva query e hash', () => {
 test('state: empacota/desempacota, confere em tempo constante e recusa diferente/vazio', () => {
   const s = novoState();
   assert.ok(s.length >= 20); assert.notEqual(s, novoState());
-  const v = empacotarState(s, '/album.html?a=1');
-  assert.deepEqual(desempacotarState(v), { state: s, voltar: '/album.html?a=1' });
-  assert.equal(desempacotarState('sem-ponto'), null); assert.equal(desempacotarState(''), null); assert.equal(desempacotarState(undefined), null);
+  const v = empacotarState(s, '/album.html?a=1', K);
+  assert.deepEqual(desempacotarState(v, K), { state: s, voltar: '/album.html?a=1' });
+  assert.equal(desempacotarState('sem-ponto', K), null); assert.equal(desempacotarState('', K), null); assert.equal(desempacotarState(undefined, K), null);
   assert.ok(stateConfere(s, s));
   assert.ok(!stateConfere(s, s + 'x')); assert.ok(!stateConfere(s, 'outro')); assert.ok(!stateConfere('', '')); assert.ok(!stateConfere(s, null));
+});
+
+test('state assinado: adulteração, outra chave, expiração (10 min) e relógio no futuro são recusados', () => {
+  const agora = Date.UTC(2026, 10, 19, 12, 0, 0);
+  const v = empacotarState('abc', '/album.html', K, agora);
+  assert.deepEqual(desempacotarState(v, K, agora + 5_000), { state: 'abc', voltar: '/album.html' });
+  assert.ok(desempacotarState(v, K, agora + VALIDADE_STATE_S * 1000));                 // no limite ainda vale
+  assert.equal(desempacotarState(v, K, agora + (VALIDADE_STATE_S + 1) * 1000), null);   // 10 min + 1 s: expirado
+  assert.equal(desempacotarState(v, K, agora - 120_000), null);                         // emitido "no futuro"
+  assert.equal(desempacotarState(v, chaveDoState({ clientSecret: 'outro-segredo' }), agora), null); // outra chave
+  const [st, b64, ts, mac] = v.split('.');
+  const evil = Buffer.from('https://evil.com').toString('base64url');
+  assert.equal(desempacotarState([st, evil, ts, mac].join('.'), K, agora), null);       // trocou o destino
+  assert.equal(desempacotarState(['outro-state', b64, ts, mac].join('.'), K, agora), null);
+  assert.equal(desempacotarState([st, b64, String(Number(ts) + 3600), mac].join('.'), K, agora), null); // estendeu a validade
+  assert.equal(desempacotarState([st, b64, ts, mac.slice(0, -2) + 'AA'].join('.'), K, agora), null);
+  assert.equal(desempacotarState([st, b64, ts].join('.'), K, agora), null);             // sem assinatura
+  assert.equal(desempacotarState(v + '.x', K, agora), null);
+});
+
+test('state sem assinatura válida no cookie = callback recusa (400) sem chamar o Discord', async () => {
+  let chamadas = 0;
+  const s = await servidor(poolFalso, { auth: { discord: CFG, fetch: async () => { chamadas++; throw new Error('sem rede'); } } });
+  const agora = Date.now();
+  const velho = encodeURIComponent(empacotarState('st', '/', K, agora - (VALIDADE_STATE_S + 5) * 1000));   // expirado
+  const forjado = encodeURIComponent(empacotarState('st', '/', chaveDoState({ clientSecret: 'x' }), agora)); // outra chave
+  const semMac = encodeURIComponent('st.' + Buffer.from('/').toString('base64url') + '.' + Math.floor(agora / 1000));
+  let n = 0;
+  for (const ck of [velho, forjado, semMac]) {
+    const r = await s.get('/api/auth/discord/callback?code=c&state=st', { headers: { 'X-Forwarded-For': `10.9.6.${++n}`, Cookie: 'ns_oauth=' + ck } });
+    assert.equal(r.status, 400); assert.match(r.json.erro, /estado de login inválido/);
+  }
+  assert.equal(chamadas, 0);
+  await s.fechar();
 });
 
 test('URL de autorização: sem prompt (primeiro login do usuário pede consentimento normalmente)', () => {
@@ -134,6 +171,17 @@ test('config do Discord: segredos só por arquivo, redirect por env, https obrig
   const semGuild = { ...env }; delete semGuild.DISCORD_GUILD_ID_FILE;
   assert.equal(lerConfigDiscord(semGuild).guildId, null);
   assert.equal(lerConfigDiscord({ ...semGuild, DISCORD_EXIGIR_MEMBRO: '1' }).exigirMembro, false); // sem guild não há como exigir
+  // client secret por VARIÁVEL: ignorado fora de dev/test, aceito em dev/test
+  const porVariavel = { DISCORD_CLIENT_ID_FILE: env.DISCORD_CLIENT_ID_FILE, DISCORD_CLIENT_SECRET: 'segredo-em-variavel', DISCORD_REDIRECT_URI: CFG.redirectUri };
+  const silencio = console.warn; const avisos = []; console.warn = (m) => avisos.push(String(m));
+  try {
+    assert.equal(lerConfigDiscord({ ...porVariavel, DB_NAME: 'naosalvo' }), null);
+    assert.equal(lerConfigDiscord({ ...porVariavel, DB_NAME: 'naosalvo_dev', NODE_ENV: 'production' }), null);
+    assert.equal(lerConfigDiscord({ ...porVariavel }), null); // DB_NAME ausente = trata como produção
+    assert.ok(avisos.length >= 3 && avisos.every((m) => /DISCORD_CLIENT_SECRET_FILE/.test(m) && !m.includes('segredo-em-variavel')), 'avisa sem imprimir o valor');
+  } finally { console.warn = silencio; }
+  assert.equal(lerConfigDiscord({ ...porVariavel, DB_NAME: 'naosalvo_dev' }).clientSecret, 'segredo-em-variavel');
+  assert.equal(lerConfigDiscord({ ...porVariavel, DB_NAME: 'naosalvo', DISCORD_CLIENT_SECRET_FILE: env.DISCORD_CLIENT_SECRET_FILE }).clientSecret, 'xyz'); // *_FILE vale em qualquer ambiente
   assert.equal(lerConfigDiscord({}), null);
   assert.equal(lerConfigDiscord({ ...env, DISCORD_REDIRECT_URI: '' }), null);
   assert.equal(lerConfigDiscord({ ...env, DISCORD_REDIRECT_URI: 'http://naosalvo.example/cb' }), null); // http fora de localhost
@@ -152,7 +200,7 @@ test('GET /api/auth/discord: 302 para o Discord com state, e o MESMO state no co
   assert.equal(loc.origin, 'https://discord.com'); assert.equal(loc.searchParams.get('scope'), 'identify');
   const ck = lerCookie(r.cookies, 'ns_oauth');
   assert.match(ck, /HttpOnly/); assert.match(ck, /SameSite=Lax/); assert.match(ck, /Secure/); assert.match(ck, /Path=\/api\/auth/);
-  const guardado = desempacotarState(decodeURIComponent(ck.split(';')[0].split('=')[1]));
+  const guardado = desempacotarState(decodeURIComponent(ck.split(';')[0].split('=')[1]), K);
   assert.equal(guardado.state, loc.searchParams.get('state')); assert.equal(guardado.voltar, '/album.html');
   await s.fechar();
 });
@@ -162,7 +210,7 @@ test('GET /api/auth/discord: voltar externo vira "/" (open redirect) e nunca vai
   for (const v of ['https://evil.com', '//evil.com', '/\\evil.com', 'javascript:alert(1)']) {
     const r = await s.get('/api/auth/discord?voltar=' + encodeURIComponent(v), { headers: { 'X-Forwarded-For': '10.9.0.2' } });
     const ck = lerCookie(r.cookies, 'ns_oauth');
-    assert.equal(desempacotarState(decodeURIComponent(ck.split(';')[0].split('=')[1])).voltar, '/', v);
+    assert.equal(desempacotarState(decodeURIComponent(ck.split(';')[0].split('=')[1]), K).voltar, '/', v);
     assert.ok(!r.headers.get('location').includes('evil'));
   }
   await s.fechar();
@@ -172,7 +220,7 @@ test('callback: state ausente, divergente ou sem cookie = 400, sem tocar no banc
   let chamadas = 0;
   const s = await servidor(poolFalso, { auth: { discord: CFG, fetch: async () => { chamadas++; throw new Error('sem rede'); } } });
   const h = (ip, extra = {}) => ({ headers: { 'X-Forwarded-For': ip, ...extra } });
-  const cookieDoState = encodeURIComponent(empacotarState('estado-certo', '/'));
+  const cookieDoState = encodeURIComponent(empacotarState('estado-certo', '/', K));
   assert.equal((await s.get('/api/auth/discord/callback?code=c&state=x', h('10.9.1.1'))).status, 400);                                  // sem cookie
   assert.equal((await s.get('/api/auth/discord/callback?code=c', h('10.9.1.2', { Cookie: 'ns_oauth=' + cookieDoState }))).status, 400); // sem state
   const r = await s.get('/api/auth/discord/callback?code=c&state=outro', h('10.9.1.3', { Cookie: 'ns_oauth=' + cookieDoState }));
@@ -185,7 +233,7 @@ test('callback: state ausente, divergente ou sem cookie = 400, sem tocar no banc
 
 test('callback: usuário cancelou no Discord = volta para a página com ?login=negado', async () => {
   const s = await servidor(poolFalso, { auth: { discord: CFG } });
-  const ck = encodeURIComponent(empacotarState('ok-state', '/album.html'));
+  const ck = encodeURIComponent(empacotarState('ok-state', '/album.html', K));
   const r = await s.get('/api/auth/discord/callback?error=access_denied&state=ok-state', { headers: { 'X-Forwarded-For': '10.9.2.1', Cookie: 'ns_oauth=' + ck } });
   assert.equal(r.status, 302); assert.equal(r.headers.get('location'), '/album.html?login=negado');
   await s.fechar();
@@ -195,7 +243,7 @@ test('callback: cookie adulterado com vetores de open redirect NUNCA gera Locati
   const s = await servidor(poolFalso, { auth: { discord: CFG } });
   let n = 0;
   for (const v of ['/a/..//evil.com', '/..//evil.com', '/.//evil.com', '//evil.com', '/\\evil.com', '%2f%2fevil.com', 'https://evil.com', 'javascript:alert(1)']) {
-    const ck = encodeURIComponent(empacotarState('st', v));
+    const ck = encodeURIComponent(empacotarState('st', v, K));
     const r = await s.get('/api/auth/discord/callback?error=access_denied&state=st', { headers: { 'X-Forwarded-For': `10.9.5.${++n}`, Cookie: 'ns_oauth=' + ck } });
     const loc = r.headers.get('location');
     assert.equal(loc, '/?login=negado', v);
@@ -206,7 +254,7 @@ test('callback: cookie adulterado com vetores de open redirect NUNCA gera Locati
 
 test('callback: cookie adulterado com destino externo é revalidado (volta para "/")', async () => {
   const s = await servidor(poolFalso, { auth: { discord: CFG } });
-  const ck = encodeURIComponent(empacotarState('st', 'https://evil.com/phish'));
+  const ck = encodeURIComponent(empacotarState('st', 'https://evil.com/phish', K));
   const r = await s.get('/api/auth/discord/callback?error=access_denied&state=st', { headers: { 'X-Forwarded-For': '10.9.2.2', Cookie: 'ns_oauth=' + ck } });
   assert.equal(r.headers.get('location'), '/?login=negado');
   await s.fechar();
@@ -234,5 +282,55 @@ test('/api/eu e rotas protegidas sem login: 401', async () => {
   const s = await servidor(poolFalso, { autenticar: async () => null });
   assert.equal((await s.get('/api/eu')).status, 401);
   assert.equal((await s.post('/api/pacotes/abrir', {})).status, 401);
+  await s.fechar();
+});
+
+// ---- IP do cliente atrás de Cloudflare -> Traefik -> API (TRUSTED_PROXY_HOPS) ----
+const reqIp = (xff, socket = '172.18.0.5') => ({ headers: xff === undefined ? {} : { 'x-forwarded-for': xff }, socket: { remoteAddress: socket } });
+
+test('extrairIp (2 saltos): o IP do cliente é o penúltimo item; o que está à esquerda é ignorado', () => {
+  // cadeia real: o Cloudflare acrescenta o cliente, o Traefik acrescenta a borda do Cloudflare
+  assert.equal(extrairIp(reqIp('203.0.113.7, 172.70.1.1'), 2), '203.0.113.7');                       // 2 itens
+  assert.equal(extrairIp(reqIp('6.6.6.6, 203.0.113.7, 172.70.1.1'), 2), '203.0.113.7');              // 3 itens: o forjado (6.6.6.6) fica à esquerda
+  assert.equal(extrairIp(reqIp('1.1.1.1, 2.2.2.2, 6.6.6.6, 203.0.113.7, 172.70.1.1'), 2), '203.0.113.7'); // vários forjados
+  assert.equal(extrairIp(reqIp('2001:db8::7, 2a06:98c0::1'), 2), '2001:db8::7');                      // IPv6
+});
+
+test('extrairIp: cadeia mais curta que o esperado usa o último; sem cabeçalho usa o socket', () => {
+  assert.equal(extrairIp(reqIp('203.0.113.7'), 2), '203.0.113.7');                 // 1 item (sem Cloudflare na frente)
+  assert.equal(extrairIp(reqIp(undefined), 2), '172.18.0.5');                      // sem XFF
+  assert.equal(extrairIp(reqIp(''), 2), '172.18.0.5');
+  assert.equal(extrairIp(reqIp(' , ,'), 2), '172.18.0.5');
+  assert.equal(extrairIp(reqIp(undefined, '::ffff:172.18.0.5'), 2), '172.18.0.5'); // IPv4 mapeado
+});
+
+test('extrairIp: item que não parece IP cai no socket; saltos configuráveis; 0 ignora o cabeçalho', () => {
+  assert.equal(extrairIp(reqIp('<script>, 172.70.1.1'), 2), '172.18.0.5');
+  assert.equal(extrairIp(reqIp('x'.repeat(100) + ', 172.70.1.1'), 2), '172.18.0.5');
+  assert.equal(extrairIp(reqIp('6.6.6.6, 203.0.113.7, 172.70.1.1'), 1), '172.70.1.1'); // 1 salto: o último
+  assert.equal(extrairIp(reqIp('6.6.6.6, 9.9.9.9, 203.0.113.7, 172.70.1.1'), 3), '9.9.9.9');
+  assert.equal(extrairIp(reqIp('6.6.6.6, 203.0.113.7'), 0), '172.18.0.5');
+  assert.equal(extrairIp(reqIp('6.6.6.6, 203.0.113.7')), '6.6.6.6'); // padrão 2: com 2 itens o primeiro é o cliente
+});
+
+test('TRUSTED_PROXY_HOPS: padrão 2; aceita 0 a 10; inválido volta ao padrão', () => {
+  assert.equal(saltosDeProxy({}), 2);
+  assert.equal(saltosDeProxy({ TRUSTED_PROXY_HOPS: '0' }), 0);
+  assert.equal(saltosDeProxy({ TRUSTED_PROXY_HOPS: '1' }), 1);
+  assert.equal(saltosDeProxy({ TRUSTED_PROXY_HOPS: '3' }), 3);
+  assert.equal(saltosDeProxy({ TRUSTED_PROXY_HOPS: '99' }), 10);
+  for (const ruim of ['', 'abc', '-1', '1.5', ' ']) assert.equal(saltosDeProxy({ TRUSTED_PROXY_HOPS: ruim }), 2, ruim);
+});
+
+test('rate limit não é burlável com X-Forwarded-For forjado à esquerda', async () => {
+  const s = await servidor(poolFalso, { auth: { discord: CFG } });
+  let ultimo;
+  for (let i = 0; i < 31; i++) {
+    // o cliente real é sempre 203.0.113.99; ele muda só o item forjado do início da cadeia
+    ultimo = await s.get('/api/auth/discord', { headers: { 'X-Forwarded-For': `6.6.6.${i}, 203.0.113.99, 172.70.1.1` } });
+  }
+  assert.equal(ultimo.status, 429);
+  const outro = await s.get('/api/auth/discord', { headers: { 'X-Forwarded-For': '6.6.6.1, 203.0.113.100, 172.70.1.1' } });
+  assert.equal(outro.status, 302); // outro cliente real não é afetado
   await s.fechar();
 });

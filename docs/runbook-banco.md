@@ -76,3 +76,14 @@ Se aparecer alguma linha: faça o `pg_dump`, apague as repetidas deixando a de m
 - Manual: `DELETE FROM eventos_meme_ip WHERE dia < (now() AT TIME ZONE America/Sao_Paulo)::date - 2;`
 
 O hash do IP (`api/lib/ip.js`, HMAC-SHA256 com o token de admin, 32 hex) é único para eventos, links e memepédia. **Não mude o algoritmo nem o token de admin sem avisar**: trocar o token invalida o anti-spam do dia (inofensivo, mas conta de novo).
+
+## Conferir o IP real depois do deploy (TRUSTED_PROXY_HOPS)
+
+A API só enxerga o IP certo se `TRUSTED_PROXY_HOPS` bater com a cadeia real (padrão 2 = Cloudflare + Traefik). **Depois de publicar no dev, confira com um request de verdade**, antes de confiar no rate limit:
+
+1. Faça login no site pelo navegador (ou `curl` em uma rota que grave IP).
+2. No banco do dev: `SELECT ip, criada_em FROM sessoes ORDER BY criada_em DESC LIMIT 3;` — a coluna `ip` tem de ser o **seu IP público** (o mesmo de `curl ifconfig.me`).
+   - É um IP `172.x`/`10.x` do Traefik ou do Cloudflare? Há proxies a menos na conta: **diminua** `TRUSTED_PROXY_HOPS`.
+   - É um IP que você não reconhece e muda a cada request? Há proxies a mais: **aumente**.
+3. Teste de forja: `curl -H 'X-Forwarded-For: 6.6.6.6' https://naosalvo-dev.fishlab.com.br/api/auth/discord -o /dev/null` e confira que `6.6.6.6` não aparece como IP da sessão/rate limit (o valor forjado fica à esquerda e é ignorado).
+4. Para mudar: variável de ambiente `TRUSTED_PROXY_HOPS` no serviço `api` das stacks (hoje não definida = 2) e redeploy.

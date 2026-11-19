@@ -52,6 +52,8 @@ OAuth2 do Discord (scope `identify`). Quem usa: o site abre `/api/auth/discord?v
 | `POST /api/auth/sair` | Apaga a sessão no banco e limpa o cookie. Exige `X-CSRF`. Sem sessão, só limpa o cookie |
 | 🔒 `GET /api/eu` | `{ usuario: { id, apelido, avatar_gato }, patente, proxima_patente, moedas, xp, csrf }`. `401` se não estiver logado. **O `csrf` daqui vai no header `X-CSRF` das chamadas que alteram dados** |
 
+**State assinado.** O cookie `ns_oauth` é `<state>.<destino>.<emitido em>.<hmac>`: HMAC-SHA256 com chave derivada do client secret. O servidor recusa (`400`) assinatura inválida, destino adulterado, cookie com mais de 10 minutos (validado no servidor, não só pelo `Max-Age`) ou emitido "no futuro". O `state` também precisa bater com o da URL de volta.
+
 Primeiro login cria o usuário com apelido único derivado do nome no Discord (acentos removidos, 3 a 20 caracteres; colisão ganha sufixo numérico: `Ana`, `Ana2`…) e um gato inicial determinístico pelo id do Discord. Um login seguinte reaproveita o usuário e só atualiza o nome de exibição. Rate limit: 30 chamadas por IP a cada 10 min nas rotas de auth (`429`).
 
 **Sessão.** Cookie `ns_sessao`: `HttpOnly`, `Secure`, `SameSite=Lax`, 30 dias. O valor é um token aleatório de 256 bits; **o banco guarda só o sha256 dele** (`sessoes.id`), então um vazamento do banco não entrega sessões. Renovação deslizante: se passou mais de 1 dia desde a última renovação, o uso empurra a expiração e reemite o cookie, com teto absoluto de 90 dias desde a criação. No máximo 10 sessões por usuário (a mais antiga cai). Expiradas são ignoradas na leitura e apagadas na subida da API e a cada hora.
@@ -60,7 +62,7 @@ Primeiro login cria o usuário com apelido único derivado do nome no Discord (a
 
 **Patente.** `lib/patente.js`: a patente é calculada no servidor pela soma do razão `eventos_xp` e pela tabela `patentes`. Ao registrar uma rota, `{ autenticada: true }` exige usuário e `{ patente: 'moderador' }` exige também essa patente ou maior (id ou nome: `'banda_larga'`, `'Banda larga'`). `401` sem login, `403` abaixo da patente (`{ erro, patente_atual }`), `503` se a tabela `patentes` estiver vazia. Todas as rotas de economia usam a sessão; nenhuma rota de admin por patente foi criada ainda.
 
-**Configuração (nunca no repositório, nunca em log).** Segredos só por arquivo (Docker secrets): `DISCORD_CLIENT_ID_FILE`, `DISCORD_CLIENT_SECRET_FILE` e, opcional, `DISCORD_GUILD_ID_FILE`. `DISCORD_REDIRECT_URI` por variável (https obrigatório fora de localhost) e precisa ser **exatamente** a URL cadastrada no portal do Discord. Sem client id/secret/redirect a API sobe normalmente e as rotas de login respondem `503`. Opcionais: `DISCORD_EXIGIR_MEMBRO=1` (só entra quem está no servidor do `DISCORD_GUILD_ID`; pede também o scope `guilds`; ver **Decisões de produto**), `SITE_ORIGIN` (origem do site para o CSRF; padrão = origem do redirect) e `COOKIE_SECURE=0` (só para teste local sem HTTPS). Nas stacks: `docker-stack.dev.yml` e `deploy/auto/stack.dev.yml` usam `naosalvo_dev_discord_client_id`, `naosalvo_dev_discord_client_secret` e `naosalvo_discord_guild_id`; `docker-stack.yml` e `deploy/auto/stack.main.yml` usam `naosalvo_discord_client_id`, `naosalvo_discord_client_secret` e `naosalvo_discord_guild_id`. A access token do Discord é usada só durante o callback e descartada (não é gravada).
+**Configuração (nunca no repositório, nunca em log).** Segredos só por arquivo (Docker secrets): `DISCORD_CLIENT_ID_FILE`, `DISCORD_CLIENT_SECRET_FILE` e, opcional, `DISCORD_GUILD_ID_FILE`. **O client secret por variável (`DISCORD_CLIENT_SECRET`) só vale em dev/test** (mesma allowlist do stub: `DB_NAME` com token `test`/`dev` e `NODE_ENV` diferente de `production`); em produção a variável é ignorada, com um aviso no log que não mostra o valor. `DISCORD_REDIRECT_URI` por variável (https obrigatório fora de localhost) e precisa ser **exatamente** a URL cadastrada no portal do Discord. Sem client id/secret/redirect a API sobe normalmente e as rotas de login respondem `503`. Opcionais: `DISCORD_EXIGIR_MEMBRO=1` (só entra quem está no servidor do `DISCORD_GUILD_ID`; pede também o scope `guilds`; ver **Decisões de produto**), `SITE_ORIGIN` (origem do site para o CSRF; padrão = origem do redirect) e `COOKIE_SECURE=0` (só para teste local sem HTTPS). Nas stacks: `docker-stack.dev.yml` e `deploy/auto/stack.dev.yml` usam `naosalvo_dev_discord_client_id`, `naosalvo_dev_discord_client_secret` e `naosalvo_discord_guild_id`; `docker-stack.yml` e `deploy/auto/stack.main.yml` usam `naosalvo_discord_client_id`, `naosalvo_discord_client_secret` e `naosalvo_discord_guild_id`. A access token do Discord é usada só durante o callback e descartada (não é gravada).
 
 ## Autenticação de teste (stub)
 
@@ -68,6 +70,11 @@ Primeiro login cria o usuário com apelido único derivado do nome no Discord (a
 
 - **Só dev e teste.** Quem manda o header vira aquele usuário. A guarda é uma **allowlist**: o stub só liga se `DB_NAME` é de teste/dev **por token** (`naosalvo_dev`, `naosalvo_test`, `test_x`, `dev_x` ou nome terminando em `test`/`dev`; `prod_devel` não vale) **e** `NODE_ENV` não é `production` (sem diferenciar maiúsculas). `NODE_ENV=test` sozinho não basta. Qualquer outro caso (`naosalvo`, `naosalvo_staging`, banco ausente, `NODE_ENV=Production`, `naosalvo` com `NODE_ENV=test`) faz a API **recusar subir**, com erro claro, antes de tocar no banco. Nunca coloque `AUTH_STUB` em `docker-stack.yml`.
 - Em produção as rotas 🔒 só aceitam a sessão do login Discord.
+
+### Fora do escopo deste PR (anotado)
+
+- Prefixo `__Host-` nos nomes dos cookies (exige Path=/ e sem Domain; o cookie de state usa `Path=/api/auth`, então ficaria só a sessão): melhoria futura.
+- Login novo **não** revoga as sessões anteriores do usuário (até 10 coexistem, uma por navegador/dispositivo). Uma tela "sair de todos os dispositivos" é o caminho natural; hoje basta apagar as linhas de `sessoes` do usuário.
 
 ## Decisões de produto
 
@@ -85,6 +92,8 @@ Primeiro login cria o usuário com apelido único derivado do nome no Discord (a
 4. **Sem tiragem numerada nos Míticos** (é recomendação do documento de economia, não implementada).
 
 ## Configuração
+
+`TRUSTED_PROXY_HOPS` (padrão **2**) diz quantos proxies confiáveis ficam entre o cliente e a API. É o que define o **IP do cliente** usado no rate limit, nos hashes anti-spam e em `sessoes.ip`. O `X-Forwarded-For` é uma lista que cada proxy acrescenta à direita; o que está à esquerda pode ser forjado pelo cliente. Na cadeia cliente → Cloudflare → Traefik → API o Cloudflare acrescenta o IP real e o Traefik acrescenta o IP da borda do Cloudflare, então o IP do cliente é o item na posição N **a partir da direita** (N=2: o penúltimo): `forjado, IP-real, borda-CF` → `IP-real`. Cadeia com menos itens que N usa o último; sem cabeçalho (ou item que não pareça IP) usa o IP do socket; `0` ignora o cabeçalho. Se mudar a infraestrutura (outro proxy na frente, ou sem Cloudflare), ajuste o valor: ver o runbook. O IP puro não é gravado em tabelas de anti-spam (só HMAC); `sessoes.ip` guarda o IP para auditoria da sessão.
 
 `DB_POOL_MAX` define o tamanho do pool de conexões do pg (inteiro de 1 a 100; padrão 10).
 
