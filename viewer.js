@@ -174,7 +174,7 @@ function initComments(el,m){
   const box=el.querySelector("[data-cmts]");if(!box)return;
   const k0=pEra(m.y),k=k0==="ig15"?"ig":k0,T=CMT_TXT[k];let list=localCmts(m.id).slice(),online=false;
   const render=()=>{const ncm=el.querySelector("[data-ncm]");if(ncm)ncm.textContent=list.length?`(${list.length})`:"";
-    const me=NS.acct?NS.acct.user:"";
+    const me=meuApelido();
     box.innerHTML=`<div class="cl">${list.length?list.map(c=>`<div class="ci">${T.li(c)}</div>`).join(""):T.vazio?`<div class="ce">${T.vazio}</div>`:""}</div>
       <form class="cf" autocomplete="off"><input class="ch" name="bot-field" tabindex="-1" aria-hidden="true">
        ${k==="fotolog"||k==="orkut"?`<textarea name="t" rows="2" maxlength="300" placeholder="${T.ph}"></textarea>`:`<input name="t" maxlength="300" placeholder="${T.ph}">`}
@@ -182,11 +182,11 @@ function initComments(el,m){
       <div class="cn">${me?`comentando como <b>${escapeHtml(me)}</b>`:`<a data-act="login">entre na sua conta</a> para comentar`}</div>`;
     const f=box.querySelector(".cf");
     f.onsubmit=async ev=>{ev.preventDefault();const t=f.t.value.trim();if(!t)return;
-      if(!NS.acct){needAccount();return}
+      if(!temConta()){needAccount();return}
       const btn=f.querySelector("button");btn.disabled=true;
-      const r=await apiPost("/api/comentarios",{id:m.id,autor:NS.acct.user,texto:t,"bot-field":f["bot-field"].value});
+      const r=await apiPost("/api/comentarios",{id:m.id,autor:meuApelido(),texto:t,"bot-field":f["bot-field"].value});
       btn.disabled=false;
-      const c=r&&r.texto?r:{autor:NS.acct.user,texto:t,em:new Date().toISOString(),local:true};
+      const c=r&&r.texto?r:{autor:meuApelido(),texto:t,em:new Date().toISOString(),local:true};
       if(!r){localCmts(m.id).push(c);nsSave()}
       list.push(c);sndPop();render();const nf=box.querySelector(".cf [name=t]");nf&&nf.focus();
       const cl=box.querySelector(".cl");cl.scrollTop=cl.scrollHeight;
@@ -202,12 +202,12 @@ function ytDoLink(u){u=(u||"").trim();if(!u)return"";try{const x=new URL(/^https
   let id="";if(h==="youtu.be")id=p.slice(1);else if(h.endsWith("youtube.com")){id=x.searchParams.get("v")||"";const mm=p.match(/\/(shorts|embed|live|v)\/([\w-]{11})/);if(!id&&mm)id=mm[2]}
   id=(id||"").slice(0,11);return /^[\w-]{11}$/.test(id)?id:""}catch(e){return""}}
 function enviarLinkSugerido(m,u){
-  if(!NS.acct){needAccount();return'<div class="chk bad">Entre na sua conta para enviar o link.</div>'}
+  if(!temConta()){needAccount();return'<div class="chk bad">Entre na sua conta para enviar o link.</div>'}
   const yt=ytDoLink(u);if(!yt)return'<div class="chk bad">Cole um link do YouTube (youtube.com/watch?v=… ou youtu.be/…).</div>';
   NS.linkSugs=NS.linkSugs||[];
   if(NS.linkSugs.some(x=>x.meme===m.id&&x.yt===yt))return'<div class="chk warn">Você já enviou esse link. Ele está na fila da moderação.</div>';
-  const sug={id:"l"+Date.now(),meme:m.id,t:m.t,yt,by:NS.acct.user,status:"pending",ts:Date.now()};
-  return apiPost("/api/links",{id:m.id,yt,autor:NS.acct.user,"bot-field":""}).then(r=>{sug.online=!!r;NS.linkSugs.push(sug);nsSave();
+  const sug={id:"l"+Date.now(),meme:m.id,t:m.t,yt,by:meuApelido(),status:"pending",ts:Date.now()};
+  return apiPost("/api/links",{id:m.id,yt,autor:meuApelido(),"bot-field":""}).then(r=>{sug.online=!!r;NS.linkSugs.push(sug);nsSave();
     return`<div class="chk ok">Link enviado! Um moderador vai conferir${r?"":" (salvo neste navegador até o site estar no ar)"}. Se for aprovado, o vídeo aparece aqui.</div>`});
 }
 // links aprovados pelos moderadores entram no acervo para todo mundo

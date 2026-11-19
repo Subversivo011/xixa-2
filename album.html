@@ -3,13 +3,13 @@
 <head>
 <meta charset="utf-8">
 <script src="gate.js?v=20261119u"></script>
-<script src="cliente-economia.js?v=20261119z"></script>
+<script src="cliente-economia.js?v=20261120a"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>NÃO SALVO — Álbum de Figurinhas da Internet</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Inter:wght@400;500;600;700&family=Baloo+2:wght@700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="theme.css?v=20261119v">
+<link rel="stylesheet" href="theme.css?v=20261120a">
 <link rel="stylesheet" href="viewer.css?v=20261119v">
 <script>try{var t=localStorage.getItem("ns_theme")}catch(e){}document.documentElement.dataset.theme=t==="dark"?"dark":"light"</script>
 <style>
@@ -195,10 +195,10 @@
 <div class="modal" id="modal" onclick="if(event.target===this)closeModal()"><div class="mbox" id="mbox"></div></div>
 
 <form name="feedback" data-netlify="true" netlify-honeypot="bot-field" hidden><input name="tipo"><textarea name="msg"></textarea><input name="contato"><input name="pagina"><input name="bot-field"></form>
-<script src="common.js?v=20261119z"></script>
+<script src="common.js?v=20261120a"></script>
 <script src="data.js?v=20261119q"></script>
 <script src="player.js?v=20261119n"></script>
-<script src="viewer.js?v=20261119x"></script>
+<script src="viewer.js?v=20261120a"></script>
 <script src="alertas.js?v=20261119n"></script>
 <script>
 renderHeader("album",{sub:[
@@ -404,10 +404,8 @@ async function openShop(){
   <div style="display:flex;gap:10px;justify-content:center"><button class="mclose" style="margin:16px 0 0" onclick="closeModal()">FECHAR</button>${dupsTotal()?`<button class="mclose" style="margin:16px 0 0;background:var(--sunk);color:var(--gold);box-shadow:none;border:1px solid var(--gold)" onclick="convertAll().then(openShop)">♻ CONVERTER REPETIDAS</button>`:""}</div>`);
 }
 function openRank(){
-  const me=CARDS.filter(c=>owned(c)>0).length,T=CARDS.length,name=NS.acct?NS.acct.user:"você";
-  const people=[["colecionador_pro",Math.round(T*.94)],["gatoNostalgico",Math.round(T*.81)],["viralizador",Math.round(T*.6)],[name,me,1],["faqo",Math.round(T*.2)],["lendarium",Math.round(T*.12)]].sort((a,b)=>b[1]-a[1]);
-  people.unshift(["Cid Cidoso",T,0,1]); // o Cid é sempre o maior colecionador (álbum completo)
-  openModal(`<h3>Ranking de colecionadores</h3><p>Usuários de exemplo. Quem completar o álbum primeiro ganha selo especial.</p>${people.map(([n,v,me2,cid],i)=>`<div class="rk${cid?" cid":""}"><b>${cid?"👑":i+1}</b><span class="av">${catSVG(me2&&NS.acct?NS.acct.av:{fur:(i*3)%10,pat:i%5,eye:i%5,acc:(i*2)%9,clo:i%7,bg:i%8})}</span><span>${escapeHtml(n)}${me2?" (você)":""}${cid?" <small>álbum completo</small>":""}</span><em>${v} / ${T}</em></div>`).join("")}<button class="mclose" onclick="closeModal()">FECHAR</button>`);
+  openModal(`<h3>Ranking de colecionadores</h3><p>Quem completar o álbum primeiro ganha selo especial.</p><div id="rkBox"></div><button class="mclose" onclick="closeModal()">FECHAR</button>`);
+  carregarRanking($("rkBox"),"cartas");
 }
 document.addEventListener("keydown",e=>{if(e.key==="Escape")closeModal();if(document.querySelector(".modal.open"))return;if(e.key==="ArrowRight")pg(page+1);if(e.key==="ArrowLeft")pg(page-1)});
 function onAccountChange(){renderAll()}

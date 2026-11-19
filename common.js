@@ -163,6 +163,8 @@ async function iniciarEconomia(){
     await atualizarCarteira();
     ECO.indisponivel=false;avisoEconomiaOff(false);
     renderWallet();
+    // cadastro_completo=false: abre o criador de gato (pode fechar; reabre no próximo carregamento até salvar)
+    if(SESSAO.usuario&&SESSAO.usuario.cadastro_completo===false)openSignup();
     if(typeof onEconomiaPronta==="function")await onEconomiaPronta();
   }catch(e){
     if(e&&e.status===401)return;
@@ -195,29 +197,97 @@ function renderWallet(){
   if(typeof onWalletRendered==="function")onWalletRendered();
 }
 
-// ---- Cadastro com avatar de gatinho (layout original) ----
+// ---- Perfil e criador de gato: edita o perfil do servidor (PATCH /api/eu) ----
+const temConta=()=>!!(SESSAO&&SESSAO.usuario&&SESSAO.usuario.cadastro_completo!==false);
+const meuApelido=()=>(SESSAO&&SESSAO.usuario&&SESSAO.usuario.apelido)||"";
+// avatar_gato válido: 6 chaves inteiras dentro da faixa (nunca decidir cadastro por avatar_gato.length)
+const GATO_FAIXA={fur:10,pat:5,eye:5,acc:9,clo:8,bg:8};
+const gatoValido=o=>!!o&&typeof o==="object"&&Object.keys(GATO_FAIXA).every(k=>Number.isInteger(o[k])&&o[k]>=0&&o[k]<GATO_FAIXA[k]);
+const FOTO_DISCORD=/^https:\/\/cdn\.discordapp\.com\/avatars\/[0-9]+\/[a-f0-9_]+\.png/;
+const APELIDO_OK=/^[A-Za-z0-9_.-]{3,20}$/;
+let sgSalvando=false;
+function sgErros(campo,msg){
+  const u=document.getElementById("sgErrU"),g=document.getElementById("sgErr"),i=document.getElementById("sgU");
+  u.textContent=campo==="apelido"?msg:"";g.textContent=campo&&campo!=="apelido"?msg:(campo?"":msg||"");
+  if(i){i.setAttribute("aria-invalid",campo==="apelido"?"true":"false")}
+}
 function openSignup(){
-  const a=NS.acct;if(a){sgO={...a.av};document.getElementById("sgU").value=a.user;document.getElementById("sgE").value=a.email||"";document.getElementById("sgChat").checked=!!a.chat}
-  document.getElementById("sgErr").textContent="";document.getElementById("sgm").classList.add("open");sgMeth(NS.acct&&NS.acct.via?NS.acct.via:"email");sgRender();
+  const u=SESSAO&&SESSAO.usuario;
+  if(!u){openLogin();return}
+  sgO=gatoValido(u.avatar_gato)?{fur:u.avatar_gato.fur,pat:u.avatar_gato.pat,eye:u.avatar_gato.eye,acc:u.avatar_gato.acc,clo:u.avatar_gato.clo,bg:u.avatar_gato.bg}:{fur:0,pat:1,eye:0,acc:0,clo:0,bg:0};
+  document.getElementById("sgU").value=u.apelido||"";
+  const temFoto=typeof u.avatar_url==="string"&&FOTO_DISCORD.test(u.avatar_url);
+  document.getElementById("sgFotoRow").style.display=temFoto?"":"none";
+  document.getElementById("sgFoto").checked=temFoto&&!!u.usar_foto;
+  document.getElementById("sgH").innerHTML=u.cadastro_completo===false?"Crie o seu <em>gatinho.</em>":"Edite o seu <em>gatinho.</em>";
+  document.getElementById("sgGoT").textContent=u.cadastro_completo===false?"Salvar meu gato":"Salvar";
+  sgErros("","");document.getElementById("sgm").classList.add("open");sgRender();
 }
-let sgM="email";
-function sgMeth(m){sgM=m;const b=document.getElementById("sgm");b.dataset.m=m;b.querySelectorAll(".sg-meth button").forEach(x=>x.classList.toggle("on",x.dataset.m===m));
-  document.getElementById("sgSoc").innerHTML=m==="email"?"":`${icon("clock")} Login com ${m==="google"?"Google":"Discord"} entra quando o site for ao ar. Por enquanto, escolha seu nome e crie o gatinho.`;
-  document.getElementById("sgGoT").textContent=NS.acct?"Salvar":m==="email"?"Criar conta":"Continuar com "+(m==="google"?"Google":"Discord");document.getElementById("sgErr").textContent=""}
 function closeSignup(){document.getElementById("sgm").classList.remove("open")}
-function submitSignup(){
-  const u=document.getElementById("sgU").value.trim(),e=document.getElementById("sgE").value.trim(),p=document.getElementById("sgP").value,chat=document.getElementById("sgChat").checked;
-  const er=document.getElementById("sgErr");
-  if(!/^[\w.-]{3,20}$/.test(u))return er.textContent="Usuário: 3 a 20 caracteres (letras, números, _ . -).";
-  if(sgM==="email"){
-    if(!/^\S+@\S+\.\S+$/.test(e))return er.textContent="Digite um e-mail válido.";
-    if(!NS.acct&&p.length<6)return er.textContent="A senha precisa de pelo menos 6 caracteres.";}
-  const isNew=!NS.acct;
-  NS.acct={user:u,email:sgM==="email"?e:"",via:sgM,av:{...sgO},chat};
-  nsSave();closeSignup();renderWallet();
-  if(isNew)toast("Conta criada! Seu gatinho já está no ranking",3200);
+async function submitSignup(){
+  if(sgSalvando)return;
+  const u=SESSAO&&SESSAO.usuario;if(!u)return;
+  const apelido=document.getElementById("sgU").value.trim();
+  if(!APELIDO_OK.test(apelido))return sgErros("apelido","Apelido: 3 a 20 caracteres (letras, números, _ . -).");
+  sgErros("","");
+  const corpo={avatar_gato:{fur:sgO.fur,pat:sgO.pat,eye:sgO.eye,acc:sgO.acc,clo:sgO.clo,bg:sgO.bg}};
+  if(apelido!==u.apelido)corpo.apelido=apelido;
+  const linhaFoto=document.getElementById("sgFotoRow");
+  if(linhaFoto.style.display!=="none")corpo.usar_foto=document.getElementById("sgFoto").checked;
+  const botao=document.getElementById("sgGo");sgSalvando=true;botao.disabled=true;
+  let r;
+  try{r=await Api.perfil(corpo,{silencioso:true})}
+  catch(e){
+    sgSalvando=false;botao.disabled=false;
+    if(e.status===401)return;
+    if(e.status===409)return sgErros("apelido","Esse apelido já está em uso. Escolha outro.");
+    if(e.status===422)return sgErros(e.campo||"",e.erro||"Valor inválido.");
+    if(e.status===0)return sgErros("","Sem conexão. Tente de novo.");
+    if(e.status===429)return sgErros("","Muitas alterações seguidas. Aguarde um pouco.");
+    if(e.status===503)return sgErros("","Serviço indisponível. Tente de novo em instantes.");
+    return sgErros("",e.erro||"Não foi possível salvar.");
+  }
+  sgSalvando=false;botao.disabled=false;
+  SESSAO.usuario=r.usuario;
+  closeSignup();updateAccount();
+  if(r.pacote_boas_vindas){
+    toast("Seu pacote de boas-vindas está esperando!",4200);
+    try{await atualizarCarteira()}catch(e){}
+    renderWallet();
+  }else toast("Perfil salvo!");
   if(typeof onAccountChange==="function")onAccountChange();
+  if(r.pacote_boas_vindas&&typeof bumpFab==="function")bumpFab();
 }
+
+// ---- Ranking (GET /api/ranking, público): abas por métrica, sem dados de exemplo ----
+const RK_METRICAS=[["xp","XP","XP"],["cartas","Cartas","cartas"]];
+let rkToken=0;
+function rkAvatar(it){
+  const ini=escapeHtml(String(it.apelido||"?").charAt(0).toUpperCase());
+  if(typeof it.avatar_url==="string"&&FOTO_DISCORD.test(it.avatar_url))
+    return `<img src="${escapeHtml(it.avatar_url)}" alt="" width="34" height="34" referrerpolicy="no-referrer" loading="lazy" decoding="async" onerror="this.replaceWith(document.createTextNode('${ini}'))">`;
+  return gatoValido(it.avatar_gato)?catSVG(it.avatar_gato):ini;
+}
+function rkLinha(it,unid){
+  const eu=meuApelido()&&String(it.apelido).toLowerCase()===meuApelido().toLowerCase();
+  const pat=RANKS.find(k=>k.name===it.patente),cor=escapeHtml(pat?pat.color:"#9aa3b2");
+  return `<div class="rkx${eu?" me":""}"><b>${escapeHtml(it.posicao)}</b><span class="av">${rkAvatar(it)}</span><span class="nm"><span class="n">${escapeHtml(it.apelido)}${eu?" (você)":""}</span>${it.patente?`<span class="pt" style="color:${cor};background:${cor}22">${escapeHtml(it.patente)}</span>`:""}</span><em>${fmt(it.valor)} ${unid}</em></div>`;
+}
+async function carregarRanking(el,metrica){
+  if(!el)return;
+  const m=RK_METRICAS.find(x=>x[0]===metrica)||RK_METRICAS[0],tok=++rkToken;
+  const abas=`<div class="rkx-tabs" role="tablist" aria-label="Ranking por">${RK_METRICAS.map(x=>`<button type="button" role="tab" aria-selected="${x[0]===m[0]}" class="${x[0]===m[0]?"on":""}" data-rk="${x[0]}">${x[1]}</button>`).join("")}</div>`;
+  const pintar=corpo=>{el.innerHTML=abas+corpo;el.querySelectorAll("[data-rk]").forEach(b=>b.onclick=()=>carregarRanking(el,b.dataset.rk));const t=el.querySelector("[data-tentar]");if(t)t.onclick=()=>carregarRanking(el,m[0])};
+  pintar(`<p class="rkx-st" role="status">Carregando o ranking…</p>`);
+  let r;
+  try{r=await Api.ranking(m[0],50,{silencioso:true})}
+  catch(e){if(tok!==rkToken)return;pintar(`<p class="rkx-st" role="alert">Não consegui carregar o ranking agora.<br><button type="button" class="rkx-bt" data-tentar>Tentar de novo</button></p>`);return}
+  if(tok!==rkToken)return;
+  const itens=(r&&r.itens)||[];
+  if(!itens.length)return pintar(`<p class="rkx-st">Ninguém no ranking ainda. Abra um pacote e seja o primeiro!</p>`);
+  pintar(`<div class="rkx-lista">${itens.map(it=>rkLinha(it,m[2])).join("")}</div>`);
+}
+
 // ---- Sessão do servidor (login com Discord): GET /api/eu ----
 let SESSAO=null;
 async function carregarSessao(){
@@ -237,26 +307,33 @@ function avisoDeLogin(){
   }catch(e){}
 }
 document.addEventListener("DOMContentLoaded",()=>{iniciarEconomia();avisoDeLogin()});
-// foto do Discord (URL montada pelo servidor); se não houver ou falhar ao carregar, mostra a inicial do apelido
+// avatar da conta: o gato (avatar_gato) é o padrão; a foto do Discord só com usar_foto=true. Fallback: inicial do apelido.
 function avatarSessaoHTML(u){
   const ini=escapeHtml(String(u.apelido||"?").charAt(0).toUpperCase());
-  const url=typeof u.avatar_url==="string"&&/^https:\/\/cdn\.discordapp\.com\/avatars\/[0-9]+\/[a-f0-9_]+\.png/.test(u.avatar_url)?u.avatar_url:"";
-  return url?`<img src="${escapeHtml(url)}" alt="" width="28" height="28" referrerpolicy="no-referrer" decoding="async" onerror="this.replaceWith(document.createTextNode('${ini}'))">`:ini;
+  const foto=u.usar_foto===true&&typeof u.avatar_url==="string"&&FOTO_DISCORD.test(u.avatar_url)?u.avatar_url:"";
+  if(foto)return `<img src="${escapeHtml(foto)}" alt="" width="28" height="28" referrerpolicy="no-referrer" decoding="async" onerror="this.replaceWith(document.createTextNode('${ini}'))">`;
+  return gatoValido(u.avatar_gato)?catSVG(u.avatar_gato):ini;
 }
 function contaSessaoHTML(){
   const u=SESSAO.usuario,p=SESSAO.patente&&SESSAO.patente.nome?SESSAO.patente.nome:"";
-  return `<div class="account-actions"><span class="sg-acct" title="Conectado com o Discord"><span class="sg-av">${avatarSessaoHTML(u)}</span><span>${escapeHtml(u.apelido)}${p?"<b>"+escapeHtml(p)+"</b>":""}</span></span><button type="button" onclick="sairDaConta()">Sair</button></div>`;
+  return `<div class="account-actions"><button type="button" class="sg-acct" onclick="openSignup()" title="Editar o meu gato e o meu apelido"><span class="sg-av">${avatarSessaoHTML(u)}</span><span>${escapeHtml(u.apelido)}${p?"<b>"+escapeHtml(p)+"</b>":""}</span></button><button type="button" onclick="sairDaConta()">Sair</button></div>`;
 }
 function updateAccount(){
-  const el=document.getElementById("acct");if(!el)return;const a=NS.acct;
+  const el=document.getElementById("acct");if(!el)return;
   if(SESSAO&&SESSAO.usuario){el.innerHTML=contaSessaoHTML();return}
-  el.innerHTML=a?`<button class="sg-acct" onclick="openSignup()"><span class="sg-av">${catSVG(a.av)}</span><span>${escapeHtml(a.user)}<b>Gato nível ${nivelPatente()+1}</b></span></button>`:`<div class="account-actions">
+  el.innerHTML=`<div class="account-actions">
     <button type="button" class="account-login" onclick="openLogin()">${icon("login")}Login</button>
   </div>`;
 }
 function openLogin(){const dlg=document.getElementById("login-dialog");if(!dlg)return;const l=document.getElementById("lgDiscord");if(l)l.href="/api/auth/discord?voltar="+encodeURIComponent(location.pathname+location.search);dlg.showModal()}
 function closeLogin(){const dlg=document.getElementById("login-dialog");dlg&&dlg.open&&dlg.close()}
-const needAccount=()=>{if(NS.acct)return false;toast("Crie sua conta (e seu gatinho) primeiro 🐱");openSignup();return true};
+const needAccount=()=>{
+  if(temConta())return false;
+  if(!SESSAO&&ECO.indisponivel){toast("Servidor indisponível. Use “Tentar de novo” e espere carregar.");return true}
+  if(SESSAO&&SESSAO.usuario){toast("Crie o seu gatinho primeiro 🐱");openSignup()}
+  else{toast("Entre na sua conta primeiro");openLogin()}
+  return true;
+};
 
 // ---- Modo teste (para demonstrar a progressão) ----
 function openTestPanel(){
@@ -444,28 +521,18 @@ function openPop(anchor,items){
 (function inject(){
   const G='<svg viewBox="0 0 24 24" width="18" height="18"><path fill="#4285F4" d="M22.5 12.3c0-.8-.1-1.5-.2-2.2H12v4.2h5.9a5 5 0 0 1-2.2 3.3v2.7h3.5c2.1-1.9 3.3-4.7 3.3-8z"/><path fill="#34A853" d="M12 23c3 0 5.5-1 7.3-2.7l-3.5-2.7c-1 .7-2.3 1.1-3.8 1.1-2.9 0-5.4-2-6.3-4.7H2.1v2.8A11 11 0 0 0 12 23z"/><path fill="#FBBC05" d="M5.7 14c-.2-.7-.4-1.3-.4-2s.1-1.4.4-2V7.2H2.1a11 11 0 0 0 0 9.6L5.7 14z"/><path fill="#EA4335" d="M12 5.4c1.6 0 3.1.6 4.2 1.7l3.1-3.1A11 11 0 0 0 2.1 7.2L5.7 10c.9-2.7 3.4-4.6 6.3-4.6z"/></svg>';
   const D='<svg viewBox="0 0 24 24" width="18" height="18"><path fill="#5865F2" d="M20.3 4.4A19.6 19.6 0 0 0 15.4 3l-.6 1.3a18 18 0 0 0-5.6 0L8.6 3a19.5 19.5 0 0 0-4.9 1.5C.6 9.1-.3 13.6.1 18.1a19.8 19.8 0 0 0 6 3l1.3-2.1a12.8 12.8 0 0 1-2-1l.5-.4a14 14 0 0 0 12.1 0l.5.4-2 1 1.3 2.1a19.7 19.7 0 0 0 6-3c.5-5.2-.9-9.7-3.5-13.7zM8 15.4c-1.2 0-2.2-1.1-2.2-2.4S6.8 10.6 8 10.6s2.2 1.1 2.2 2.4-1 2.4-2.2 2.4zm8 0c-1.2 0-2.2-1.1-2.2-2.4s1-2.4 2.2-2.4 2.2 1.1 2.2 2.4-1 2.4-2.2 2.4z"/></svg>';
-  const d=document.createElement("div");d.innerHTML=`<div id="sgm" onclick="if(event.target===this)closeSignup()">
+  const d=document.createElement("div");d.innerHTML=`<div id="sgm" onclick="if(event.target===this)closeSignup()" role="dialog" aria-modal="true" aria-labelledby="sgH">
   <div class="sg-box">
     <button class="sg-x" onclick="closeSignup()" aria-label="Fechar">${icon("xmark")}</button>
     <div class="sg-form">
-      <div class="sg-steps"><span class="on"><b>1</b>Sua conta</span><i></i><span class="on"><b>2</b>Seu gatinho</span></div>
-      <h2>Entre para o <em>museu.</em></h2>
-      <p class="s">Junte figurinhas, avalie vídeos e suba no ranking. Todo mundo começa com o mesmo gato.</p>
-      <div class="sg-meth" role="tablist">
-        <button data-m="google" onclick="sgMeth('google')">${G}<span>Google</span></button>
-        <button data-m="discord" onclick="sgMeth('discord')">${D}<span>Discord</span></button>
-        <button data-m="email" onclick="sgMeth('email')">${icon("mail")}<span>E-mail</span></button>
-      </div>
-      <div class="sg-soc-note" id="sgSoc"></div>
-      <div class="sg-fl"><input class="t" id="sgU" placeholder=" " maxlength="20" autocomplete="username"><label for="sgU">Nome de usuário</label></div>
-      <div class="sg-em">
-        <div class="sg-fl"><input class="t" id="sgE" type="email" placeholder=" " autocomplete="email"><label for="sgE">E-mail</label></div>
-        <div class="sg-fl"><input class="t" id="sgP" type="password" placeholder=" " autocomplete="new-password"><label for="sgP">Senha (mín. 6 caracteres)</label></div>
-      </div>
-      <label class="sg-chk"><input type="checkbox" id="sgChat"><span class="bx">${icon("check")}</span><span>Sou do Xet da live do Cid<small>Faço parte da comunidade da live</small></span></label>
-      <div class="sg-err" id="sgErr"></div>
-      <button class="sg-go" onclick="submitSignup()"><span id="sgGoT">Criar conta</span> →</button>
-      <p class="sg-note">Protótipo: nenhuma conta real é criada. Avatar, moedas e cartas ficam salvos só neste navegador, e a senha não é guardada.</p>
+      <div class="sg-steps"><span class="on"><b>1</b>Seu perfil</span><i></i><span class="on"><b>2</b>Seu gatinho</span></div>
+      <h2 id="sgH">Crie o seu <em>gatinho.</em></h2>
+      <p class="s">Escolha o apelido e o visual do seu gato. Ele aparece no ranking e nos comentários.</p>
+      <div class="sg-fl"><input class="t" id="sgU" placeholder=" " maxlength="20" autocomplete="username" aria-describedby="sgErrU"><label for="sgU">Apelido</label></div>
+      <div class="sg-err" id="sgErrU" role="alert"></div>
+      <label class="sg-chk" id="sgFotoRow" style="display:none"><input type="checkbox" id="sgFoto"><span class="bx">${icon("check")}</span><span>Usar minha foto do Discord<small>No lugar do gato, no cabeçalho e no ranking</small></span></label>
+      <div class="sg-err" id="sgErr" role="alert"></div>
+      <button class="sg-go" id="sgGo" onclick="submitSignup()"><span id="sgGoT">Salvar meu gato</span> →</button>
     </div>
     <div class="sg-studio">
       <div class="sg-pv">
@@ -487,7 +554,6 @@ function openPop(anchor,items){
       <a class="lg-net" id="lgDiscord" href="/api/auth/discord">${D}<span>Continuar com Discord</span></a>
       <button type="button" class="lg-net" disabled aria-disabled="true">${G}<span>Google</span><small>em breve</small></button>
     </div>
-    <p class="lg-new">Sou novo, <button type="button" class="lg-link" onclick="closeLogin();openSignup()">criar conta</button></p>
     <form method="dialog" class="lg-close"><button>Fechar</button></form>
   </dialog>`);
   document.addEventListener("keydown",e=>{if(e.key==="Escape"){closeSignup();const t=document.getElementById("tp");t&&t.classList.remove("open");const p=document.getElementById("pop");p&&p.classList.remove("open")}});
