@@ -1,9 +1,8 @@
 // Sobe.Desce: ranking real dos memes mais visitados (abriu) e mais clicados (deu play), hoje ou desde sempre.
-import { createHmac } from 'node:crypto';
+import { hashIp } from '../lib/ip.js';
 import { send, lerJson, limited } from '../lib/http.js';
 import { VOTE_ID } from './votos.js';
 
-const hashIp = (adminToken, ip) => createHmac('sha256', adminToken || 'naosalvo').update(String(ip)).digest('hex').slice(0, 32);
 const TIPOS = { visitados: 'visita', clicados: 'clique' };
 const HOJE = "(now() AT TIME ZONE 'America/Sao_Paulo')::date";
 

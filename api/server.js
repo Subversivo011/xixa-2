@@ -3,6 +3,7 @@
 import { migrar, segredo, criarPoolDoAmbiente } from './migrate.js';
 import { criarApp } from './app.js';
 import { criarAutenticadorStub } from './auth-stub.js';
+import { agendarLimpezaEventosIp } from './lib/limpeza.js';
 
 // falha ANTES de tocar no banco se o stub estiver ligado em produção (ver auth-stub.js)
 const autenticar = criarAutenticadorStub();
@@ -18,4 +19,5 @@ const { server } = criarApp({
   ytKey: segredo('YT_API_KEY'), // opcional: sem chave, /api/yt-stats devolve {}
   autenticar // provisório até o login Discord: null (economia responde 401) salvo AUTH_STUB=1 em dev
 });
+agendarLimpezaEventosIp(pool); // apaga eventos_meme_ip antigos: já no boot e a cada 6h
 server.listen(3000, () => console.log('naosalvo-api :3000'));

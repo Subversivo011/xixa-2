@@ -1,11 +1,10 @@
 // Memepédia: textos de cada meme escritos pela comunidade (a moderação aprova antes de publicar).
-import { createHmac } from 'node:crypto';
+import { hashIp } from '../lib/ip.js';
 import { send, lerJson, clean, limited } from '../lib/http.js';
 import { VOTE_ID } from './votos.js';
 
 export const CAMPOS_MEMEPEDIA = ['origem', 'porque', 'usos', 'rede', 'hoje', 'curiosidades'];
 export const EDICOES_PENDENTES_POR_IP = 5; // por meme
-const hashIp = (adminToken, ip) => createHmac('sha256', adminToken || 'naosalvo').update(String(ip)).digest('hex').slice(0, 32);
 
 export default function registrar(r) {
   // texto publicado: último aprovado de cada campo (de um meme, ou de todos para a lista)
