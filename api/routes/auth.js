@@ -1,10 +1,11 @@
 // Login com Discord, sessão e perfil: GET /api/auth/discord, GET /api/auth/discord/callback, POST /api/auth/sair, GET /api/eu.
 // Config em ctx.auth = { discord (lerConfigDiscord | null), fetch, cookieSecure, origemSite }.
-import { send, limited } from '../lib/http.js';
+import { send, limited, lerJson } from '../lib/http.js';
 import { lerCookies, montarCookie, apagarCookie } from '../lib/cookies.js';
 import { verificarCsrf } from '../lib/csrf.js';
 import { patenteDoUsuario } from '../lib/patente.js';
 import { ErroNegocio, carteira } from '../economia/servico.js';
+import { lerPerfil, atualizarPerfil } from './../auth/perfil.js';
 import {
   caminhoSeguro, comParametro, novoState, empacotarState, desempacotarState, stateConfere, urlDeAutorizacao,
   trocarCodigo, buscarPerfil, ehMembro, acharOuCriarUsuario, ErroDiscord, chaveDoState, VALIDADE_STATE_S
@@ -86,26 +87,38 @@ export default function registrar(r) {
     return send(res, 200, { ok: true }, { 'Set-Cookie': limpa });
   });
 
-  // quem sou eu: usuário, patente (pelo XP, no servidor), saldo e o token CSRF desta sessão
+  // quem sou eu: perfil, patente (pelo XP, no servidor), saldo e o token CSRF desta sessão
   r.get('/api/eu', async ({ res, pool, usuario }) => {
-    let atual, proxima, c, rows, conta;
+    let atual, proxima, c, perfil;
     try {
-      [{ atual, proxima }, c, { rows }, { rows: conta }] = await Promise.all([
+      [{ atual, proxima }, c, perfil] = await Promise.all([
         patenteDoUsuario(pool, usuario.id),
         carteira(pool, usuario),
-        pool.query('SELECT avatar_gato FROM usuarios WHERE id = $1', [usuario.id]),
-        pool.query("SELECT avatar_url FROM contas_oauth WHERE usuario_id = $1 AND provedor = 'discord' LIMIT 1", [usuario.id])
+        lerPerfil(pool, usuario.id)
       ]);
     } catch (e) {
       if (e instanceof ErroNegocio) return send(res, e.status, { erro: e.message });
       throw e;
     }
     return send(res, 200, {
-      usuario: { id: Number(usuario.id), apelido: usuario.apelido, avatar_gato: rows[0]?.avatar_gato || {}, avatar_url: conta[0]?.avatar_url ?? null },
+      usuario: perfil,
       patente: atual && { id: atual.id, nome: atual.nome, cor: atual.cor, xp_minimo: atual.xp_minimo },
       proxima_patente: proxima && { id: proxima.id, nome: proxima.nome, xp_minimo: proxima.xp_minimo, faltam: proxima.xp_minimo - c.xp },
       moedas: c.moedas, xp: c.xp,
       csrf: usuario.csrf || null // enviar em X-CSRF nas chamadas que alteram dados
     });
+  }, { autenticada: true });
+
+  // edita o perfil: apelido, gato (avatar padrão) e usar_foto. A 1ª vez que o gato é salvo completa o cadastro e dá o pacote de boas-vindas.
+  r.patch('/api/eu', async ({ req, res, pool, usuario }) => {
+    if (limited('perfil:' + usuario.id, 30)) return send(res, 429, { erro: 'Muitas alterações. Aguarde um pouco.' });
+    const corpo = await lerJson(req);
+    if (corpo === undefined) return send(res, 400, { erro: 'json inválido' });
+    try {
+      return send(res, 200, await atualizarPerfil(pool, usuario, corpo));
+    } catch (e) {
+      if (e instanceof ErroNegocio) return send(res, e.status, { erro: e.message, ...(e.campo ? { campo: e.campo } : {}) });
+      throw e;
+    }
   }, { autenticada: true });
 }

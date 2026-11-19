@@ -87,3 +87,17 @@ A API só enxerga o IP certo se `TRUSTED_PROXY_HOPS` bater com a cadeia real (pa
    - É um IP que você não reconhece e muda a cada request? Há proxies a mais: **aumente**.
 3. Teste de forja: `curl -H 'X-Forwarded-For: 6.6.6.6' https://naosalvo-dev.fishlab.com.br/api/auth/discord -o /dev/null` e confira que `6.6.6.6` não aparece como IP da sessão/rate limit (o valor forjado fica à esquerda e é ignorado).
 4. Para mudar: variável de ambiente `TRUSTED_PROXY_HOPS` no serviço `api` das stacks (hoje não definida = 2) e redeploy.
+
+## Antes da migração 013 (perfil e cadastro)
+
+A 013 cria o índice único parcial `pacotes_estoque_boas_uq` (1 pacote `boas` por usuário). Se existir usuário com mais de um, o índice falha e a migração é desfeita (a API não sobe até corrigir). Confira antes, no banco alvo; o esperado é **0 linhas**:
+
+```sql
+SELECT usuario_id, count(*) AS n
+  FROM pacotes_estoque
+ WHERE origem = 'boas'
+ GROUP BY usuario_id
+HAVING count(*) > 1;
+```
+
+Se aparecer linha: `pg_dump` antes e apague os excedentes não abertos (`usado_em IS NULL`), deixando um por usuário. As colunas novas (`usar_foto`, `cadastro_completo_em`) são aditivas. Quem já existe fica com `cadastro_completo_em` nulo: o front leva essas contas ao criador de gato, e o pacote de boas-vindas vem ao salvar o gato (quem já tinha ganhado `boas` pela visita antiga não ganha outro).
