@@ -1,0 +1,6 @@
+# Revisão por área (vale com "Require review from Code Owners" na proteção do main).
+# Ajustar para os usuários reais antes de ativar.
+*          @willianjack0
+/api/      @willianjack0
+/deploy/   @willianjack0
+/.github/  @willianjack0
