@@ -386,7 +386,7 @@ function renderFooter(){
       <button class="fq-art" onclick="openFeedback()" aria-label="Mandar feedback">${PHONE_SVG}</button>
       <span class="fq-txt"><span class="fq-logo">fala<i>.</i>que<i>.</i>eu<i>.</i>te<i>.</i>escut<span class="fq-o">o</span></span>
         <span class="fq-l1">feedback? <em>Quer contribuir com ideias?</em></span><span class="fq-l2">a pessoa amada em 7 dias?</span><span class="fq-l3">ajoelha e envia.</span></span>
-      <span class="fq-acts"><button class="fq-go" onclick="openFeedback()">${icon("send")}Mandar feedback</button><a class="fq-go alt" href="/contribuir/">${icon("user")}Quero contribuir com ideias</a></span>
+      <span class="fq-acts"><button class="fq-go" onclick="openFeedback()">${icon("send")}Mandar feedback</button><a class="fq-go alt" href="/contribuir/">${icon("user")}Quero contribuir</a></span>
     </div>
   </div>
   <div class="ft-band"><div class="ft-band-in">
