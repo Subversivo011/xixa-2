@@ -644,20 +644,6 @@
     "saves": 1700
   },
   {
-    "id": "cade-o-richard",
-    "title": "Cadê o Richard?",
-    "file": "cade-o-richard.jpg",
-    "year": 2017,
-    "date": "2017-04-05",
-    "cat": "tv",
-    "catLabel": "TV",
-    "rarity": "Classico",
-    "by": "Jornalismo Aventura",
-    "context": "A procura aflita pelo explorador de animais silvestres no meio do matagal que virou bordão de busca.",
-    "views": 31000,
-    "saves": 1250
-  },
-  {
     "id": "canarinho-pistola",
     "title": "Canarinho Pistola",
     "file": "canarinho-pistola.webp",
@@ -784,20 +770,6 @@
     "saves": 1600
   },
   {
-    "id": "video-viral-2023",
-    "title": "Registro Viral Comunitário 2023",
-    "file": "1064550255_1794969532808627.mp4",
-    "year": 2023,
-    "date": "2023-11-05",
-    "cat": "videos",
-    "catLabel": "Vídeos Curtos",
-    "rarity": "Classico",
-    "by": "Comunidade XET",
-    "context": "Corte em vídeo resgatado dos grupos de mensagens e streams da comunidade.",
-    "views": 25000,
-    "saves": 890
-  },
-  {
     "id": "que-show-da-xuxa-e-esse",
     "title": "Que Show da Xuxa É Esse?!",
     "file": "que-show-da-xuxa-e-esse.jpg",
@@ -810,19 +782,5 @@
     "context": "A menina revoltada de laço na cabeça barrada na gravação do Xou da Xuxa em 1988, descoberta no documentário de 2024 e virando febre instantânea.",
     "views": 240000,
     "saves": 19500
-  },
-  {
-    "id": "video-viral-2024",
-    "title": "Corte de Live 2024",
-    "file": "lv_0_20261117231817.mp4",
-    "year": 2024,
-    "date": "2024-11-17",
-    "cat": "videos",
-    "catLabel": "Vídeos",
-    "rarity": "Classico",
-    "by": "Comunidade XET",
-    "context": "Momento hilário capturado em live recente antes da inauguração do museu.",
-    "views": 22000,
-    "saves": 950
   }
 ]

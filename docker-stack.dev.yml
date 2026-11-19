@@ -1,0 +1,52 @@
+# Ambiente de desenvolvimento (branch dev) no servidor 2.
+# Deploy: docker --context servidor2 stack deploy -c docker-stack.dev.yml naosalvo-dev
+version: '3.8'
+
+services:
+  web:
+    image: naosalvo-frontend:dev
+    deploy:
+      replicas: 1
+      labels:
+        - "traefik.enable=true"
+        - "traefik.docker.network=v0net"
+        - "traefik.http.routers.naosalvo-dev.rule=Host(`naosalvo-dev.fishlab.com.br`)"
+        - "traefik.http.routers.naosalvo-dev.entrypoints=websecure"
+        - "traefik.http.routers.naosalvo-dev.tls.certresolver=letsencryptresolver"
+        - "traefik.http.services.naosalvo-dev.loadbalancer.server.port=80"
+    networks:
+      - v0net
+
+  api:
+    image: naosalvo-api:dev
+    environment:
+      DB_HOST: postgres
+      DB_NAME: naosalvo_dev
+      DB_USER: naosalvo_dev
+      DB_PASSWORD_FILE: /run/secrets/naosalvo_dev_db_password
+      ADMIN_TOKEN_FILE: /run/secrets/naosalvo_dev_admin_token
+    secrets:
+      - naosalvo_dev_db_password
+      - naosalvo_dev_admin_token
+    deploy:
+      replicas: 1
+      labels:
+        - "traefik.enable=true"
+        - "traefik.docker.network=v0net"
+        - "traefik.http.routers.naosalvo-dev-api.rule=Host(`naosalvo-dev.fishlab.com.br`) && PathPrefix(`/api`)"
+        - "traefik.http.routers.naosalvo-dev-api.priority=100"
+        - "traefik.http.routers.naosalvo-dev-api.entrypoints=websecure"
+        - "traefik.http.routers.naosalvo-dev-api.tls.certresolver=letsencryptresolver"
+        - "traefik.http.services.naosalvo-dev-api.loadbalancer.server.port=3000"
+    networks:
+      - v0net
+
+secrets:
+  naosalvo_dev_db_password:
+    external: true
+  naosalvo_dev_admin_token:
+    external: true
+
+networks:
+  v0net:
+    external: true

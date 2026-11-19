@@ -496,6 +496,8 @@ naosalvo-2/
 ├── data.js                 # MEMES (59), YEAR_INFO (2004 a 2020+) e COLLECTIONS (8 coleções, 109 cartas)
 ├── player.js               # Player do YouTube
 ├── viewer.js / viewer.css  # Tela de vídeo e foto no visual de cada época, votos e sons
+├── alertas.js              # Alertas de época sorteados no player (MSN, Orkut, WhatsApp, Pix…)
+├── sons/                   # MP3 opcionais dos alertas (ver sons/LEIA-ME.md); sem arquivo, o som é sintetizado
 ├── theme.css               # Tokens de cor, tema claro/escuro, cabeçalho, menus e rodapé
 ├── home.css                # Estilos dos blocos da home
 ├── album.css               # Estilos do álbum e da abertura de pacotes
@@ -591,6 +593,20 @@ A paleta vem do logo (azul do céu e azul da marca) e o fundo tem raios de luz. 
 
 ---
 
+## Ambientes e branches
+
+| Ambiente | Endereço | Branch | Stack | Banco |
+|---|---|---|---|---|
+| Local (produção do protótipo) | `naosalvo-local.fishlab.com.br` | `main` | `naosalvo` (`docker-stack.yml`) | `naosalvo` |
+| Desenvolvimento | `naosalvo-dev.fishlab.com.br` | `dev` | `naosalvo-dev` (`docker-stack.dev.yml`) | `naosalvo_dev` |
+
+- `main` guarda o protótipo visual (tag `v0.1-prototipo`). `dev` é onde o banco, o back e a estrutura nova são montados e testados antes de chegar ao `main`.
+- Cada ambiente tem segredos próprios (`naosalvo_*` e `naosalvo_dev_*`) e imagens separadas (`:latest` e `:dev`).
+- Deploy do dev: `docker build -t naosalvo-api:dev ./api && docker build -t naosalvo-frontend:dev . && docker stack deploy -c docker-stack.dev.yml naosalvo-dev` (contexto `servidor2`).
+- Deploy automático: o serviço `naosalvo-deployer` publica `main` e `dev` sozinho (`deploy/auto/`).
+- Próximos passos (banco, API, admin e front): [`docs/PLANO-IMPLEMENTACAO.md`](docs/PLANO-IMPLEMENTACAO.md).
+- DNS: o registro `naosalvo-dev` no Cloudflare deve apontar para o mesmo destino do `naosalvo-local` (com proxy).
+
 ## 7. Formulário de Contribuidores, Dashboard e API
 
 Cadastro de quem quer ajudar o projeto, mais as rotas de votos, visualizações e feedback do site. Os dados vão para um banco PostgreSQL próprio (`naosalvo`), no servidor 2.
@@ -620,10 +636,14 @@ Cadastro de quem quer ajudar o projeto, mais as rotas de votos, visualizações 
 | `/api/admin/feedback/:id` | DELETE | Admin | Exclui um feedback |
 | `/api/admin/comentarios` | GET | Admin | Lista os comentários das fotos (Bearer token) |
 | `/api/admin/comentarios/:id` | DELETE | Admin | Apaga um comentário (moderação) |
+| `/api/links` | POST | `viewer.js` | Link do YouTube enviado pela comunidade para meme sem vídeo (`id`, `yt` de 11 caracteres, `autor`; honeypot; 10 por 10 min por IP). Fica `pendente` |
+| `/api/links/aprovados` | GET | `viewer.js` | `{ meme_id: yt }` dos links aprovados; o site usa no lugar do vídeo que faltava |
+| `/api/admin/links` | GET | Dashboard | Lista os links enviados, pendentes primeiro (Bearer token) |
+| `/api/admin/links/:id` | POST | Dashboard | Aprova ou recusa (`{ status: "aprovado" \| "recusado" }`) |
 
 **Segurança:** validação no servidor, Discord único, honeypot, rate limit por IP, CSV sem injeção de fórmula. Senha do banco, token admin e (opcionalmente) a chave do YouTube são lidos de arquivos de Docker secrets (`DB_PASSWORD_FILE`, `ADMIN_TOKEN_FILE`, `YT_API_KEY_FILE`), nunca do git. O dashboard tem `noindex`.
 
-**Deploy (servidor 2):** `docker build -t naosalvo-api:latest ./api && docker build -t naosalvo-frontend:latest . && docker stack deploy -c docker-stack.yml naosalvo`. As tabelas `contribuidores`, `votos`, `feedback` e `comentarios` são criadas pela API na primeira subida. O site fica em `naosalvo-local.fishlab.com.br`; o Traefik envia `/api` para a API (porta 3000) e o resto para o nginx.
+**Deploy (servidor 2):** `docker build -t naosalvo-api:latest ./api && docker build -t naosalvo-frontend:latest . && docker stack deploy -c docker-stack.yml naosalvo`. As tabelas `contribuidores`, `votos`, `feedback`, `comentarios` e `links_sugeridos` são criadas pela API na primeira subida. O site fica em `naosalvo-local.fishlab.com.br`; o Traefik envia `/api` para a API (porta 3000) e o resto para o nginx.
 
 ---
 

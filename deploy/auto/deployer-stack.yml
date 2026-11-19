@@ -1,0 +1,17 @@
+# docker --context servidor2 build -t naosalvo-deployer:latest deploy/auto
+# docker --context servidor2 stack deploy -c deploy/auto/deployer-stack.yml naosalvo-deployer
+version: '3.8'
+services:
+  deployer:
+    image: naosalvo-deployer:latest
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - state:/state
+    deploy:
+      replicas: 1
+      placement:
+        constraints: [node.role == manager]
+      restart_policy:
+        condition: any
+volumes:
+  state:
