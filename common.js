@@ -380,20 +380,18 @@ function ftGo(k){
 }
 function renderFooter(){
   if(document.getElementById("nsft"))return;
-  const f=document.createElement("footer");f.id="nsft";f.className="nsft";
-  f.innerHTML=`<div class="ft-wrap">
-    <div class="fq">
+  const f=document.createElement("footer");f.id="nsft";f.className="nsft nsft2";
+  f.innerHTML=`  <div class="ft-band"><div class="ft-band-in">
+    <div class="ft-legal">${socialHTML()}<b>Aviso legal</b>
+      <p>O Não Salvo é apenas um compilado de vídeos e fotos que já estão publicados na internet. Não hospedamos nenhum vídeo: todos são exibidos direto do YouTube, pelo player oficial, e continuam pertencendo aos seus autores e canais de origem. As fotos e marcas citadas pertencem aos seus respectivos donos.</p>
+      <p>É dono de algum conteúdo e quer que ele saia daqui? <button onclick="openFeedback('remocao')">Peça a remoção</button> e a gente tira.</p>
+      <small>© ${new Date().getFullYear()} Não Salvo · projeto de fã, sem fins lucrativos</small></div>
+    <div class="fq fq-in">
       <button class="fq-art" onclick="openFeedback()" aria-label="Mandar feedback">${PHONE_SVG}</button>
       <span class="fq-txt"><span class="fq-logo">fala<i>.</i>que<i>.</i>eu<i>.</i>te<i>.</i>escut<span class="fq-o">o</span></span>
         <span class="fq-l1">feedback? <em>Quer contribuir com ideias?</em></span><span class="fq-l2">a pessoa amada em 7 dias?</span><span class="fq-l3">ajoelha e envia.</span></span>
       <span class="fq-acts"><button class="fq-go" onclick="openFeedback()">${icon("send")}Mandar feedback</button><a class="fq-go alt" href="/contribuir/">${icon("user")}Quero contribuir</a></span>
     </div>
-  </div>
-  <div class="ft-band"><div class="ft-band-in">
-    <div class="ft-legal">${socialHTML()}<b>Aviso legal</b>
-      <p>O Não Salvo é apenas um compilado de vídeos e fotos que já estão publicados na internet. Não hospedamos nenhum vídeo: todos são exibidos direto do YouTube, pelo player oficial, e continuam pertencendo aos seus autores e canais de origem. As fotos e marcas citadas pertencem aos seus respectivos donos.</p>
-      <p>É dono de algum conteúdo e quer que ele saia daqui? <button onclick="openFeedback('remocao')">Peça a remoção</button> e a gente tira.</p>
-      <small>© ${new Date().getFullYear()} Não Salvo · projeto de fã, sem fins lucrativos</small></div>
     <img class="ft-boneco" src="boneco.png?v=2" alt="" width="478" height="600">
   </div></div>`;
   document.body.appendChild(f);
