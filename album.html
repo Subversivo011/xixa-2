@@ -7,8 +7,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Inter:wght@400;500;600;700&family=Baloo+2:wght@700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="theme.css?v=20261119k">
-<link rel="stylesheet" href="viewer.css?v=20261119k">
+<link rel="stylesheet" href="theme.css?v=20261119n">
+<link rel="stylesheet" href="viewer.css?v=20261119n">
 <script>try{var t=localStorage.getItem("ns_theme")}catch(e){}document.documentElement.dataset.theme=t==="dark"?"dark":"light"</script>
 <style>
 :root{--Comum:#8e939c;--Relevante:#2fbf5b;--Raro:#2f86ff;--Relíquia:#a35cff;--Lendário:#e8a317;--Mítico:#ff4a4a}
@@ -108,6 +108,7 @@
 .new{position:absolute;top:-8px;right:-6px;background:#ff3b6b;color:#fff;font-size:10px;font-weight:800;padding:3px 8px;border-radius:99px;z-index:5;letter-spacing:.5px}
 .mclose{margin:18px auto 0;display:block;padding:12px 28px;border-radius:12px;background:linear-gradient(180deg,var(--brand2),var(--brand-strong));color:#fff;font-weight:800;letter-spacing:.6px;box-shadow:0 6px 20px var(--glow)}
 .rk{display:flex;align-items:center;gap:12px;padding:9px 6px;border-bottom:1px solid var(--line);font-size:13px}
+.rk.cid{background:linear-gradient(90deg,#ffd23f22,transparent);border-radius:8px}.rk.cid b{font-size:16px}.rk small{display:block;font-size:10px;color:var(--mut)}
 .rk b{width:22px;text-align:center;color:var(--mut)}.rk .av{width:30px;height:30px;border-radius:50%;overflow:hidden}.rk .av svg{width:100%;height:100%;display:block}.rk span{flex:1}.rk em{font-style:normal;color:var(--brand);font-weight:700}
 .note{grid-column:1/-1;text-align:center;font-size:11px;color:var(--faint);margin-top:6px}
 .pk-wrap{display:grid;place-items:center;padding:10px 0 4px;perspective:900px}
@@ -149,7 +150,7 @@
 @media(max-width:1100px){.layout{grid-template-columns:210px minmax(0,1fr)}.det{grid-column:1/-1;border:0;padding:0;position:static;max-width:380px;margin:0 auto}}
 @media(max-width:720px){.layout{grid-template-columns:1fr;padding:12px}.cards{grid-template-columns:repeat(2,1fr)}.album{padding-left:34px}.pack{grid-template-columns:repeat(3,1fr);gap:8px}}
 </style>
-<link rel="stylesheet" href="album.css?v=20261119m">
+<link rel="stylesheet" href="album.css?v=20261119n">
 </head>
 <body>
 
@@ -192,17 +193,18 @@
 <div class="modal" id="modal" onclick="if(event.target===this)closeModal()"><div class="mbox" id="mbox"></div></div>
 
 <form name="feedback" data-netlify="true" netlify-honeypot="bot-field" hidden><input name="tipo"><textarea name="msg"></textarea><input name="contato"><input name="pagina"><input name="bot-field"></form>
-<script src="common.js?v=20261119m"></script>
-<script src="data.js?v=20261119k"></script>
-<script src="player.js?v=20261119l"></script>
-<script src="viewer.js?v=20261119k"></script>
-<script src="alertas.js?v=20261119k"></script>
+<script src="common.js?v=20261119n"></script>
+<script src="data.js?v=20261119n"></script>
+<script src="player.js?v=20261119n"></script>
+<script src="viewer.js?v=20261119n"></script>
+<script src="alertas.js?v=20261119n"></script>
 <script>
 renderHeader("album",{sub:[
   {k:"cols",ic:"collections",label:"Coleções",fn:()=>{setSubOn("cols");document.querySelector(".side").scrollIntoView({behavior:"smooth"})}},
   {k:"shop",ic:"shop",label:"Loja",fn:()=>openShop()},
   {k:"conv",ic:"convert",label:"Converter repetidas",fn:()=>convertAll()},
-  {k:"rank",ic:"ranking",label:"Ranking",fn:()=>openRank()}
+  {k:"rank",ic:"ranking",label:"Ranking",fn:()=>openRank()},
+  {k:"wiki",ic:"book",label:"Memepédia",href:"memepedia.html"}
 ]});
 setSubOn("cols");
 document.querySelectorAll("[data-ic]").forEach(e=>e.outerHTML=icon(e.dataset.ic));document.getElementById("coinIc").innerHTML=icon("coin");
@@ -286,7 +288,7 @@ let vpl=null;
 // fim da revelação (todas viradas ou pacote fechado): só agora carteira, XP, patente e o álbum atrás aparecem
 function settlePack(){if(!packOpen)return;packOpen=false;holdWallet(false);renderAll()}
 function closeModal(){vpl&&vpl.stop();$("modal").classList.remove("open");settlePack()}
-function watch(id){const m=MEMES.find(x=>x.id===id);if(!m)return;closeModal();const rel=MEMES.filter(x=>x.id!==m.id).sort((p,q)=>Math.abs(p.y-m.y)-Math.abs(q.y-m.y));openViewer(m,{related:rel,onPick:watch,onYear:y=>{location.href="index.html#"+(y>=2020?"2020mais":y)}})}
+function watch(id){const m=MEMES.find(x=>x.id===id);if(!m)return;closeModal();const rel=MEMES.filter(x=>x.id!==m.id).sort((p,q)=>Math.abs(p.y-m.y)-Math.abs(q.y-m.y));openViewer(m,{related:rel,onPick:watch,onYear:y=>{location.href="index.html#"+y}})}
 
 // ---- moedas: repetida vira moeda ----
 function convertOne(id){const c=byId[id];if(owned(c)<2)return;NS.owned[id]--;addCoins(DUP_VALUE[c.r],`(${c.name} repetida)`);renderAll()}
@@ -375,8 +377,9 @@ function openShop(){
 }
 function openRank(){
   const me=CARDS.filter(c=>owned(c)>0).length,T=CARDS.length,name=NS.acct?NS.acct.user:"você";
-  const people=[["colecionador_pro",Math.round(T*.94)],["gatoNostalgico",Math.round(T*.81)],["Cid Cidoso",Math.round(T*.77)],["viralizador",Math.round(T*.6)],[name,me,1],["faqo",Math.round(T*.2)],["lendarium",Math.round(T*.12)]].sort((a,b)=>b[1]-a[1]);
-  openModal(`<h3>Ranking de colecionadores</h3><p>Usuários de exemplo. Quem completar o álbum primeiro ganha selo especial.</p>${people.map(([n,v,me2],i)=>`<div class="rk"><b>${i+1}</b><span class="av">${catSVG(me2&&NS.acct?NS.acct.av:{fur:(i*3)%10,pat:i%5,eye:i%5,acc:(i*2)%9,clo:i%7,bg:i%8})}</span><span>${escapeHtml(n)}${me2?" (você)":""}</span><em>${v} / ${T}</em></div>`).join("")}<button class="mclose" onclick="closeModal()">FECHAR</button>`);
+  const people=[["colecionador_pro",Math.round(T*.94)],["gatoNostalgico",Math.round(T*.81)],["viralizador",Math.round(T*.6)],[name,me,1],["faqo",Math.round(T*.2)],["lendarium",Math.round(T*.12)]].sort((a,b)=>b[1]-a[1]);
+  people.unshift(["Cid Cidoso",T,0,1]); // o Cid é sempre o maior colecionador (álbum completo)
+  openModal(`<h3>Ranking de colecionadores</h3><p>Usuários de exemplo. Quem completar o álbum primeiro ganha selo especial.</p>${people.map(([n,v,me2,cid],i)=>`<div class="rk${cid?" cid":""}"><b>${cid?"👑":i+1}</b><span class="av">${catSVG(me2&&NS.acct?NS.acct.av:{fur:(i*3)%10,pat:i%5,eye:i%5,acc:(i*2)%9,clo:i%7,bg:i%8})}</span><span>${escapeHtml(n)}${me2?" (você)":""}${cid?" <small>álbum completo</small>":""}</span><em>${v} / ${T}</em></div>`).join("")}<button class="mclose" onclick="closeModal()">FECHAR</button>`);
 }
 document.addEventListener("keydown",e=>{if(e.key==="Escape")closeModal();if(document.querySelector(".modal.open"))return;if(e.key==="ArrowRight")pg(page+1);if(e.key==="ArrowLeft")pg(page-1)});
 function onAccountChange(){renderAll()}

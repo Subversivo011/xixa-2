@@ -27,7 +27,7 @@ function playerHTML(m,bare){
   if(e.id===4) under=`<div class="u4"><h4>${escapeHtml(m.t)}</h4><div class="u4r"><span class="av4">🐱</span><span class="ch">acervo_naosalvo</span><button class="sub4">Inscrever-se <em>${fmt(Math.round(likes*3))}</em></button><b class="vw">${views} visualizações</b></div><div class="u4l"><span>👍 ${fmt(likes)}</span><span>👎 ${fmt(dis)}</span><i><s style="width:94%"></s></i></div></div>`;
   if(e.id===5) under=`<div class="u5"><h4>${escapeHtml(m.t)}</h4><div class="u5r"><span class="av4">🐱</span><span class="ch">acervo_naosalvo<small>${fmt(Math.round(likes*3))} inscritos</small></span><button class="sub5">Inscrever-se</button><span class="pill">👍 ${fmt(likes)} │ 👎</span><span class="pill">↗ Compartilhar</span></div><div class="u5d"><b>${views} visualizações · há ${yearsAgo} anos</b></div></div>`;
   if(bare)under="";
-  return `<div class="vp vp-e${e.id}${bare?" bare":""}${m.yt?"":" vp-noyt"}">
+  return `<div class="vp vp-e${e.id}${bare?" bare":""}${m.yt?"":" vp-noyt"}${m.vert?" vp-vert":""}">
    ${e.id===0&&!bare?`<div class="vp-title"><span>▶ Reproduzindo: ${slug}.wmv</span><span>_ □ ×</span></div>`:""}
    <div class="vp-stage">
     <div class="vp-screen" style="background:${vpGrad(m.t)}">${m.yt?`<img class="vp-thumb" src="https://i.ytimg.com/vi/${m.yt}/hqdefault.jpg" alt="" onerror="this.remove()">`:m.img?`<img class="vp-thumb" src="${escapeHtml(m.img)}" alt="" onerror="this.remove()">`:""}${m.yt||m.img?"":`<span class="vp-emo">${m.e}</span>`}<div class="vp-noise"></div>

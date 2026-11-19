@@ -8,8 +8,8 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preconnect" href="https://i.ytimg.com">
 <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Inter:wght@400;500;600;700&family=Baloo+2:wght@700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="theme.css?v=20261119k">
-<link rel="stylesheet" href="viewer.css?v=20261119k">
+<link rel="stylesheet" href="theme.css?v=20261119n">
+<link rel="stylesheet" href="viewer.css?v=20261119n">
 <script>try{var t=localStorage.getItem("ns_theme")}catch(e){}document.documentElement.dataset.theme=t==="dark"?"dark":"light"</script>
 <style>
 main{padding:24px 28px 60px;max-width:1280px;margin:0 auto}
@@ -159,7 +159,7 @@ main{display:flex;flex-direction:column}
 .top,.cur{grid-template-columns:1fr}.stage{grid-template-columns:1fr}.side{display:none}.facts{grid-template-columns:1fr 1fr}.rail{grid-template-columns:1fr 1fr}.rail .card:nth-child(3){display:none}main{padding:16px 14px 40px}}
 @media(max-width:600px){.f .two{grid-template-columns:1fr}.today{grid-template-columns:110px 1fr}.box .body{padding:16px}}
 </style>
-<link rel="stylesheet" href="home.css?v=20261119k">
+<link rel="stylesheet" href="home.css?v=20261119n">
 </head>
 <body class="home">
 <div class="rays-wrap" aria-hidden="true"><div class="rays" id="rays"></div></div>
@@ -213,19 +213,20 @@ main{display:flex;flex-direction:column}
 <div class="modal" id="modal" onclick="if(event.target===this)closeM()"><div class="box" id="box"></div></div>
 
 <form name="feedback" data-netlify="true" netlify-honeypot="bot-field" hidden><input name="tipo"><textarea name="msg"></textarea><input name="contato"><input name="pagina"><input name="bot-field"></form>
-<script src="common.js?v=20261119m"></script>
-<script src="data.js?v=20261119k"></script>
-<script src="player.js?v=20261119l"></script>
-<script src="viewer.js?v=20261119k"></script>
-<script src="alertas.js?v=20261119k"></script>
+<script src="common.js?v=20261119n"></script>
+<script src="data.js?v=20261119n"></script>
+<script src="player.js?v=20261119n"></script>
+<script src="viewer.js?v=20261119n"></script>
+<script src="alertas.js?v=20261119n"></script>
 <script>
 renderHeader("inicio",{search:true,sub:[]});
 document.querySelectorAll("[data-ic]").forEach(e=>e.outerHTML=icon(e.dataset.ic));
 // ===================== ACERVO =====================
 const CAT_IC={"Vídeos":"video","TV":"tv","Música":"music","Cultura":"culture","Zoeira":"zoeira","Fotos":"photo","Esportes":"sports"};
 const CAT_EMO={"Vídeos":"🎞️","TV":"📺","Música":"🎵","Cultura":"🌐","Zoeira":"🤡","Fotos":"📸","Esportes":"⚽"};
-const yKey=y=>(parseInt(y)>=2020?"2020+":String(y));
-const KEYS=Object.keys(YEAR_INFO);
+const yKey=y=>{y=parseInt(y)||2020;return y<2000?"1995–1999":y<=2003?"2000–2003":y>=2026?"2026":String(y)};
+const yLab=k=>(YEAR_INFO[k]&&YEAR_INFO[k].rot)||k;
+const KEYS=Object.keys(YEAR_INFO).sort((a,b)=>parseInt(a)-parseInt(b)); // "2004" vem antes de "1995–1999" no Object.keys
 const GRAD=["#1d3a8a,#0b0f2a","#5b1d8a,#14061f","#8a3a1d,#2a0f06","#1d8a6e,#06241d","#8a1d4a,#240614","#1d6e8a,#06202a","#7a8a1d,#1f2406"];
 const grad=s=>"linear-gradient(135deg,"+GRAD[[...s].reduce((a,c)=>a+c.charCodeAt(0),0)%GRAD.length]+")";
 
@@ -242,7 +243,7 @@ const RANK_USERS=[["Cid Cidoso",15420,247,104,2],
  ["AteuDeGoianinha",7180,151,90,12],["Rulsso",6720,139,87,17],["cigarra_eletronica",6290,127,85,18],["maffeimafia",5830,114,82,19],["genery3",5360,102,80,20],["Velma",4980,93,78,21],
  ["ipsilva",4860,88,76,0],["bruninhotv",4720,84,74,1],["viralizador",4580,79,71,3],["faqo",4390,72,69,5],["lendariin",4180,66,64,6],["gatoNostalgico",2950,41,52,7],["fotologueira",420,6,23,8],["novato_2012",60,0,9,9]];
 
-const art=a=>((a.img||a.yt)?`<img class="th" src="${a.img||"https://i.ytimg.com/vi/"+a.yt+"/mqdefault.jpg"}" alt="" loading="lazy" decoding="async" width="320" height="180" onerror="this.remove()">`:"")+`<span class="ph">${a.art||icon(CAT_IC[a.c]||"video","art")}</span>`;
+const art=a=>(a.cuidado?`<span class="cdo-t" title="Selo de cuidado: contém conteúdo preconceituoso">${icon("care","in")}<b>Selo de cuidado</b><small>clique para saber mais</small></span>`:"")+((a.img||a.yt)?`<img class="th${a.cuidado?" cdo-blur":""}" src="${a.img||"https://i.ytimg.com/vi/"+a.yt+"/mqdefault.jpg"}" alt="" loading="lazy" decoding="async" width="320" height="180" onerror="this.remove()">`:"")+`<span class="ph">${a.art||icon(CAT_IC[a.c]||"video","art")}</span>`;
 let ALL=[];
 function buildAll(){
   ALL=MEMES.map(m=>{const l=NS.links[m.id],k=l?normUrl(l):"";return{...m,yt:m.yt||(k.startsWith("yt:")?k.slice(3):undefined),url:l||(m.yt?"https://www.youtube.com/watch?v="+m.yt:null)}});
@@ -265,6 +266,7 @@ const SUB_ITEMS=[
   {k:"cat",ic:"categories",label:"Categorias",dd:1,fn:(e,b)=>openPop(b,[{ic:"all",label:"Todas",fn:()=>pickCat("Todas")},...[...new Set(ALL.map(a=>a.c))].map(c=>({ic:CAT_IC[c]||"video",label:c,note:ALL.filter(a=>a.c===c).length+"",fn:()=>pickCat(c)}))])},
   {k:"rand",ic:"random",label:"Aleatório",fn:()=>randomPick()},
   {k:"rank",ic:"ranking",label:"Ranking",fn:()=>openRank()},
+  {k:"wiki",ic:"book",label:"Memepédia",href:"memepedia.html"},
   {k:"album",ic:"album",label:"Álbum de figurinhas",href:"album.html"},
   {k:"mod",ic:"moderation",label:"Moderação",fn:()=>openMod()},
   {sp:1},
@@ -287,38 +289,81 @@ function renderPulse(){
   const dd=new Date(a.date+"T12:00:00"),mon=dd.toLocaleDateString("pt-BR",{month:"short"}).replace(".","");
   $("today").innerHTML=`<div class="today2"><button class="tthumb" onclick="openM('${a.id}')" style="background:${grad(a.t)}">${art(a)}<span class="ago-b">Há ${ago} anos</span>${PLAY}</button>
     <div class="tinfo"><div class="cal"><small>${mon}</small><b>${dd.getDate()}</b><em>${dd.getFullYear()}</em></div><div><h3>${escapeHtml(a.t)}</h3><p>${escapeHtml(a.d).slice(0,110)}…</p><button class="lnk" onclick="openM('${a.id}')">Relembrar →</button></div></div></div>`;
-  // sobe.desce: views com um "sorteio do dia" (num site real: acessos das últimas 24h)
-  const seed=+t.replace(/-/g,"");const sc=ALL.map(x=>{const h=[...x.id].reduce((s,c)=>s*31+c.charCodeAt(0),seed)%1000/1000;return{x,h}});
-  const up=[...sc].sort((p,q)=>q.h-p.h).slice(0,5),dn=[...sc].sort((p,q)=>p.h-q.h).slice(0,5);
-  const li=(h,u)=>`<button class="sd-i ${u?"up":"dn"}" onclick="openM('${h.x.id}')">${icon(u?"arrowUp":"arrowDown")}<span><u>${escapeHtml(h.x.t)}</u><small>${u?"+"+Math.round(40+h.h*240):"−"+Math.round(10+(1-h.h)*60)}%</small></span></button>`;
-  $("hot").innerHTML=`<div class="sd-h"><span class="sd-logo"><span class="su">sobe</span><i>.</i><span class="de">desc<span class="ee">e${HORNS}</span></span></span><span class="sd-clip">${icon("clipboard")}</span></div>
-    <div class="sd"><div><h6 class="up">${icon("arrowUp")}sobe</h6>${up.map(h=>li(h,1)).join("")}</div><div><h6 class="dn">${icon("arrowDown")}desce</h6>${dn.map(h=>li(h,0)).join("")}</div></div>`;
+  renderSobeDesce();
   const lat=[...ALL].sort((p,q)=>(q.added||"").localeCompare(p.added||"")).slice(0,5);
   $("latest").innerHTML=lat.map(x=>{const days=Math.max(0,Math.round((new Date(t)-new Date(x.added))/864e5));return`<button class="row lt" onclick="openM('${x.id}')"><span class="em" style="background:${grad(x.t)}">${art(x)}</span><span>${escapeHtml(x.t)}<small>${x.y} · ${x.mine?"enviado por você":x.by?"por "+x.by:"acervo"}</small></span><em class="nw">${days===0?"hoje":days===1?"ontem":"há "+days+"d"}</em></button>`}).join("");
 }
 
+// ---- Sobe.Desce: ranking real de visitados (abriu) e clicados (deu play), hoje ou de todos os tempos ----
+const SD={tipo:"visitados",periodo:"hoje",cache:{}};
+try{const x=JSON.parse(localStorage.getItem("ns_sd")||"{}");if(x.tipo)SD.tipo=x.tipo;if(x.periodo)SD.periodo=x.periodo}catch(e){}
+function sdLocal(){
+  const k=SD.tipo==="visitados"?"v":"c",hoje=nsToday(),ontem=new Date(new Date(hoje+"T12:00:00")-864e5).toISOString().slice(0,10);
+  const L=ALL.filter(a=>!a.mine).map(a=>{const e=(NS.ev||{})[a.id]||{},d=e[k]||{};return{id:a.id,hoje:d[hoje]||0,ontem:d[ontem]||0,total:e[k+"t"]||0}});
+  if(SD.periodo==="hoje")return{sobe:L.filter(x=>x.hoje).sort((a,b)=>b.hoje-a.hoje).slice(0,5),desce:L.filter(x=>x.ontem>x.hoje).sort((a,b)=>(b.ontem-b.hoje)-(a.ontem-a.hoje)).slice(0,5),local:1};
+  return{sobe:L.filter(x=>x.total).sort((a,b)=>b.total-a.total).slice(0,5),desce:[...L].sort((a,b)=>a.total-b.total||a.id.localeCompare(b.id)).slice(0,5),local:1};
+}
+async function sdDados(){
+  const key=SD.tipo+"|"+SD.periodo;if(SD.cache[key]&&Date.now()-SD.cache[key].t<60000)return SD.cache[key].d;
+  let d=null;try{const r=await fetch(`/api/sobedesce?tipo=${SD.tipo}&periodo=${SD.periodo}`,{headers:{accept:"application/json"}});if(r.ok&&(r.headers.get("content-type")||"").includes("json"))d=await r.json()}catch(e){}
+  if(!d||!Array.isArray(d.sobe))d=sdLocal();SD.cache[key]={t:Date.now(),d};return d;
+}
+function sdSet(k,v){SD[k]=v;try{localStorage.setItem("ns_sd",JSON.stringify({tipo:SD.tipo,periodo:SD.periodo}))}catch(e){}renderSobeDesce()}
+async function renderSobeDesce(){
+  const el=$("hot");if(!el)return;
+  const per=SD.periodo==="hoje"?"Hoje":"Todos os tempos";
+  const head=`<div class="sd-h"><span class="sd-logo"><span class="su">sobe</span><i>.</i><span class="de">desc<span class="ee">e${HORNS}</span></span></span>
+    <span class="sd-per"><button class="sd-clip" onclick="this.parentElement.classList.toggle('open');event.stopPropagation()" aria-haspopup="true" aria-label="Período: ${per}" title="Período: ${per}">${icon("clipboard")}</button>
+     <span class="sd-pop" role="menu"><b>Período</b><button role="menuitemradio" aria-checked="${SD.periodo==="hoje"}" class="${SD.periodo==="hoje"?"on":""}" onclick="sdSet('periodo','hoje')">${icon("clock","in")}Hoje</button><button role="menuitemradio" aria-checked="${SD.periodo==="sempre"}" class="${SD.periodo==="sempre"?"on":""}" onclick="sdSet('periodo','sempre')">${icon("ranking","in")}Todos os tempos</button></span></span></div>
+    <div class="sd-tabs" role="tablist"><button role="tab" aria-selected="${SD.tipo==="visitados"}" class="${SD.tipo==="visitados"?"on":""}" onclick="sdSet('tipo','visitados')">${icon("eye","in")}Mais visitados</button><button role="tab" aria-selected="${SD.tipo==="clicados"}" class="${SD.tipo==="clicados"?"on":""}" onclick="sdSet('tipo','clicados')">${icon("cursor","in")}Mais clicados</button><span class="sd-pl">${per}</span></div>`;
+  const keep=el.querySelector(".sd");el.innerHTML=head+(keep?keep.outerHTML:`<div class="sd"><div class="sd-load">carregando…</div></div>`);
+  const d=await sdDados();
+  const nome=SD.tipo==="visitados"?["visita","visitas"]:["clique","cliques"];
+  const n=v=>`${fmt(v)} ${v===1?nome[0]:nome[1]}`;
+  const varia=x=>SD.periodo==="hoje"?(x.ontem?`${x.hoje>=x.ontem?"+":"−"}${Math.abs(Math.round((x.hoje-x.ontem)/x.ontem*100))}%`:"novo hoje"):"";
+  const li=(x,u)=>{const a=byId(x.id);if(!a)return"";const v=SD.periodo==="hoje"?(u?x.hoje:x.ontem-x.hoje):x.total;
+    const sub=SD.periodo==="hoje"?(u?`${n(x.hoje)} · ${varia(x)}`:`−${fmt(x.ontem-x.hoje)} desde ontem`):(u?n(x.total):(x.total?n(x.total):"ninguém viu ainda"));
+    return`<button class="sd-i ${u?"up":"dn"}" onclick="openM('${a.id}')">${icon(u?"arrowUp":"arrowDown")}<span><u>${escapeHtml(a.t)}</u><small>${sub}</small></span></button>`};
+  const vazio=u=>`<p class="sd-vz">${u?(SD.periodo==="hoje"?`Ninguém ${SD.tipo==="visitados"?"abriu":"deu play em"} um meme hoje. Seja o primeiro!`:"Ainda sem dados."):(SD.periodo==="hoje"?"Nada caiu desde ontem.":"Ainda sem dados.")}</p>`;
+  const ups=d.sobe.map(x=>li(x,1)).join(""),dns=d.desce.map(x=>li(x,0)).join("");
+  el.querySelectorAll(".sd-nota").forEach(x=>x.remove());el.querySelector(".sd").outerHTML=`<div class="sd"><div><h6 class="up">${icon("arrowUp")}sobe</h6>${ups||vazio(1)}</div><div><h6 class="dn">${icon("arrowDown")}desce</h6>${dns||vazio(0)}</div></div>${d.local?`<p class="sd-nota">Contando só os acessos deste navegador até o site entrar no ar.</p>`:""}`;
+}
+document.addEventListener("click",e=>{if(!e.target.closest(".sd-per"))document.querySelectorAll(".sd-per.open").forEach(x=>x.classList.remove("open"))});
+
 // ---- Linha do tempo (layout original) ----
 function renderYears(){
-  $("years").innerHTML=KEYS.map(y=>`<button class="y ${y===cur?'on':''}" onclick="go('${y}')">${y}</button>`).join("");
+  $("years").innerHTML=KEYS.map(y=>`<button class="y ${y===cur?'on':''}" onclick="go('${y}')">${yLab(y)}</button>`).join("");
   const ys=$("years"),el=ys.querySelector(".on");if(el)ys.scrollTo({left:el.offsetLeft-ys.clientWidth/2+el.clientWidth/2,behavior:"smooth"});
+}
+// prévia da linha do tempo: 3 memes sorteados a cada visita (e a cada volta ao ano), misturando vídeo e foto quando houver
+let PREV_SEED=Math.random();const PREV_SEED2=()=>{PREV_SEED=Math.random()};const PREV_CACHE={};
+function prevDoAno(k){
+  if(PREV_CACHE[k])return PREV_CACHE[k].map(id=>ALL.find(a=>a.id===id)).filter(Boolean);
+  const L=ALL.filter(a=>yKey(a.y)===k&&!a.mine);
+  const h=a=>{let x=PREV_SEED*1e6;for(const c of a.id)x=(x*31+c.charCodeAt(0))%1e9;return x/1e9};
+  const fotos=L.filter(a=>a.tipo==="foto").sort((a,b)=>h(a)-h(b)),vids=L.filter(a=>a.tipo!=="foto").sort((a,b)=>h(a)-h(b));
+  const out=[];if(fotos.length&&vids.length){out.push(vids.shift(),fotos.shift())}
+  const resto=[...vids,...fotos].sort((a,b)=>h(a)-h(b));while(out.length<3&&resto.length)out.push(resto.shift());
+  out.sort((a,b)=>h(a)-h(b));PREV_CACHE[k]=out.map(a=>a.id);return out;
 }
 function renderCur(){
   const i=KEYS.indexOf(cur),d=YEAR_INFO[cur],p=KEYS[i-1],n=KEYS[i+1];
-  $("prev").innerHTML=p?`<span class="arw">‹</span><b>${p}</b>`:"";
-  $("next").innerHTML=n?`<span class="arw">›</span><b>${n}</b>`:"";
+  $("prev").innerHTML=p?`<span class="arw">‹</span><b>${yLab(p)}</b>`:"";
+  $("next").innerHTML=n?`<span class="arw">›</span><b>${yLab(n)}</b>`:"";
   $("prev").onclick=()=>p&&go(p);$("next").onclick=()=>n&&go(n);
   const el=$("cur");el.classList.remove("fade");void el.offsetWidth;el.classList.add("fade");
-  const items=ALL.filter(a=>yKey(a.y)===cur).sort((a,b)=>b.views-a.views).slice(0,3);
-  const fill=items.map(a=>card(a));while(fill.length<3)fill.push(addCard(cur==="2020+"?2020:cur));
+  const items=prevDoAno(cur);
+  const fill=items.map(a=>card(a));while(fill.length<3)fill.push(addCard(parseInt(cur)));
   const exp=`setView('ano');$('browse').scrollIntoView({behavior:'smooth'})`;
-  el.innerHTML=`<div class="cur-t"><div class="cur-h"><button class="mnav" ${p?`onclick="go('${p}')"`:"disabled"} aria-label="Ano anterior">‹</button><div><h2 class="disp">${cur}</h2><div class="lema">${d.lema}</div></div><button class="mnav" ${n?`onclick="go('${n}')"`:"disabled"} aria-label="Próximo ano">›</button></div>
-    <p>${d.txt}</p><button class="btn dexp" onclick="${exp}">Explorar ${cur} →</button></div>
+  el.innerHTML=`<div class="cur-t"><div class="cur-h"><button class="mnav" ${p?`onclick="go('${p}')"`:"disabled"} aria-label="Ano anterior">‹</button><div><h2 class="disp">${yLab(cur)}</h2><div class="lema">${d.lema}</div></div><button class="mnav" ${n?`onclick="go('${n}')"`:"disabled"} aria-label="Próximo ano">›</button></div>
+    <p>${d.txt}</p><button class="btn dexp" onclick="${exp}">Explorar ${yLab(cur)} →</button></div>
     <div class="mini">${fill.join("")}</div>
-    <div class="mfoot"><span class="mdots">${KEYS.map(k=>`<i class="${k===cur?"on":""}"></i>`).join("")}</span><button class="btn mexp" onclick="${exp}">Ver tudo de ${cur} →</button></div>`;
+    <div class="mfoot"><span class="mdots">${KEYS.map(k=>`<i class="${k===cur?"on":""}"></i>`).join("")}</span><button class="btn mexp" onclick="${exp}">Ver tudo de ${yLab(cur)} →</button></div>`;
+  jujubaNoAno();
 }
 function renderGrid(){
   let list=ALL,title="Todos os registros";
-  if(view==="ano"&&!query){list=ALL.filter(a=>yKey(a.y)===cur);title="Registros de "+cur}
+  if(view==="ano"&&!query){list=ALL.filter(a=>yKey(a.y)===cur);title="Registros de "+yLab(cur)}
   if(query){const fold=x=>String(x).normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase();const q=fold(query);list=ALL.filter(a=>fold(a.t+" "+a.d+" "+a.c+" "+a.y).includes(q));title=`Busca: “${query}”`}
   if(cat!=="Todas")list=list.filter(a=>a.c===cat);
   list=[...list].sort((a,b)=>a.y-b.y||b.views-a.views);
@@ -330,6 +375,23 @@ function renderGrid(){
 (function swipe(){let x0=null,y0=0;const c=()=>document.getElementById("cur");
   document.addEventListener("touchstart",e=>{if(innerWidth>860||!c()||!c().contains(e.target)||e.target.closest(".mini"))return;x0=e.touches[0].clientX;y0=e.touches[0].clientY},{passive:true});
   document.addEventListener("touchend",e=>{if(x0===null)return;const dx=e.changedTouches[0].clientX-x0,dy=e.changedTouches[0].clientY-y0;x0=null;if(Math.abs(dx)<50||Math.abs(dy)>Math.abs(dx))return;const i=KEYS.indexOf(cur),k=KEYS[i+(dx<0?1:-1)];if(k)go(k)},{passive:true});})();
+// ---- easter-egg: a jujuba escondida ----
+// Todo dia uma jujuba se esconde em um ano diferente da linha do tempo. Quem acha ganha moedas (1 vez por dia).
+const JUJUBA_SVG='<svg viewBox="0 0 40 40" aria-hidden="true"><defs><radialGradient id="jjg" cx="35%" cy="30%" r="70%"><stop offset="0" stop-color="#fff6"/><stop offset=".25" stop-color="#ff5ca8"/><stop offset="1" stop-color="#c2185b"/></radialGradient></defs><path d="M8 26c0-9 5-17 12-17s12 8 12 17c0 4-5 6-12 6s-12-2-12-6z" fill="url(#jjg)"/><g fill="#fff" opacity=".85"><circle cx="15" cy="20" r="1.1"/><circle cx="22" cy="16" r="1"/><circle cx="26" cy="23" r="1.1"/><circle cx="18" cy="27" r="1"/><circle cx="12" cy="25" r=".9"/></g></svg>';
+function anoDaJujuba(){const d=nsToday();let h=0;for(const c of d)h=(h*33+c.charCodeAt(0))>>>0;return KEYS[h%KEYS.length]}
+function jujubaNoAno(){const el=$("cur");if(!el)return;el.querySelector(".jjb")?.remove();
+  if(cur!==anoDaJujuba()||NS.jujuba===nsToday())return;
+  const b=document.createElement("button");b.className="jjb";b.title="?";b.setAttribute("aria-label","Uma jujuba?");b.innerHTML=JUJUBA_SVG;
+  b.onclick=ev=>{ev.stopPropagation();NS.jujuba=nsToday();NS.jujubas=(NS.jujubas||0)+1;NS.coins+=50;addXP(10);nsSave();renderWallet();
+    b.classList.add("pego");setTimeout(()=>b.remove(),700);
+    toast(NS.jujubas===1?"🍬 Você achou a jujuba escondida! +50 moedas. Amanhã ela se esconde em outro ano.":`🍬 Jujuba nº ${NS.jujubas} encontrada! +50 moedas.`,4200)};
+  el.appendChild(b)}
+// a cada 9 s troca a prévia do ano (se o ano tiver mais de 3 memes); pausa com o mouse em cima ou fora da tela
+setInterval(()=>{const el=document.querySelector("#cur .mini");if(!el||el.matches(":hover")||document.hidden)return;
+  const r=$("tl").getBoundingClientRect();if(r.bottom<0||r.top>innerHeight)return;
+  if(ALL.filter(a=>yKey(a.y)===cur&&!a.mine).length<=3)return;
+  const old=PREV_CACHE[cur]||[];let tries=0;do{delete PREV_CACHE[cur];PREV_SEED2();}while(tries++<4&&prevDoAno(cur).map(a=>a.id).join()===old.join());
+  el.classList.add("swap");setTimeout(()=>{el.innerHTML=prevDoAno(cur).map(a=>card(a)).join("");el.classList.remove("swap")},260)},9000);
 function go(y,scroll){cur=String(y);view="ano";query="";$("q").value="";cat="Todas";renderNav();renderYears();renderCur();renderGrid();if(scroll)$("tl").scrollIntoView({behavior:"smooth"})}
 
 // ---- Modal do meme com o player da época ----
@@ -339,7 +401,7 @@ function openM(id){
   const rel=ALL.filter(x=>x.id!==a.id).sort((p,q)=>Math.abs(p.y-a.y)-Math.abs(q.y-a.y)||q.views-p.views);
   openViewer({...a,e:a.art},{related:rel.map(r=>({...r,e:r.art})),onPick:openM,
     onYear:y=>{go(yKey(y));$("tl").scrollIntoView({behavior:"smooth"})},
-    onSaveLink:u=>saveOldLink(a.id,u)});
+    onSaveLink:u=>saveOldLink(a.id,u),onClose:()=>{SD.cache={};renderSobeDesce()}});
 }
 function closeM(){player&&player.stop();$("modal").classList.remove("open")}
 new MutationObserver(()=>{const b=$("box");if(b&&!b.querySelector(".xclose")){const x=document.createElement("button");x.className="xclose";x.textContent="✕";x.setAttribute("aria-label","Fechar");x.onclick=closeM;b.prepend(x)}}).observe(document.getElementById("box"),{childList:true});
@@ -446,6 +508,7 @@ function openMod(){
   $("box").innerHTML=`<div class="body"><h2 class="disp">${icon("moderation","h")}Fila de moderação</h2><p>Quem tem patente mais alta modera quem tem patente mais baixa. Cada moderação vale +15 XP.</p>
   ${mine.length?`<h4 class="h4">SEUS ENVIOS</h4>${mine.map(s=>`<div class="mine"><span>${icon(CAT_IC[s.c]||"video","in")}${escapeHtml(s.t)} <small>(${s.ticket})</small></span><span class="st-${s.status}">${s.status==="approved"?"aprovado · +"+REWARD.approved+" moedas":"aguardando moderação"}</span></div>`).join("")}<div style="height:14px"></div>`:""}
   ${linksQ(canMod)}
+  ${wikiQ(canMod)}
   <h4 class="h4">ENVIOS DA COMUNIDADE</h4>${qs}
   <button class="btn ghost" onclick="closeM()" style="margin-top:6px">Fechar</button></div>`;
   $("modal").classList.add("open");
@@ -457,6 +520,17 @@ function linksQ(canMod){
     <div class="by">por <b>${escapeHtml(x.by)}</b> · <a href="https://www.youtube.com/watch?v=${x.yt}" target="_blank" rel="noopener">youtu.be/${x.yt}</a></div>
     <div class="act">${x.status==="ok"?'<span class="st-approved">Aprovado: o vídeo já aparece no acervo</span>':x.status==="no"?'<span class="st-pending">Recusado</span>':canMod?`<button class="btn" onclick="moderarLink('${x.id}','ok')">${icon("check")}Aprovar</button><button class="btn ghost" onclick="moderarLink('${x.id}','no')">${icon("xmark")}Recusar</button>`:`<span style="font-size:12px;color:var(--mut)">${icon("clock","in")}Aguardando um moderador</span>`}</div></div>`).join("")}`;
 }
+// textos da Memepédia enviados pela comunidade (no site real, o moderador aprova em /dashboard/)
+const WIKI_CAMPO={origem:"De onde surgiu",porque:"Por que viralizou",usos:"Como é usado",rede:"Onde ficou famoso",hoje:"Onde está hoje",curiosidades:"Curiosidades"};
+function wikiQ(canMod){
+  const L=(NS.wikiSugs||[]).slice().reverse();if(!L.length)return"";
+  return `<h4 class="h4">MEMEPÉDIA: TEXTOS ENVIADOS</h4>${L.map(x=>`<div class="q ${x.status!=="pending"?"done":""}"><h4>${icon("book","in")}${escapeHtml(x.t)} <small style="color:var(--mut);font-family:Inter;font-size:12px">· ${WIKI_CAMPO[x.campo]||x.campo}</small></h4>
+    <div class="by">por <b>${escapeHtml(x.by)}</b>${x.fonte?` · <a href="${escapeHtml(x.fonte)}" target="_blank" rel="noopener nofollow">fonte</a>`:""}</div><p>${escapeHtml(x.texto)}</p>
+    <div class="act">${x.status==="ok"?'<span class="st-approved">Aprovado: já aparece na Memepédia</span>':x.status==="no"?'<span class="st-pending">Recusado</span>':canMod?`<button class="btn" onclick="moderarWiki('${x.id}','ok')">${icon("check")}Aprovar</button><button class="btn ghost" onclick="moderarWiki('${x.id}','no')">${icon("xmark")}Recusar</button>`:`<span style="font-size:12px;color:var(--mut)">${icon("clock","in")}Aguardando um moderador</span>`}</div></div>`).join("")}`;
+}
+function moderarWiki(id,v){const x=(NS.wikiSugs||[]).find(z=>z.id===id);if(!x)return;x.status=v;
+  if(v==="ok"){NS.wiki=NS.wiki||{};(NS.wiki[x.meme]=NS.wiki[x.meme]||{})[x.campo]={texto:x.texto,autor:x.by,fonte:x.fonte}}
+  nsSave();openMod()}
 function moderarLink(id,v){const x=(NS.linkSugs||[]).find(z=>z.id===id);if(!x)return;x.status=v;
   if(v==="ok"){NS.links[x.meme]="https://youtu.be/"+x.yt;if(NS.acct&&x.by===NS.acct.user){NS.coins+=REWARD.oldLink;addXP(XP_GAIN.oldLink)}}
   nsSave();addXP(15);buildAll();renderAll();openMod();toast(v==="ok"?"Link aprovado: o vídeo entrou no acervo.":"Link recusado.")}
@@ -466,6 +540,7 @@ function moderate(id,v){NS.modDone[id]=v;NS.modDoneAt=NS.modDoneAt||{};NS.modDon
 function openRank(){
   const me=NS.acct?[[NS.acct.user,NS.xp,NS.approvedCount,Object.keys(NS.owned).length,-1,true]]:[];
   const list=[...RANK_USERS,...me].sort((a,b)=>b[1]-a[1]);
+  const ic=list.findIndex(u=>u[0]==="Cid Cidoso");if(ic>0)list.unshift(list.splice(ic,1)[0]); // o Cid é sempre o primeiro
   $("box").className="box";
   $("box").innerHTML=`<div class="body"><h2 class="disp">${icon("ranking","h")}Ranking da galera</h2><p>Quem mais salvou a internet brasileira. Envio aprovado, moderação, link salvo e carta nova contam XP.</p>
   ${list.map((u,i)=>{const r=rankOf(u[1]);const av=u[5]?NS.acct.av:{fur:(u[4]*3)%10,pat:u[4]%5,eye:u[4]%5,acc:(u[4]*2)%9,clo:u[4]%7,bg:u[4]%8};
@@ -492,7 +567,7 @@ document.addEventListener("keydown",e=>{
 });
 const t0=Date.now();setInterval(()=>{const m=Math.floor((Date.now()-t0)/60000);$("timer").textContent=m+"m explorando a história da internet"},15000);
 $("timer").textContent="0m explorando a história da internet";
-const h=location.hash.slice(1).replace("mais","+");if(YEAR_INFO[h])cur=h;
+const h=decodeURIComponent(location.hash.slice(1)).replace("mais","+");if(YEAR_INFO[h])cur=h;else if(/^\d{4}$/.test(h))cur=yKey(h);
 renderWallet();renderAll();scheduleApprovals();
 if(["rank","mod","send","rand","tl","todos"].includes(h))setTimeout(()=>{ftGo(h);history.replaceState(null,"",location.pathname)},300);
 // centraliza os raios do fundo no logo

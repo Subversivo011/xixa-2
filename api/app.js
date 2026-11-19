@@ -12,9 +12,11 @@ import links from './routes/links.js';
 import yt from './routes/yt.js';
 import admin from './routes/admin.js';
 import economia from './routes/economia.js';
+import sobedesce from './routes/sobedesce.js';
+import memepedia from './routes/memepedia.js';
 
 export function criarApp({ pool, adminToken = '', ytKey = '', autenticar = null } = {}) {
   const router = criarRouter({ pool, adminToken, autenticar, extras: { ytKey } });
-  for (const modulo of [saude, acervo, contribuidores, votos, feedback, comentarios, links, yt, economia, admin]) modulo(router);
+  for (const modulo of [saude, acervo, contribuidores, votos, feedback, comentarios, links, yt, economia, sobedesce, memepedia, admin]) modulo(router);
   return { router, server: http.createServer((req, res) => router.tratar(req, res)) };
 }

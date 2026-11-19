@@ -7,6 +7,11 @@
 // =====================================================================
 const API={votos:"/api/votos",stats:"/api/yt-stats"};
 const CANAL="Não Salvo",AV="avatar-ns.png";
+// canal real do vídeo no YouTube (data.js: canal); avatar com a inicial do canal
+const canal=m=>escapeHtml((m&&m.canal)||CANAL);
+const AVC=["#e53935","#8e24aa","#3949ab","#00897b","#f4511e","#6d4c41","#1e88e5","#43a047","#c0ca33","#fb8c00"];
+function avSrc(m){if(!m||!m.canal)return AV;const n=m.canal.trim(),L=(n.match(/[A-Za-zÀ-ÿ0-9]/)||["?"])[0].toUpperCase();let h=0;for(const c of n)h=(h*31+c.charCodeAt(0))>>>0;
+  return"data:image/svg+xml,"+encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40"><rect width="40" height="40" fill="${AVC[h%AVC.length]}"/><text x="20" y="27" font-family="Arial,sans-serif" font-size="20" font-weight="700" fill="#fff" text-anchor="middle">${L}</text></svg>`)}
 const MESES=["janeiro","fevereiro","março","abril","maio","junho","julho","agosto","setembro","outubro","novembro","dezembro"];
 async function apiGet(u){try{const r=await fetch(u,{headers:{accept:"application/json"}});if(!r.ok)return null;const t=r.headers.get("content-type")||"";return t.includes("json")?await r.json():null}catch(e){return null}}
 async function apiPost(u,b){try{const r=await fetch(u,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify(b)});if(!r.ok)return null;return await r.json()}catch(e){return null}}
@@ -56,11 +61,11 @@ const relList=(rel,n)=>rel.slice(0,n||8);
 const thumb=(r,c)=>(r.img||r.yt)?`<span class="${c||"th"}" style="background-image:url(${r.img||"https://i.ytimg.com/vi/"+r.yt+"/mqdefault.jpg"}),${vpGrad(r.t)}"></span>`:`<span class="${c||"th"}" style="background:${vpGrad(r.t)}">${r.art||""}</span>`;
 function relHTML(e,rel){
   const L=relList(rel,e===5?10:8);
-  if(e===1)return`<div class="rel1"><h5>Vídeos relacionados</h5>${L.map(r=>`<a class="ri" data-id="${r.id}">${thumb(r)}<span><b>${escapeHtml(r.t)}</b><small>De: <u>${CANAL}</u></small><small>Exibições: ${fmt(r.views)}</small></span></a>`).join("")}</div>`;
-  if(e===2)return`<div class="rel2"><h5>Vídeos relacionados</h5>${L.map(r=>`<a class="ri" data-id="${r.id}">${thumb(r)}<span><b>${escapeHtml(r.t)}</b><small>${fmt(r.views)} exibições</small><small>${CANAL}</small></span></a>`).join("")}</div>`;
-  if(e===3)return`<div class="rel3"><h5>Vídeos sugeridos</h5>${L.map(r=>`<a class="ri" data-id="${r.id}">${thumb(r)}<span><b>${escapeHtml(r.t)}</b><small>de ${CANAL}</small><small>${fmt(r.views)} exibições</small></span></a>`).join("")}</div>`;
-  if(e===4)return`<div class="rel4"><h5>A seguir <em>REPRODUÇÃO AUTOMÁTICA <i></i></em></h5>${L.map(r=>`<a class="ri" data-id="${r.id}">${thumb(r)}<span><b>${escapeHtml(r.t)}</b><small>${CANAL}</small><small>${fmt(r.views)} visualizações</small></span></a>`).join("")}</div>`;
-  return`<div class="rel5"><div class="chipsr"><b>Tudo</b><span>Do ${CANAL}</span><span>Relacionados</span></div>${L.map(r=>`<a class="ri" data-id="${r.id}">${thumb(r)}<span><b>${escapeHtml(r.t)}</b><small>${CANAL} ${icon("check","vf")}</small><small>${short(r.views)} visualizações · ${ago(r.y)}</small></span></a>`).join("")}</div>`;
+  if(e===1)return`<div class="rel1"><h5>Vídeos relacionados</h5>${L.map(r=>`<a class="ri" data-id="${r.id}">${thumb(r)}<span><b>${escapeHtml(r.t)}</b><small>De: <u>${canal(r)}</u></small><small>Exibições: ${fmt(r.views)}</small></span></a>`).join("")}</div>`;
+  if(e===2)return`<div class="rel2"><h5>Vídeos relacionados</h5>${L.map(r=>`<a class="ri" data-id="${r.id}">${thumb(r)}<span><b>${escapeHtml(r.t)}</b><small>${fmt(r.views)} exibições</small><small>${canal(r)}</small></span></a>`).join("")}</div>`;
+  if(e===3)return`<div class="rel3"><h5>Vídeos sugeridos</h5>${L.map(r=>`<a class="ri" data-id="${r.id}">${thumb(r)}<span><b>${escapeHtml(r.t)}</b><small>de ${canal(r)}</small><small>${fmt(r.views)} exibições</small></span></a>`).join("")}</div>`;
+  if(e===4)return`<div class="rel4"><h5>A seguir <em>REPRODUÇÃO AUTOMÁTICA <i></i></em></h5>${L.map(r=>`<a class="ri" data-id="${r.id}">${thumb(r)}<span><b>${escapeHtml(r.t)}</b><small>${canal(r)}</small><small>${fmt(r.views)} visualizações</small></span></a>`).join("")}</div>`;
+  return`<div class="rel5"><div class="chipsr"><b>Tudo</b><span>Do ${CANAL}</span><span>Relacionados</span></div>${L.map(r=>`<a class="ri" data-id="${r.id}">${thumb(r)}<span><b>${escapeHtml(r.t)}</b><small>${canal(r)} ${icon("check","vf")}</small><small>${short(r.views)} visualizações · ${ago(r.y)}</small></span></a>`).join("")}</div>`;
 }
 const headBar=e=>{
   const logo=`<img class="yl" src="logo-word.png" alt="Não Salvo">`,snd=`<button class="snd" data-act="snd" title="Sons da época">${icon(SND.on?"volume":"mute")}<span>Sons da época</span></button>`,x=`<button class="vx" data-act="close" title="Fechar (Esc)">${icon("xmark")}</button>`;
@@ -70,7 +75,7 @@ const headBar=e=>{
   if(e===4)return`<header class="yh4"><i class="mn">${icon("menu")}</i>${logo}<div class="sr"><input placeholder="Pesquisar"><button>${icon("search")}</button></div><div class="lk"><i>${icon("upload")}</i>${snd}${x}</div></header>`;
   return`<header class="yh5"><i class="mn">${icon("menu")}</i>${logo}<div class="sr"><input placeholder="Pesquisar"><button>${icon("search")}</button><i class="mc">${icon("mic")}</i></div><div class="lk"><i>${icon("upload")}</i><i>${icon("bell")}</i>${snd}${x}</div></header>`;
 };
-const btns=y=>`<div class="vbs"><button class="vb" data-act="year">Ver o ano ${y}</button><button class="vb sec" data-act="close">Fechar</button></div>`;
+const btns=y=>`<div class="vbs"><button class="vb" data-act="year">Ver o ano ${y}</button><button class="vb mp" data-act="wiki">${icon("book","in")}Memepédia</button><button class="vb sec" data-act="close">Fechar</button></div>`;
 const linkBox=m=>m.yt?"":`<div class="lbx"><b>Vídeo original não encontrado.</b> Conhece o link no YouTube? Envie para a moderação conferir. Se for aprovado, você ganha +${REWARD.oldLink} moedas.<div class="in"><input class="ol" placeholder="https://youtube.com/watch?v=…"><button data-act="savelink">Enviar para a moderação</button></div><div class="olm"></div></div>`;
 const descTxt=m=>escapeHtml(m.d||"");
 
@@ -96,8 +101,8 @@ function videoPage(m,rel){
         <div class="xrt"><b>Gostou? Dê sua nota antes de encaminhar para 10 amigos:</b><div data-rt></div><button class="xsh" data-act="share">${icon("mail","in")}Encaminhar link</button></div>${linkBox(m)}${btns(m.y)}</div></div>
     <div class="xtask"><span class="xstart">iniciar</span><span class="xt on">${icon("video","xi")}Reprodutor de Mídia</span><span class="xtray">${icon("culture","xi")}Conectado a 52,0 Kbps <b data-clock></b></span></div></div>`;
   const chan=(k)=>{
-    if(k===1)return`<div class="cb1"><img src="${AV}" alt=""><div><small>De:</small> <a>${CANAL}</a><br><small>Adicionado: ${dExt(m.date)}</small><br><span class="vs1">${icon("check","in")}Inscrito</span></div><p>${descTxt(m)}</p><dl><dt>Categoria:</dt><dd><a>${escapeHtml(m.c)}</a></dd><dt>Tags:</dt><dd><a>meme</a> <a>${m.y}</a> <a>viral</a> <a>naosalvo</a></dd></dl></div>`;
-    if(k===2)return`<div class="cb2"><div class="r"><img src="${AV}" alt=""><div><a>${CANAL}</a><small>${dNum(m.date)}</small></div><span class="vs2">${icon("check","in")}Inscrito</span></div><p>${descTxt(m)}</p></div>`;
+    if(k===1)return`<div class="cb1"><img src="${avSrc(m)}" alt=""><div><small>De:</small> <a>${canal(m)}</a><br><small>Adicionado: ${dExt(m.date)}</small><br><span class="vs1">${icon("check","in")}Inscrito</span></div><p>${descTxt(m)}</p><dl><dt>Categoria:</dt><dd><a>${escapeHtml(m.c)}</a></dd><dt>Tags:</dt><dd><a>meme</a> <a>${m.y}</a> <a>viral</a> <a>naosalvo</a></dd></dl></div>`;
+    if(k===2)return`<div class="cb2"><div class="r"><img src="${avSrc(m)}" alt=""><div><a>${canal(m)}</a><small>${dNum(m.date)}</small></div><span class="vs2">${icon("check","in")}Inscrito</span></div><p>${descTxt(m)}</p></div>`;
   };
   if(e===1)return`<div class="ytp e1">${headBar(1)}<div class="yc"><main><h1>${T}</h1>${pl}
     <div class="ub1"><div data-rt></div><div class="vw1">Exibições: <b>${vw}</b></div></div>
@@ -106,16 +111,28 @@ function videoPage(m,rel){
     <div class="ub2"><div data-rt></div><div class="vw2">${vw}</div></div>
     <div class="tabs2"><a>${icon("heart","in")}Favorito</a><a data-act="share">${icon("share","in")}Compartilhar</a><a>Listas de reprodução</a><a>Sinalizar</a></div>${chan(2)}${linkBox(m)}${btns(m.y)}</main></div></div>`;
   if(e===3)return`<div class="ytp e3">${headBar(3)}<div class="yc"><main><h1>${T}</h1>${pl}
-    <div class="ub3"><div class="cr"><img src="${AV}" alt=""><a>${CANAL}</a><span class="vs3">${icon("check","in")}Inscrito</span></div><div class="vw3">${vw}</div></div>
+    <div class="ub3"><div class="cr"><img src="${avSrc(m)}" alt=""><a>${canal(m)}</a><span class="vs3">${icon("check","in")}Inscrito</span></div><div class="vw3">${vw}</div></div>
     <div class="ac3"><div data-rt></div><span class="a">Adicionar a</span><span class="a" data-act="share">Compartilhar</span></div>
     <div class="ds3"><b>Enviado em ${dExt(m.date)}</b><p>${descTxt(m)}</p><small>Categoria: <a>${escapeHtml(m.c)}</a></small></div>${linkBox(m)}${btns(m.y)}</main></div></div>`;
   if(e===4)return`<div class="ytp e4">${headBar(4)}<div class="yc"><main>${pl}<h1>${T}</h1>
-    <div class="ub4"><div class="cr"><img src="${AV}" alt=""><div><a>${CANAL}</a></div><span class="vs4">${icon("check","in")}Inscrito</span></div><div class="vw4">${vw}</div></div>
+    <div class="ub4"><div class="cr"><img src="${avSrc(m)}" alt=""><div><a>${canal(m)}</a></div><span class="vs4">${icon("check","in")}Inscrito</span></div><div class="vw4">${vw}</div></div>
     <div class="ac4"><span data-act="share">${icon("share","in")}Compartilhar</span><span>${icon("more","in")}Mais</span><div data-rt></div></div>
     <div class="ds4"><b>Publicado em ${dExt(m.date)}</b><p>${descTxt(m)}</p><small>Categoria <a>${escapeHtml(m.c)}</a></small></div>${linkBox(m)}${btns(m.y)}</main></div></div>`;
   return`<div class="ytp e5">${headBar(5)}<div class="yc"><main>${pl}<h1>${T}</h1>
-    <div class="ub5"><div class="cr"><img src="${AV}" alt=""><div><a>${CANAL} ${icon("check","vf")}</a></div><span class="vs5">${icon("bell","in")}Inscrito</span></div><div class="ac5"><div data-rt></div><span class="p" data-act="share">${icon("share","in")}Compartilhar</span><span class="p">${icon("more","in")}</span></div></div>
+    <div class="ub5"><div class="cr"><img src="${avSrc(m)}" alt=""><div><a>${canal(m)} ${icon("check","vf")}</a></div><span class="vs5">${icon("bell","in")}Inscrito</span></div><div class="ac5"><div data-rt></div><span class="p" data-act="share">${icon("share","in")}Compartilhar</span><span class="p">${icon("more","in")}</span></div></div>
     <div class="ds5"><b>${vw} ${ago(m.y)}</b> <span class="tg">#${escapeHtml(m.c.toLowerCase())} #meme #${m.y}</span><p>${descTxt(m)}</p></div>${linkBox(m)}${btns(m.y)}</main></div></div>`;
+}
+
+// ---- vídeos verticais (2020+): visual de app de vídeo curto ----
+function shortPage(m){
+  const T=escapeHtml(m.t),pl=playerHTML(m,true),c=canal(m),h="@"+((m.canal||"naosalvo").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[^a-z0-9_.]+/g,""));
+  const x=`<button class="vx" data-act="close" title="Fechar (Esc)">${icon("xmark")}</button>`,snd=`<button class="snd" data-act="snd" title="Sons da época">${icon(SND.on?"volume":"mute")}<span>Sons da época</span></button>`;
+  return`<div class="tkp"><header class="tkh"><span class="tkt"><b>Para você</b><span>Seguindo</span></span><div class="lk">${snd}${x}</div></header>
+    <div class="tkw"><div class="tkv">${pl}
+      <div class="tko"><b>${escapeHtml(h)}</b><p>${T}</p><small>♫ som original · ${c}</small></div>
+      <div class="tkr"><span class="tka"><img src="${avSrc(m)}" alt=""><i>+</i></span><div data-rt></div><span class="tki">${icon("comment")}<small>${short(Math.round((m.saves||100)*1.3))}</small></span><span class="tki" data-act="share">${icon("share")}<small>Compartilhar</small></span></div></div>
+      <div class="tkd"><div class="tkc"><img src="${avSrc(m)}" alt=""><div><b>${c}</b><small>${escapeHtml(h)} · ${dNum(m.date)}</small></div><span class="tkf">Seguir</span></div>
+        <h1>${T}</h1><p>${descTxt(m)}</p><div class="tg">#${escapeHtml(m.c.toLowerCase())} #meme #${m.y} #fyp</div><div class="vwc5"><span data-views></span></div>${btns(m.y)}</div></div></div>`;
 }
 
 // ---- página da foto por rede social ----
@@ -208,15 +225,18 @@ async function compartilharYT(m){
 
 // ---- abrir / fechar ----
 let VW=null;
-function closeViewer(){if(!VW)return;VW.player&&VW.player.stop();clearInterval(VW.clock);clearTimeout(VW.toastT);VW.el.remove();document.body.classList.remove("vw-open");document.removeEventListener("keydown",VW.key);const cb=VW.onClose;VW=null;cb&&cb()}
+function closeViewer(){if(!VW)return;removeEventListener("resize",VW.rs);VW.player&&VW.player.stop();clearInterval(VW.clock);clearTimeout(VW.toastT);VW.el.remove();document.body.classList.remove("vw-open");document.removeEventListener("keydown",VW.key);const cb=VW.onClose;VW=null;cb&&cb()}
 function openViewer(m,opt={}){
   closeViewer();
   const isPhoto=m.tipo==="foto",rel=(opt.related||[]).filter(r=>r.id!==m.id);
-  const cls=isPhoto?"vw-photo":`vw-e${vEra(m.y)}`;
+  const cls=isPhoto?"vw-photo":m.vert?"vw-short vw-e5":`vw-e${vEra(m.y)}`;
   const el=document.createElement("div");el.className="vw "+cls;el.setAttribute("role","dialog");el.setAttribute("aria-label",m.t);
-  el.innerHTML=`<div class="vw-win ${cls}">${isPhoto?photoPage(m,rel):videoPage(m,rel)}</div>`;
+  el.innerHTML=`<div class="vw-win ${cls}">${isPhoto?photoPage(m,rel):m.vert?shortPage(m):videoPage(m,rel)}</div>`;
   document.body.appendChild(el);document.body.classList.add("vw-open");el.firstElementChild.scrollTop=0;
-  VW={el,m,onClose:opt.onClose};
+  if(m.cuidado)montarCuidado(el,m);
+  if(typeof registrarEvento==="function")registrarEvento(m.id,"visita");
+  el.querySelectorAll("img").forEach(i=>i.complete||i.addEventListener("load",()=>VW&&VW.fit&&VW.fit(),{once:true}));
+  VW={el,m,onClose:opt.onClose};VW.fit=()=>encaixarJanela(el);VW.rs=()=>VW&&VW.fit();addEventListener("resize",VW.rs);requestAnimationFrame(VW.fit);[250,800,1600].forEach(t=>setTimeout(()=>VW&&VW.el===el&&VW.fit(),t));
   VW.key=ev=>{if(ev.key==="Escape"&&!el.querySelector(".dial"))closeViewer()};document.addEventListener("keydown",VW.key);
   el.addEventListener("click",ev=>{if(ev.target===el){closeViewer();return}const a=ev.target.closest("[data-act],[data-id],[data-like],[data-star]");if(!a)return;
     if(a.dataset.id){ev.preventDefault();sndClick();opt.onPick&&opt.onPick(a.dataset.id);return}
@@ -224,6 +244,8 @@ function openViewer(m,opt={}){
     if(act==="close")closeViewer();
     else if(act==="year"){const y=m.y;closeViewer();opt.onYear&&opt.onYear(y)}
     else if(act==="share")compartilharYT(m);
+    else if(act==="wiki"){closeViewer();location.href="memepedia.html#"+encodeURIComponent(m.id)}
+    else if(act==="reveal"){const c=el.querySelector(".cdo");if(c)c.classList.add("ok");sndClick()}
     else if(act==="snd"){SND.on=!SND.on;try{localStorage.setItem("ns_snd",SND.on?"1":"0")}catch(e){}a.innerHTML=icon(SND.on?"volume":"mute")+"<span>Sons da época</span>"}
     else if(act==="savelink"){const u=el.querySelector(".ol").value.trim(),out=el.querySelector(".olm");const r=enviarLinkSugerido(m,u);
       if(r&&r.then){out.innerHTML='<div class="chk">Enviando…</div>';r.then(h=>{out.innerHTML=h||"";if(h&&h.includes("chk ok"))el.querySelector(".ol").value=""})}else out.innerHTML=r||""}
@@ -235,7 +257,7 @@ function openViewer(m,opt={}){
   const paint=()=>{const mine=myVote(m.id);
     if(isPhoto){const n=tot.up;el.querySelectorAll("[data-like-photo]").forEach(b=>b.innerHTML=`<button class="plk ${mine.v===1?"on":""}" data-like="1">${icon("heart")}${pEra(m.y)==="fotolog"?`<span>${mine.v===1?"Flog favoritado":"Favoritar este flog"} (${fmt(n)})</span>`:pEra(m.y)==="orkut"?`<span>${mine.v===1?"Você curtiu":"Curtir"} · ${fmt(n)}</span>`:""}</button>`);
       const l=el.querySelector("[data-likes]");if(l)l.textContent=`${fmt(n)} curtida${n===1?"":"s"}`;const no=el.querySelector("[data-notes]");if(no)no.textContent=`${fmt(n)} nota${n===1?"":"s"}`;return}
-    const rt=el.querySelector("[data-rt]");if(rt)rt.innerHTML=ratingHTML(e,tot,mine)};
+    const rt=el.querySelector("[data-rt]");if(rt)rt.innerHTML=m.vert?`<button class="tkl ${mine.v===1?"on":""}" data-like="1">${icon("heart")}<small>${short(tot.up)}</small></button>`:ratingHTML(e,tot,mine)};
   paint();
   loadVotes(m.id).then(d=>{if(d&&VW&&VW.m===m){tot=d;paint()}});
   if(isPhoto)initComments(el,m);
@@ -253,9 +275,9 @@ function openViewer(m,opt={}){
     // imersão: discada, lan house, avisos da época
     const hooks={};
     if(discada(m.y))hooks.beforeStart=()=>dialUp(el);
-    hooks.onPlay=()=>{if(!VW||VW.toasted)return;VW.toasted=1;VW.toastT=setTimeout(()=>{if(VW&&VW.m===m&&typeof alertaDaEpoca==="function")alertaDaEpoca(el,m,false)},4000)};
+    hooks.onPlay=()=>{if(!VW||VW.toasted)return;VW.toasted=1;if(typeof registrarEvento==="function")registrarEvento(m.id,"clique");VW.toastT=setTimeout(()=>{if(VW&&VW.m===m&&typeof alertaDaEpoca==="function")alertaDaEpoca(el,m,false)},4000)};
     VW.player=initPlayer(el.querySelector(".vp"),m,rel,id=>opt.onPick&&opt.onPick(id),hooks);
-    if(lanhouse(m.y)){const b=document.createElement("div");b.className="lan";let s=29*60+59;b.innerHTML=`<b>LAN HOUSE</b><span>Máquina 07</span><span class="lt"></span><small>R$ 1,50/hora</small>`;el.appendChild(b);const lt=b.querySelector(".lt");
+    if(lanhouse(m.y)){const b=document.createElement("div");b.className="lan";let s=29*60+59;b.innerHTML=`<b>LAN HOUSE</b><span>Máquina 07</span><span class="lt"></span><small>R$ 1,50/hora</small>`;el.querySelector(".vw-win").appendChild(b);const lt=b.querySelector(".lt");
       const tick=()=>{lt.textContent="Tempo restante "+String(Math.floor(s/60)).padStart(2,"0")+":"+String(s%60).padStart(2,"0");if(s>0)s--};tick();VW.clock=setInterval(tick,1000)}
     const ck=el.querySelector("[data-clock]");if(ck){const f=()=>ck.textContent=new Date().toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit"});f();VW.clock=setInterval(f,30000)}
   }
@@ -271,3 +293,44 @@ function dialUp(root){return new Promise(res=>{
   const done=()=>{T.forEach(clearTimeout);clearTimeout(fin);if(SND.ctx){try{SND.ctx.close()}catch(e){}SND.ctx=null}d.remove();res()};
   const fin=setTimeout(done,7400);d.querySelectorAll("button").forEach(b=>b.onclick=done);
 })}
+
+// ---- janela inteira na tela: diminui a mídia até tudo caber, sem rolagem dentro da janela ----
+function encaixarJanela(el){
+  const w=el.querySelector(".vw-win");if(!w)return;
+  const media=w.querySelector(".tkv")||w.querySelector(".vp-stage")||w.querySelector(".pimg");if(!media)return;
+  media.style.maxWidth="";media.style.maxHeight="";
+  const pad=innerWidth<=700||innerHeight<800?16:48,room=innerHeight-pad,minH=innerWidth<=700?140:120;
+  for(let i=0;i<4;i++){
+    const over=w.offsetHeight-room;if(over<=1)return;
+    if(media.classList.contains("pimg")){const h=media.getBoundingClientRect().height;if(h<=minH)return;media.style.maxHeight=Math.max(minH,h-over)+"px";continue}
+    const scr=media.querySelector(".vp-screen")||media,sr=scr.getBoundingClientRect();if(sr.height<=minH)return;
+    const ar=sr.width/Math.max(1,sr.height),h=Math.max(minH,sr.height-over);
+    media.style.maxWidth=Math.floor(h*ar)+"px";media.style.marginLeft="auto";media.style.marginRight="auto";
+  }
+}
+
+// ---- selo de cuidado: memes com preconceito ficam borrados até a pessoa escolher ver ----
+const CUIDADO={
+  racismo:{nome:"racismo",lei:"Racismo é crime inafiançável e imprescritível (Constituição, art. 5º, XLII). Lei 7.716/1989: praticar, induzir ou incitar discriminação de raça ou cor dá reclusão de 2 a 5 anos e multa (redação da Lei 14.532/2023). Injúria racial (art. 2º-A): reclusão de 2 a 5 anos e multa.",
+    orgs:[["Geledés – Instituto da Mulher Negra","https://www.geledes.org.br"],["Educafro","https://www.educafro.org.br"],["Denuncie: Disque 100 (Direitos Humanos)","https://www.gov.br/mdh/pt-br/ondh"]]},
+  lgbtfobia:{nome:"LGBTfobia",lei:"Desde 2019 o STF enquadra homofobia e transfobia na Lei do Racismo (ADO 26 e MI 4.733): reclusão de 2 a 5 anos e multa. Ofensa direta a uma pessoa LGBTQIA+ pode ser injúria racial (art. 2º-A da Lei 7.716/1989).",
+    orgs:[["ANTRA – Associação Nacional de Travestis e Transexuais","https://antrabrasil.org"],["Grupo Gay da Bahia","https://grupogaydabahia.com.br"],["Denuncie: Disque 100","https://www.gov.br/mdh/pt-br/ondh"]]},
+  machismo:{nome:"machismo",lei:"Violência psicológica contra a mulher é crime (Código Penal, art. 147-B, Lei 14.188/2021): reclusão de 6 meses a 2 anos e multa. Em março de 2026 o Senado aprovou projeto que inclui a misoginia na Lei do Racismo (pena de 2 a 5 anos); confira se já virou lei.",
+    orgs:[["Instituto Maria da Penha","https://www.institutomariadapenha.org.br"],["Think Olga","https://thinkolga.com"],["Denuncie: Ligue 180","https://www.gov.br/mulheres/pt-br/ligue180"]]},
+  capacitismo:{nome:"capacitismo",lei:"Discriminar pessoa com deficiência é crime (Lei 13.146/2015, art. 88): reclusão de 1 a 3 anos e multa, aumentada se for pela internet.",
+    orgs:[["Instituto Jô Clemente","https://www.ijc.org.br"],["Denuncie: Disque 100","https://www.gov.br/mdh/pt-br/ondh"]]}
+};
+function cuidadoHTML(m,curto){const c=CUIDADO[m.cuidado.tipo]||CUIDADO.racismo;
+  return`<div class="cdo-selo">${icon("care","in")}<b>Selo de cuidado</b><span>contém ${c.nome}</span></div>${curto?"":`<p>${escapeHtml(m.cuidado.nota||"")}</p>
+   <p>O Não Salvo é um museu da internet brasileira. Este registro fica aqui como memória: na época, muita gente achava esse tipo de piada “normal”. Hoje sabemos que não é. Isso não é humor, é preconceito.</p>
+   <p class="cdo-lei"><b>É crime.</b> ${c.lei}</p>
+   <div class="cdo-orgs"><small>Quem luta contra isso:</small>${c.orgs.map(([n,u])=>`<a href="${u}" target="_blank" rel="noopener">${icon("extlink","in")}${n}</a>`).join("")}</div>`}`}
+function montarCuidado(el,m){
+  const w=el.querySelector(".vw-win");if(!w)return;
+  const box=document.createElement("div");box.className="cdo";
+  box.innerHTML=`<div class="cdo-in">${cuidadoHTML(m)}<button class="cdo-ver" data-act="reveal">${icon("eye","in")}Entendi, quero ver</button><button class="cdo-sair" data-act="close">Voltar</button></div>`;
+  w.appendChild(box);
+  const info=document.createElement("div");info.className="cdo-faixa";info.innerHTML=cuidadoHTML(m,true)+`<button data-act="cdoinfo">por quê?</button>`;
+  const alvo=w.querySelector(".vbs");if(alvo)alvo.before(info);
+  info.querySelector("button").onclick=ev=>{ev.stopPropagation();box.classList.remove("ok")};
+}
