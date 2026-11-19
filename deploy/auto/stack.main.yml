@@ -1,0 +1,60 @@
+# Cópia fixa usada pelo deployer (não vem do repositório em tempo de deploy).
+# Mudou a stack? Rebuild do naosalvo-deployer.
+version: '3.8'
+
+services:
+  web:
+    image: naosalvo-frontend:latest
+    deploy:
+      replicas: 1
+      update_config:
+        order: start-first
+        failure_action: rollback
+        monitor: 20s
+      labels:
+        - "traefik.enable=true"
+        - "traefik.docker.network=v0net"
+        - "traefik.http.routers.naosalvo.rule=Host(`naosalvo-local.fishlab.com.br`)"
+        - "traefik.http.routers.naosalvo.entrypoints=websecure"
+        - "traefik.http.routers.naosalvo.tls.certresolver=letsencryptresolver"
+        - "traefik.http.services.naosalvo.loadbalancer.server.port=80"
+    networks:
+      - v0net
+
+  api:
+    image: naosalvo-api:latest
+    environment:
+      DB_HOST: postgres
+      DB_NAME: naosalvo
+      DB_USER: naosalvo
+      DB_PASSWORD_FILE: /run/secrets/naosalvo_db_password
+      ADMIN_TOKEN_FILE: /run/secrets/naosalvo_admin_token
+    secrets:
+      - naosalvo_db_password
+      - naosalvo_admin_token
+    deploy:
+      replicas: 1
+      update_config:
+        order: start-first
+        failure_action: rollback
+        monitor: 20s
+      labels:
+        - "traefik.enable=true"
+        - "traefik.docker.network=v0net"
+        - "traefik.http.routers.naosalvo-api.rule=Host(`naosalvo-local.fishlab.com.br`) && PathPrefix(`/api`)"
+        - "traefik.http.routers.naosalvo-api.priority=100"
+        - "traefik.http.routers.naosalvo-api.entrypoints=websecure"
+        - "traefik.http.routers.naosalvo-api.tls.certresolver=letsencryptresolver"
+        - "traefik.http.services.naosalvo-api.loadbalancer.server.port=3000"
+    networks:
+      - v0net
+
+secrets:
+  naosalvo_db_password:
+    external: true
+  naosalvo_admin_token:
+    external: true
+
+networks:
+  v0net:
+    external: true

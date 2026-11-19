@@ -20,7 +20,7 @@ memes_data.json
 # Arquivos de deploy / build
 Dockerfile
 .dockerignore
-docker-stack.yml
+docker-stack*.yml
 docker-compose*.yml
 
 # Lixo
