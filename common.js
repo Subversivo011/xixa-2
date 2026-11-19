@@ -140,7 +140,13 @@ function nsToday(){const d=new Date();d.setDate(d.getDate()+(NS.dayOffset||0));r
   nsSave();
 })();
 
-function addXP(n){const before=rankOf(NS.xp);NS.xp+=n;const after=rankOf(NS.xp);nsSave();if(after!==before)setTimeout(()=>toast(`🎖️ Nova patente: ${after.name}! ${after.can}`,4200),600);renderWallet()}
+// Revelação em curso (ex.: abrir pacote): quem está revelando liga holdWallet(true). Enquanto isso o estado
+// (NS, nsSave) muda na hora, mas a carteira não é redesenhada e o aviso de patente fica na fila.
+// holdWallet(false) desenha a carteira e mostra o aviso.
+let walletHold=false,pendingRank=null;
+function showRankToast(r){setTimeout(()=>toast(`🎖️ Nova patente: ${r.name}! ${r.can}`,4200),600)}
+function holdWallet(on){walletHold=!!on;if(walletHold)return;renderWallet();if(pendingRank){const r=pendingRank;pendingRank=null;showRankToast(r)}}
+function addXP(n){const before=rankOf(NS.xp);NS.xp+=n;const after=rankOf(NS.xp);nsSave();if(after!==before){if(walletHold)pendingRank=after;else showRankToast(after)}renderWallet()}
 function addCoins(n,why){NS.coins+=n;nsSave();renderWallet();if(why)toast(`+${n} 🪙 ${why}`)}
 
 // ---- UI compartilhada ----
@@ -152,6 +158,7 @@ const fmt=n=>Number(n).toLocaleString("pt-BR");
 const compactCoins=new Intl.NumberFormat("pt-BR",{notation:"compact",maximumSignificantDigits:3});
 
 function renderWallet(){
+  if(walletHold)return;
   const el=document.getElementById("wallet");if(!el)return;
   const r=rankOf(NS.xp),nx=nextRank(NS.xp);
   const pct=nx?Math.round((NS.xp-r.xp)/(nx.xp-r.xp)*100):100;
@@ -162,6 +169,7 @@ function renderWallet(){
     <span class="wl-c">${icon("coin")}<b>${NS.coins>=10000?compactCoins.format(NS.coins):balance}</b></span>
     <span class="wl-r"><em style="color:${r.color}">${r.name}</em><i><s style="width:${pct}%;background:${r.color}"></s></i><small>${progress}</small></span></button>`;
   updateAccount();
+  if(typeof onWalletRendered==="function")onWalletRendered();
 }
 
 // ---- Cadastro com avatar de gatinho (layout original) ----
