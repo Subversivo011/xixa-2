@@ -95,7 +95,15 @@ button:hover>.thumb>.play,button:hover>.ct>.play,.tthumb:hover>.play,.card:hover
 .timeline{border:0;border-radius:24px;padding:20px 24px 24px;background:var(--panel);box-shadow:0 1px 2px #0000000d,0 10px 34px #00000014}
 :root[data-theme="dark"] .timeline{box-shadow:0 0 0 1px var(--line),0 10px 34px #0005}
 .years{padding:16px 0 6px}
-.years::before{background:var(--line2);height:3px;border-radius:3px;bottom:14px}
+.timeline .years{gap:0;scrollbar-width:none}
+.timeline .years::-webkit-scrollbar{display:none}
+.timeline .years::before{content:none}
+/* o trilho é desenhado em cada ano: acompanha a rolagem em vez de parar na largura visível */
+.timeline .y::before{content:"";position:absolute;left:0;right:0;bottom:14px;height:3px;background:var(--line2)}
+.timeline .y:first-child::before{border-radius:3px 0 0 3px}
+.timeline .y:last-child::before{border-radius:0 3px 3px 0}
+.timeline .y.on::before{background:linear-gradient(90deg,var(--line2),var(--brand),var(--line2))}
+@media (max-width:760px){.timeline .years{-webkit-mask-image:linear-gradient(90deg,transparent,#000 22px,#000 calc(100% - 22px),transparent);mask-image:linear-gradient(90deg,transparent,#000 22px,#000 calc(100% - 22px),transparent)}}
 .y{font-size:13px}
 .y::after{width:8px;height:8px;margin-left:-4px;background:var(--line2);box-shadow:none;bottom:11px}
 .y:hover::after{background:var(--brand)}
