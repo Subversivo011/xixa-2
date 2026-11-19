@@ -13,13 +13,27 @@
 // ============================================================================================
 
 const APELIDO = /^[A-Za-z0-9_.\-]{3,20}$/;
-const BANCOS_DE_PRODUCAO = ['naosalvo']; // o banco do ambiente de produção (o de dev é naosalvo_dev)
 
-/** Devolve o autenticador do stub, ou null se AUTH_STUB não estiver ligado. Lança se ligado em produção. */
+/**
+ * ALLOWLIST: o stub só pode ligar se
+ *   (o nome do banco contém "test" ou "dev", OU NODE_ENV=test)  E  NODE_ENV não é "production".
+ * Tudo o mais é recusado (naosalvo, naosalvo_staging, banco ausente...): é mais seguro listar o que
+ * pode do que tentar adivinhar o que é produção. Comparação sem diferenciar maiúsculas de minúsculas.
+ */
+export function stubPermitido(env = process.env) {
+  const nodeEnv = String(env.NODE_ENV || '').trim().toLowerCase();
+  const banco = String(env.DB_NAME || '').trim().toLowerCase();
+  if (nodeEnv === 'production') return false;
+  return nodeEnv === 'test' || banco.includes('test') || banco.includes('dev');
+}
+
+/** Devolve o autenticador do stub, ou null se AUTH_STUB não estiver ligado. Lança se ligado fora da allowlist. */
 export function criarAutenticadorStub(env = process.env) {
   if (env.AUTH_STUB !== '1') return null;
-  if (env.NODE_ENV === 'production' || BANCOS_DE_PRODUCAO.includes(env.DB_NAME || 'naosalvo')) {
-    throw new Error('AUTH_STUB=1 é proibido em produção (banco/ambiente de produção detectado). Remova a variável.');
+  if (!stubPermitido(env)) {
+    throw new Error(
+      `AUTH_STUB=1 recusado: o stub só liga com DB_NAME contendo "test" ou "dev" (ou NODE_ENV=test) e NODE_ENV diferente de production ` +
+      `(DB_NAME="${env.DB_NAME || ''}", NODE_ENV="${env.NODE_ENV || ''}"). Remova AUTH_STUB deste ambiente.`);
   }
   console.warn('!! AUTH_STUB=1: login de TESTE ativo (header X-Test-User). Não use fora de dev/teste.');
 

@@ -32,7 +32,7 @@ async function carregarRegras(db) {
   const { rows } = await db.query('SELECT chave, valor FROM regras_economia');
   const r = Object.fromEntries(rows.map((x) => [x.chave, x.valor]));
   for (const k of ['valor_repetida', 'recompensa_moedas', 'xp_ganho', 'limites']) {
-    if (!r[k]) throw new Error(`regras_economia sem a chave "${k}" (rode as migrações)`);
+    if (!r[k]) throw new ErroNegocio(503, `regras de economia ausentes ("${k}"): rode as migrações e o seed`);
   }
   return r;
 }
@@ -157,7 +157,9 @@ export async function visita(pool, usuario, { agora = new Date() } = {}) {
     const razao = criarRazao(cli, usuario.id);
     const nova = await razao.xp(regras.xp_ganho.visita, 'visita_diaria', dia);
     const ganhos = [];
-    if (nova) {
+    // sem o tipo "diario" cadastrado (seed não rodou) a visita só dá XP; não há o que guardar no estoque
+    const { rows: [temDiario] } = await cli.query("SELECT 1 AS ok FROM pacotes_tipo WHERE id = 'diario' AND ativo");
+    if (nova && temDiario) {
       const { rows: [q] } = await cli.query(
         "SELECT count(*)::int AS n FROM pacotes_estoque WHERE usuario_id = $1 AND tipo = 'diario' AND usado_em IS NULL", [usuario.id]);
       if (q.n < regras.limites.pacote_diario_max) {
@@ -222,7 +224,9 @@ export async function abrirPacote(pool, usuario, { estoque_id = null, tipo = nul
     if (!item) throw new ErroNegocio(404, 'pacote não encontrado no seu estoque');
 
     const { rows: [pk] } = await cli.query('SELECT id, nome, cartas, chances, garantia, escopo FROM pacotes_tipo WHERE id = $1', [item.tipo]);
-    const escopo = await cartasDoEscopo(cli, pk.escopo === 'colecao' ? item.colecao_id : null);
+    const escopo = pk ? await cartasDoEscopo(cli, pk.escopo === 'colecao' ? item.colecao_id : null) : [];
+    // acervo não carregado (seed não rodou): erro claro e nada é gravado
+    if (!pk || !escopo.length) throw new ErroNegocio(503, 'acervo de cartas ainda não foi carregado (rode node api/seed/acervo.js); tente mais tarde');
     const semente = novaSemente();
     const sorteadas = sortearPacote({ cartas: escopo, chances: pk.chances, garantia: pk.garantia, quantidade: pk.cartas, rng: criarRng(semente) });
 

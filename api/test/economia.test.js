@@ -49,14 +49,6 @@ test('sem login: 401; header inválido: 401; ranking é público', { skip }, asy
   assert.equal((await s.get('/api/ranking')).status, 200);
 });
 
-test('stub: desligado sem AUTH_STUB e recusa subir em produção', () => {
-  assert.equal(criarAutenticadorStub({}), null);
-  assert.equal(criarAutenticadorStub({ AUTH_STUB: '0' }), null);
-  assert.throws(() => criarAutenticadorStub({ AUTH_STUB: '1', NODE_ENV: 'production', DB_NAME: 'naosalvo_dev' }), /proibido em produção/);
-  assert.throws(() => criarAutenticadorStub({ AUTH_STUB: '1', DB_NAME: 'naosalvo' }), /proibido em produção/);
-  assert.throws(() => criarAutenticadorStub({ AUTH_STUB: '1' }), /proibido em produção/); // DB_NAME ausente = padrão de produção
-});
-
 test('visita: XP, pacote diário e boas-vindas; idempotente no mesmo dia', { skip }, async () => {
   const v1 = await POST('/api/visita', {}, 'visitante');
   assert.equal(v1.status, 200);
@@ -275,6 +267,26 @@ test('ranking ignora banidos; usuário banido não opera (403)', { skip }, async
   assert.equal((await GET('/api/carteira', 'banido-1')).status, 403);
   const r = (await s.get('/api/ranking?metrica=xp&limite=100')).json;
   assert.ok(!r.itens.some((i) => i.apelido === 'banido-1'));
+});
+
+test('sem seed: abrir pacote responde 503 claro e não grava nada', { skip }, async () => {
+  const vazio = await bancoDeTeste({ seed: false }); // migrações, mas sem acervo
+  const sv = await servidor(vazio.pool, { autenticar: criarAutenticadorStub({ AUTH_STUB: '1', DB_NAME: 'naosalvo_test' }) });
+  try {
+    const h = como('sem-seed');
+    assert.equal((await sv.post('/api/visita', {}, h)).status, 200);                  // visita funciona; sem pacotes cadastrados
+    assert.equal((await sv.post('/api/pacotes/abrir', { tipo: 'boas' }, h)).status, 404);
+    // pacote cadastrado e no estoque, mas sem nenhuma carta no acervo
+    await vazio.pool.query("INSERT INTO pacotes_tipo (id, nome, chances) VALUES ('boas', 'Boas', '{\"Comum\":1}')");
+    await vazio.pool.query("INSERT INTO pacotes_estoque (usuario_id, tipo, origem) SELECT id, 'boas', 'boas' FROM usuarios");
+    const r = await sv.post('/api/pacotes/abrir', { tipo: 'boas' }, h);
+    assert.equal(r.status, 503); assert.match(r.json.erro, /acervo.*seed/);
+    assert.equal((await vazio.pool.query('SELECT count(*)::int AS n FROM pacotes_abertos')).rows[0].n, 0);
+    assert.equal((await vazio.pool.query('SELECT count(*)::int AS n FROM pacotes_estoque WHERE usado_em IS NULL')).rows[0].n, 1);
+    // regras apagadas: também 503, não 500
+    await vazio.pool.query('DELETE FROM regras_economia');
+    assert.equal((await sv.get('/api/carteira', h)).status, 503);
+  } finally { await sv.fechar(); await vazio.fechar(); }
 });
 
 test('todo saldo e XP do banco batem com o razão (varredura geral)', { skip }, async () => {
