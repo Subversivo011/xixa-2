@@ -134,10 +134,21 @@ export async function trocarCodigo(cfg, code, fetchFn = fetch) {
   return j.access_token;
 }
 
+// ---- foto de perfil: URL montada AQUI, só de id e hash validados ----
+const ID_DISCORD = /^[0-9]{5,25}$/;
+const HASH_AVATAR = /^[a-f0-9_]{1,64}$/;
+/** https://cdn.discordapp.com/avatars/<id>/<hash>.png?size=128, ou null (sem foto, id ou hash fora do formato). Sempre png, nunca o avatar padrão. */
+export function urlDoAvatar(id, hash) {
+  if (typeof id !== 'string' || typeof hash !== 'string') return null;
+  if (!ID_DISCORD.test(id) || !HASH_AVATAR.test(hash)) return null;
+  return `https://cdn.discordapp.com/avatars/${id}/${hash}.png?size=128`;
+}
+
 export async function buscarPerfil(accessToken, fetchFn = fetch) {
   const j = await chamar(fetchFn, `${API}/users/@me`, { headers: { Authorization: `Bearer ${accessToken}` } }, 'perfil');
   if (!/^\d{5,25}$/.test(String(j.id || ''))) throw new ErroDiscord('perfil: id inválido');
-  return { id: String(j.id), username: String(j.username || ''), global_name: j.global_name ? String(j.global_name) : null };
+  const id = String(j.id);
+  return { id, username: String(j.username || ''), global_name: j.global_name ? String(j.global_name) : null, avatar_url: urlDoAvatar(id, j.avatar) };
 }
 
 export async function ehMembro(accessToken, guildId, fetchFn = fetch) {
@@ -170,7 +181,8 @@ export async function acharOuCriarUsuario(pool, perfil) {
       `SELECT u.id, u.apelido, u.banido FROM contas_oauth c JOIN usuarios u ON u.id = c.usuario_id
         WHERE c.provedor = 'discord' AND c.provedor_id = $1`, [perfil.id]);
     if (ex.length) {
-      await pool.query("UPDATE contas_oauth SET nome_exibicao = $2 WHERE provedor = 'discord' AND provedor_id = $1", [perfil.id, nomeExibicao]);
+      // um único UPDATE (atômico): nome e foto acompanham o Discord a cada login (a pessoa pode ter trocado)
+      await pool.query("UPDATE contas_oauth SET nome_exibicao = $2, avatar_url = $3 WHERE provedor = 'discord' AND provedor_id = $1", [perfil.id, nomeExibicao, perfil.avatar_url ?? null]);
       if (!ex[0].banido) await pool.query('UPDATE usuarios SET ultimo_acesso = now() WHERE id = $1', [ex[0].id]);
       return { id: Number(ex[0].id), apelido: ex[0].apelido, banido: ex[0].banido, novo: false };
     }
@@ -181,7 +193,7 @@ export async function acharOuCriarUsuario(pool, perfil) {
         'INSERT INTO usuarios (apelido, avatar_gato, ultimo_acesso) VALUES ($1,$2,now()) RETURNING id, apelido',
         [gerarApelido(perfil.global_name || perfil.username, tentativa), JSON.stringify(gatoInicial(perfil.id))]);
       await cli.query(
-        "INSERT INTO contas_oauth (usuario_id, provedor, provedor_id, nome_exibicao) VALUES ($1,'discord',$2,$3)", [u.id, perfil.id, nomeExibicao]);
+        "INSERT INTO contas_oauth (usuario_id, provedor, provedor_id, nome_exibicao, avatar_url) VALUES ($1,'discord',$2,$3,$4)", [u.id, perfil.id, nomeExibicao, perfil.avatar_url ?? null]);
       await cli.query('COMMIT');
       return { id: Number(u.id), apelido: u.apelido, banido: false, novo: true };
     } catch (e) {

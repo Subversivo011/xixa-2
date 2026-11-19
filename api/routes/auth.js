@@ -88,19 +88,20 @@ export default function registrar(r) {
 
   // quem sou eu: usuário, patente (pelo XP, no servidor), saldo e o token CSRF desta sessão
   r.get('/api/eu', async ({ res, pool, usuario }) => {
-    let atual, proxima, c, rows;
+    let atual, proxima, c, rows, conta;
     try {
-      [{ atual, proxima }, c, { rows }] = await Promise.all([
+      [{ atual, proxima }, c, { rows }, { rows: conta }] = await Promise.all([
         patenteDoUsuario(pool, usuario.id),
         carteira(pool, usuario),
-        pool.query('SELECT avatar_gato FROM usuarios WHERE id = $1', [usuario.id])
+        pool.query('SELECT avatar_gato FROM usuarios WHERE id = $1', [usuario.id]),
+        pool.query("SELECT avatar_url FROM contas_oauth WHERE usuario_id = $1 AND provedor = 'discord' LIMIT 1", [usuario.id])
       ]);
     } catch (e) {
       if (e instanceof ErroNegocio) return send(res, e.status, { erro: e.message });
       throw e;
     }
     return send(res, 200, {
-      usuario: { id: Number(usuario.id), apelido: usuario.apelido, avatar_gato: rows[0]?.avatar_gato || {} },
+      usuario: { id: Number(usuario.id), apelido: usuario.apelido, avatar_gato: rows[0]?.avatar_gato || {}, avatar_url: conta[0]?.avatar_url ?? null },
       patente: atual && { id: atual.id, nome: atual.nome, cor: atual.cor, xp_minimo: atual.xp_minimo },
       proxima_patente: proxima && { id: proxima.id, nome: proxima.nome, xp_minimo: proxima.xp_minimo, faltam: proxima.xp_minimo - c.xp },
       moedas: c.moedas, xp: c.xp,
