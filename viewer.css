@@ -16,6 +16,12 @@ body.vw-open{overflow:hidden}
 .vw .snd .ico{width:16px;height:16px}
 .vw .snd:hover{opacity:1}
 .vw .yl{height:30px;width:auto;display:block}
+/* logo do topo: desenho próprio (TV antiga + nome), lembra o YouTube sem copiar o logo oficial */
+.vw .ylt{display:inline-flex;align-items:center;gap:6px;flex:none;color:#282828;font:bold 22px/1 Arial,Helvetica,sans-serif;letter-spacing:-.5px;white-space:nowrap}
+.vw .ylt svg{height:100%;width:auto}
+.vw .ylt .tela{fill:#fff}
+.vw .yh5 .ylt{color:#f1f1f1}
+.vw .yh5 .ylt .tela{fill:#0f0f0f}
 .vw .vbs{display:flex;gap:8px;margin:16px 0 6px;flex-wrap:wrap}
 .vw .lbx{margin-top:12px;padding:10px 12px;font-size:12px;border:1px dashed #9ab;border-radius:4px;line-height:1.5}
 .vw .lbx .in{display:flex;gap:6px;margin-top:6px}.vw .lbx input{flex:1;padding:5px 7px;border:1px solid #aaa;font:inherit;font-size:12px}
@@ -331,7 +337,7 @@ body.vw-open{overflow:hidden}
   .vw-win .yh1 .t1{flex-wrap:nowrap}
   .vw-win .yh1 .lk a{display:none}
   .vw-win .yh1 .lk{font-size:0}
-  .vw-win .yl{height:24px}
+  .vw-win .yl{height:24px}.vw-win .ylt{font-size:18px}
   .vw-win .lk{display:flex;align-items:center;gap:6px;margin-left:auto}
   .vw-win h1{font-size:18px!important;line-height:1.25}
   .vw-win .vbs .vb{flex:1}

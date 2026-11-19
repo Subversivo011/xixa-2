@@ -1,6 +1,6 @@
 // =====================================================================
 //  NÃO SALVO — tela do vídeo/foto no visual da época
-//  Vídeos: página no estilo do YouTube do ano do meme (canal Não Salvo).
+//  Vídeos: página no estilo do YouTube do ano do meme (canal Não Salvo; logo próprio que lembra o YouTube, não o oficial).
 //  Fotos: página no estilo da rede social de fotos da época.
 //  Votos (curtidas/estrelas) e visualizações vêm das funções do Netlify
 //  (/api/votos e /api/yt-stats). Sem elas, funciona só no navegador.
@@ -69,7 +69,7 @@ function relHTML(e,rel){
   return`<div class="rel5"><div class="chipsr"><b>Tudo</b><span>Do ${CANAL}</span><span>Relacionados</span></div>${L.map(r=>`<a class="ri" data-id="${r.id}">${thumb(r)}<span><b>${escapeHtml(r.t)}</b><small>${canal(r)} ${icon("check","vf")}</small><small>${short(r.views)} visualizações · ${ago(r.y)}</small></span></a>`).join("")}</div>`;
 }
 const headBar=e=>{
-  const logo=`<img class="yl" src="logo-word.png" alt="Não Salvo">`,snd=`<button class="snd" data-act="snd" title="Sons da época">${icon(SND.on?"volume":"mute")}<span>Sons da época</span></button>`,x=`<button class="vx" data-act="close" title="Fechar (Esc)">${icon("xmark")}</button>`;
+  const logo=`<span class="yl ylt" role="img" aria-label="YouTube"><svg viewBox="0 0 34 30" aria-hidden="true"><path d="M11 2l6 6 6-6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/><rect x="1.5" y="8" width="31" height="20.5" rx="5" fill="currentColor"/><rect x="5" y="11.5" width="24" height="13.5" rx="3" class="tela"/><path d="M14.5 14.5v7.5l6.5-3.75z" fill="currentColor"/></svg><b>YouTube</b></span>`,snd=`<button class="snd" data-act="snd" title="Sons da época">${icon(SND.on?"volume":"mute")}<span>Sons da época</span></button>`,x=`<button class="vx" data-act="close" title="Fechar (Esc)">${icon("xmark")}</button>`;
   if(e===1)return`<header class="yh1"><div class="t1">${logo}<div class="lk"><a>Cadastre-se</a> | <a>Login</a> | <a>Ajuda</a>${snd}${x}</div></div><nav><a class="on">Vídeos</a><a>Categorias</a><a>Canais</a><a>Comunidade</a></nav><div class="sr"><input placeholder=""><button>Pesquisar</button><a>Enviar vídeos</a></div></header>`;
   if(e===2)return`<header class="yh2">${logo}<div class="sr"><input><button>Pesquisar</button></div><a class="up">Enviar</a><div class="lk">${snd}${x}</div></header>`;
   if(e===3)return`<header class="yh3">${logo}<div class="sr"><input><button>${icon("search")}</button></div><a class="up">Enviar</a><div class="lk">${snd}${x}</div></header>`;
