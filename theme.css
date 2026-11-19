@@ -407,4 +407,60 @@ a[onclick]:not([href]):focus-visible{outline:2px solid var(--brand);outline-offs
   .hd .sub .pop{position:static;box-shadow:none;max-height:none;margin-inline:8px}
   .account-tools{flex-wrap:wrap;border-top:1px solid var(--line);margin-top:8px;padding:8px 4px 0;justify-content:space-between}
   .wl-r{display:none}
+/* fala.que.eu.te.escuto: feedback + contribuir com ideias */
+.fq{max-width:760px;cursor:default}
+.fq:hover{transform:none;box-shadow:0 10px 26px #0000002e}
+.fq-art{display:block;padding:0;background:none;border:0;cursor:pointer}
+.fq-l1 em{font-style:normal;font-family:Inter,sans-serif;font-size:13px;font-weight:800;color:var(--brand);margin-left:6px;vertical-align:2px}
+.fq-acts{display:flex;flex-direction:column;gap:8px;position:relative}
+.fq-acts .fq-go{justify-content:center;text-decoration:none;cursor:pointer}
+.fq-go.alt{background:transparent;color:#2b2330;box-shadow:inset 0 0 0 2px #2b2330}
+.fq-go.alt:hover{background:#2b2330;color:#fff}
+:root[data-theme="dark"] .fq-go.alt{background:transparent;color:#fff;box-shadow:inset 0 0 0 2px #fff}
+:root[data-theme="dark"] .fq-go.alt:hover{background:#fff;color:#2b2330}
+@media(max-width:860px){.fq{grid-template-columns:56px 1fr}.fq-acts{grid-column:1/-1}.fq-l1 em{display:block;margin:2px 0 0;font-size:12.5px}}
+
+/* ---- rodapé: fala.que.eu.te.escuto dentro da faixa escura ---- */
+.nsft2{margin-top:56px}
+.nsft2 .ft-band{margin-top:0}
+.nsft2 .ft-band-in{display:grid;grid-template-columns:minmax(0,1fr) minmax(300px,350px) 130px;grid-template-areas:"legal fq boneco";gap:26px;align-items:center;padding:28px 28px 24px}
+.nsft2 .ft-legal{grid-area:legal;min-width:0}
+.nsft2 .ft-legal p{max-width:none}
+.nsft2 .soc{gap:12px;margin-bottom:20px}
+.nsft2 .soc-t{font-size:12px;margin-bottom:2px}
+.nsft2 .ft-legal .soc .sb{width:54px;height:54px;border-radius:15px;box-shadow:0 6px 18px #0006}
+.nsft2 .ft-legal .soc .sb svg{width:27px;height:27px}
+.nsft2 .ft-legal .soc .sb:hover{transform:translateY(-3px) scale(1.06)}
+.nsft2 .fq-in{grid-area:fq;max-width:none;width:100%;min-width:0;grid-template-columns:52px minmax(0,1fr);gap:10px 12px;padding:14px;margin:0;align-self:center}
+.nsft2 .fq-in .fq-art{width:52px}
+.nsft2 .fq-in .fq-acts{grid-column:1/-1;flex-direction:row;flex-wrap:wrap;gap:8px}
+.nsft2 .fq-in .fq-acts .fq-go{flex:1 1 130px;min-width:0}
+.nsft2 .fq-in .fq-l1 em{display:block;margin:2px 0 0;vertical-align:0}
+.nsft2 .fq-in .fq-logo{font-size:19px}
+.nsft2 .ft-boneco{grid-area:boneco;position:relative;right:auto;bottom:auto;height:190px;width:auto;max-width:100%;object-fit:contain;justify-self:center;align-self:end;margin-bottom:-24px}
+@media(max-width:1100px){
+  .nsft2 .ft-band-in{grid-template-columns:minmax(0,1fr) 290px 100px;gap:20px;padding:26px 20px 22px}
+  .nsft2 .ft-boneco{height:150px}
+}
+@media(max-width:860px){
+  .nsft2 .ft-band-in{grid-template-columns:minmax(0,1fr) 250px 76px;gap:16px;padding:24px 16px 20px}
+  .nsft2 .fq-in{grid-template-columns:40px minmax(0,1fr);padding:12px}
+  .nsft2 .fq-in .fq-art{width:40px}
+  .nsft2 .fq-in .fq-logo{font-size:16px}
+  .nsft2 .fq-in .fq-acts{flex-direction:column}
+  .nsft2 .fq-in .fq-acts .fq-go{flex:none;width:100%}
+  .nsft2 .ft-boneco{height:120px;margin-bottom:-20px}
+}
+@media(max-width:640px){
+  .nsft2{margin-top:36px}
+  .nsft2 .ft-band-in{grid-template-columns:minmax(0,1fr) 84px;grid-template-areas:"legal legal" "fq boneco";gap:18px 10px;padding:24px 14px 20px}
+  .nsft2 .soc{justify-content:flex-start}
+  .nsft2 .ft-legal .soc .sb{width:56px;height:56px}
+  .nsft2 .ft-boneco{height:130px;margin-bottom:-20px}
+}
+@media(max-width:380px){
+  .nsft2 .ft-band-in{grid-template-columns:minmax(0,1fr) 68px}
+  .nsft2 .ft-legal .soc .sb{width:52px;height:52px}
+  .nsft2 .fq-in .fq-logo{font-size:15px}
+  .nsft2 .ft-boneco{height:110px}
 }
