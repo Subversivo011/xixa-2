@@ -101,3 +101,18 @@ HAVING count(*) > 1;
 ```
 
 Se aparecer linha: `pg_dump` antes e apague os excedentes não abertos (`usado_em IS NULL`), deixando um por usuário. As colunas novas (`usar_foto`, `cadastro_completo_em`) são aditivas. Quem já existe fica com `cadastro_completo_em` nulo: o front leva essas contas ao criador de gato, e o pacote de boas-vindas vem ao salvar o gato (quem já tinha ganhado `boas` pela visita antiga não ganha outro).
+
+## Migração 014 (limite de troca de apelido) e apelidos reservados
+
+A 014 só acrescenta `usuarios.apelido_alterado_em TIMESTAMPTZ NULL` (`ADD COLUMN IF NOT EXISTS`, `lock_timeout` 5 s, sem backfill, sem reescrever a tabela). Nada a conferir antes. Todo mundo começa com a primeira troca livre.
+
+A lista de reservados (`api/auth/apelidos.js`) vale para trocas e para novos logins; **contas que já têm um apelido reservado não são renomeadas**. Para achar quem já usa um (e decidir caso a caso, p.ex. pelo admin):
+
+```sql
+SELECT id, apelido, criado_em
+  FROM usuarios
+ WHERE regexp_replace(lower(translate(apelido, '._-', '')), '[0-9]+$', '') IN
+       ('admin','administrador','mod','moderador','moderacao','suporte','staff','naosalvo','xet','sistema','system','root','discord','oficial');
+```
+
+(O SQL cobre apelidos ASCII, que é a única forma aceita pelo CHECK da tabela. Quem aparecer aí continua logando normalmente; só não consegue manter esse nome se trocar e voltar.)

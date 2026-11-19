@@ -117,7 +117,10 @@ export default function registrar(r) {
     try {
       return send(res, 200, await atualizarPerfil(pool, usuario, corpo));
     } catch (e) {
-      if (e instanceof ErroNegocio) return send(res, e.status, { erro: e.message, ...(e.campo ? { campo: e.campo } : {}) });
+      if (e instanceof ErroNegocio) {
+        const cab = e.extra?.tente_em_segundos ? { 'Retry-After': String(e.extra.tente_em_segundos) } : {};
+        return send(res, e.status, { erro: e.message, ...(e.campo ? { campo: e.campo } : {}), ...(e.extra || {}) }, cab);
+      }
       throw e;
     }
   }, { autenticada: true });

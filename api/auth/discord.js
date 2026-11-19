@@ -158,13 +158,19 @@ export async function ehMembro(accessToken, guildId, fetchFn = fetch) {
 
 // ---- usuário: apelido único e gato inicial ----
 /** Apelido válido (3 a 20 de [A-Za-z0-9_.-]) derivado do nome do Discord; sufixo numérico quando já existe. */
+import { ehReservado } from './apelidos.js';
+
+// Reservado não se resolve com número (variantes com número no fim também são reservadas): ganha o sufixo "_gato".
+const fugirDeReservado = (n) => (ehReservado(n) ? n.slice(0, 15).replace(/[_.-]+$/, '') + '_gato' : n);
+
 export function gerarApelido(base, tentativa = 0) {
   let b = String(base || '').normalize('NFD').replace(/[̀-ͯ]/g, '')
     .replace(/[^A-Za-z0-9_.-]+/g, '_').replace(/^[_.-]+|[_.-]+$/g, '').replace(/_{2,}/g, '_');
   if (b.length < 3) b = (b + 'gato').slice(0, 8);
-  if (tentativa === 0) return b.slice(0, 20);
+  b = fugirDeReservado(b.slice(0, 20));
+  if (tentativa === 0) return b;
   const sufixo = tentativa < 100 ? String(tentativa + 1) : String(Math.floor(1000 + Math.random() * 9000));
-  return b.slice(0, 20 - sufixo.length) + sufixo;
+  return fugirDeReservado(b.slice(0, 20 - sufixo.length) + sufixo);
 }
 
 /** Gato inicial: determinístico pelo id do Discord, mesmas faixas do criador de gato (common.js / álbum). */

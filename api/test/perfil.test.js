@@ -58,6 +58,7 @@ test('apelido duplicado: 409 (sem diferenciar maiúsculas); o próprio apelido e
   }
   assert.notEqual((await GET('/api/eu', b.u)).json.usuario.apelido, nome, 'b não mudou');
   // (stub: a partir daqui 'a' é chamado pelo apelido atual, que é `nome`)
+  await q('UPDATE usuarios SET apelido_alterado_em = NULL WHERE lower(apelido) = lower($1)', [nome]);   // a janela de 24 h tem teste próprio
   assert.equal((await PATCH('/api/eu', { apelido: nome.toUpperCase() }, nome)).status, 200);   // a só muda a caixa do próprio nome
   assert.equal((await GET('/api/eu', nome.toUpperCase())).json.usuario.apelido, nome.toUpperCase());
   assert.equal((await PATCH('/api/eu', { apelido: nome.toUpperCase() }, nome.toUpperCase())).status, 200); // repetir o mesmo valor também
@@ -286,4 +287,84 @@ test('usuário banido não altera o perfil (403)', { skip }, async () => {
   const { u, id } = await novoUsuario();
   await q('UPDATE usuarios SET banido = true WHERE id = $1', [id]);
   assert.equal((await PATCH('/api/eu', { apelido: 'Banido' + n }, u)).status, 403);
+});
+
+// ---------- reservados e limite de troca de apelido ----------
+const alteradoEm = async (id) => (await q('SELECT apelido_alterado_em FROM usuarios WHERE id = $1', [id]))[0].apelido_alterado_em;
+
+test('apelido reservado: 422 com banco real e nada muda', { skip }, async () => {
+  const { u, id } = await novoUsuario();
+  for (const ruim of ['admin', 'Admin_2', 'a.d.m.i.n', 'Nao_Salvo', 'XET', 'root99', 'Moderador', 'oficial']) {
+    const r = await PATCH('/api/eu', { apelido: ruim }, u);
+    assert.equal(r.status, 422, ruim); assert.equal(r.json.campo, 'apelido');
+  }
+  assert.equal((await GET('/api/eu', u)).json.usuario.apelido, u);
+  assert.equal(await alteradoEm(id), null, 'recusa não gasta a janela');
+});
+
+test('apelido: 1ª troca livre, 2ª logo em seguida = 429 {erro, tente_em_segundos} + Retry-After; nada muda', { skip }, async () => {
+  const { u, id } = await novoUsuario();
+  assert.equal(await alteradoEm(id), null);
+  const p1 = await PATCH('/api/eu', { apelido: 'Primeira' + n }, u);
+  assert.equal(p1.status, 200); assert.ok(await alteradoEm(id), 'registrou a troca');
+
+  const nome1 = 'Primeira' + n;
+  const p2 = await PATCH('/api/eu', { apelido: 'Segunda' + n }, nome1);
+  assert.equal(p2.status, 429); assert.equal(p2.json.campo, 'apelido'); assert.match(p2.json.erro, /tente de novo/);
+  assert.ok(Number.isInteger(p2.json.tente_em_segundos) && p2.json.tente_em_segundos > 86300 && p2.json.tente_em_segundos <= 86400, String(p2.json.tente_em_segundos));
+  assert.equal(p2.headers.get('retry-after'), String(p2.json.tente_em_segundos));
+  assert.equal((await GET('/api/eu', nome1)).json.usuario.apelido, nome1, 'apelido não mudou');
+});
+
+test('janela de 24 h: 23h59 ainda bloqueia (com o tempo que falta), 24h+ libera e reinicia a janela', { skip }, async () => {
+  const { u, id } = await novoUsuario();
+  await PATCH('/api/eu', { apelido: 'Janela' + n }, u);
+  let atual = 'Janela' + n;
+  await q("UPDATE usuarios SET apelido_alterado_em = now() - interval '23 hours 59 minutes' WHERE id = $1", [id]);
+  const quase = await PATCH('/api/eu', { apelido: 'JanelaB' + n }, atual);
+  assert.equal(quase.status, 429); assert.ok(quase.json.tente_em_segundos > 0 && quase.json.tente_em_segundos <= 61, String(quase.json.tente_em_segundos));
+  await q("UPDATE usuarios SET apelido_alterado_em = now() - interval '24 hours 1 minute' WHERE id = $1", [id]);
+  const ok = await PATCH('/api/eu', { apelido: 'JanelaB' + n }, atual); atual = 'JanelaB' + n;
+  assert.equal(ok.status, 200); assert.equal(ok.json.usuario.apelido, atual);
+  assert.equal((await PATCH('/api/eu', { apelido: 'JanelaC' + n }, atual)).status, 429, 'a janela recomeçou');
+});
+
+test('429 do apelido é tudo ou nada: o gato e o pacote de boas-vindas do mesmo PATCH também não passam', { skip }, async () => {
+  const { u, id } = await novoUsuario();
+  await PATCH('/api/eu', { apelido: 'Tudo' + n }, u);
+  const nome = 'Tudo' + n;
+  const r = await PATCH('/api/eu', { apelido: 'Nada' + n, avatar_gato: GATO }, nome);
+  assert.equal(r.status, 429);
+  const e = (await GET('/api/eu', nome)).json.usuario;
+  assert.equal(e.cadastro_completo, false); assert.notDeepEqual(e.avatar_gato, GATO);
+  assert.equal((await boasDe(id)).length, 0);
+  // sem mexer no apelido o gato passa (e a janela do apelido segue fechada)
+  const g = await PATCH('/api/eu', { avatar_gato: GATO }, nome);
+  assert.equal(g.status, 200); assert.ok(g.json.pacote_boas_vindas);
+});
+
+test('salvar o gato e usar_foto não contam como troca; mesmo apelido não gasta a janela', { skip }, async () => {
+  const { u, id } = await novoUsuario();
+  await comFoto(id);
+  assert.equal((await PATCH('/api/eu', { avatar_gato: GATO, usar_foto: true }, u)).status, 200);
+  assert.equal(await alteradoEm(id), null, 'criação do gato não conta');
+  assert.equal((await PATCH('/api/eu', { avatar_gato: GATO2 }, u)).status, 200);
+  assert.equal((await PATCH('/api/eu', { apelido: u }, u)).status, 200);                        // mesmo valor: nada a fazer
+  assert.equal(await alteradoEm(id), null, 'mesmo valor não conta');
+  const p = await PATCH('/api/eu', { apelido: 'Livre' + n }, u);                                 // a 1ª troca de verdade ainda é livre
+  assert.equal(p.status, 200); assert.ok(await alteradoEm(id));
+});
+
+test('só a caixa do apelido também conta como troca (e é limitada)', { skip }, async () => {
+  const { u } = await novoUsuario();
+  assert.equal((await PATCH('/api/eu', { apelido: u.toUpperCase() }, u)).status, 200);
+  assert.equal((await PATCH('/api/eu', { apelido: u.toLowerCase() }, u.toUpperCase())).status, 429);
+});
+
+test('apelido ocupado (409) não gasta a janela do usuário', { skip }, async () => {
+  const a = await novoUsuario(), b = await novoUsuario();
+  await PATCH('/api/eu', { apelido: 'Ocupado' + n }, a.u);
+  assert.equal((await PATCH('/api/eu', { apelido: 'Ocupado' + n }, b.u)).status, 409);
+  assert.equal(await alteradoEm(b.id), null);
+  assert.equal((await PATCH('/api/eu', { apelido: 'Livre2_' + n }, b.u)).status, 200);          // ainda tem a 1ª troca
 });
