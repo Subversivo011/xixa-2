@@ -8,6 +8,7 @@ import { createHash } from 'node:crypto';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { dirname, join } from 'node:path';
 import pg from 'pg';
+import { tamanhoDoPool } from './lib/config.js';
 
 const PASTA = join(dirname(fileURLToPath(import.meta.url)), 'migrations');
 const TRAVA = 7_435_001; // chave arbitrária do pg_advisory_lock
@@ -28,7 +29,7 @@ export const criarPoolDoAmbiente = (extra = {}) => new pg.Pool({
   user: process.env.DB_USER || 'naosalvo',
   database: process.env.DB_NAME || 'naosalvo',
   password: segredo('DB_PASSWORD'),
-  max: 5,
+  max: tamanhoDoPool(), // DB_POOL_MAX (padrão 10)
   ...extra
 });
 
