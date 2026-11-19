@@ -7,7 +7,7 @@ import { patenteDoUsuario } from '../lib/patente.js';
 import { ErroNegocio, carteira } from '../economia/servico.js';
 import {
   caminhoSeguro, comParametro, novoState, empacotarState, desempacotarState, stateConfere, urlDeAutorizacao,
-  trocarCodigo, buscarPerfil, ehMembro, acharOuCriarUsuario, ErroDiscord
+  trocarCodigo, buscarPerfil, ehMembro, acharOuCriarUsuario, ErroDiscord, chaveDoState, VALIDADE_STATE_S
 } from '../auth/discord.js';
 import { COOKIE_SESSAO, criarSessao, resolverSessao, apagarSessao } from '../auth/sessao.js';
 
@@ -29,7 +29,7 @@ export default function registrar(r) {
     const voltar = caminhoSeguro(url.searchParams.get('voltar'));
     const state = novoState();
     return redirecionar(res, urlDeAutorizacao(auth.discord, state), [
-      montarCookie(COOKIE_STATE, empacotarState(state, voltar), { maxAge: 600, path: PATH_STATE, secure: auth.cookieSecure })
+      montarCookie(COOKIE_STATE, empacotarState(state, voltar, chaveDoState(auth.discord)), { maxAge: VALIDADE_STATE_S, path: PATH_STATE, secure: auth.cookieSecure })
     ]);
   });
 
@@ -39,7 +39,7 @@ export default function registrar(r) {
     if (!auth?.discord) return indisponivel(res);
     const limpaState = apagarCookie(COOKIE_STATE, { path: PATH_STATE, secure: auth.cookieSecure });
 
-    const guardado = desempacotarState(lerCookies(req.headers.cookie)[COOKIE_STATE]);
+    const guardado = desempacotarState(lerCookies(req.headers.cookie)[COOKIE_STATE], chaveDoState(auth.discord));
     // o state é de uso único: some do navegador em qualquer desfecho
     if (!guardado || !stateConfere(guardado.state, url.searchParams.get('state'))) {
       return send(res, 400, { erro: 'estado de login inválido ou expirado; comece de novo' }, { 'Set-Cookie': limpaState });

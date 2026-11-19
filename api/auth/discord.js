@@ -1,7 +1,8 @@
 // Login com Discord (OAuth2, scope identify). Funções puras + chamadas HTTP injetáveis (fetch) para teste sem rede.
 // Segredos só por arquivo (*_FILE); nada daqui é logado: nem client secret, nem code, nem access token.
-import { createHash, randomBytes, timingSafeEqual } from 'node:crypto';
+import { createHash, createHmac, randomBytes, timingSafeEqual } from 'node:crypto';
 import { segredo } from '../lib/config.js';
+import { stubPermitido } from '../auth-stub.js';
 
 const API = 'https://discord.com/api/v10';
 export const AUTORIZAR = 'https://discord.com/oauth2/authorize';
@@ -9,11 +10,18 @@ const TIMEOUT_MS = 8000;
 
 /**
  * Lê a configuração. Devolve null se faltar client id/secret/redirect (rotas respondem 503, o resto da API segue).
- *  DISCORD_CLIENT_ID_FILE, DISCORD_CLIENT_SECRET_FILE (obrigatórios), DISCORD_GUILD_ID_FILE (opcional),
+ *  DISCORD_CLIENT_ID_FILE, DISCORD_CLIENT_SECRET_FILE (obrigatórios), DISCORD_GUILD_ID_FILE (opcional).
+ *  O client secret SÓ vem de arquivo (*_FILE) fora de dev/test: a variável DISCORD_CLIENT_SECRET é ignorada em produção
+ *  (aparece em `docker inspect` e em dumps de ambiente). Em dev/test (allowlist do auth-stub) a variável vale, por conveniência.
  *  DISCORD_REDIRECT_URI (env), DISCORD_EXIGIR_MEMBRO=1 (opcional: só entra quem está no servidor do guild; pede o scope guilds).
  */
 export function lerConfigDiscord(env = process.env) {
-  const clientId = segredo('DISCORD_CLIENT_ID', env), clientSecret = segredo('DISCORD_CLIENT_SECRET', env);
+  const devOuTeste = stubPermitido(env);
+  if (!env.DISCORD_CLIENT_SECRET_FILE && env.DISCORD_CLIENT_SECRET && !devOuTeste) {
+    console.warn('DISCORD_CLIENT_SECRET por variável de ambiente é ignorado fora de dev/test: use DISCORD_CLIENT_SECRET_FILE (Docker secret)');
+  }
+  const clientId = segredo('DISCORD_CLIENT_ID', env);
+  const clientSecret = env.DISCORD_CLIENT_SECRET_FILE || devOuTeste ? segredo('DISCORD_CLIENT_SECRET', env) : '';
   const redirectUri = String(env.DISCORD_REDIRECT_URI || '').trim();
   if (!clientId || !clientSecret || !redirectUri) return null;
   let u; try { u = new URL(redirectUri); } catch { return null; }
@@ -66,14 +74,32 @@ export function comParametro(caminho, chave, valor) {
   return caminhoSeguro(montado, null) ?? `/?${new URLSearchParams({ [chave]: valor })}`;
 }
 
-// ---- state anti-CSRF (cookie ns_oauth = "<state>.<voltar em base64url>") ----
+// ---- state anti-CSRF: cookie ns_oauth = "<state>.<voltar b64>.<emitido em s>.<hmac>" ----
+// O cookie é assinado com HMAC-SHA256 (chave derivada do client secret) e carrega a hora de emissão: o servidor
+// recusa adulteração e cookie com mais de 10 minutos, mesmo que o navegador o mantenha.
+export const VALIDADE_STATE_S = 600;
+export const chaveDoState = (cfg) => createHmac('sha256', cfg.clientSecret).update('ns-oauth-state').digest();
 export const novoState = () => randomBytes(16).toString('base64url');
-export const empacotarState = (state, voltar) => `${state}.${Buffer.from(voltar).toString('base64url')}`;
-export function desempacotarState(valor) {
-  const i = String(valor || '').indexOf('.');
-  if (i < 1) return null;
-  try { return { state: valor.slice(0, i), voltar: Buffer.from(valor.slice(i + 1), 'base64url').toString('utf8') }; } catch { return null; }
+const assinar = (chave, corpo) => createHmac('sha256', chave).update(corpo).digest('base64url');
+
+export function empacotarState(state, voltar, chave, agoraMs = Date.now()) {
+  const corpo = `${state}.${Buffer.from(voltar).toString('base64url')}.${Math.floor(agoraMs / 1000)}`;
+  return `${corpo}.${assinar(chave, corpo)}`;
 }
+
+/** { state, voltar } ou null (formato ruim, assinatura inválida, expirado ou vindo do futuro). */
+export function desempacotarState(valor, chave, agoraMs = Date.now()) {
+  const partes = String(valor || '').split('.');
+  if (partes.length !== 4) return null;
+  const [state, voltarB64, ts, mac] = partes;
+  if (!state || !/^\d{1,12}$/.test(ts)) return null;
+  const esperado = Buffer.from(assinar(chave, `${state}.${voltarB64}.${ts}`)), recebido = Buffer.from(mac);
+  if (esperado.length !== recebido.length || !timingSafeEqual(esperado, recebido)) return null;
+  const idade = Math.floor(agoraMs / 1000) - Number(ts);
+  if (idade > VALIDADE_STATE_S || idade < -60) return null;
+  try { return { state, voltar: Buffer.from(voltarB64, 'base64url').toString('utf8') }; } catch { return null; }
+}
+
 export function stateConfere(esperado, recebido) {
   const a = Buffer.from(String(esperado || '')), b = Buffer.from(String(recebido || ''));
   return a.length > 0 && a.length === b.length && timingSafeEqual(a, b);
