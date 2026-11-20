@@ -64,7 +64,7 @@ async function abrir(layout, vp, { recados = [] } = {}) {
   page.on("pageerror", (e) => erros.push("pageerror: " + e.message));
   page.on("console", (m) => { if (m.type() === "error" && !/Failed to load resource|fonts\.g/.test(m.text())) erros.push("console: " + m.text()); });
   await page.goto(base + "/perfil.html?u=Ana");
-  await page.waitForSelector("#btEditar");
+  await page.waitForSelector("[data-ed=visual]");
   return { ctx, page, st, erros };
 }
 const VPS = [{ width: 390, height: 844 }, { width: 360, height: 740 }, { width: 1280, height: 900 }];
@@ -74,7 +74,7 @@ for (const vp of VPS) {
   for (const layout of VISUAIS) {
     test(`editar perfil ${vp.width}px, visual ${layout}: Salvar sempre visível, visual atual visível, favorita por mini-cartas, foco e Esc`, opts, async () => {
       const { ctx, page, st, erros } = await abrir(layout, vp);
-      await page.click("#btEditar");
+      await page.click("[data-ed=visual]");
       await page.waitForSelector("#dlg[open]");
       const dentro = async (sel) => page.$eval(sel, (el) => { const r = el.getBoundingClientRect(); return r.top >= 0 && r.bottom <= innerHeight + 0.5 && r.left >= 0 && r.right <= innerWidth + 0.5; });
       // rodapé visível com o corpo no topo e depois rolado até o fim
@@ -116,7 +116,7 @@ for (const vp of VPS) {
       await page.keyboard.press("Escape");
       assert.strictEqual(await page.$eval("#dlg", (d) => d.open), false);
       // reabre, escolhe e salva
-      await page.click("#btEditar");
+      await page.click("[data-ed=visual]");
       const esperado = await page.$eval("#fav label:nth-of-type(3) input", (i) => i.value);
       await page.click("#fav label:nth-of-type(3)");
       await page.click("#btSalvar");
@@ -130,7 +130,7 @@ for (const vp of VPS) {
 
 test("trocar o visual no carrossel mobile e salvar manda o visual novo", opts, async () => {
   const { ctx, page, st, erros } = await abrir("orkut", VPS[0]);
-  await page.click("#btEditar");
+  await page.click("[data-ed=visual]");
   await page.locator('#lays input[value="bluesky"]').evaluate((i) => i.closest("label").scrollIntoView({ inline: "center", block: "nearest" }));
   await page.click('#lays label.l-bluesky');
   await page.click("#btSalvar");
@@ -142,7 +142,7 @@ test("trocar o visual no carrossel mobile e salvar manda o visual novo", opts, a
 
 test("setas no radiogroup dos visuais trocam o marcado", opts, async () => {
   const { ctx, page } = await abrir("orkut", VPS[0]);
-  await page.click("#btEditar");
+  await page.click("[data-ed=visual]");
   await page.keyboard.press("ArrowRight");
   assert.notStrictEqual(await page.$eval("#lays input:checked", (i) => i.value), "orkut");
   await ctx.close();

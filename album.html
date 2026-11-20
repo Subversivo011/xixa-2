@@ -242,7 +242,7 @@ function cardHTML(c,opt={}){
   return `<button class="card ${FOIL.has(c.r)?'foil':''} ${c.r} ${opt.sel?'sel':''}" style="--rc:${rc}" onclick="pick('${c.id}')">
    <div class="top"><span>${c.num}</span><em>${c.r}</em></div>
    ${favId()===c.id?'<span class="star">⭐</span>':''}${owned(c)>1&&!opt.force?`<span class="cp">x${owned(c)}</span>`:''}${c.y?`<span class="yr">${c.y}</span>`:""}
-   <div class="art" style="background:linear-gradient(150deg,${col.bg[0]},${col.bg[1]})">${cardYt(c)?`<img src="https://i.ytimg.com/vi/${cardYt(c)}/mqdefault.jpg" alt="" loading="lazy" onerror="this.remove()">`:""}<span class="emo">${c.e}</span></div>
+   <div class="art" style="background:linear-gradient(150deg,${col.bg[0]},${col.bg[1]})">${cardYt(c)?`<img src="https://i.ytimg.com/vi/${cardYt(c)}/mqdefault.jpg" alt="" loading="lazy" onerror="var e=this.nextElementSibling;if(e)e.hidden=false;this.remove()">`:""}<span class="emo"${cardYt(c)?" hidden":""}>${c.e}</span></div>
    <div class="nm">${escapeHtml(c.name)}</div><div class="ft">${col.n.toUpperCase()}</div></button>`;
 }
 function renderCols(){
