@@ -161,7 +161,7 @@ main{display:flex;flex-direction:column}
 .top,.cur{grid-template-columns:1fr}.stage{grid-template-columns:1fr}.side{display:none}.facts{grid-template-columns:1fr 1fr}.rail{grid-template-columns:1fr 1fr}.rail .card:nth-child(3){display:none}main{padding:16px 14px 40px}}
 @media(max-width:600px){.f .two{grid-template-columns:1fr}.today{grid-template-columns:110px 1fr}.box .body{padding:16px}}
 </style>
-<link rel="stylesheet" href="home.css?v=20261119v">
+<link rel="stylesheet" href="home.css?v=20261121u">
 </head>
 <body class="home">
 <div class="rays-wrap" aria-hidden="true"><div class="rays" id="rays"></div></div>
@@ -311,9 +311,8 @@ async function renderSobeDesce(){
   const el=$("hot");if(!el)return;
   const per=SD.periodo==="hoje"?"Hoje":"Todos os tempos";
   const head=`<div class="sd-h"><span class="sd-logo"><span class="su">sobe</span><i>.</i><span class="de">desc<span class="ee">e${HORNS}</span></span></span>
-    <span class="sd-per"><button class="sd-clip" onclick="this.parentElement.classList.toggle('open');event.stopPropagation()" aria-haspopup="true" aria-label="Período: ${per}" title="Período: ${per}">${icon("clipboard")}</button>
-     <span class="sd-pop" role="menu"><b>Período</b><button role="menuitemradio" aria-checked="${SD.periodo==="hoje"}" class="${SD.periodo==="hoje"?"on":""}" onclick="sdSet('periodo','hoje')">${icon("clock","in")}Hoje</button><button role="menuitemradio" aria-checked="${SD.periodo==="sempre"}" class="${SD.periodo==="sempre"?"on":""}" onclick="sdSet('periodo','sempre')">${icon("ranking","in")}Todos os tempos</button></span></span></div>
-    <div class="sd-tabs" role="tablist"><button role="tab" aria-selected="${SD.tipo==="visitados"}" class="${SD.tipo==="visitados"?"on":""}" onclick="sdSet('tipo','visitados')">${icon("eye","in")}Mais visitados</button><button role="tab" aria-selected="${SD.tipo==="clicados"}" class="${SD.tipo==="clicados"?"on":""}" onclick="sdSet('tipo','clicados')">${icon("cursor","in")}Mais clicados</button><span class="sd-pl">${per}</span></div>`;
+    <div class="sd-seg" role="group" aria-label="Período do ranking">${[["hoje","clock","Hoje"],["sempre","ranking","Todos os tempos"]].map(([k,ic,t])=>`<button type="button" aria-pressed="${SD.periodo===k}" class="${SD.periodo===k?"on":""}" onclick="sdSet('periodo','${k}')">${icon(ic,"in")}${t}</button>`).join("")}</div></div>
+    <div class="sd-tabs" role="tablist"><button role="tab" aria-selected="${SD.tipo==="visitados"}" class="${SD.tipo==="visitados"?"on":""}" onclick="sdSet('tipo','visitados')">${icon("eye","in")}Mais visitados</button><button role="tab" aria-selected="${SD.tipo==="clicados"}" class="${SD.tipo==="clicados"?"on":""}" onclick="sdSet('tipo','clicados')">${icon("cursor","in")}Mais clicados</button></div>`;
   const keep=el.querySelector(".sd");el.innerHTML=head+(keep?keep.outerHTML:`<div class="sd"><div class="sd-load">carregando…</div></div>`);
   const d=await sdDados();
   const nome=SD.tipo==="visitados"?["visita","visitas"]:["clique","cliques"];
@@ -326,7 +325,6 @@ async function renderSobeDesce(){
   const ups=d.sobe.map(x=>li(x,1)).join(""),dns=d.desce.map(x=>li(x,0)).join("");
   el.querySelectorAll(".sd-nota").forEach(x=>x.remove());el.querySelector(".sd").outerHTML=`<div class="sd"><div><h6 class="up">${icon("arrowUp")}sobe</h6>${ups||vazio(1)}</div><div><h6 class="dn">${icon("arrowDown")}desce</h6>${dns||vazio(0)}</div></div>${d.local?`<p class="sd-nota">Contando só os acessos deste navegador até o site entrar no ar.</p>`:""}`;
 }
-document.addEventListener("click",e=>{if(!e.target.closest(".sd-per"))document.querySelectorAll(".sd-per.open").forEach(x=>x.classList.remove("open"))});
 
 // ---- Linha do tempo (layout original) ----
 function renderYears(){
