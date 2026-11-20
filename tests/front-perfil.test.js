@@ -111,7 +111,7 @@ test("perfil próprio: gato como foto, barra de dono, sem formulário de recado;
   assert.match(await page.textContent("#pf"), /Banda larga/);
   await page.click("#btEditar");
   await page.check('input[name=lay][value="msn"]', { force: true });
-  await page.selectOption("#fav", "memes-0");
+  await page.check("#fav input[value=memes-0]", { force: true });
   await page.click("#btSalvar");
   await page.waitForSelector(".pf-msn");
   assert.deepStrictEqual(api.st.patches.at(-1).corpo, { perfil_layout: "msn", carta_favorita: "memes-0" });
