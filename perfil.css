@@ -557,3 +557,35 @@
   .pf-whatsapp .chat{min-height:0}
 }
 .pf-dlg fieldset:first-of-type>legend{position:sticky;top:0;z-index:3;width:100%;background:var(--panel);padding:6px 0;margin:0}
+
+/* ---- redes modernas: barra de XP na cor da patente (--pc) e um detalhe típico de cada rede ---- */
+.pf-vine .pf-xp,.pf-snapchat .pf-xp,.pf-instagram .pf-xp,.pf-tiktok .pf-xp,.pf-kwai .pf-xp,.pf-bluesky .pf-xp{height:10px;background:color-mix(in srgb,var(--pc,#0a6a9a) 24%,transparent);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--pc,#0a6a9a) 55%,transparent)}
+.pf-vine .pf-xp i,.pf-snapchat .pf-xp i,.pf-instagram .pf-xp i,.pf-tiktok .pf-xp i,.pf-kwai .pf-xp i,.pf-bluesky .pf-xp i{background:var(--pc,#0a6a9a);box-shadow:0 0 8px color-mix(in srgb,var(--pc,#0a6a9a) 70%,transparent)}
+.pf .det{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:8px 0;font-size:13px;font-weight:600;line-height:1.35}
+.pf .cab .det{justify-content:flex-start}
+.det-vine{color:#00704f}
+.det-vine .loop{display:inline-block;flex:none;width:72px;height:6px;border-radius:3px;background:#00805d33;overflow:hidden}
+.det-vine .loop i{display:block;height:100%;width:100%;background:#00805d;border-radius:3px}
+.det-snapchat{display:inline-flex!important;padding:6px 14px;border-radius:999px;background:#111;color:#fffc00}
+.det-snapchat .chama{display:inline-block}
+.det-instagram{color:#262626}
+.det-instagram .cora{color:#c4123f;font-size:16px}
+.det-tiktok{display:block!important;overflow:hidden;width:0;min-width:100%}
+.det-tiktok .som{display:block;overflow:hidden;white-space:nowrap;border-radius:999px;background:#2a2a2a;color:#fff;padding:6px 0;max-width:100%}
+.det-tiktok .trilho{display:inline-flex;padding-left:12px}
+.det-tiktok .trilho span{padding-right:48px}
+.det-kwai{display:inline-flex!important;padding:6px 14px;border-radius:999px;background:#ffe3c2;color:#6b2d00}
+.det-kwai .moeda{display:inline-block}
+.det-bluesky{color:#0a5cc2}
+.det-bluesky .ok{display:inline-grid;place-items:center;width:18px;height:18px;border-radius:50%;background:#0a5cc2;color:#fff;font-size:12px}
+@media(prefers-reduced-motion:no-preference){
+  .det-vine .loop i{width:0;animation:pf-loop 6s linear infinite}
+  .det-snapchat .chama{animation:pf-chama 1.4s ease-in-out infinite}
+  .det-tiktok .trilho{animation:pf-som 14s linear infinite}
+  .det-kwai .moeda{animation:pf-moeda 3s linear infinite}
+}
+@keyframes pf-loop{to{width:100%}}
+@keyframes pf-chama{0%,100%{transform:scale(1) rotate(-3deg)}50%{transform:scale(1.18) rotate(3deg)}}
+@keyframes pf-som{to{transform:translateX(-50%)}}
+@keyframes pf-moeda{to{transform:rotateY(360deg)}}
+@media(max-width:640px){.pf .cab .det{justify-content:center;text-align:center}}
