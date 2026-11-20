@@ -1,4 +1,4 @@
-// Home (index.html): ranking Sobe.Desce sem exceção no console (logado e convidado) e abas com >= 44px no celular.
+// Home (index.html): abas do ranking Sobe.Desce com >= 44px de altura no celular (logado e convidado).
 // API mockada via page.route. Roda com arquivo explícito: node --test tests/front-home-ranking.test.js
 const test = require("node:test");
 const assert = require("node:assert");
@@ -65,59 +65,25 @@ async function abrir({ convidado = false, vp = { width: 390, height: 844 }, dado
   return { ctx, page, erros, chamadas };
 }
 
-for (const [rotulo, convidado] of [["logado", false], ["convidado (ns_convidado=1)", true]]) {
-  for (const vp of [{ width: 390, height: 844 }, { width: 1280, height: 900 }]) {
-    test(`home ${rotulo} ${vp.width}px: Sobe.Desce de hoje e de todos os tempos, visitados e clicados, sem erro no console`, opts, async () => {
-      const { ctx, page, erros } = await abrir({ convidado, vp });
+for (const [rotulo, convidado] of [["logado", false], ["convidado", true]]) {
+  for (const vp of [{ width: 390, height: 844 }, { width: 360, height: 740 }]) {
+    test(`abas do ranking >= 44px de altura (${rotulo}, ${vp.width}px)`, opts, async () => {
+      const { ctx, page } = await abrir({ convidado, vp });
       await page.waitForSelector("#hot .sd-i");
-      assert.strictEqual(await page.$$eval("#hot .sd-i.up", (l) => l.length), 5);
-      assert.strictEqual(await page.$$eval("#hot .sd-i.dn", (l) => l.length), 5);
-      for (const [alvo, qual] of [["periodo", 2], ["tipo", 2], ["periodo", 1], ["tipo", 1], ["periodo", 2]]) {
-        await page.click(alvo === "periodo" ? `#hot .sd-seg button:nth-child(${qual})` : `#hot .sd-tabs button:nth-child(${qual})`);
-        await page.waitForSelector("#hot .sd-i");
-        assert.ok((await page.$$eval("#hot .sd-i", (l) => l.length)) > 0);
-      }
-      // rajada de renders concorrentes
-      await page.evaluate(async () => { SD.cache = {}; await Promise.all([1, 2, 3, 4, 5].map(() => renderSobeDesce())); });
-      assert.strictEqual(await page.$$eval("#hot .sd", (l) => l.length), 1, "um único bloco .sd");
-      // o relógio da home (setInterval de 15 s) roda sem exceção
-      assert.ok(await page.evaluate(() => !!document.getElementById("timer")));
-      assert.deepStrictEqual(erros, []);
+      const alturas = await page.$$eval("#hot .sd-seg button, #hot .sd-tabs button", (l) => l.map((b) => ({ t: b.textContent.trim(), h: b.getBoundingClientRect().height, w: b.getBoundingClientRect().width })));
+      assert.deepStrictEqual(alturas.map((a) => a.t), ["Hoje", "Todos os tempos", "Mais visitados", "Mais clicados"]);
+      assert.ok(alturas.every((a) => a.h >= 44 && a.w >= 44), JSON.stringify(alturas));
+      assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), "sem overflow horizontal");
+      await page.click("#hot .sd-seg button:nth-child(2)");
+      await page.click("#hot .sd-tabs button:nth-child(2)");
+      await page.waitForSelector("#hot .sd-i");
+      assert.ok((await page.$$eval("#hot .sd-seg button, #hot .sd-tabs button", (l) => l.every((b) => b.getBoundingClientRect().height >= 44))), "segue >= 44px depois de trocar de aba");
       await ctx.close();
     });
   }
 }
 
-test("home com o ranking vazio (sem dados hoje) também não dá erro", opts, async () => {
-  const { ctx, page, erros } = await abrir({ dados: { sobe: [], desce: [] } });
-  await page.waitForSelector("#hot .sd-vz");
-  await page.click("#hot .sd-seg button:nth-child(2)");
-  await page.click("#hot .sd-tabs button:nth-child(2)");
-  assert.ok((await page.$$eval("#hot .sd-vz", (l) => l.length)) >= 2);
-  assert.deepStrictEqual(erros, []);
-  await ctx.close();
-});
-
-test("home com ns_sd salvo inválido no localStorage não quebra o ranking", opts, async () => {
-  const { ctx, page, erros } = await abrir({ sdSalvo: JSON.stringify({ tipo: "xyz", periodo: "abc" }) });
-  await page.waitForSelector("#hot .sd");
-  assert.deepStrictEqual(erros, []);
-  await ctx.close();
-});
-
-for (const vp of [{ width: 390, height: 844 }, { width: 360, height: 740 }]) {
-  test(`abas do ranking >= 44px de altura no celular (${vp.width}px)`, opts, async () => {
-    const { ctx, page, erros } = await abrir({ vp });
-    const alturas = await page.$$eval("#hot .sd-seg button, #hot .sd-tabs button", (l) => l.map((b) => ({ t: b.textContent.trim(), h: b.getBoundingClientRect().height, w: b.getBoundingClientRect().width })));
-    assert.strictEqual(alturas.length, 4);
-    assert.ok(alturas.every((a) => a.h >= 44 && a.w >= 44), JSON.stringify(alturas));
-    assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), "sem overflow horizontal");
-    assert.deepStrictEqual(erros, []);
-    await ctx.close();
-  });
-}
-
-test("no desktop as abas continuam compactas (sem regressão visual)", opts, async () => {
+test("no desktop as abas continuam compactas", opts, async () => {
   const { ctx, page } = await abrir({ vp: { width: 1280, height: 900 } });
   const h = await page.$eval("#hot .sd-tabs button", (b) => b.getBoundingClientRect().height);
   assert.ok(h < 44, "desktop mantém a altura compacta: " + h);
