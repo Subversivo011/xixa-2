@@ -93,19 +93,27 @@ let sgO={fur:0,pat:1,eye:0,acc:0,clo:0,bg:0},sgTab=0;
 const SG_TABS=["Pelo","Acessórios","Roupa","Fundo"];
 function sgRender(){
   document.getElementById("sgBig").innerHTML=catSVG(sgO);const br=document.getElementById("sgBreed");if(br)br.innerHTML=sgO.fur===SPHYNX?"Raça: <b>Sphynx</b> · sem pelo, orelhas grandes e muitas ruguinhas":"Raça: <b>Gato padrão</b> · "+SG.fur[sgO.fur][0].toLowerCase();
-  document.getElementById("sgTabs").innerHTML=SG_TABS.map((t,i)=>`<button class="${i===sgTab?'on':''}" onclick="sgTab=${i};sgRender()">${t}</button>`).join("");
+  // o redesenho troca os botões: guarda onde estava o foco para devolvê-lo ao equivalente (teclado)
+  const ae=document.activeElement,tabs0=document.getElementById("sgTabs"),opts0=document.getElementById("sgOpts");
+  const focoAba=ae&&tabs0.contains(ae)?[...tabs0.children].indexOf(ae):-1;
+  const focoOpt=ae&&opts0.contains(ae)&&ae.classList.contains("sg-o")?[...opts0.querySelectorAll(".sg-o")].indexOf(ae):-1;
+  tabs0.innerHTML=SG_TABS.map((t,i)=>`<button type="button" role="tab" id="sgTab${i}" aria-selected="${i===sgTab}" aria-controls="sgOpts" tabindex="${i===sgTab?0:-1}" class="${i===sgTab?'on':''}" onclick="sgTab=${i};sgRender()">${t}</button>`).join("");
+  opts0.setAttribute("aria-labelledby","sgTab"+sgTab);
   const sel=(k,i)=>sgO[k]===i?" on":"";
+  const pr=(k,i)=>`aria-pressed="${sgO[k]===i}"`;
   let h="";
   if(sgTab===0){
-    h+=`<h5>COR DO PELO</h5><div class="sg-row">${SG.fur.map((f,i)=>`<button class="sg-o${sel('fur',i)}" title="${f[0]}" onclick="sgSet('fur',${i})"><i style="background:${f[1]}"></i></button>`).join("")}</div>`;
+    h+=`<h5>COR DO PELO</h5><div class="sg-row">${SG.fur.map((f,i)=>`<button type="button" class="sg-o${sel('fur',i)}" title="${f[0]}" aria-label="Pelo ${f[0]}" ${pr('fur',i)} onclick="sgSet('fur',${i})"><i style="background:${f[1]}"></i></button>`).join("")}</div>`;
     const sph=sgO.fur===SPHYNX;
-    h+=`<h5>PADRÃO${sph?'<em>Sphynx não tem pelo, então não tem padrão</em>':''}</h5><div class="sg-row">${SG.pat.map((p,i)=>`<button class="sg-o sq${sph?'':sel('pat',i)}" ${sph?'disabled':''} onclick="sgSet('pat',${i})">${p}</button>`).join("")}</div>`;
-    h+=`<h5>COR DOS OLHOS</h5><div class="sg-row">${SG.eye.map((f,i)=>`<button class="sg-o${sel('eye',i)}" title="${f[0]}" onclick="sgSet('eye',${i})"><i style="background:${f[1]}"></i></button>`).join("")}</div>`;
+    h+=`<h5>PADRÃO${sph?'<em>Sphynx não tem pelo, então não tem padrão</em>':''}</h5><div class="sg-row">${SG.pat.map((p,i)=>`<button type="button" class="sg-o sq${sph?'':sel('pat',i)}" ${sph?'disabled':''} aria-pressed="${!sph&&sgO.pat===i}" onclick="sgSet('pat',${i})">${p}</button>`).join("")}</div>`;
+    h+=`<h5>COR DOS OLHOS</h5><div class="sg-row">${SG.eye.map((f,i)=>`<button type="button" class="sg-o${sel('eye',i)}" title="${f[0]}" aria-label="Olhos ${f[0]}" ${pr('eye',i)} onclick="sgSet('eye',${i})"><i style="background:${f[1]}"></i></button>`).join("")}</div>`;
   }
-  if(sgTab===1) h+=`<h5>ACESSÓRIOS (OPCIONAL)</h5><div class="sg-row">${SG.acc.map((a,i)=>`<button class="sg-o sq${sel('acc',i)}" onclick="sgSet('acc',${i})"><span>${a[1]}</span>${a[0]}</button>`).join("")}</div>`;
-  if(sgTab===2) h+=`<h5>ROUPA (OPCIONAL)</h5><div class="sg-row">${SG.clo.map((c,i)=>`<button class="sg-o sq${sel('clo',i)}" onclick="sgSet('clo',${i})"><i style="background:${c[1]==='#0000'?'#222':c[1]};width:26px;height:26px;margin-bottom:4px"></i>${c[0]}</button>`).join("")}</div>`;
-  if(sgTab===3) h+=`<h5>FUNDO</h5><div class="sg-row">${SG.bg.map((b,i)=>`<button class="sg-o${sel('bg',i)}" title="${b[0]}" onclick="sgSet('bg',${i})"><i style="background:radial-gradient(circle at 35% 30%,${b[1][0]},${b[1][1]})"></i></button>`).join("")}</div>`;
-  document.getElementById("sgOpts").innerHTML=h;
+  if(sgTab===1) h+=`<h5>ACESSÓRIOS (OPCIONAL)</h5><div class="sg-row">${SG.acc.map((a,i)=>`<button type="button" class="sg-o sq${sel('acc',i)}" ${pr('acc',i)} onclick="sgSet('acc',${i})"><span>${a[1]}</span>${a[0]}</button>`).join("")}</div>`;
+  if(sgTab===2) h+=`<h5>ROUPA (OPCIONAL)</h5><div class="sg-row">${SG.clo.map((c,i)=>`<button type="button" class="sg-o sq${sel('clo',i)}" ${pr('clo',i)} onclick="sgSet('clo',${i})"><i style="background:${c[1]==='#0000'?'#222':c[1]};width:26px;height:26px;margin-bottom:4px"></i>${c[0]}</button>`).join("")}</div>`;
+  if(sgTab===3) h+=`<h5>FUNDO</h5><div class="sg-row">${SG.bg.map((b,i)=>`<button type="button" class="sg-o${sel('bg',i)}" title="${b[0]}" aria-label="Fundo ${b[0]}" ${pr('bg',i)} onclick="sgSet('bg',${i})"><i style="background:radial-gradient(circle at 35% 30%,${b[1][0]},${b[1][1]})"></i></button>`).join("")}</div>`;
+  opts0.innerHTML=h;
+  if(focoAba>=0){const b=tabs0.children[focoAba];b&&b.focus({preventScroll:true})}
+  else if(focoOpt>=0){const b=opts0.querySelectorAll(".sg-o")[focoOpt];b&&b.focus({preventScroll:true})}
 }
 function sgSet(k,i){sgO[k]=i;sgRender()}
 function sgShuffle(){sgO={fur:rnd(SG.fur.length),pat:rnd(SG.pat.length),eye:rnd(SG.eye.length),acc:rnd(SG.acc.length),clo:rnd(SG.clo.length),bg:rnd(SG.bg.length)};sgRender()}
@@ -253,9 +261,12 @@ function sgErros(campo,msg){
   u.textContent=campo==="apelido"?msg:"";g.textContent=campo&&campo!=="apelido"?msg:(campo?"":msg||"");
   if(i){i.setAttribute("aria-invalid",campo==="apelido"?"true":"false")}
 }
+let sgFoco=null;
 function openSignup(){
   const u=SESSAO&&SESSAO.usuario;
   if(!u){avisoLogin("editar o perfil");return}
+  const jaAberto=document.getElementById("sgm").classList.contains("open");
+  if(!jaAberto)sgFoco=document.activeElement;
   sgO=gatoValido(u.avatar_gato)?{fur:u.avatar_gato.fur,pat:u.avatar_gato.pat,eye:u.avatar_gato.eye,acc:u.avatar_gato.acc,clo:u.avatar_gato.clo,bg:u.avatar_gato.bg}:{fur:0,pat:1,eye:0,acc:0,clo:0,bg:0};
   document.getElementById("sgU").value=u.apelido||"";
   const temFoto=typeof u.avatar_url==="string"&&FOTO_DISCORD.test(u.avatar_url);
@@ -264,8 +275,22 @@ function openSignup(){
   document.getElementById("sgH").innerHTML=u.cadastro_completo===false?"Crie o seu <em>gatinho.</em>":"Edite o seu <em>gatinho.</em>";
   document.getElementById("sgGoT").textContent=u.cadastro_completo===false?"Salvar meu gato":"Salvar";
   sgErros("","");document.getElementById("sgm").classList.add("open");sgRender();
+  // foco no primeiro campo; em tela de toque vai para o próprio diálogo (focar o campo abriria o teclado e cobriria a prévia)
+  const alvo=matchMedia("(pointer:coarse)").matches?document.querySelector("#sgm .sg-box"):document.getElementById("sgU");
+  if(alvo)alvo.focus({preventScroll:true});
 }
-function closeSignup(){document.getElementById("sgm").classList.remove("open")}
+function closeSignup(){
+  const m=document.getElementById("sgm");if(!m||!m.classList.contains("open"))return;
+  m.classList.remove("open");
+  // devolve o foco a quem abriu; se o avatar foi redesenhado (salvou), vai para o novo botão da conta
+  const f=sgFoco;sgFoco=null;
+  const novo=document.querySelector("#acct .sg-acct");
+  // quem abriu pode ter sumido (item do menu da conta fechado, avatar redesenhado): então o foco vai para o avatar
+  const visivel=e=>!!e&&e!==document.body&&e.isConnected&&e.getClientRects().length>0&&typeof e.focus==="function";
+  // no celular o avatar fica dentro do menu fechado: então o foco vai para o botão que abre o menu
+  const toggle=document.querySelector(".menu-toggle");
+  if(visivel(f))f.focus({preventScroll:true});else if(visivel(novo))novo.focus({preventScroll:true});else if(visivel(toggle))toggle.focus({preventScroll:true});
+}
 async function submitSignup(){
   if(sgSalvando)return;
   const u=SESSAO&&SESSAO.usuario;if(!u)return;
@@ -298,7 +323,7 @@ async function submitSignup(){
   }
   sgSalvando=false;botao.disabled=false;
   SESSAO.usuario=r.usuario;
-  closeSignup();updateAccount();
+  updateAccount();closeSignup(); // redesenha o avatar antes: closeSignup devolve o foco ao novo botão
   if(r.pacote_boas_vindas){
     toast("Seu pacote de boas-vindas está esperando!",4200);
     try{await atualizarCarteira()}catch(e){}
@@ -587,17 +612,15 @@ function openPop(anchor,items){
   const G='<svg viewBox="0 0 24 24" width="18" height="18"><path fill="#4285F4" d="M22.5 12.3c0-.8-.1-1.5-.2-2.2H12v4.2h5.9a5 5 0 0 1-2.2 3.3v2.7h3.5c2.1-1.9 3.3-4.7 3.3-8z"/><path fill="#34A853" d="M12 23c3 0 5.5-1 7.3-2.7l-3.5-2.7c-1 .7-2.3 1.1-3.8 1.1-2.9 0-5.4-2-6.3-4.7H2.1v2.8A11 11 0 0 0 12 23z"/><path fill="#FBBC05" d="M5.7 14c-.2-.7-.4-1.3-.4-2s.1-1.4.4-2V7.2H2.1a11 11 0 0 0 0 9.6L5.7 14z"/><path fill="#EA4335" d="M12 5.4c1.6 0 3.1.6 4.2 1.7l3.1-3.1A11 11 0 0 0 2.1 7.2L5.7 10c.9-2.7 3.4-4.6 6.3-4.6z"/></svg>';
   const D='<svg viewBox="0 0 24 24" width="18" height="18"><path fill="#5865F2" d="M20.3 4.4A19.6 19.6 0 0 0 15.4 3l-.6 1.3a18 18 0 0 0-5.6 0L8.6 3a19.5 19.5 0 0 0-4.9 1.5C.6 9.1-.3 13.6.1 18.1a19.8 19.8 0 0 0 6 3l1.3-2.1a12.8 12.8 0 0 1-2-1l.5-.4a14 14 0 0 0 12.1 0l.5.4-2 1 1.3 2.1a19.7 19.7 0 0 0 6-3c.5-5.2-.9-9.7-3.5-13.7zM8 15.4c-1.2 0-2.2-1.1-2.2-2.4S6.8 10.6 8 10.6s2.2 1.1 2.2 2.4-1 2.4-2.2 2.4zm8 0c-1.2 0-2.2-1.1-2.2-2.4s1-2.4 2.2-2.4 2.2 1.1 2.2 2.4-1 2.4-2.2 2.4z"/></svg>';
   const d=document.createElement("div");d.innerHTML=`<div id="sgm" onclick="if(event.target===this)closeSignup()" role="dialog" aria-modal="true" aria-labelledby="sgH">
-  <div class="sg-box">
+  <div class="sg-box" tabindex="-1">
     <button class="sg-x" onclick="closeSignup()" aria-label="Fechar">${icon("xmark")}</button>
     <div class="sg-form">
-      <div class="sg-steps"><span class="on"><b>1</b>Seu perfil</span><i></i><span class="on"><b>2</b>Seu gatinho</span></div>
+      <div class="sg-steps"><span class="on">Seu perfil e seu gatinho</span></div>
       <h2 id="sgH">Crie o seu <em>gatinho.</em></h2>
       <p class="s">Escolha o apelido e o visual do seu gato. Ele aparece no ranking e nos comentários.</p>
       <div class="sg-fl"><input class="t" id="sgU" placeholder=" " maxlength="20" autocomplete="username" aria-describedby="sgErrU"><label for="sgU">Apelido</label></div>
       <div class="sg-err" id="sgErrU" role="alert"></div>
       <label class="sg-chk" id="sgFotoRow" style="display:none"><input type="checkbox" id="sgFoto"><span class="bx">${icon("check")}</span><span>Usar minha foto do Discord<small>No lugar do gato, no cabeçalho e no ranking</small></span></label>
-      <div class="sg-err" id="sgErr" role="alert"></div>
-      <button class="sg-go" id="sgGo" onclick="submitSignup()"><span id="sgGoT">Salvar meu gato</span> →</button>
     </div>
     <div class="sg-studio">
       <div class="sg-pv">
@@ -606,9 +629,13 @@ function openPop(anchor,items){
         <button class="sg-shuf" onclick="sgShuffle()">${icon("random")} Embaralhar tudo</button>
       </div>
       <div class="sg-opts">
-        <div class="sg-tabs" id="sgTabs"></div>
-        <div id="sgOpts"></div>
+        <div class="sg-tabs" id="sgTabs" role="tablist" aria-label="Partes do gato"></div>
+        <div id="sgOpts" role="tabpanel" aria-labelledby="sgTab0"></div>
       </div>
+    </div>
+    <div class="sg-bar">
+      <div class="sg-err" id="sgErr" role="alert"></div>
+      <button class="sg-go" id="sgGo" onclick="submitSignup()"><span id="sgGoT">Salvar meu gato</span> →</button>
     </div>
   </div>
 </div>`;document.body.appendChild(d.firstElementChild);
@@ -622,7 +649,20 @@ function openPop(anchor,items){
     </div>
     <form method="dialog" class="lg-close"><button>Fechar</button></form>
   </dialog>`);
-  document.addEventListener("keydown",e=>{if(e.key==="Escape"){closeSignup();const t=document.getElementById("tp");t&&t.classList.remove("open");const p=document.getElementById("pop");p&&p.classList.remove("open")}});
+  document.addEventListener("keydown",e=>{
+    if(e.key==="Tab"){const m=document.getElementById("sgm");if(m&&m.classList.contains("open")){
+      const fs=[...m.querySelectorAll('.sg-box button:not([disabled]),.sg-box input:not([disabled]):not([type=hidden])')].filter(x=>x.offsetParent!==null||getComputedStyle(x).position==="fixed");
+      if(fs.length){const i=fs.indexOf(document.activeElement);
+        if(e.shiftKey&&(i<=0)){e.preventDefault();fs[fs.length-1].focus()}
+        else if(!e.shiftKey&&(i===fs.length-1||i<0&&document.activeElement.classList.contains("sg-box"))){e.preventDefault();fs[0].focus()}}}}
+    // setas nas abas do editor (padrão WAI-ARIA de tablist): ←/→ trocam de aba, Home/End vão às pontas
+    const aba=e.target&&e.target.closest&&e.target.closest("#sgTabs [role=tab]");
+    if(aba&&["ArrowLeft","ArrowRight","Home","End"].includes(e.key)){
+      const n=SG_TABS.length,i=[...aba.parentElement.children].indexOf(aba);
+      sgTab=e.key==="Home"?0:e.key==="End"?n-1:(i+(e.key==="ArrowRight"?1:-1)+n)%n;
+      e.preventDefault();sgRender();const nova=document.getElementById("sgTab"+sgTab);if(nova)nova.focus({preventScroll:true});return;
+    }
+    if(e.key==="Escape"){closeSignup();const t=document.getElementById("tp");t&&t.classList.remove("open");const p=document.getElementById("pop");p&&p.classList.remove("open")}});
 })();
 
 
