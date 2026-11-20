@@ -88,7 +88,8 @@ button:hover>.thumb>.play,button:hover>.ct>.play,.tthumb:hover>.play,.card:hover
 .row.lt{grid-template-columns:64px 1fr auto;padding:8px 6px;border-bottom:0}
 .row.lt .em{width:64px;height:38px;border-radius:9px}
 .row.lt span{font-weight:600}
-.row.lt em.nw{background:color-mix(in srgb,var(--ok) 14%,transparent);padding:3px 8px;border-radius:99px;font-size:12px}
+.row.lt em.nw{background:color-mix(in srgb,var(--ok) 14%,transparent);padding:3px 8px;border-radius:99px;font-size:12px;font-weight:700}
+:root:not([data-theme="dark"]) .row.lt em.nw{color:#0d6b3c}
 .row{border-radius:12px}
 
 /* Linha do tempo */

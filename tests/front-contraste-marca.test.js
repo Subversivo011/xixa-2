@@ -253,3 +253,105 @@ test("home: nenhum texto corrido em caixa alta (só rótulos curtos)", opts, asy
     await ctx.close();
   }
 });
+
+// ---------- cabeçalho logado: patente cabe sem cortar; menu do cabeçalho legível ----------
+async function abrirLogado({ w, h = 800, apelido, patente, tema = "light", pagina = "/index.html" }) {
+  const ctx = await browser.newContext({ viewport: { width: w, height: h } });
+  await ctx.route((u) => u.hostname !== "127.0.0.1", (r) => r.abort());
+  const GATO = { fur: 1, pat: 0, eye: 2, acc: 3, clo: 0, bg: 4 };
+  const PAT = { id: "x", nome: patente, xp_minimo: 0, cor: "#2fbf5b" };
+  const json = (r, st, c) => r.fulfill({ status: st, contentType: "application/json", body: JSON.stringify(c) });
+  await ctx.route("**/api/**", (route) => {
+    const p = new URL(route.request().url()).pathname;
+    if (p === "/api/eu") return json(route, 200, { usuario: { id: 1, apelido, avatar_gato: GATO, avatar_url: null, usar_foto: false, cadastro_completo: true }, patente: PAT, proxima_patente: null, moedas: 1234, xp: 200, csrf: "t" });
+    if (p === "/api/carteira") return json(route, 200, { usuario: { id: 1, apelido }, moedas: 1234, xp: 200, patente: PAT, proxima_patente: null, pacotes: [], cartas: { distintas: 0 }, valor_das_repetidas: 0 });
+    if (p === "/api/album") return json(route, 200, { colecoes: [], total: 0, tenho: 0, colecoes_completas: 0 });
+    if (p === "/api/visita") return json(route, 200, { dia: "2026-11-20", primeira_visita_do_dia: false, xp_ganho: 0, pacotes_ganhos: [], carteira: { xp: 200, moedas: 1234 } });
+    if (p === "/api/pacotes/tipos") return json(route, 200, { itens: [] });
+    return json(route, 404, { erro: "x" });
+  });
+  await ctx.addInitScript((t) => { try { localStorage.setItem("ns_theme", t); } catch (e) { /* sem storage */ } }, tema);
+  const page = await ctx.newPage();
+  const erros = [];
+  page.on("pageerror", (e) => erros.push("pageerror: " + e.message));
+  await page.goto(base + pagina);
+  await page.waitForFunction(() => typeof ECO !== "undefined" && ECO.pronto === true);
+  await page.waitForTimeout(500);
+  return { ctx, page, erros };
+}
+
+test("cabeçalho logado: 'Banda larga' (12px) cabe inteira de 1200 a 1849px; patente longa corta só com ellipsis e tem tooltip", opts, async () => {
+  const falhas = [];
+  for (const w of [1200, 1280, 1366, 1440, 1500, 1600, 1849]) {
+    const curto = await abrirLogado({ w, apelido: "Ana", patente: "Banda larga" });
+    const a = await curto.page.evaluate(() => { const s = document.querySelector(".sg-acct > span:last-child"), b = s.querySelector("b"); return { sw: s.scrollWidth, cw: s.clientWidth, patente: b.textContent, hd: Math.round(document.querySelector(".hd").getBoundingClientRect().height), page: [document.documentElement.scrollWidth, document.documentElement.clientWidth] }; });
+    if (a.sw > a.cw) falhas.push(`${w}px: "${a.patente}" cortada (${a.sw} > ${a.cw})`);
+    await curto.ctx.close();
+    const longo = await abrirLogado({ w, apelido: "ApelidoComVinteLetra", patente: "Dono de comunidade" });
+    const b = await longo.page.evaluate(() => { const hd = document.querySelector(".hd"), t = document.querySelector(".sg-acct"), menu = [...document.querySelectorAll(".hd .sub a,.hd .sub button")].filter((e) => e.getClientRects().length), ultimo = menu[menu.length - 1].getBoundingClientRect(), conta = t.getBoundingClientRect(); return { hd: Math.round(hd.getBoundingClientRect().height), page: [document.documentElement.scrollWidth, document.documentElement.clientWidth], title: t.getAttribute("title"), contaNaTela: conta.right <= innerWidth + 0.5, menuAntesDaConta: ultimo.right <= conta.left + 1, linhaUnica: new Set(menu.map((e) => Math.round(e.getBoundingClientRect().top))).size === 1 }; });
+    if (b.hd !== a.hd) falhas.push(`${w}px: altura do cabeçalho muda com nomes longos (${a.hd} -> ${b.hd})`);
+    if (b.page[0] > b.page[1]) falhas.push(`${w}px: overflow horizontal com nomes longos`);
+    if (!b.contaNaTela) falhas.push(`${w}px: conta fora da tela`);
+    if (!b.menuAntesDaConta) falhas.push(`${w}px: menu empurrado sobre a conta`);
+    if (!b.linhaUnica) falhas.push(`${w}px: menu quebrou em duas linhas`);
+    if (!/Dono de comunidade/.test(b.title) || !/ApelidoComVinteLetra/.test(b.title)) falhas.push(`${w}px: sem tooltip com apelido e patente: ${b.title}`);
+    await longo.ctx.close();
+  }
+  assert.deepStrictEqual(falhas, []);
+});
+
+test("menu do cabeçalho e botão Sair legíveis (>= 7:1 no DOM, margem para o antialiasing) em claro e escuro", opts, async () => {
+  const falhas = [];
+  for (const tema of ["light", "dark"]) for (const pagina of ["/index.html", "/memepedia.html", "/linha-do-tempo.html#2012"]) {
+    const { ctx, page } = await abrirLogado({ w: 1280, apelido: "Ana", patente: "Banda larga", tema, pagina });
+    const r = await page.evaluate(() => {
+      const parse = (s) => { const m = /rgba?\(([^)]+)\)|color\(srgb ([^)]+)\)/.exec(s); if (m[1]) { const p = m[1].split(/[ ,\/]+/).filter(Boolean).map(Number); return { r: p[0], g: p[1], b: p[2], a: p[3] === undefined ? 1 : p[3] }; } const p = m[2].split(/[ \/]+/).map(Number); return { r: p[0] * 255, g: p[1] * 255, b: p[2] * 255, a: p[3] === undefined ? 1 : p[3] }; };
+      const L = (c) => { const f = (x) => { x /= 255; return x <= 0.03928 ? x / 12.92 : Math.pow((x + 0.055) / 1.055, 2.4); }; return 0.2126 * f(c.r) + 0.7152 * f(c.g) + 0.0722 * f(c.b); };
+      const body = parse(getComputedStyle(document.body).backgroundColor), hd = parse(getComputedStyle(document.querySelector(".hd")).backgroundColor);
+      const bg = { r: hd.r * hd.a + body.r * (1 - hd.a), g: hd.g * hd.a + body.g * (1 - hd.a), b: hd.b * hd.a + body.b * (1 - hd.a) };
+      const alvos = [...document.querySelectorAll(".hd .sub > a:not(.on):not(.cta), .hd .sub > button:not(.cta):not(.on)")].slice(0, 3).concat([...document.querySelectorAll(".account-actions > button")].filter((b) => /Sair/.test(b.textContent)));
+      return alvos.map((e) => { const x = L(parse(getComputedStyle(e).color)), y = L(bg); return [e.textContent.trim().slice(0, 14), (Math.max(x, y) + 0.05) / (Math.min(x, y) + 0.05)]; });
+    });
+    for (const [t, ratio] of r) if (ratio < 7) falhas.push(`${tema} ${pagina} "${t}" = ${ratio.toFixed(2)}`);
+    await ctx.close();
+  }
+  assert.deepStrictEqual(falhas, []);
+});
+
+test("em.nw ('ontem') da home >= 5:1 sobre o fundo esverdeado, claro e escuro", opts, async () => {
+  for (const tema of ["light", "dark"]) {
+    const { ctx, page } = await abrir("/index.html", { w: 1280, h: 900, tema });
+    const r = await page.evaluate(() => {
+      const e = document.querySelector("em.nw"); if (!e) return null;
+      const parse = (s) => { const m = /rgba?\(([^)]+)\)|color\(srgb ([^)]+)\)/.exec(s); if (m[1]) { const p = m[1].split(/[ ,\/]+/).filter(Boolean).map(Number); return { r: p[0], g: p[1], b: p[2], a: p[3] === undefined ? 1 : p[3] }; } const p = m[2].split(/[ \/]+/).map(Number); return { r: p[0] * 255, g: p[1] * 255, b: p[2] * 255, a: p[3] === undefined ? 1 : p[3] }; };
+      const L = (c) => { const f = (x) => { x /= 255; return x <= 0.03928 ? x / 12.92 : Math.pow((x + 0.055) / 1.055, 2.4); }; return 0.2126 * f(c.r) + 0.7152 * f(c.g) + 0.0722 * f(c.b); };
+      let base = null; for (let x = e.parentElement; x && !base; x = x.parentElement) { const c = parse(getComputedStyle(x).backgroundColor); if (c.a > 0.95) base = c; }
+      const t = parse(getComputedStyle(e).backgroundColor), bg = { r: t.r * t.a + base.r * (1 - t.a), g: t.g * t.a + base.g * (1 - t.a), b: t.b * t.a + base.b * (1 - t.a) };
+      const x = L(parse(getComputedStyle(e).color)), y = L(bg); return (Math.max(x, y) + 0.05) / (Math.min(x, y) + 0.05);
+    });
+    assert.ok(r !== null, "em.nw não encontrado");
+    assert.ok(r >= 5, `${tema}: ${r.toFixed(2)}`);
+    await ctx.close();
+  }
+});
+
+test("linha do tempo: subtítulo e rodapé da PÁGINA (.lt-top small, .lt-marcas) >= 4,5:1 em todos os anos, claro e escuro", opts, async () => {
+  const falhas = [];
+  for (const tema of ["light", "dark"]) {
+    const { ctx, page } = await abrir("/linha-do-tempo.html#2012", { w: 1280, h: 900, tema });
+    const anos = await page.evaluate(() => KEYS.slice());
+    for (const k of anos) {
+      await page.evaluate((k) => ir(k), k);
+      await page.waitForTimeout(650); // o fundo da página anima (.4s) ao trocar de época
+      const r = await page.evaluate(() => {
+        const parse = (s) => { const m = /rgba?\(([^)]+)\)/.exec(s); const p = m[1].split(/[ ,\/]+/).filter(Boolean).map(Number); return { r: p[0], g: p[1], b: p[2], a: p[3] === undefined ? 1 : p[3] }; };
+        const L = (c) => { const f = (x) => { x /= 255; return x <= 0.03928 ? x / 12.92 : Math.pow((x + 0.055) / 1.055, 2.4); }; return 0.2126 * f(c.r) + 0.7152 * f(c.g) + 0.0722 * f(c.b); };
+        const bg = parse(getComputedStyle(document.body).backgroundColor);
+        return ["main .lt-top small", ".lt-marcas"].map((s) => { const e = document.querySelector(s); const cs = getComputedStyle(e); const x = L(parse(cs.color)), y = L(bg); return [s, (Math.max(x, y) + 0.05) / (Math.min(x, y) + 0.05), cs.opacity]; });
+      });
+      for (const [s, ratio] of r) if (ratio < 4.5) falhas.push(`${tema} ${k} ${s} = ${ratio.toFixed(2)}`);
+    }
+    await ctx.close();
+  }
+  assert.deepStrictEqual(falhas, []);
+});

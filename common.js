@@ -390,7 +390,7 @@ function avatarSessaoHTML(u){
 }
 function contaSessaoHTML(){
   const u=SESSAO.usuario,p=SESSAO.patente&&SESSAO.patente.nome?SESSAO.patente.nome:"";
-  return `<div class="account-actions"><span class="acct-wrap"><button type="button" class="sg-acct" onclick="abrirMenuConta(event)" aria-haspopup="menu" aria-expanded="false" aria-controls="acct-menu" title="Meu perfil"><span class="sg-av">${avatarSessaoHTML(u)}</span><span>${escapeHtml(u.apelido)}${p?"<b>"+escapeHtml(p)+"</b>":""}</span></button><div class="acct-menu" id="acct-menu" role="menu" hidden>
+  return `<div class="account-actions"><span class="acct-wrap"><button type="button" class="sg-acct" onclick="abrirMenuConta(event)" aria-haspopup="menu" aria-expanded="false" aria-controls="acct-menu" title="Meu perfil: ${escapeHtml(u.apelido)}${p?" · "+escapeHtml(p):""}"><span class="sg-av">${avatarSessaoHTML(u)}</span><span>${escapeHtml(u.apelido)}${p?"<b>"+escapeHtml(p)+"</b>":""}</span></button><div class="acct-menu" id="acct-menu" role="menu" hidden>
     <a role="menuitem" href="perfil.html">${icon("user")}Ver o meu perfil</a>
     <a role="menuitem" href="perfil.html#editar">${icon("edit")}Editar o meu perfil</a>
     <button type="button" role="menuitem" onclick="fecharMenuConta();openSignup()">${icon("cat")}Editar gatinho e apelido</button>
