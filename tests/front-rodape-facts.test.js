@@ -83,7 +83,7 @@ for (const [w, h] of [[390, 844], [360, 740]]) {
       const btns = [...document.querySelectorAll(".nsft2 .fq-acts .fq-go")].map((b) => { const x = b.getBoundingClientRect(); return { t: b.textContent.trim(), h: x.height, w: x.width, y: x.y, alt: b.classList.contains("alt") }; });
       const nomes = [...document.querySelectorAll(".nsft2 button,.nsft2 a")].filter((e) => !e.closest("[aria-hidden=true]") && e.getClientRects().length).map((e) => (e.getAttribute("aria-label") || e.textContent.trim()));
       return {
-        artW: a.width, artH: a.height, artHidden: art.getAttribute("aria-hidden"), artTab: art.getAttribute("tabindex"), btns,
+        artW: a.width, artH: a.height, artHidden: art.getAttribute("aria-hidden"), artTag: art.tagName, artFocavel: art.matches("button,a,[tabindex]"), btns,
         perguntas: (document.querySelector(".nsft2 .fq-txt").textContent.match(/\?/g) || []).length,
         textos: document.querySelector(".nsft2 .fq-txt").textContent.replace(/\s+/g, " ").trim(),
         l2: getComputedStyle(document.querySelector(".nsft2 .fq-l2")).fontSize, l3: !!document.querySelector(".nsft2 .fq-l3"),
@@ -93,7 +93,9 @@ for (const [w, h] of [[390, 844], [360, 740]]) {
       };
     });
     assert.ok(r.artW >= 44 && r.artH >= 44, `telefone ${r.artW}x${r.artH}`);
-    assert.strictEqual(r.artHidden, "true"); assert.strictEqual(r.artTab, "-1");
+    assert.strictEqual(r.artHidden, "true");
+    assert.strictEqual(r.artTag, "SPAN", "decorativo é um span, não um botão com aria-hidden (antipadrão)");
+    assert.strictEqual(r.artFocavel, false, "o telefone decorativo não é focável");
     assert.strictEqual(r.mandarFeedback, 1, "Mandar feedback aparece uma vez para leitor de tela");
     assert.deepStrictEqual(r.btns.map((b) => b.t), ["Mandar feedback", "Quero contribuir"]);
     assert.deepStrictEqual(r.btns.map((b) => b.alt), [false, true], "primário e secundário");
@@ -228,5 +230,62 @@ test("timer com guarda: faixa removida ou redesenhada não gera erro de console"
   await page.evaluate(() => document.querySelector(".facts").remove());
   await page.clock.runFor(300000);
   assert.deepStrictEqual(erros, []);
+  await ctx.close();
+});
+
+// ---- contraste medido por PIXEL: pixels do núcleo do texto (cor do texto) contra o fundo real atrás deles ----
+async function contrastePorPixel(page, sel) {
+  const el = (await page.$$(sel))[0];
+  await el.scrollIntoViewIfNeeded();
+  const cor = await el.evaluate((e) => getComputedStyle(e).color);
+  const estilo = await page.addStyleTag({ content: ".nsft2 .fq-in *{color:transparent!important;-webkit-text-fill-color:transparent!important;text-shadow:none!important}" });
+  const semTexto = (await el.screenshot()).toString("base64");
+  await estilo.evaluate((n) => n.parentNode.removeChild(n));
+  const comTexto = (await el.screenshot()).toString("base64");
+  return page.evaluate(async ({ a, b, cor }) => {
+    const dec = async (x) => { const bmp = await createImageBitmap(await (await fetch("data:image/png;base64," + x)).blob()); const c = document.createElement("canvas"); c.width = bmp.width; c.height = bmp.height; const g = c.getContext("2d"); g.drawImage(bmp, 0, 0); return g.getImageData(0, 0, c.width, c.height); };
+    const [fundo, texto] = [await dec(a), await dec(b)];
+    const m = /rgba?\(([^)]+)\)/.exec(cor), t = m[1].split(/[ ,\/]+/).map(Number);
+    const L = (r, g, bl) => { const f = (x) => { x /= 255; return x <= 0.03928 ? x / 12.92 : Math.pow((x + 0.055) / 1.055, 2.4); }; return 0.2126 * f(r) + 0.7152 * f(g) + 0.0722 * f(bl); };
+    const rs = [];
+    for (let i = 0; i < texto.data.length; i += 4) {
+      const d = Math.hypot(texto.data[i] - t[0], texto.data[i + 1] - t[1], texto.data[i + 2] - t[2]);
+      if (d > 40) continue; // só o núcleo do glifo (sem antialias)
+      const x = L(texto.data[i], texto.data[i + 1], texto.data[i + 2]), y = L(fundo.data[i], fundo.data[i + 1], fundo.data[i + 2]);
+      rs.push((Math.max(x, y) + 0.05) / (Math.min(x, y) + 0.05));
+    }
+    rs.sort((p, q) => p - q);
+    return { n: rs.length, min: rs[0], p5: rs[Math.floor(rs.length * 0.05)], mediana: rs[Math.floor(rs.length / 2)] };
+  }, { a: semTexto, b: comTexto, cor });
+}
+
+for (const [w, h] of [[390, 844], [1280, 800]]) for (const tema of ["light", "dark"]) {
+  test(`rodapé ${w}px (${tema}): pergunta, logo e apoio com contraste >= 4,5:1 medido por pixel`, opts, async () => {
+    const { ctx, page, erros } = await abrir("/index.html", { w, h, tema });
+    const falhas = [];
+    for (const sel of [".nsft2 .fq-l1", ".nsft2 .fq-l2", ".nsft2 .fq-logo", ".nsft2 .fq-logo i"]) {
+      const r = await contrastePorPixel(page, sel);
+      assert.ok(r.n >= 8, `${sel}: poucos pixels de texto medidos (${r.n})`);
+      if (r.min < 4.5) falhas.push(`${sel} min=${r.min.toFixed(2)} mediana=${r.mediana.toFixed(2)} n=${r.n}`);
+    }
+    assert.deepStrictEqual(falhas, []);
+    assert.deepStrictEqual(erros, []);
+    await ctx.close();
+  });
+}
+
+test("rodapé em ponteiro de toque 1000px: botões 44px e apoio 13,5px", opts, async () => {
+  const ctx = await browser.newContext({ viewport: { width: 1000, height: 800 }, hasTouch: true, isMobile: false });
+  await ctx.route((u) => u.hostname !== "127.0.0.1", (r) => r.abort());
+  await ctx.route("**/api/**", (r) => r.fulfill({ status: 401, contentType: "application/json", body: "{}" }));
+  await ctx.addInitScript(() => { try { localStorage.setItem("ns_convidado", "1"); } catch (e) { /* sem storage */ } });
+  const page = await ctx.newPage();
+  await page.goto(base + "/index.html");
+  await page.waitForSelector(".nsft2 .fq-in");
+  const coarse = await page.evaluate(() => matchMedia("(pointer:coarse)").matches);
+  assert.ok(coarse, "o contexto com hasTouch deveria ter pointer:coarse");
+  const r = await page.evaluate(() => ({ hs: [...document.querySelectorAll(".nsft2 .fq-acts .fq-go")].map((b) => b.getBoundingClientRect().height), l2: getComputedStyle(document.querySelector(".nsft2 .fq-l2")).fontSize }));
+  assert.ok(r.hs.every((h) => h >= 44), "botões 44px: " + r.hs);
+  assert.strictEqual(r.l2, "13.5px");
   await ctx.close();
 });
