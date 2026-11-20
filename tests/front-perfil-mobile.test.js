@@ -76,6 +76,8 @@ for (const vp of VPS) {
       const { ctx, page, st, erros } = await abrir(layout, vp);
       await page.click("#btEditar");
       await page.waitForSelector("#dlg[open]");
+      const vis = await page.$eval("#lays input:checked", (i) => { const l = i.closest("label").getBoundingClientRect(), c = document.getElementById("dlgCorpo").getBoundingClientRect(); return l.top >= c.top - 1 && l.bottom <= c.bottom + 1; });
+      assert.ok(vis, "visual escolhido à vista");
       const dentro = async (sel) => page.$eval(sel, (el) => { const r = el.getBoundingClientRect(); return r.top >= 0 && r.bottom <= innerHeight + 0.5 && r.left >= 0 && r.right <= innerWidth + 0.5; });
       // rodapé visível com o corpo no topo e depois rolado até o fim
       assert.ok(await dentro("#btSalvar"), "Salvar visível ao abrir");
@@ -85,20 +87,22 @@ for (const vp of VPS) {
       await page.$eval("#dlgCorpo", (e) => { e.scrollTop = 0; });
       // altura mínima de toque dos botões do rodapé
       for (const id of ["#btSalvar", "#btCancelar", "#btGato"]) assert.ok((await page.$eval(id, (e) => e.getBoundingClientRect().height)) >= 44, id + " >= 44px");
-      // visual atual: marcado, com foco, e visível dentro da fileira
+      // visual atual: marcado, com foco e à vista dentro do corpo rolável do diálogo
       const foco = await page.evaluate(() => { const a = document.activeElement; return a && a.name === "lay" && a.checked && a.value; });
       assert.strictEqual(foco, layout, "foco inicial no visual atual");
-      const vis = await page.$eval("#lays input:checked", (i) => { const l = i.closest("label").getBoundingClientRect(), c = document.getElementById("lays").getBoundingClientRect(); return l.left >= c.left - 1 && l.right <= c.right + 1; });
-      assert.ok(vis, "visual escolhido visível na fileira");
+      assert.strictEqual(await page.$eval("#laysN", (e) => e.textContent), `Visual ${Object.keys(await page.evaluate(() => LAYOUTS)).indexOf(layout) + 1} de 15`, "contador");
       if (vp.width <= 520) {
-        assert.strictEqual(await page.$eval("#lays", (e) => getComputedStyle(e).display), "flex", "carrossel em 1 linha");
-        const tops = await page.$$eval("#lays .pf-lay", (l) => new Set(l.map((x) => Math.round(x.getBoundingClientRect().top))).size);
-        assert.strictEqual(tops, 1, "1 linha só");
+        assert.strictEqual(await page.$eval("#lays", (e) => getComputedStyle(e).display), "grid", "grade");
+        const lefts = await page.$$eval("#lays .pf-lay", (l) => new Set(l.map((x) => Math.round(x.getBoundingClientRect().left))).size);
+        assert.strictEqual(lefts, 2, "2 colunas");
         const alt = await page.$$eval("#lays .pf-lay", (l) => new Set(l.map((x) => Math.round(x.getBoundingClientRect().height))).size);
         assert.strictEqual(alt, 1, "cartões com a mesma altura");
+        const mini = await page.$$eval("#lays .mini", (l) => new Set(l.map((x) => Math.round(x.getBoundingClientRect().height))).size);
+        assert.strictEqual(mini, 1, "miniaturas com a mesma altura");
         const nm = await page.$$eval("#lays .pf-lay .nm", (l) => new Set(l.map((x) => Math.round(x.getBoundingClientRect().height))).size);
         assert.strictEqual(nm, 1, "legendas com a mesma altura");
-        assert.ok(await page.$eval("#lays", (e) => e.scrollWidth > e.clientWidth), "há o que rolar");
+        assert.ok(await page.$eval("#lays", (e) => e.scrollWidth <= e.clientWidth + 1), "grade sem rolagem lateral");
+        assert.ok(await page.$eval("#dlgCorpo", (e) => e.scrollHeight > e.clientHeight), "o corpo rola na vertical");
         assert.ok(await page.$eval("#fav", (e) => e.scrollWidth > e.clientWidth), "mini-cartas rolam na horizontal");
         assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), "sem overflow horizontal");
         assert.ok(await page.$eval("#dlg", (d) => d.getBoundingClientRect().height <= innerHeight), "diálogo cabe na tela");
@@ -128,11 +132,12 @@ for (const vp of VPS) {
   }
 }
 
-test("trocar o visual no carrossel mobile e salvar manda o visual novo", opts, async () => {
+test("trocar o visual na grade mobile atualiza o contador e salva o visual novo", opts, async () => {
   const { ctx, page, st, erros } = await abrir("orkut", VPS[0]);
   await page.click("#btEditar");
-  await page.locator('#lays input[value="bluesky"]').evaluate((i) => i.closest("label").scrollIntoView({ inline: "center", block: "nearest" }));
+  await page.locator('#lays input[value="bluesky"]').evaluate((i) => i.closest("label").scrollIntoView({ block: "center" }));
   await page.click('#lays label.l-bluesky');
+  assert.strictEqual(await page.$eval("#laysN", (e) => e.textContent), "Visual 15 de 15");
   await page.click("#btSalvar");
   await page.waitForSelector(".pf-bluesky");
   assert.strictEqual(st.patches.at(-1).perfil_layout, "bluesky");
@@ -188,17 +193,20 @@ test("WhatsApp desktop com recados mantém o chat alto", opts, async () => {
   await ctx.close();
 });
 
-for (const vp of VPS.slice(0, 2)) {
-  test(`Facebook ${vp.width}px: abas role=tab, aria-selected e >= 44px de altura`, opts, async () => {
+for (const vp of VPS) {
+  test(`Facebook ${vp.width}px: nav com links âncora (sem role=tab falso), sem campo Pesquisar, 44px`, opts, async () => {
     const { ctx, page, erros } = await abrir("facebook", vp);
     await page.waitForSelector(".abas");
-    assert.strictEqual(await page.getAttribute(".abas", "role"), "tablist");
-    const abas = await page.$$eval(".abas [role=tab]", (l) => l.map((a) => ({ sel: a.getAttribute("aria-selected"), h: a.getBoundingClientRect().height, w: a.getBoundingClientRect().width })));
-    assert.strictEqual(abas.length, 3);
+    assert.strictEqual(await page.$eval(".abas", (e) => e.tagName), "NAV");
+    assert.ok(await page.getAttribute(".abas", "aria-label"));
+    assert.strictEqual(await page.$$eval("#pf [role=tab], #pf [role=tablist], #pf [aria-selected]", (l) => l.length), 0, "sem roles de aba falsos");
+    assert.strictEqual(await page.$$eval(".abas a", (l) => l.filter((a) => /^#fb-/.test(a.getAttribute("href"))).length), 3);
+    assert.ok(!/Pesquisar/.test(await page.textContent(".pf-top")), "sem o campo Pesquisar decorativo");
+    const abas = await page.$$eval(".abas a", (l) => l.map((a) => ({ cur: a.getAttribute("aria-current"), h: a.getBoundingClientRect().height, w: a.getBoundingClientRect().width })));
     assert.ok(abas.every((a) => a.h >= 44 && a.w >= 44), JSON.stringify(abas));
-    assert.deepStrictEqual(abas.map((a) => a.sel), ["true", "false", "false"]);
-    await page.click("#ab-fotos");
-    assert.deepStrictEqual(await page.$$eval(".abas [role=tab]", (l) => l.map((a) => a.getAttribute("aria-selected"))), ["false", "false", "true"]);
+    assert.deepStrictEqual(abas.map((a) => a.cur), ["true", null, null]);
+    await page.click(".abas a:nth-child(3)");
+    assert.deepStrictEqual(await page.$$eval(".abas a", (l) => l.map((a) => a.getAttribute("aria-current"))), [null, null, "true"]);
     assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), "sem overflow horizontal");
     assert.deepStrictEqual(erros, []);
     await ctx.close();
