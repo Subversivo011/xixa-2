@@ -1,4 +1,5 @@
-// Perfil do usuário: apelido editável, gato (avatar padrão), foto do Discord opcional (usar_foto) e fim do cadastro.
+// Perfil do usuário: apelido editável, gato (avatar padrão), foto do Discord opcional (usar_foto), fim do cadastro,
+// e o perfil público: layout (perfil_layout) e carta favorita (carta_favorita).
 // O servidor valida tudo: nada do que vem do cliente entra no banco sem passar por lista fechada ou regra.
 import { ErroNegocio, MSG_INDISPONIVEL, transacao } from '../economia/servico.js';
 import { ehReservado, ESPERA_TROCA_HORAS } from './apelidos.js';
@@ -37,19 +38,24 @@ export function validarApelido(v) {
   return a;
 }
 
-const CAMPOS = ['apelido', 'avatar_gato', 'usar_foto'];
+// visual do perfil público (lista fechada; a mesma do CHECK da migração 015)
+export const LAYOUTS = Object.freeze(['orkut', 'fotolog', 'msn', 'twitter', 'facebook']);
+const CARTA_ID = /^[a-z0-9_-]{1,60}$/i;
+
+const CAMPOS = ['apelido', 'avatar_gato', 'usar_foto', 'perfil_layout', 'carta_favorita'];
 
 /** Perfil público do próprio usuário (o que /api/eu devolve em "usuario"). usar_foto efetivo: só true se existir avatar_url. */
 export async function lerPerfil(db, usuarioId) {
   const { rows } = await db.query(
-    `SELECT u.id, u.apelido, u.avatar_gato, u.usar_foto, u.cadastro_completo_em, c.avatar_url
+    `SELECT u.id, u.apelido, u.avatar_gato, u.usar_foto, u.cadastro_completo_em, u.perfil_layout, u.carta_favorita, c.avatar_url
        FROM usuarios u LEFT JOIN contas_oauth c ON c.usuario_id = u.id AND c.provedor = 'discord'
       WHERE u.id = $1`, [usuarioId]);
   if (!rows.length) throw new ErroNegocio(401, 'usuário não encontrado');
   const u = rows[0];
   return {
     id: Number(u.id), apelido: u.apelido, avatar_gato: u.avatar_gato || {}, avatar_url: u.avatar_url ?? null,
-    usar_foto: !!u.usar_foto && u.avatar_url != null, cadastro_completo: u.cadastro_completo_em != null
+    usar_foto: !!u.usar_foto && u.avatar_url != null, cadastro_completo: u.cadastro_completo_em != null,
+    perfil_layout: u.perfil_layout || 'orkut', carta_favorita: u.carta_favorita ?? null
   };
 }
 
@@ -62,7 +68,7 @@ export async function atualizarPerfil(pool, usuario, corpo) {
   if (corpo === null || typeof corpo !== 'object' || Array.isArray(corpo)) throw new ErroPerfil(400, 'corpo deve ser um objeto JSON');
   const desconhecida = Object.keys(corpo).find((k) => !CAMPOS.includes(k));
   if (desconhecida !== undefined) throw new ErroPerfil(400, `campo não permitido: ${desconhecida.slice(0, 40)}`);
-  if (!CAMPOS.some((k) => k in corpo)) throw new ErroPerfil(400, 'envie ao menos um campo: apelido, avatar_gato ou usar_foto');
+  if (!CAMPOS.some((k) => k in corpo)) throw new ErroPerfil(400, 'envie ao menos um campo: apelido, avatar_gato, usar_foto, perfil_layout ou carta_favorita');
 
   // validação de formato antes de abrir transação
   const novo = {};
@@ -71,6 +77,16 @@ export async function atualizarPerfil(pool, usuario, corpo) {
   if ('usar_foto' in corpo) {
     if (typeof corpo.usar_foto !== 'boolean') throw new ErroPerfil(422, 'usar_foto deve ser true ou false', 'usar_foto');
     novo.usar_foto = corpo.usar_foto;
+  }
+  if ('perfil_layout' in corpo) {
+    if (typeof corpo.perfil_layout !== 'string' || !LAYOUTS.includes(corpo.perfil_layout))
+      throw new ErroPerfil(422, `perfil_layout deve ser um destes: ${LAYOUTS.join(', ')}`, 'perfil_layout');
+    novo.perfil_layout = corpo.perfil_layout;
+  }
+  if ('carta_favorita' in corpo) { // null = sem carta favorita
+    const c = corpo.carta_favorita;
+    if (c !== null && (typeof c !== 'string' || !CARTA_ID.test(c))) throw new ErroPerfil(422, 'carta_favorita inválida', 'carta_favorita');
+    novo.carta_favorita = c;
   }
 
   return transacao(pool, async (cli) => {
@@ -97,6 +113,16 @@ export async function atualizarPerfil(pool, usuario, corpo) {
         if (!c || c.avatar_url == null) throw new ErroPerfil(422, 'sua conta não tem foto do Discord para usar', 'usar_foto');
       }
       await cli.query('UPDATE usuarios SET usar_foto = $2 WHERE id = $1', [u.id, novo.usar_foto]);
+    }
+
+    if (novo.perfil_layout !== undefined) await cli.query('UPDATE usuarios SET perfil_layout = $2 WHERE id = $1', [u.id, novo.perfil_layout]);
+    if (novo.carta_favorita !== undefined) {
+      // só uma carta que a pessoa TEM (quantidade > 0) pode ser a favorita
+      if (novo.carta_favorita !== null) {
+        const { rows: tem } = await cli.query('SELECT 1 FROM inventario_cartas WHERE usuario_id = $1 AND carta_id = $2 AND quantidade > 0', [u.id, novo.carta_favorita]);
+        if (!tem.length) throw new ErroPerfil(422, 'você não tem essa carta no álbum', 'carta_favorita');
+      }
+      await cli.query('UPDATE usuarios SET carta_favorita = $2 WHERE id = $1', [u.id, novo.carta_favorita]);
     }
 
     if (novo.avatar_gato !== undefined) {

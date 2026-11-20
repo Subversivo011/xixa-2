@@ -15,11 +15,12 @@ import economia from './routes/economia.js';
 import authRotas from './routes/auth.js';
 import sobedesce from './routes/sobedesce.js';
 import memepedia from './routes/memepedia.js';
+import perfis from './routes/perfis.js';
 
 // auth = { discord: config | null, fetch, cookieSecure, origemSite }  (ver routes/auth.js e auth/discord.js)
 export function criarApp({ pool, adminToken = '', ytKey = '', autenticar = null, auth = {} } = {}) {
   const cfgAuth = { discord: null, fetch: globalThis.fetch, cookieSecure: true, origemSite: '', ...auth };
   const router = criarRouter({ pool, adminToken, autenticar, extras: { ytKey, auth: cfgAuth } });
-  for (const modulo of [saude, acervo, contribuidores, votos, feedback, comentarios, links, yt, authRotas, economia, sobedesce, memepedia, admin]) modulo(router);
+  for (const modulo of [saude, acervo, contribuidores, votos, feedback, comentarios, links, yt, authRotas, economia, sobedesce, memepedia, perfis, admin]) modulo(router);
   return { router, server: http.createServer((req, res) => router.tratar(req, res)) };
 }

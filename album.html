@@ -3,13 +3,13 @@
 <head>
 <meta charset="utf-8">
 <script src="gate.js?v=20261120c"></script>
-<script src="cliente-economia.js?v=20261120c"></script>
+<script src="cliente-economia.js?v=20261121p"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>NÃO SALVO — Álbum de Figurinhas da Internet</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Inter:wght@400;500;600;700&family=Baloo+2:wght@700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="theme.css?v=20261120c">
+<link rel="stylesheet" href="theme.css?v=20261121p">
 <link rel="stylesheet" href="viewer.css?v=20261120d">
 <script>try{var t=localStorage.getItem("ns_theme")}catch(e){}document.documentElement.dataset.theme=t==="dark"?"dark":"light"</script>
 <style>
@@ -195,7 +195,7 @@
 <div class="modal" id="modal" onclick="if(event.target===this)closeModal()"><div class="mbox" id="mbox"></div></div>
 
 <form name="feedback" data-netlify="true" netlify-honeypot="bot-field" hidden><input name="tipo"><textarea name="msg"></textarea><input name="contato"><input name="pagina"><input name="bot-field"></form>
-<script src="common.js?v=20261120c"></script>
+<script src="common.js?v=20261121p"></script>
 <script src="data.js?v=20261119q"></script>
 <script src="player.js?v=20261119n"></script>
 <script src="viewer.js?v=20261120e"></script>
@@ -239,7 +239,7 @@ function cardHTML(c,opt={}){
   if(!has)return `<button class="card lock ${opt.sel?'sel':''}" onclick="pick('${c.id}')"><div class="top"><span>${c.num}</span><em style="color:var(--faint)">${c.r}</em></div><div class="art"><b>${+c.num}</b></div><div class="nm">???</div><div class="ft">${col.n.toUpperCase()}</div></button>`;
   return `<button class="card ${FOIL.has(c.r)?'foil':''} ${c.r} ${opt.sel?'sel':''}" style="--rc:${rc}" onclick="pick('${c.id}')">
    <div class="top"><span>${c.num}</span><em>${c.r}</em></div>
-   ${NS.fav===c.id?'<span class="star">⭐</span>':''}${owned(c)>1&&!opt.force?`<span class="cp">x${owned(c)}</span>`:''}${c.y?`<span class="yr">${c.y}</span>`:""}
+   ${favId()===c.id?'<span class="star">⭐</span>':''}${owned(c)>1&&!opt.force?`<span class="cp">x${owned(c)}</span>`:''}${c.y?`<span class="yr">${c.y}</span>`:""}
    <div class="art" style="background:linear-gradient(150deg,${col.bg[0]},${col.bg[1]})">${cardYt(c)?`<img src="https://i.ytimg.com/vi/${cardYt(c)}/mqdefault.jpg" alt="" loading="lazy" onerror="this.remove()">`:""}<span class="emo">${c.e}</span></div>
    <div class="nm">${escapeHtml(c.name)}</div><div class="ft">${col.n.toUpperCase()}</div></button>`;
 }
@@ -272,7 +272,7 @@ function renderDet(){
   <div class="kv"><span>Coleção</span><b>${col.n}</b></div>
   <div class="kv"><span>Raridade</span><b style="color:var(--${c.r})">⬢ ${c.r}</b></div>${odds}
   ${c.meme?`<button class="play" onclick="watch('${c.meme}')">▶ ASSISTIR NO PLAYER DE ${c.y}</button>`:""}
-  <button class="bigbtn" onclick="setFav()">${NS.fav===c.id?'★ É A SUA FAVORITA':'☆ DEFINIR COMO FAVORITA'}</button>
+  <button class="bigbtn" onclick="setFav()">${favId()===c.id?'★ É A SUA FAVORITA':'☆ DEFINIR COMO FAVORITA'}</button>
   ${n>1?`<button class="sm" style="color:var(--gold)" onclick="convertOne('${c.id}')">♻ CONVERTER AS REPETIDAS DESTA CARTA</button>`:""}
   <button class="sm" onclick="share()">⤴ COMPARTILHAR</button>
   <div class="copies">Você possui ${n} cópia${n>1?'s':''} desta carta</div>`;
@@ -281,7 +281,14 @@ const renderAll=()=>{renderCols();renderAlbum();renderDet()};
 function pick(id){sel=id;renderAlbum();renderDet()}
 function setCol(k){ci=k;page=0;sel=CARDS.find(c=>c.ci===k).id;renderAll()}
 function pg(p){const pages=Math.ceil(CARDS.filter(x=>x.ci===ci).length/PER);if(p<0||p>=pages)return;page=p;renderAlbum()}
-function setFav(){NS.fav=sel;nsSave();renderAll();toast("Carta favorita definida ⭐")}
+// favorita oficial = a do servidor (perfil); NS.fav só como reserva enquanto a sessão carrega
+function favId(){return (typeof SESSAO!=="undefined"&&SESSAO&&SESSAO.usuario&&"carta_favorita" in SESSAO.usuario)?SESSAO.usuario.carta_favorita:NS.fav}
+// carta favorita: vai para o perfil público (servidor). Só dá para escolher uma carta que você tem.
+async function setFav(){
+  if(owned(byId[sel])<1){toast("Você ainda não tem essa carta.");return}
+  try{const r=await Api.perfil({carta_favorita:sel},{silencioso:true});if(SESSAO&&SESSAO.usuario&&r&&r.usuario)SESSAO.usuario.carta_favorita=r.usuario.carta_favorita;NS.fav=sel;nsSave();renderAll();toast("Carta favorita definida ⭐ Ela aparece no seu perfil.")}
+  catch(e){toast((e&&e.erro)||"Não consegui salvar a favorita agora.")}
+}
 function share(){const c=byId[sel],t=`Consegui a carta ${c.num} "${c.name}" (${c.r}) no álbum do Não Salvo!`;try{navigator.clipboard.writeText(t).then(()=>toast("Texto copiado!"),()=>toast(t))}catch(e){toast(t)}}
 function about(){const c=COLLECTIONS[ci];openModal(`<h3>${c.n}</h3><p>${c.about}</p><table class="tbl"><tr><th>Raridade</th><th>Cartas</th><th>Você tem</th></tr>${RARITIES.map(r=>{const l=CARDS.filter(x=>x.ci===ci&&x.r===r);return l.length?`<tr><td style="color:var(--${r})">⬢ ${r}</td><td>${l.length}</td><td>${l.filter(x=>owned(x)).length}</td></tr>`:""}).join("")}</table><p style="margin-top:12px">Completar a coleção rende um bônus de <b style="color:var(--gold)">moedas</b> e XP.</p><button class="mclose" onclick="closeModal()">FECHAR</button>`)}
 function openModal(h,cls){$("mbox").className="mbox "+(cls||"");$("mbox").innerHTML=`<button class="xclose" onclick="closeModal()" aria-label="Fechar" title="Fechar (Esc)">${icon("xmark")}</button>`+h;$("modal").classList.add("open")}
