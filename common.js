@@ -10,64 +10,84 @@ const SG={
 };
 let sgN=0;
 const SPHYNX=9; // "Rosa" vira gato Sphynx (sem pelo)
+// cores derivadas do pelo (sombra e brilho) para o gatinho "Fofinho"
+function mixHex(a,b,t){const p=h=>[1,3,5].map(i=>parseInt(h.slice(i,i+2),16));const A=p(a),B=p(b);return"#"+A.map((x,i)=>Math.round(x+(B[i]-x)*t).toString(16).padStart(2,"0")).join("")}
+const lumHex=h=>{const p=[1,3,5].map(i=>parseInt(h.slice(i,i+2),16)/255);return .2126*p[0]+.7152*p[1]+.0722*p[2]};
+// Gatinho "fofinho" (nov/2026): só o desenho mudou. As opções salvas (fur, pat, eye, acc, clo, bg) continuam as mesmas,
+// então quem já montou o gato vê o mesmo gato, com o traço novo.
 function catSVG(o){
-  const sph=o.fur===SPHYNX;
-  const id="g"+(sgN++),fur=sph?"#efb6c4":SG.fur[o.fur][1],eye=SG.eye[o.eye][1],bg=SG.bg[o.bg][1],clo=o.clo,acc=o.acc,pat=sph?0:o.pat;
-  const dk="rgba(0,0,0,.28)",shade="#d48a9f";
-  let s=`<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"><defs><radialGradient id="${id}" cx="50%" cy="35%" r="75%"><stop offset="0" stop-color="${bg[0]}"/><stop offset="1" stop-color="${bg[1]}"/></radialGradient>
-  <pattern id="${id}p" width="12" height="12" patternUnits="userSpaceOnUse"><path d="M0 6H12M6 0V12" stroke="#00000055" stroke-width="2"/></pattern>
-  ${sph?`<radialGradient id="${id}s" cx="45%" cy="35%" r="70%"><stop offset="0" stop-color="#f7cdd7"/><stop offset="1" stop-color="#e7a2b4"/></radialGradient>`:""}</defs>
-  <rect width="200" height="200" fill="url(#${id})"/>`;
-  const skin=sph?`url(#${id}s)`:fur;
-  // corpo
-  s+=`<path d="M28 205Q30 150 72 140L128 140Q170 150 172 205Z" fill="${skin}"/>`;
-  if(sph) s+=`<g stroke="${shade}" stroke-width="2" fill="none" stroke-linecap="round"><path d="M84 146q16 7 32 0M80 154q20 8 40 0"/></g>`;
-  const cc=SG.clo[clo][1];
-  if(clo===0) s+=`<path d="M28 205Q30 150 72 140Q100 166 128 140Q170 150 172 205Z" fill="${cc}"/><path d="M60 146Q100 176 140 146" stroke="#2b2b38" stroke-width="7" fill="none"/><path d="M92 165v26M108 165v26" stroke="#ddd" stroke-width="2"/><path d="M70 188h60l6 17H64z" fill="#15151c"/>`;
-  else if(clo===1) s+=`<path d="M28 205Q30 150 72 140Q100 158 128 140Q170 150 172 205Z" fill="${cc}"/><path d="M76 142Q100 160 124 142" stroke="#bbb" stroke-width="3" fill="none"/>`;
-  else if(clo===2) s+=`<path d="M28 205Q30 150 72 140L100 168L128 140Q170 150 172 205Z" fill="${cc}"/><path d="M100 168V205M72 140L88 176M128 140L112 176" stroke="#25497c" stroke-width="2.5"/><rect x="40" y="178" width="20" height="9" fill="#2f5a95"/>`;
-  else if(clo===3) s+=`<path d="M28 205Q30 150 72 140Q100 154 128 140Q170 150 172 205Z" fill="${cc}"/><path d="M72 146Q100 164 128 146" stroke="#a99f88" stroke-width="6" fill="none"/>`;
-  else if(clo===4) s+=`<path d="M28 205Q30 150 72 140Q100 158 128 140Q170 150 172 205Z" fill="${cc}"/><path d="M100 158V205" stroke="#2c3a20" stroke-width="3"/><path d="M62 144Q100 164 138 144" stroke="#d98a2a" stroke-width="6" fill="none"/>`;
-  else if(clo===5) s+=`<path d="M28 205Q30 150 72 140Q100 158 128 140Q170 150 172 205Z" fill="${cc}"/><path d="M28 205Q30 150 72 140Q100 158 128 140Q170 150 172 205Z" fill="url(#${id}p)"/><path d="M80 144L100 166L120 144" stroke="#7a1218" stroke-width="3" fill="none"/>`;
-  else if(clo===6) s+=`<path d="M68 142L76 205M132 142L124 205" stroke="${cc}" stroke-width="10"/><path d="M76 205Q100 180 124 205" fill="${skin}"/>`;
-  // bandana atrás do rosto
-  if(acc===6) s+=`<path d="M62 138Q100 150 138 138L100 182Z" fill="#d6282f"/><circle cx="90" cy="150" r="2" fill="#fff"/><circle cx="108" cy="150" r="2" fill="#fff"/><circle cx="99" cy="164" r="2" fill="#fff"/>`;
+  const sph=o.fur===SPHYNX,id="g"+(sgN++);
+  const fur=sph?"#efb6c4":SG.fur[o.fur][1],eye=SG.eye[o.eye][1],bg=SG.bg[o.bg][1],clo=o.clo,acc=o.acc,pat=sph?0:o.pat;
+  const claro=lumHex(fur)>.55;
+  const ln="",lnS=""; // sem contorno (estilo Fofinho)
+  const dk=claro?"rgba(80,60,40,.30)":"rgba(0,0,0,.30)";
+  const furL=mixHex(fur,"#ffffff",claro?.35:.22),furD=mixHex(fur,"#000000",.18);
+  const inner=sph?"#e58aa1":"#f3a7b5";
+  let s=`<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"><defs>
+   <radialGradient id="${id}" cx="50%" cy="30%" r="80%"><stop offset="0" stop-color="${bg[0]}"/><stop offset="1" stop-color="${bg[1]}"/></radialGradient>
+   <radialGradient id="${id}h" cx="45%" cy="35%" r="70%"><stop offset="0" stop-color="${furL}"/><stop offset="1" stop-color="${fur}"/></radialGradient>
+   <pattern id="${id}p" width="12" height="12" patternUnits="userSpaceOnUse"><path d="M0 6H12M6 0V12" stroke="#00000055" stroke-width="2"/></pattern></defs>
+   <rect width="200" height="200" fill="url(#${id})"/>`;
+  const skin=`url(#${id}h)`;
+  // corpo (ombros) + roupa
+  const corpo="M34 205Q36 156 76 146L124 146Q164 156 166 205Z";
+  s+=`<path d="${corpo}" fill="${fur}" ${ln}/>`;
+  const cc=SG.clo[clo][1],gola="M34 205Q36 156 76 146Q100 168 124 146Q164 156 166 205Z";
+  if(clo===0) s+=`<path d="${gola}" fill="${cc}" ${ln}/><path d="M64 152Q100 178 136 152" stroke="#2b2b38" stroke-width="7" fill="none"/><path d="M93 168v24M107 168v24" stroke="#ddd" stroke-width="2" stroke-linecap="round"/>`;
+  else if(clo===1) s+=`<path d="${gola}" fill="${cc}" ${ln}/><path d="M80 148Q100 164 120 148" stroke="#bbb" stroke-width="3" fill="none"/>`;
+  else if(clo===2) s+=`<path d="M34 205Q36 156 76 146L100 172L124 146Q164 156 166 205Z" fill="${cc}" ${ln}/><path d="M100 172V205M76 146L90 178M124 146L110 178" stroke="#25497c" stroke-width="2.5"/>`;
+  else if(clo===3) s+=`<path d="${gola}" fill="${cc}" ${ln}/><path d="M76 152Q100 168 124 152" stroke="#a99f88" stroke-width="6" fill="none"/>`;
+  else if(clo===4) s+=`<path d="${gola}" fill="${cc}" ${ln}/><path d="M100 162V205" stroke="#2c3a20" stroke-width="3"/><path d="M66 150Q100 168 134 150" stroke="#d98a2a" stroke-width="6" fill="none"/>`;
+  else if(clo===5) s+=`<path d="${gola}" fill="${cc}" ${ln}/><path d="${gola}" fill="url(#${id}p)"/><path d="M84 150L100 168L116 150" stroke="#7a1218" stroke-width="3" fill="none"/>`;
+  else if(clo===6) s+=`<path d="M72 148L78 205M128 148L122 205" stroke="${cc}" stroke-width="10"/>`;
+  if(acc===6) s+=`<path d="M64 140Q100 152 136 140L100 184Z" fill="#d6282f" ${lnS}/><circle cx="90" cy="152" r="2" fill="#fff"/><circle cx="108" cy="152" r="2" fill="#fff"/><circle cx="99" cy="166" r="2" fill="#fff"/>`;
+  // orelhas
   if(sph){
-    // Sphynx: orelhas enormes, rosto anguloso, pele com rugas, sem bigode
-    s+=`<path d="M52 86L34 8L102 50Z" fill="${skin}"/><path d="M148 86L166 8L98 50Z" fill="${skin}"/>
-    <path d="M60 72L45 24L90 52Z" fill="#e58aa1"/><path d="M140 72L155 24L110 52Z" fill="#e58aa1"/>
-    <path d="M60 72L45 24" stroke="${shade}" stroke-width="1.5"/><path d="M140 72L155 24" stroke="${shade}" stroke-width="1.5"/>`;
-    s+=`<ellipse cx="100" cy="97" rx="51" ry="48" fill="${skin}"/><ellipse cx="68" cy="114" rx="18" ry="15" fill="${skin}"/><ellipse cx="132" cy="114" rx="18" ry="15" fill="${skin}"/>`;
-    s+=`<g stroke="${shade}" stroke-width="2.2" fill="none" stroke-linecap="round"><path d="M80 60Q100 52 120 60"/><path d="M84 68Q100 62 116 68"/><path d="M91 75Q100 71 109 75"/><path d="M64 80q9-6 18-1"/><path d="M118 79q9-5 18 1"/></g>`;
-    s+=`<ellipse cx="100" cy="120" rx="19" ry="12" fill="#fff" opacity=".18"/>`;
-    [[80,96,-10],[120,96,10]].forEach(([x,y,r])=>{s+=`<g transform="rotate(${r} ${x} ${y})"><path d="M${x-14} ${y}Q${x} ${y-17} ${x+14} ${y}Q${x} ${y+17} ${x-14} ${y}Z" fill="${eye}" stroke="${shade}" stroke-width="1.5"/><ellipse cx="${x}" cy="${y}" rx="4.4" ry="9.5" fill="#101018"/><circle cx="${x-3.5}" cy="${y-4.5}" r="2.8" fill="#fff"/><circle cx="${x+3}" cy="${y+4}" r="1.3" fill="#fff" opacity=".8"/></g>`});
-    s+=`<path d="M94 112h12l-6 7z" fill="#c9667f"/><path d="M100 119v4M100 123q-6 6-12 2M100 123q6 6 12 2" stroke="#7a3a4a" stroke-width="1.8" fill="none" stroke-linecap="round"/>`;
-  } else {
-    // orelhas
-    const ear=pat===4?"#4b3a30":fur;
-    s+=`<path d="M54 76L56 26L96 56Z" fill="${ear}"/><path d="M146 76L144 26L104 56Z" fill="${ear}"/><path d="M62 64L63 38L84 55Z" fill="#e89aa8"/><path d="M138 64L137 38L116 55Z" fill="#e89aa8"/>`;
-    // cabeça
-    s+=`<ellipse cx="100" cy="98" rx="54" ry="47" fill="${fur}"/>`;
-    if(pat===1) s+=`<g stroke="${dk}" stroke-width="4" stroke-linecap="round" fill="none"><path d="M100 53v15M88 55l3 13M112 55l-3 13M48 96h14M50 107h14M152 96h-14M150 107h-14"/></g>`;
-    if(pat===2) s+=`<g fill="${dk}"><circle cx="70" cy="68" r="7"/><circle cx="132" cy="72" r="6"/><circle cx="56" cy="104" r="6"/><circle cx="146" cy="100" r="7"/><circle cx="104" cy="62" r="4"/></g>`;
-    if(pat===3) s+=`<path d="M100 52Q92 74 94 96L106 96Q108 74 100 52Z" fill="#f4f1ea"/><ellipse cx="100" cy="120" rx="26" ry="18" fill="#f4f1ea"/>`;
-    if(pat===4) s+=`<ellipse cx="100" cy="106" rx="34" ry="30" fill="#4b3a30" opacity=".6"/>`;
-    s+=`<ellipse cx="100" cy="118" rx="20" ry="13" fill="#fff" opacity=".22"/>`;
-    // olhos
-    [[80,96],[120,96]].forEach(([x,y])=>{s+=`<ellipse cx="${x}" cy="${y}" rx="11.5" ry="12.5" fill="${eye}"/><ellipse cx="${x}" cy="${y}" rx="4.6" ry="9.5" fill="#101018"/><circle cx="${x-3.5}" cy="${y-4.5}" r="2.8" fill="#fff"/><circle cx="${x+3}" cy="${y+4}" r="1.3" fill="#fff" opacity=".8"/>`});
-    s+=`<path d="M94 112h12l-6 7z" fill="#e58b9b"/><path d="M100 119v4M100 123q-6 6-12 2M100 123q6 6 12 2" stroke="#3a2a2a" stroke-width="1.8" fill="none" stroke-linecap="round"/>
-    <g stroke="#fff" stroke-opacity=".75" stroke-width="1.2" stroke-linecap="round"><path d="M70 116L38 110M70 122L40 126M130 116L162 110M130 122L160 126"/></g>`;
+    s+=`<path d="M56 86Q40 40 36 12Q70 26 104 52Z" fill="${fur}" ${ln}/><path d="M144 86Q160 40 164 12Q130 26 96 52Z" fill="${fur}" ${ln}/>
+     <path d="M62 74Q50 44 48 26Q72 38 92 54Z" fill="${inner}"/><path d="M138 74Q150 44 152 26Q128 38 108 54Z" fill="${inner}"/>`;
+  }else{
+    const e=pat===4?"#4b3a30":fur;
+    s+=`<path d="M50 84Q44 40 56 24Q66 18 100 54Z" fill="${e}" ${ln}/><path d="M150 84Q156 40 144 24Q134 18 100 54Z" fill="${e}" ${ln}/>
+     <path d="M60 70Q56 44 62 34Q70 32 88 54Z" fill="${inner}"/><path d="M140 70Q144 44 138 34Q130 32 112 54Z" fill="${inner}"/>`;
+    s+=`<path d="M62 40l4 9M68 36l3 9M138 40l-4 9M132 36l-3 9" stroke="${furL}" stroke-width="2" stroke-linecap="round" opacity=".9"/>`;
   }
-  // acessórios
-  if(acc===1) s+=`<g fill="none" stroke="#2a2a30" stroke-width="3"><circle cx="80" cy="96" r="15"/><circle cx="120" cy="96" r="15"/><path d="M95 94h10M65 92L52 86M135 92L148 86"/></g>`;
-  if(acc===2) s+=`<g fill="#0c0c12"><rect x="62" y="84" width="34" height="22" rx="8"/><rect x="104" y="84" width="34" height="22" rx="8"/></g><path d="M96 90h8M62 90L50 84M138 90L150 84" stroke="#0c0c12" stroke-width="3"/><path d="M68 90h12" stroke="#fff" stroke-opacity=".4" stroke-width="2"/>`;
-  if(acc===3) s+=`<path d="M52 66Q54 24 100 24Q146 24 148 66Q100 54 52 66Z" fill="#2d5bd1"/><path d="M52 64Q100 50 148 64Q170 68 176 76Q120 62 52 70Z" fill="#1c3f9c"/><circle cx="100" cy="24" r="4" fill="#1c3f9c"/>`;
-  if(acc===4) s+=`<path d="M50 70Q52 20 100 20Q148 20 150 70Q100 58 50 70Z" fill="#c8402f"/><rect x="48" y="62" width="104" height="14" rx="7" fill="#9e2e20"/><circle cx="100" cy="16" r="7" fill="#e2e2e2"/>`;
-  if(acc===5) s+=`<path d="M50 100Q42 20 100 20Q158 20 150 100" stroke="#222" stroke-width="7" fill="none"/><rect x="38" y="82" width="18" height="34" rx="9" fill="#2a2a36"/><rect x="144" y="82" width="18" height="34" rx="9" fill="#2a2a36"/><rect x="42" y="88" width="8" height="22" rx="4" fill="#3d8bff"/><rect x="150" y="88" width="8" height="22" rx="4" fill="#3d8bff"/>`;
-  if(acc===7) s+=`<path d="M66 144Q100 178 134 144" stroke="#f0c040" stroke-width="5" fill="none" stroke-dasharray="7 3"/>`;
-  if(acc===8) s+=`<circle cx="120" cy="96" r="16" fill="#ffffff14" stroke="#d4a82a" stroke-width="3"/><path d="M134 108Q142 140 130 170" stroke="#d4a82a" stroke-width="1.8" fill="none"/>`;
+  // cabeça (bochechas mais largas: "mochi")
+  const cab="M100 50C140 50 158 74 158 100C158 112 162 120 156 128C148 142 126 150 100 150C74 150 52 142 44 128C38 120 42 112 42 100C42 74 60 50 100 50Z";
+  s+=`<path d="${cab}" fill="${skin}" ${ln}/>`;
+  s+=`<clipPath id="${id}c"><path d="${cab}"/></clipPath><g clip-path="url(#${id}c)">`;
+  if(pat===1) s+=`<g stroke="${dk}" stroke-width="5" stroke-linecap="round" fill="none"><path d="M100 52v14M88 54q2 8 4 13M112 54q-2 8-4 13M42 98q10-1 16 3M42 110q10 0 15 3M158 98q-10-1-16 3M158 110q-10 0-15 3"/></g>`;
+  if(pat===2) s+=`<g fill="${dk}"><ellipse cx="68" cy="70" rx="9" ry="7"/><ellipse cx="134" cy="72" rx="8" ry="6"/><circle cx="52" cy="108" r="7"/><circle cx="150" cy="104" r="6"/></g>`;
+  if(pat===3) s+=`<path d="M100 50Q90 76 92 98L108 98Q110 76 100 50Z" fill="#f6f2ea"/><ellipse cx="100" cy="128" rx="34" ry="24" fill="#f6f2ea"/>`;
+  if(pat===4) s+=`<ellipse cx="100" cy="104" rx="40" ry="30" fill="#4b3a30" opacity=".55"/>`;
+  if(sph) s+=`<g stroke="#d48a9f" stroke-width="2.2" fill="none" stroke-linecap="round"><path d="M82 62Q100 55 118 62"/><path d="M86 70Q100 65 114 70"/><path d="M92 77Q100 74 108 77"/></g>`;
+  s+=`</g>`;
+  // focinho claro
+  if(!sph&&pat!==3) s+=`<ellipse cx="100" cy="124" rx="22" ry="14" fill="#fff" opacity="${claro?.35:.22}"/>`;
+  // bochechas rosadas
+  s+=`<ellipse cx="66" cy="122" rx="10" ry="6" fill="#ff7a9a" opacity=".38"/><ellipse cx="134" cy="122" rx="10" ry="6" fill="#ff7a9a" opacity=".38"/>`;
+  // olhos
+  const OY=102,OX=[76,124];
+  OX.forEach(x=>{
+    s+=`<ellipse cx="${x}" cy="${OY}" rx="13" ry="14" fill="#fff"/><ellipse cx="${x}" cy="${OY+1}" rx="11" ry="12.5" fill="${eye}"/>
+       <ellipse cx="${x}" cy="${OY+2}" rx="6.5" ry="9" fill="#14101a"/><circle cx="${x-4}" cy="${OY-5}" r="4" fill="#fff"/><circle cx="${x+4}" cy="${OY+5.5}" r="1.8" fill="#fff" opacity=".9"/>
+       <path d="M${x-13} ${OY-8}Q${x} ${OY-18} ${x+13} ${OY-8}" stroke="${furD}" stroke-width="2" fill="none" stroke-linecap="round" opacity=".5"/>`;
+  });
+  // nariz e boquinha em "w"
+  s+=`<path d="M94.5 116q5.5-2.5 11 0q-1.5 5-5.5 6.5q-4-1.5-5.5-6.5z" fill="#ef8ea0"/>
+   <path d="M100 122.5v3M100 125.5q-4 5-9 1.5M100 125.5q4 5 9 1.5" stroke="#4a2f34" stroke-width="2" fill="none" stroke-linecap="round"/>`;
+  // bigodes
+  if(!sph){const w=claro?"#7a6a5a":"#ffffff";s+=`<g stroke="${w}" stroke-opacity=".75" stroke-width="1.6" stroke-linecap="round" fill="none"><path d="M70 122Q54 118 38 120M70 127Q55 128 40 134M130 122Q146 118 162 120M130 127Q145 128 160 134"/></g>`}
+  // acessórios (posições dos olhos novas)
+  if(acc===1) s+=`<g fill="none" stroke="#2a2a30" stroke-width="3.2"><circle cx="76" cy="102" r="16"/><circle cx="124" cy="102" r="16"/><path d="M92 100q8-5 16 0M60 98L46 92M140 98L154 92"/></g>`;
+  if(acc===2) s+=`<g fill="#0c0c12"><rect x="57" y="90" width="38" height="24" rx="10"/><rect x="105" y="90" width="38" height="24" rx="10"/></g><path d="M95 96h10M57 96L45 90M143 96L155 90" stroke="#0c0c12" stroke-width="3.2"/><path d="M64 97h12M112 97h12" stroke="#fff" stroke-opacity=".45" stroke-width="2.4" stroke-linecap="round"/>`;
+  if(acc===3) s+=`<path d="M50 72Q52 26 100 26Q148 26 150 72Q100 58 50 72Z" fill="#2d5bd1" ${lnS}/><path d="M50 70Q100 56 150 70Q172 74 178 82Q122 68 50 76Z" fill="#1c3f9c" ${lnS}/><circle cx="100" cy="26" r="4.5" fill="#1c3f9c"/>`;
+  if(acc===4) s+=`<path d="M48 76Q50 22 100 22Q150 22 152 76Q100 62 48 76Z" fill="#c8402f" ${lnS}/><rect x="46" y="66" width="108" height="15" rx="7.5" fill="#9e2e20" ${lnS}/><circle cx="100" cy="18" r="8" fill="#eee" ${lnS}/>`;
+  if(acc===5) s+=`<path d="M46 106Q38 24 100 24Q162 24 154 106" stroke="#222" stroke-width="7" fill="none"/><rect x="32" y="88" width="20" height="36" rx="10" fill="#2a2a36" ${lnS}/><rect x="148" y="88" width="20" height="36" rx="10" fill="#2a2a36" ${lnS}/><rect x="37" y="95" width="9" height="22" rx="4.5" fill="#3d8bff"/><rect x="154" y="95" width="9" height="22" rx="4.5" fill="#3d8bff"/>`;
+  if(acc===7) s+=`<path d="M70 150Q100 180 130 150" stroke="#f0c040" stroke-width="5" fill="none" stroke-dasharray="7 3"/>`;
+  if(acc===8) s+=`<circle cx="124" cy="102" r="17" fill="#ffffff14" stroke="#d4a82a" stroke-width="3"/><path d="M140 114Q148 146 136 176" stroke="#d4a82a" stroke-width="1.8" fill="none"/>`;
   return s+"</svg>";
 }
+
 const rnd=n=>Math.floor(Math.random()*n);
 let sgO={fur:0,pat:1,eye:0,acc:0,clo:0,bg:0},sgTab=0;
 const SG_TABS=["Pelo","Acessórios","Roupa","Fundo"];
