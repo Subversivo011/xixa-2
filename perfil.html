@@ -12,7 +12,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Inter:wght@400;500;600;700;800&family=Baloo+2:wght@700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="theme.css?v=20261121p">
 <link rel="stylesheet" href="viewer.css?v=20261120d">
-<link rel="stylesheet" href="perfil.css?v=20261121p">
+<link rel="stylesheet" href="perfil.css?v=20261121q">
 <script>try{var t=localStorage.getItem("ns_theme")}catch(e){}document.documentElement.dataset.theme=t==="dark"?"dark":"light"</script>
 </head>
 <body>
@@ -54,11 +54,21 @@ renderWallet();
 
 // ---- visuais do perfil: nomes e textos de cada rede (a interação é sempre um recado; o nome muda) ----
 const LAYOUTS={
+  homepage:{nome:"Home page anos 90",dica:"livro de visitas",cor:"linear-gradient(90deg,#008080,#ff00ff,#ffff00)",recados:"Livro de visitas",acao:"Assinar!!!",ph:()=>"Assine meu livro de visitas!!!",vazio:"Ninguém assinou ainda. Seja o primeiro!!!",ok:"Livro de visitas assinado!"},
+  icq:{nome:"ICQ",dica:"uh-oh! mensagens",cor:"linear-gradient(90deg,#3a8ee6,#7ec850)",recados:"Mensagens recebidas",acao:"Enviar",ph:a=>`Mensagem para ${a}…`,vazio:"Nenhuma mensagem ainda.",ok:"Uh-oh! Mensagem enviada."},
   orkut:{nome:"Orkut",dica:"scraps e comunidades",cor:"linear-gradient(90deg,#c4006a,#bfd0ea)",recados:"Scraps",acao:"enviar scrap",ph:a=>`escreva um scrap para ${a}…`,vazio:"Ninguém deixou scrap ainda. Seja o primeiro!",ok:"Scrap enviado!"},
   fotolog:{nome:"Fotolog",dica:"livro de visitas",cor:"linear-gradient(90deg,#262626,#8cc63f)",recados:"livro de visitas",acao:"assinar",ph:()=>"assine o livro de visitas…",vazio:"Ninguém assinou o livro de visitas ainda.",ok:"Você assinou o livro de visitas!"},
   msn:{nome:"MSN",dica:"mensagens offline",cor:"linear-gradient(90deg,#1a6fc2,#4caf2a)",recados:"Mensagens offline",acao:"Enviar",ph:a=>`Digite uma mensagem para ${a}…`,vazio:"Nenhuma mensagem ainda. Mande um oi!",ok:"Mensagem enviada!"},
   twitter:{nome:"Twitter antigo",dica:"o do passarinho",cor:"linear-gradient(90deg,#33ccff,#c0deed)",recados:"Menções",acao:"Tweetar",ph:a=>`@${a} `,vazio:"Ninguém mencionou ainda.",ok:"Tweet enviado!"},
-  facebook:{nome:"Facebook antigo",dica:"o mural azul",cor:"linear-gradient(90deg,#3b5998,#e9ebee)",recados:"Mural",acao:"Publicar",ph:a=>`Escreva algo para ${a}…`,vazio:"O mural está vazio. Escreva algo!",ok:"Publicado no mural!"}
+  facebook:{nome:"Facebook antigo",dica:"o mural azul",cor:"linear-gradient(90deg,#3b5998,#e9ebee)",recados:"Mural",acao:"Publicar",ph:a=>`Escreva algo para ${a}…`,vazio:"O mural está vazio. Escreva algo!",ok:"Publicado no mural!"},
+  ask:{nome:"Ask.fm",dica:"perguntas e respostas",cor:"linear-gradient(90deg,#1679a0,#d0353e)",recados:"Perguntas",acao:"Perguntar",ph:a=>`Pergunte algo para ${a}…`,vazio:"Ninguém perguntou nada ainda.",ok:"Pergunta enviada!"},
+  whatsapp:{nome:"WhatsApp",dica:"conversa no zap",cor:"linear-gradient(90deg,#075e54,#dcf8c6)",recados:"Conversa",acao:"Enviar",ph:()=>"Mensagem",vazio:"Nenhuma mensagem ainda. Mande um oi!",ok:"Mensagem enviada ✔✔"},
+  vine:{nome:"Vine",dica:"6 segundos em loop",cor:"linear-gradient(90deg,#00805d,#e1f4ed)",recados:"Comentários",acao:"Comentar",ph:()=>"Adicione um comentário…",vazio:"Nenhum comentário ainda.",ok:"Comentário enviado!",mod:1,st:["figurinhas","coleções","loops"]},
+  snapchat:{nome:"Snapchat",dica:"stories e filtros",cor:"linear-gradient(90deg,#fffc00,#9b4dca)",recados:"Chat",acao:"Enviar",ph:()=>"Enviar um chat",vazio:"Nenhum chat ainda.",ok:"Chat enviado!",mod:1,st:["figurinhas","coleções","snapscore"]},
+  instagram:{nome:"Instagram",dica:"feed e stories",cor:"linear-gradient(90deg,#f09433,#dc2743,#bc1888)",recados:"Comentários",acao:"Publicar",ph:()=>"Adicione um comentário…",vazio:"Nenhum comentário ainda.",ok:"Comentário publicado!",mod:1,st:["publicações","coleções","XP"]},
+  tiktok:{nome:"TikTok",dica:"vídeo curto",cor:"linear-gradient(90deg,#25f4ee,#000,#fe2c55)",recados:"Comentários",acao:"Postar",ph:()=>"Adicionar comentário…",vazio:"Seja o primeiro a comentar!",ok:"Comentário postado!",mod:1,st:["figurinhas","coleções","curtidas"]},
+  kwai:{nome:"Kwai",dica:"vídeo curto laranja",cor:"linear-gradient(90deg,#c45200,#ffb36b)",recados:"Comentários",acao:"Enviar",ph:()=>"Diga algo legal…",vazio:"Ninguém comentou ainda.",ok:"Comentário enviado!",mod:1,st:["figurinhas","coleções","moedas de XP"]},
+  bluesky:{nome:"Bluesky",dica:"a fuga de 2024",cor:"linear-gradient(90deg,#0a5cc2,#5aa9ff)",recados:"Respostas",acao:"Responder",ph:a=>`Responder a @${a}…`,vazio:"Nenhuma resposta ainda.",ok:"Resposta publicada!",mod:1,st:["figurinhas","coleções","XP"]}
 };
 const MAX=300;
 const $=id=>document.getElementById(id);
@@ -106,15 +116,22 @@ function recadosHTML(L){
     <div class="ln"><small id="rcN" aria-live="polite">${MAX} caracteres restantes</small><button type="submit" id="rcB">${esc(L.acao)}</button></div></form>`;
   const lista=REC.length?`<ul class="pf-rcs">${REC.map(r=>`<li class="pf-rc">${gato(r.autor.avatar_gato,r.autor.apelido,"pf-mini")}<div>
      <div class="qm"><a href="${linkPerfil(r.autor.apelido)}">${esc(r.autor.apelido)}</a><time datetime="${esc(r.em)}">${esc(quando(r.em))}</time>${r.pode_apagar?`<button type="button" class="ap" data-apagar="${esc(r.id)}" aria-label="Apagar recado de ${esc(r.autor.apelido)}">apagar</button>`:""}</div>
-     <p>${tw?`<span class="ar">@${esc(ap)}</span> `:""}${esc(r.texto)}</p>${P.perfil.layout==="facebook"?`<div class="rod">Curtir · Comentar · ${esc(quando(r.em))}</div>`:""}</div></li>`).join("")}</ul>`:`<p class="pf-vazio">${esc(eu?"Quando alguém deixar um recado, ele aparece aqui.":L.vazio)}</p>`;
+     <p>${tw||P.perfil.layout==="bluesky"?`<span class="ar">@${esc(ap)}</span> `:""}${esc(r.texto)}</p>${rodRec(r)}</div></li>`).join("")}</ul>`:`<p class="pf-vazio">${esc(eu?"Quando alguém deixar um recado, ele aparece aqui.":L.vazio)}</p>`;
   return form+lista;
 }
 
+// rodapé de cada recado, no jeito da rede
+function rodRec(r){const l=P.perfil.layout,q=esc(quando(r.em));
+  return {facebook:`<div class="rod">Curtir · Comentar · ${q}</div>`,whatsapp:`<div class="rod">${esc(new Date(r.em).toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit"}))} ✔✔</div>`,
+   instagram:`<div class="rod">Curtir · Responder</div>`,tiktok:`<div class="rod">Responder · ♡</div>`,kwai:`<div class="rod">Responder · ♡</div>`,bluesky:`<div class="rod">💬 · 🔁 · ♡</div>`,vine:`<div class="rod">🔁 revine</div>`,
+   ask:`<div class="rod">👍 Curtir</div>`,icq:`<div class="rod">uh-oh!</div>`}[l]||""}
+// coleções como "destaques" redondos (Instagram, TikTok etc.)
+function destaquesHTML(){return `<div class="pf-dest">${P.album.colecoes.map(k=>{const c=colecao(k.id);return `<span class="d"><i style="--cc:${esc(c?c.c:"#888")}">${esc(c?c.ic:"📒")}</i><b>${esc(k.nome)}</b><small>${k.tenho}/${k.total}</small></span>`}).join("")}</div>`}
 // ---- cada rede monta o perfil do seu jeito ----
 function montar(){
   const p=P.perfil,L=LAYOUTS[p.layout]||LAYOUTS.orkut,ap=esc(p.apelido),desde=dataBR(p.membro_desde),nRec=REC.length;
   const a=P.album,figs=figsHTML(12),cols=colsHTML(),rec=recadosHTML(L),pat=patHTML(),fav=favHTML();
-  const T={
+  let T={
     orkut:()=>`<div class="pf-top"><b>orkut</b><nav aria-hidden="true"><span>Início</span><span>Perfil</span><span>Scraps</span><span>Comunidades</span></nav></div>
      <div class="pf-g"><div class="pf-c"><div class="pf-card">${gato(p.avatar_gato,p.apelido)}<div class="pf-nome">${ap}</div><div class="pf-cap">Brasil · no Não Salvo desde ${esc(desde)}</div>
        <div class="lk" aria-hidden="true"><span>scraps (${nRec})</span><span>figurinhas (${a.tenho})</span><span>comunidades (${a.colecoes.length})</span></div></div></div>
@@ -141,6 +158,33 @@ function montar(){
        <div class="caixa"><h2 class="pf-h">${esc(L.recados)} (${nRec})</h2>${rec}</div><div class="caixa"><h2 class="pf-h">Fotos (figurinhas)</h2>${figs}</div></div>
       <div class="pf-c"><div class="caixa"><h2 class="pf-h">Nível</h2>${pat}</div><div class="caixa"><h2 class="pf-h">Curtiu (carta favorita)</h2>${fav}</div><div class="caixa"><h2 class="pf-h">Grupos (coleções)</h2>${cols}</div></div></div>`
   };
+  // redes novas (vídeo curto, fotos, stories): mesmo esqueleto, cada uma com seu visual no CSS
+  const mod=()=>{const st=L.st||["figurinhas","coleções","XP"];
+    return `<div class="banner" aria-hidden="true"></div><div class="cab">${gato(p.avatar_gato,p.apelido)}<div class="tx"><h1 class="pf-nome">${ap}</h1><div class="arroba">@${ap.toLowerCase()}</div>
+      <div class="nums"><span><b>${a.tenho}</b>${esc(st[0])}</span><span><b>${a.colecoes_completas}/${a.colecoes.length}</b>${esc(st[1])}</span><span><b>${esc(short(P.xp))}</b>${esc(st[2])}</span></div>
+      <div class="bio">Colecionando a internet brasileira desde ${esc(desde)}.</div>${pat}</div></div>
+     ${destaquesHTML()}
+     <div class="pf-g"><div class="pf-c"><h2 class="pf-h">${p.layout==="instagram"?"Publicações":"Figurinhas"}</h2>${figs}</div>
+      <div class="pf-c"><div class="pf-box fav"><h2 class="pf-h">Carta favorita</h2>${fav}</div><div class="pf-box rcx"><h2 class="pf-h">${esc(L.recados)} (${nRec})</h2>${rec}</div></div></div>`};
+  Object.assign(T,{
+    homepage:()=>`<div class="win"><div class="tit">Minha Home Page - Netscape Navigator</div><div class="pg">
+      <h1 class="pf-nome"><span>✨ Bem-vindo à home page de ${ap}!!! ✨</span></h1><p class="cont">Você é o visitante nº <b>${String(7000+a.tenho*13+nRec).padStart(9,"0")}</b> · 🚧 Página em construção 🚧</p>
+      <div class="pf-g"><div class="pf-c"><div class="moldura">${gato(p.avatar_gato,p.apelido)}</div><p class="eu">Este sou eu!!! :)</p>${pat}<p class="eu">No Não Salvo desde ${esc(desde)}</p></div>
+       <div class="pf-c"><h2 class="pf-h">📖 ${esc(L.recados)} (${nRec})</h2>${rec}<hr><h2 class="pf-h">🖼️ Minhas figurinhas</h2>${figs}</div>
+       <div class="pf-c"><h2 class="pf-h">⭐ Minha carta favorita</h2>${fav}<h2 class="pf-h">🔗 Meus links (coleções)</h2>${cols}<p class="melhor">Melhor visualizado em 800x600</p></div></div></div></div>`,
+    icq:()=>`<div class="win"><div class="tit"><span>ICQ · Informações de ${ap}</span><i aria-hidden="true">_ □ ✕</i></div>
+      <div class="pf-g"><div class="pf-c lado"><div class="pf-box">${gato(p.avatar_gato,p.apelido)}</div><h1 class="pf-nome">${ap}</h1><div class="uin">UIN: ${esc(String(10000000+a.tenho*991+nRec*7))}</div><span class="on">🌼 Disponível</span></div>
+       <div class="pf-c"><div class="caixa"><h2 class="pf-h">${esc(L.recados)} (${nRec})</h2>${rec}</div><div class="caixa"><h2 class="pf-h">Arquivos recebidos (figurinhas)</h2>${figs}</div></div>
+       <div class="pf-c"><div class="caixa"><h2 class="pf-h">Nível</h2>${pat}</div><div class="caixa"><h2 class="pf-h">Carta favorita</h2>${fav}</div><div class="caixa"><h2 class="pf-h">Grupos (coleções)</h2>${cols}</div></div></div></div>`,
+    ask:()=>`<div class="pf-top"><b>ask.fm</b></div><div class="pf-g"><div class="pf-c"><div class="caixa">${gato(p.avatar_gato,p.apelido)}<h1 class="pf-nome">${ap}</h1><div class="pf-cap">@${ap.toLowerCase()} · desde ${esc(desde)}</div><div class="nums"><span><b>${nRec}</b>respostas</span><span><b>${a.tenho}</b>figurinhas</span></div>${pat}</div></div>
+       <div class="pf-c"><div class="caixa"><h2 class="pf-h">${esc(L.recados)} (${nRec})</h2>${rec}</div><div class="caixa"><h2 class="pf-h">Figurinhas</h2>${figs}</div></div>
+       <div class="pf-c"><div class="caixa"><h2 class="pf-h">Carta favorita</h2>${fav}</div><div class="caixa"><h2 class="pf-h">Coleções</h2>${cols}</div></div></div>`,
+    whatsapp:()=>`<div class="pf-g"><div class="pf-c chat"><div class="topo">${gato(p.avatar_gato,p.apelido,"pf-mini")}<div><h1 class="pf-nome">${ap}</h1><small>online</small></div></div>
+       <div class="msgs">${rec}</div></div>
+      <div class="pf-c info"><div class="caixa cen">${gato(p.avatar_gato,p.apelido)}<h2 class="pf-nome">${ap}</h2><div class="pf-cap">Recado: “${P.patente?esc(P.patente.nome):"Disponível"}” 🙂</div>${pat}</div>
+       <div class="caixa"><h2 class="pf-h">Carta favorita</h2>${fav}</div><div class="caixa"><h2 class="pf-h">Mídia (figurinhas)</h2>${figs}</div><div class="caixa"><h2 class="pf-h">Grupos em comum (coleções)</h2>${cols}</div></div></div>`,
+    vine:mod,snapchat:mod,instagram:mod,tiktok:mod,kwai:mod,bluesky:mod
+  });
   const el=$("pf");el.className="pf pf-"+(LAYOUTS[p.layout]?p.layout:"orkut");el.innerHTML=(T[p.layout]||T.orkut)();
   ligar(L);
 }

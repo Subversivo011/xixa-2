@@ -114,7 +114,7 @@ O perfil que outras pessoas visitam (`perfil.html?u=<apelido>`). Tudo exige logi
 
 | Campo | Tipo | Regra |
 |---|---|---|
-| `perfil_layout` | string | Visual do perfil: `orkut` (padrão), `fotolog`, `msn`, `twitter` ou `facebook`. Outro valor = `422 { campo: "perfil_layout" }` |
+| `perfil_layout` | string | Visual do perfil, as mesmas redes da linha do tempo: `homepage` (anos 90), `icq`, `orkut` (padrão), `fotolog`, `msn`, `twitter`, `facebook`, `ask`, `whatsapp`, `vine`, `snapchat`, `instagram`, `tiktok`, `kwai` ou `bluesky`. Outro valor = `422 { campo: "perfil_layout" }` |
 | `carta_favorita` | string \| null | Id da carta em destaque. **Só uma carta que a pessoa tem** (`quantidade > 0`), senão `422 { campo: "carta_favorita" }`. `null` tira a favorita. Se a pessoa reciclar a carta depois, ela some do perfil (conferido na leitura) |
 
 | Rota | Resposta |
@@ -124,7 +124,7 @@ O perfil que outras pessoas visitam (`perfil.html?u=<apelido>`). Tudo exige logi
 | `POST /api/perfil/:apelido/recados` (exige `X-CSRF`) | Corpo `{ texto }`: 1 a 300 caracteres depois de limpar (controle e caracteres invisíveis viram espaço, espaços repetidos juntos). `201` com o recado. `422` texto vazio/longo ou recado no próprio perfil; `404` perfil inexistente; `429` mais de 10 recados em 10 min |
 | `DELETE /api/recados/:id` (exige `X-CSRF`) | `200 { ok: true }`. Só o dono do perfil ou o autor; qualquer outro caso (inclusive id inválido) = `404`, para não revelar nada |
 
-O texto do recado é guardado como texto puro: **o front sempre escapa** antes de mostrar. Os visuais são inspirados em cada rede, sem logos oficiais. A interação é a mesma em todos (recado) e só muda o nome: scrap (Orkut), livro de visitas (Fotolog), mensagem offline (MSN), menção (Twitter) e mural (Facebook).
+O texto do recado é guardado como texto puro: **o front sempre escapa** antes de mostrar. Os visuais são inspirados em cada rede, sem logos oficiais. A interação é a mesma em todos (recado) e só muda o nome (scrap no Orkut, livro de visitas no Fotolog e na home page, mensagem offline no MSN, menção no Twitter, mural no Facebook, pergunta no Ask.fm, comentário no Instagram/TikTok/Kwai/Vine etc.).
 
 ### Apelido: reservados e limite de troca
 
