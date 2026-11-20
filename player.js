@@ -16,6 +16,7 @@ const VPI={
  pause:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 5h3.5v14H7zM13.5 5H17v14h-3.5z" fill="currentColor"/></svg>',
  replay:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5V2L7.5 6 12 10V7a5 5 0 1 1-5 5H5a7 7 0 1 0 7-7z" fill="currentColor"/></svg>',
  vol:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4z" fill="currentColor"/><path d="M15 9a4 4 0 0 1 0 6M17.5 6.5a7.5 7.5 0 0 1 0 11" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>',
+ volLow:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4z" fill="currentColor"/><path d="M15 9a4 4 0 0 1 0 6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>',
  mute:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4z" fill="currentColor"/><path d="M15.5 9.5l5 5m0-5l-5 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>',
  gear:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 8.5a3.5 3.5 0 1 0 0 7 3.5 3.5 0 0 0 0-7zm8.4 4.6l1.6 1.2-1.6 2.8-1.9-.6a7.6 7.6 0 0 1-1.7 1l-.4 2h-3.2l-.4-2a7.6 7.6 0 0 1-1.7-1l-1.9.6-1.6-2.8 1.6-1.2a7 7 0 0 1 0-2.2L3.6 9.7l1.6-2.8 1.9.6a7.6 7.6 0 0 1 1.7-1l.4-2h3.2l.4 2a7.6 7.6 0 0 1 1.7 1l1.9-.6 1.6 2.8-1.6 1.2a7 7 0 0 1 0 2.2z" fill="currentColor" fill-rule="evenodd"/></svg>',
  fs:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>'
@@ -43,7 +44,7 @@ function playerHTML(m,bare){
     <div class="vp-screen" style="background:${vpGrad(m.t)}">${m.yt?`<img class="vp-thumb" src="https://i.ytimg.com/vi/${m.yt}/hqdefault.jpg" alt="" onerror="this.remove()">`:m.img?`<img class="vp-thumb" src="${escapeHtml(m.img)}" alt="" onerror="this.remove()">`:""}${m.yt||m.img?"":`<span class="vp-emo">${m.e}</span>`}<div class="vp-noise"></div>
       ${m.yt?`<button class="vp-big" data-a="play" aria-label="Assistir">${VPI.play}</button>`:`<div class="vp-off"><b>Vídeo original fora do ar</b><small>Conhece o link no YouTube? Mande pelo campo abaixo do vídeo.</small></div>`}<div class="vp-buf"><span></span>${e.id<=1?"Carregando… (conexão discada?)":"Carregando…"}</div><div class="vp-end"></div></div>
     <div class="vp-bar">${m.yt?`<button class="vp-pp" data-a="play" aria-label="Assistir">${VPI.play}</button>`:""}<div class="vp-track"><i class="vp-load"></i><i class="vp-prog"></i><b class="vp-knob"></b></div>
-      <span class="vp-time">${m.yt?"0:00 / --:--":"--:--"}</span>${q?`<span class="vp-q">${q}</span>`:""}${m.yt?`<button class="vp-ic vp-mute" title="Som" aria-label="Tirar o som">${VPI.vol}</button>`:""}${e.id>=4?`<span class="vp-ic" aria-hidden="true">${VPI.gear}</span>`:''}${m.yt?`<button class="vp-ic vp-fs" title="Tela cheia" aria-label="Tela cheia">${VPI.fs}</button>`:""}</div>
+      <span class="vp-time">${m.yt?"0:00 / --:--":"--:--"}</span>${q?`<span class="vp-q">${q}</span>`:""}${m.yt?`<span class="vp-vol"><button class="vp-ic vp-mute" title="Som" aria-label="Tirar o som">${VPI.vol}</button><input class="vp-vs" type="range" min="0" max="100" step="5" value="100" aria-label="Volume" title="Volume"></span>`:""}${e.id>=4?`<span class="vp-ic" aria-hidden="true">${VPI.gear}</span>`:''}${m.yt?`<button class="vp-ic vp-fs" title="Tela cheia" aria-label="Tela cheia">${VPI.fs}</button>`:""}</div>
    </div>${under}
    ${bare?"":`<div class="vp-era">📼 ${e.name} · ${e.note}${m.yt?` · <a class="vp-ytl" href="https://www.youtube.com/watch?v=${m.yt}" target="_blank" rel="noopener">Assistir no YouTube ↗</a>`:" · vídeo original ainda não encontrado"}</div>`}</div>`;
 }
@@ -56,6 +57,9 @@ function initPlayer(root,m,related,onPick,hooks){
   const e=eraOf(m.y),$q=s=>root.querySelector(s);
   const prog=$q(".vp-prog"),knob=$q(".vp-knob"),time=$q(".vp-time"),scr=$q(".vp-screen"),pp=$q(".vp-pp"),load=$q(".vp-load");
   let t=0,dur=0,playing=false,started=false,muted=false;
+  // volume (0–100) lembrado entre vídeos; 0 = mudo
+  let vol=100;try{const v=parseInt(localStorage.getItem("ns_vol"),10);if(v>=0&&v<=100)vol=v}catch(x){}
+  muted=vol===0;
   const draw=()=>{const p=dur?t/dur*100:0;prog.style.width=p+"%";knob.style.left=p+"%";time.textContent=mmss(t)+" / "+(dur?mmss(dur):"--:--")};
   const setPlaying=v=>{playing=v;scr.classList.toggle("playing",v);const k=v?"pause":(scr.classList.contains("ended")?"replay":"play");pp.innerHTML=VPI[k];pp.setAttribute("aria-label",v?"Pausar":k==="replay"?"Assistir de novo":"Assistir")};
   function endScreen(){setPlaying(false);scr.classList.add("ended");pp.innerHTML=VPI.replay;pp.setAttribute("aria-label","Assistir de novo");
@@ -73,7 +77,7 @@ function initPlayer(root,m,related,onPick,hooks){
       $q(".vp-end").innerHTML=`<div class="vp-fail">${msg}</div><a class="vp-again" href="https://www.youtube.com/watch?v=${m.yt}" target="_blank" rel="noopener">${VPI.play}Assistir no YouTube ↗</a>`;scr.classList.add("ended")};
     const onMsg=ev=>{if(!ifr||ev.source!==ifr.contentWindow)return;let d;try{d=typeof ev.data==="string"?JSON.parse(ev.data):ev.data}catch(x){return}
       if(!d||!d.event)return;
-      if(!ready){ready=true;clearTimeout(timer);clearInterval(poke);scr.classList.remove("buffering");send("addEventListener",["onStateChange"]);send("unloadModule",["captions"]);send("unloadModule",["cc"]);if(muted)send("mute")}
+      if(!ready){ready=true;clearTimeout(timer);clearInterval(poke);scr.classList.remove("buffering");send("addEventListener",["onStateChange"]);send("unloadModule",["captions"]);send("unloadModule",["cc"]);send("setVolume",[vol||50]);if(muted)send("mute")}
       if(d.event==="onError")return fail("Este vídeo não pode ser reproduzido fora do YouTube.");
       const info=d.info||{};
       if(typeof info.duration==="number"&&info.duration>0)dur=info.duration;
@@ -98,13 +102,23 @@ function initPlayer(root,m,related,onPick,hooks){
     };
     api={play:()=>{if(!started){if(hooks.beforeStart&&!hooks._ok){started=true;hooks.beforeStart().then(()=>{hooks._ok=1;started=false;api.play()});return}return start()}send("playVideo")},pause:()=>send("pauseVideo"),seek:s=>{t=s;draw();send("seekTo",[s,true])},
       mute:v=>send(v?"mute":"unMute"),
+      volume:v=>send("setVolume",[v]),
       stop:()=>{removeEventListener("message",onMsg);clearTimeout(timer);clearInterval(poke);send("pauseVideo");if(ifr){ifr.remove();ifr=null}}};
   }
   const toggle=()=>{if(scr.classList.contains("ended")&&!scr.classList.contains("ytfail")){scr.classList.remove("ended");api.seek(0);api.play();return}playing?api.pause():api.play()};
   root.querySelectorAll(".vp-big,.vp-pp").forEach(b=>b.onclick=ev=>{ev.stopPropagation();toggle()});
   scr.onclick=()=>{if(scr.classList.contains("ended"))return;toggle()};
   $q(".vp-track").onclick=ev=>{if(!dur)return;const r=ev.currentTarget.getBoundingClientRect();const s=Math.max(0,Math.min(dur,(ev.clientX-r.left)/r.width*dur));scr.classList.remove("ended");api.seek(s);if(!playing)api.play()};
-  const mb=$q(".vp-mute");if(mb)mb.onclick=ev=>{ev.stopPropagation();muted=!muted;mb.innerHTML=muted?VPI.mute:VPI.vol;mb.setAttribute("aria-label",muted?"Ligar o som":"Tirar o som");api.mute(muted)};
+  // som: o botão liga/desliga; a barrinha ajusta o volume (do jeito do player de cada época)
+  const mb=$q(".vp-mute"),vs=$q(".vp-vs");
+  const pintarVol=()=>{const v=muted?0:vol;if(mb){mb.innerHTML=v===0?VPI.mute:v<50?VPI.volLow:VPI.vol;mb.setAttribute("aria-label",muted?"Ligar o som":"Tirar o som")}
+    if(vs){vs.value=String(v);vs.style.setProperty("--p",v+"%");vs.setAttribute("aria-valuetext",v===0?"sem som":v+"%")}};
+  const guardar=()=>{try{localStorage.setItem("ns_vol",String(muted?0:vol))}catch(x){}};
+  if(mb)mb.onclick=ev=>{ev.stopPropagation();muted=!muted;if(!muted&&vol===0)vol=50;if(!muted)api.volume(vol);api.mute(muted);pintarVol();guardar()};
+  if(vs){["click","pointerdown","mousedown","touchstart"].forEach(k=>vs.addEventListener(k,ev=>ev.stopPropagation(),{passive:true}));
+    vs.addEventListener("keydown",ev=>ev.stopPropagation());
+    vs.oninput=()=>{const v=Math.max(0,Math.min(100,parseInt(vs.value,10)||0));if(v===0){muted=true;api.mute(true)}else{vol=v;api.volume(v);if(muted){muted=false;api.mute(false)}}pintarVol();guardar()}}
+  pintarVol();
   const fb=$q(".vp-fs");if(fb)fb.onclick=ev=>{ev.stopPropagation();const st=$q(".vp-stage");try{document.fullscreenElement?document.exitFullscreen():st.requestFullscreen()}catch(x){}};
   draw();
   return {stop:()=>api.stop()};
@@ -220,5 +234,34 @@ a.vp-again{text-decoration:none}
 .u5 .pill{background:#272727;border-radius:99px;padding:7px 12px;font-size:12px}.u5r .pill:first-of-type{margin-left:auto}
 .u5d{background:#272727;border-radius:10px;padding:10px 12px;font-size:12px}
 .vp-vert .vp-big{background:none;width:76px;height:76px}.vp-vert .vp-big svg{width:66px;height:66px;opacity:.9;filter:drop-shadow(0 2px 8px #000a)}.vp-vert .vp-screen:hover .vp-big{background:none}
+/* volume: botão + barrinha (aparece ao passar o mouse, como no YouTube de 2008 em diante; sempre visível nos players antigos) */
+.vp-vol{display:inline-flex;align-items:center;gap:6px}
+.vp-vs{-webkit-appearance:none;appearance:none;width:0;opacity:0;height:16px;margin:0;padding:0;background:transparent;cursor:pointer;transition:width .18s,opacity .18s;--vt:#ffffff40;--vf:#fff;--vk:#fff}
+.vp-vol:hover .vp-vs,.vp-vol:focus-within .vp-vs{width:64px;opacity:1}
+.vp-vs::-webkit-slider-runnable-track{height:3px;border-radius:2px;background:linear-gradient(90deg,var(--vf) var(--p,100%),var(--vt) var(--p,100%))}
+.vp-vs::-moz-range-track{height:3px;border-radius:2px;background:var(--vt)}
+.vp-vs::-moz-range-progress{height:3px;border-radius:2px;background:var(--vf)}
+.vp-vs::-webkit-slider-thumb{-webkit-appearance:none;width:12px;height:12px;margin-top:-4.5px;border-radius:50%;background:var(--vk);border:0;box-shadow:0 0 2px #0008}
+.vp-vs::-moz-range-thumb{width:12px;height:12px;border-radius:50%;background:var(--vk);border:0;box-shadow:0 0 2px #0008}
+.vp-vs:focus-visible{outline:2px solid #ffbf00;outline-offset:2px}
+/* até 2004 (player de mídia): barra azul sempre visível */
+.vp-e0 .vp-vs{width:58px;opacity:1;--vt:#7a8bb0;--vf:#1fa83a;--vk:#2a5bd7}
+.vp-e0 .vp-vs::-webkit-slider-thumb{border-radius:3px;width:8px;height:13px;margin-top:-5px}.vp-e0 .vp-vs::-moz-range-thumb{border-radius:3px;width:8px;height:13px}
+/* 2005–2007: barrinha cinza sempre visível */
+.vp-e1 .vp-vs{--vt:#e6e6e6;--vf:#8a8a8a;--vk:#fff}
+.vp-e1 .vp-vs::-webkit-slider-runnable-track{height:6px;border:1px solid #999;border-radius:0}.vp-e1 .vp-vs::-moz-range-track{height:6px;border:1px solid #999;border-radius:0}
+.vp-e1 .vp-vs::-webkit-slider-thumb{border-radius:2px;width:8px;height:13px;margin-top:-4.5px;border:1px solid #777}.vp-e1 .vp-vs::-moz-range-thumb{border-radius:2px;width:8px;height:13px;border:1px solid #777}
+/* 2008–2009: preto brilhante com miolo vermelho */
+.vp-e2 .vp-vs{--vt:#333;--vf:#d22;--vk:#ddd}
+/* 2010 em diante: branco, como o YouTube */
+.vp-e3 .vp-vs,.vp-e4 .vp-vs,.vp-e5 .vp-vs{--vt:#ffffff40;--vf:#fff;--vk:#fff}
+.vp-e0 .vp-vol .vp-vs{width:44px;opacity:1}
+/* 2005–2007: o player era estreito, então a barrinha abre numa caixinha cinza em cima do alto-falante (sem espremer a barra) */
+.vp-e1 .vp-vol{position:relative}
+.vp-e1 .vp-vol::before{content:"";position:absolute;left:-30px;right:-30px;bottom:100%;height:12px}
+.vp-e1 .vp-vol .vp-vs{position:absolute;left:50%;bottom:calc(100% + 8px);width:84px;height:26px;margin-left:-42px;padding:0 8px;box-sizing:border-box;background:linear-gradient(#f7f7f7,#cfcfcf);border:1px solid #999;border-radius:3px;box-shadow:0 2px 6px #0004;opacity:0;pointer-events:none;z-index:6}
+.vp-e1 .vp-vol:hover .vp-vs,.vp-e1 .vp-vol:focus-within .vp-vs{width:84px;opacity:1;pointer-events:auto}
+.vp-time{white-space:nowrap}
+@media(max-width:600px){.vp-vol{display:inline-flex}.vp-vol .vp-mute{display:grid}.vp-vs{display:none}.vp-e0 .vp-vs,.vp-e1 .vp-vs{display:none}}
 @media(max-width:600px){.vp-rel{grid-template-columns:repeat(2,1fr)}.vp-ic{display:none}}`;
 (function(){const s=document.createElement("style");s.textContent=PLAYER_CSS;document.head.appendChild(s)})();
