@@ -338,7 +338,7 @@
 .pf-bluesky .pf-rc .ar{color:#0a5cc2}
 .pf-bluesky .pf-form button{background:#0a5cc2;color:#fff;border-radius:999px}
 /* diálogo de edição */
-.pf-dlg{max-width:620px;width:calc(100% - 24px);border:0;border-radius:18px;padding:0;background:var(--panel);color:var(--txt);box-shadow:0 30px 80px #000a}
+.pf-dlg{margin:auto;max-height:calc(100vh - 24px);max-width:620px;width:calc(100% - 24px);border:0;border-radius:18px;padding:0;background:var(--panel);color:var(--txt);box-shadow:0 30px 80px #000a}
 .pf-dlg::backdrop{background:#0009}
 .pf-dlg form{padding:20px}
 .pf-dlg h2{margin:0 0 4px;font:800 22px "Baloo 2",Inter,sans-serif}

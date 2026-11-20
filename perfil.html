@@ -10,9 +10,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Inter:wght@400;500;600;700;800&family=Baloo+2:wght@700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="theme.css?v=20261121p">
+<link rel="stylesheet" href="theme.css?v=20261121r">
 <link rel="stylesheet" href="viewer.css?v=20261120d">
-<link rel="stylesheet" href="perfil.css?v=20261121q">
+<link rel="stylesheet" href="perfil.css?v=20261121r">
 <script>try{var t=localStorage.getItem("ns_theme")}catch(e){}document.documentElement.dataset.theme=t==="dark"?"dark":"light"</script>
 </head>
 <body>
@@ -36,7 +36,7 @@
   </form>
 </dialog>
 
-<script src="common.js?v=20261121p"></script>
+<script src="common.js?v=20261121r"></script>
 <script src="data.js?v=20261119q"></script>
 <script src="player.js?v=20261119n"></script>
 <script src="viewer.js?v=20261120e"></script>
@@ -226,7 +226,7 @@ function abrirEdicao(){
   const l=P.album.cartas.slice().sort((a,b)=>RORD.indexOf(a.raridade)-RORD.indexOf(b.raridade)||a.nome.localeCompare(b.nome));
   $("fav").innerHTML=`<option value="">Nenhuma</option>`+l.map(c=>`<option value="${esc(c.id)}" ${P.carta_favorita&&P.carta_favorita.id===c.id?"selected":""}>${esc(c.nome)} (${esc(c.raridade)})</option>`).join("");
   $("fav").disabled=!l.length;if(!l.length)$("fav").innerHTML=`<option value="">Você ainda não tem figurinhas</option>`;
-  $("dlgErro").textContent="";$("dlg").showModal();
+  $("dlgErro").textContent="";$("dlg").showModal();const sel=$("lays").querySelector("input:checked");sel&&sel.focus({preventScroll:true}); // foco na rede atual, não na primeira
 }
 $("btCancelar").onclick=()=>$("dlg").close();
 $("btGato").onclick=()=>{$("dlg").close();if(typeof openSignup==="function")openSignup()};

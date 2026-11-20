@@ -524,7 +524,7 @@ function renderHeader(page,opt={}){
   document.addEventListener("pointerdown",dismissOutside);
   document.addEventListener("focusin",dismissOutside);
   panel.addEventListener("click",event=>{
-    if(event.target.closest("button,a") && !event.target.closest(".dd")){
+    if(event.target.closest("button,a") && !event.target.closest(".dd,.sg-acct")){ // o avatar abre o menu da conta: o painel fica aberto
       if(menu.getAttribute("aria-expanded")==="true")menu.focus();
       closeMenu();
     }
