@@ -518,7 +518,7 @@ function toggleTheme(){setTheme(document.documentElement.dataset.theme==="light"
 // page: "inicio" | "album"; sub: [{k,ic,label,fn,cta,dd,href}]
 function renderHeader(page,opt={}){
   const hd=document.createElement("header");hd.className="hd";
-  hd.innerHTML=`<a class="brand" href="index.html" aria-label="Não Salvo — início"><img src="logo-word.png" alt="Não Salvo"><small>Museu da internet brasileira</small></a>
+  hd.innerHTML=`<a class="brand" href="index.html" aria-label="Não Salvo — início"><img src="logo-word.png" alt="Não Salvo" width="380" height="73"><small>Museu da internet brasileira</small></a>
    <div class="tools">${opt.search?`<label class="srch">${icon("search","s-ic")}<input id="q" type="search" placeholder="Buscar memes, anos, categorias…" aria-label="Buscar"></label>`:""}
    <div id="wallet"></div><div id="acct"></div><button class="tsw" id="themeB" role="switch" aria-label="Modo escuro" onclick="toggleTheme()">${icon("sun","t-l")}${icon("moon","t-d")}</button></div>`;
   document.body.prepend(hd);
