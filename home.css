@@ -285,3 +285,14 @@ button:hover>.thumb>.play,button:hover>.ct>.play,.tthumb:hover>.play,.card:hover
 main:has(.facts){padding-bottom:22px!important}
 body:has(main .facts) .nsft2{margin-top:22px!important}
 @media(max-width:760px){.facts{margin-top:70px!important}main:has(.facts){padding-bottom:16px!important}body:has(main .facts) .nsft2{margin-top:18px!important}}
+
+/* sobe.desce: período em botões lado a lado (Hoje | Todos os tempos), no lugar do ícone de prancheta */
+.sd-h{flex-wrap:wrap;gap:10px 12px;align-items:center}
+.sd-seg{display:inline-flex;gap:2px;padding:3px;border-radius:999px;background:var(--sunk);box-shadow:inset 0 0 0 1px var(--line);margin-left:auto}
+.sd-seg button{display:inline-flex;align-items:center;gap:6px;min-height:36px;padding:0 13px;border-radius:999px;border:0;background:none;color:var(--mut);font:700 12px Inter,system-ui,sans-serif;cursor:pointer;white-space:nowrap;transition:background .15s,color .15s}
+.sd-seg button:hover{color:var(--txt);background:var(--panel)}
+.sd-seg button.on{background:#0a6a9a;color:#fff;box-shadow:0 2px 8px #0a6a9a55}
+.sd-seg button:focus-visible{outline:3px solid #ffbf00;outline-offset:2px}
+.sd-seg .ico.in{width:15px;height:15px;margin:0}
+@media(pointer:coarse){.sd-seg button{min-height:44px}}
+@media(max-width:420px){.sd-seg{margin-left:0;width:100%}.sd-seg button{flex:1;justify-content:center}}
