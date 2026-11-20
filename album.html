@@ -197,7 +197,7 @@
 <form name="feedback" data-netlify="true" netlify-honeypot="bot-field" hidden><input name="tipo"><textarea name="msg"></textarea><input name="contato"><input name="pagina"><input name="bot-field"></form>
 <script src="common.js?v=20261121r"></script>
 <script src="data.js?v=20261119q"></script>
-<script src="player.js?v=20261119n"></script>
+<script src="player.js?v=20261121w"></script>
 <script src="viewer.js?v=20261120e"></script>
 <script src="alertas.js?v=20261119n"></script>
 <script>
@@ -271,7 +271,7 @@ function renderDet(){
   <h2>${escapeHtml(c.name)}</h2><p>${escapeHtml(c.desc||"")}</p>
   <div class="kv"><span>Coleção</span><b>${col.n}</b></div>
   <div class="kv"><span>Raridade</span><b style="color:var(--${c.r})">⬢ ${c.r}</b></div>${odds}
-  ${c.meme?`<button class="play" onclick="watch('${c.meme}')">▶ ASSISTIR NO PLAYER DE ${c.y}</button>`:""}
+  ${c.meme?`<button class="play" onclick="watch('${c.meme}')"><svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true" style="vertical-align:-2px"><path d="M8 5.5v13l10.5-6.5z" fill="currentColor"/></svg> ASSISTIR NO PLAYER DE ${c.y}</button>`:""}
   <button class="bigbtn" onclick="setFav()">${favId()===c.id?'★ É A SUA FAVORITA':'☆ DEFINIR COMO FAVORITA'}</button>
   ${n>1?`<button class="sm" style="color:var(--gold)" onclick="convertOne('${c.id}')">♻ CONVERTER AS REPETIDAS DESTA CARTA</button>`:""}
   <button class="sm" onclick="share()">⤴ COMPARTILHAR</button>
