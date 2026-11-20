@@ -33,13 +33,13 @@
 
 /* carta (mesmo desenho do álbum, menor) */
 .pf-carta{position:relative;display:flex;flex-direction:column;aspect-ratio:3/4.1;border-radius:12px;padding:5px;border:2px solid var(--rc);background:linear-gradient(160deg,#1a1f2c,#0b0e16);color:#ececf6;box-shadow:0 0 14px color-mix(in srgb,var(--rc) 45%,transparent);text-align:left;font-family:Inter,sans-serif}
-.pf-carta .tp{display:flex;justify-content:space-between;font:800 11.5px Rajdhani,Inter,sans-serif;letter-spacing:.5px;padding:1px 4px 3px}
+.pf-carta .tp{display:flex;justify-content:space-between;font:800 12px Rajdhani,Inter,sans-serif;letter-spacing:.5px;padding:1px 4px 3px}
 .pf-carta .tp em{font-style:normal;color:var(--rc);text-transform:uppercase}
 .pf-carta .art{flex:1;border-radius:7px;display:grid;place-items:center;position:relative;overflow:hidden;font-size:40px}
 .pf-carta .art img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:.55}
 .pf-carta .art span{position:relative}
 .pf-carta .nm{margin-top:5px;border:1px solid color-mix(in srgb,var(--rc) 70%,#000);border-radius:5px;background:#06070b;text-align:center;font:700 11.5px/1.2 Rajdhani,Inter,sans-serif;text-transform:uppercase;padding:4px 3px;color:#fff;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
-.pf-carta .ft{text-align:center;font-size:11px;color:#b5b5c8;padding:4px 0 1px;letter-spacing:.4px;text-transform:uppercase}
+.pf-carta .ft{text-align:center;font-size:12px;color:#b5b5c8;padding:4px 0 1px;letter-spacing:.4px;text-transform:uppercase}
 .pf-carta.grande{max-width:230px;margin:0 auto}
 .pf-carta.grande .art{font-size:72px}
 .pf-carta.grande .nm{font-size:14px}
@@ -47,7 +47,7 @@
 .pf-semfav{display:grid;place-items:center;aspect-ratio:3/4.1;max-width:230px;margin:0 auto;border-radius:12px;border:2px dashed currentColor;opacity:.75;text-align:center;padding:14px;font-size:13px}
 .pf-figs{display:grid;grid-template-columns:repeat(auto-fill,minmax(92px,1fr));gap:10px}
 .pf-figs .pf-carta .art{font-size:30px}
-.pf-figs .pf-carta .nm{font-size:11px}
+.pf-figs .pf-carta .nm{font-size:12px}
 .pf-mais{margin-top:10px}
 
 /* coleções (barrinhas) */
@@ -72,9 +72,9 @@
 .pf-rc .qm{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px;font-size:12.5px}
 .pf-rc .qm a{font-weight:800;text-decoration:none;color:inherit}
 .pf-rc .qm a:hover{text-decoration:underline}
-.pf-rc .qm time{opacity:.8;font-size:11.5px}
+.pf-rc .qm time{opacity:.8;font-size:12px}
 .pf-rc p{margin:4px 0 0;font-size:14px;line-height:1.45;word-break:break-word;white-space:pre-wrap}
-.pf-rc .ap{margin-left:auto;min-height:44px;min-width:56px;padding:0 10px;border-radius:6px;border:1px solid currentColor;background:none;color:inherit;font:600 11.5px Inter,sans-serif;cursor:pointer;opacity:.85}
+.pf-rc .ap{margin-left:auto;min-height:44px;min-width:56px;padding:0 10px;border-radius:6px;border:1px solid currentColor;background:none;color:inherit;font:600 12px Inter,sans-serif;cursor:pointer;opacity:.85}
 .pf-vazio{padding:12px;text-align:center;font-size:13px;opacity:.85}
 
 /* layout base em 3 colunas (cada visual reorganiza) */
@@ -153,12 +153,12 @@
 .pf-twitter .cab{display:flex;gap:14px;align-items:center;border-bottom:1px solid #eee;padding-bottom:14px;margin-bottom:12px}
 .pf-twitter .cab .pf-gato{width:80px;flex:none;border-radius:6px}
 .pf-twitter .pf-nome{font-size:24px;color:#333}
-.pf-twitter .arroba{color:#666;font-size:13px}
+.pf-twitter .arroba{color:#4d4d4d;font-size:13px;opacity:1}
 .pf-twitter .bio{font-size:13px;margin-top:4px}
 .pf-twitter .lado{background:#ddeef6;border-left:1px solid #c0deed;padding:16px}
 .pf-twitter .nums{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:10px 0 14px;text-align:left}
 .pf-twitter .nums b{display:block;font-size:17px;color:#0a6e9c}
-.pf-twitter .nums span{font-size:11px;color:#555}
+.pf-twitter .nums span{font-size:12px;color:#555}
 .pf-twitter .pf-h{font:bold 13px "Lucida Grande",Arial,sans-serif;color:#333}
 .pf-twitter .pf-form{background:#f4f9fc;border:1px solid #d6e9f3;border-radius:6px;padding:10px}
 .pf-twitter .pf-form .q{font-size:15px;color:#555}
@@ -171,7 +171,6 @@
 .pf-facebook{background:#e9ebee;color:#1d2129;font-family:"Lucida Grande",Tahoma,Verdana,sans-serif}
 .pf-facebook .pf-top{display:flex;align-items:center;gap:12px;padding:8px 18px;background:#3b5998;border-bottom:1px solid #29487d;color:#fff}
 .pf-facebook .pf-top b{font:bold 22px "Helvetica Neue",Arial,sans-serif;letter-spacing:-1px}
-.pf-facebook .pf-top span{background:#fff;color:#888;font-size:12px;padding:4px 10px;border-radius:2px;min-width:180px}
 .pf-facebook .pf-g{grid-template-columns:200px minmax(0,1fr) 240px}
 .pf-facebook .pf-gato{border-radius:0;border:1px solid #ccc;background:#fff;padding:3px}
 .pf-facebook .info{font-size:12px;margin-top:10px;display:grid;gap:4px}
@@ -183,7 +182,7 @@
 .pf-facebook .pf-form button{background:#4267b2;color:#fff;border-radius:2px}
 .pf-facebook .pf-rc{border-bottom:1px solid #e9ebee;border-radius:0;padding:10px 0}
 .pf-facebook .pf-rc .qm a{color:#365899}
-.pf-facebook .pf-rc .rod{font-size:11.5px;color:#4b67a1;margin-top:4px}
+.pf-facebook .pf-rc .rod{font-size:12px;color:#4b67a1;margin-top:4px}
 
 
 /* ---------- HOME PAGE ANOS 90 ---------- */
@@ -204,7 +203,7 @@
 .pf-homepage .pf-rc .qm a{color:#0000ee;text-decoration:underline}
 .pf-homepage .pf-form textarea{border-radius:0;border:2px inset #808080}
 .pf-homepage .pf-form button{background:#c0c0c0;color:#000;border:2px solid;border-color:#fff #404040 #404040 #fff;border-radius:0;font-family:Tahoma,sans-serif}
-.pf-homepage .melhor{font:11px "Courier New",monospace;text-align:center;margin-top:12px}
+.pf-homepage .melhor{font:12px "Courier New",monospace;text-align:center;margin-top:12px}
 .pf-homepage .pf-carta{border-radius:0}
 
 /* ---------- ICQ ---------- */
@@ -221,7 +220,7 @@
 .pf-icq .pf-h{font:bold 12px Tahoma,sans-serif;color:#0a246a;background:linear-gradient(#fff,#d6dff7);margin:-10px -10px 10px;padding:6px 10px;border-bottom:1px solid #7f9db9}
 .pf-icq .pf-rc{background:#f6faf3;border:1px solid #cfe3c4;border-radius:2px}
 .pf-icq .pf-rc .qm a{color:#1f6b16}
-.pf-icq .pf-rc .rod{font-size:11px;color:#1f6b16;font-weight:bold;margin-top:2px}
+.pf-icq .pf-rc .rod{font-size:12px;color:#1f6b16;font-weight:bold;margin-top:2px}
 .pf-icq .pf-form button{background:linear-gradient(#fff,#ece9d8);border:1px solid #003c74;color:#000;border-radius:3px}
 
 /* ---------- ASK.FM ---------- */
@@ -232,7 +231,7 @@
 .pf-ask .pf-gato{border-radius:50%;max-width:150px;margin:0 auto 8px}
 .pf-ask .pf-nome{font-size:19px;margin:0;text-align:center}
 .pf-ask .pf-cap{text-align:center}
-.pf-ask .nums{display:flex;justify-content:center;gap:18px;margin:10px 0;text-align:center;font-size:11px;color:#5f6b72}
+.pf-ask .nums{display:flex;justify-content:center;gap:18px;margin:10px 0;text-align:center;font-size:12px;color:#5f6b72}
 .pf-ask .nums b{display:block;font-size:18px;color:#c22a33}
 .pf-ask .pf-h{color:#1673a0}
 .pf-ask .pf-rc{display:block;background:#fff;border:1px solid #e3ecf0;padding:0;overflow:hidden}
@@ -246,7 +245,7 @@
 /* ---------- WHATSAPP ---------- */
 .pf-whatsapp{background:#d9d0c6;color:#111b21;font-family:"Segoe UI",Roboto,Helvetica,sans-serif}
 .pf-whatsapp .pf-g{grid-template-columns:minmax(0,1fr) 300px;gap:0;padding:0}
-.pf-whatsapp .chat{display:flex;flex-direction:column;min-height:520px;background:#efeae2 url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80'%3E%3Cg fill='none' stroke='%23d9d1c7' stroke-width='1.2'%3E%3Ccircle cx='15' cy='15' r='6'/%3E%3Cpath d='M50 10l8 8-8 8-8-8z'/%3E%3Cpath d='M10 55q10-10 20 0'/%3E%3C/g%3E%3C/svg%3E")}
+.pf-whatsapp .chat{display:flex;flex-direction:column;min-height:420px;background:#efeae2 url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80'%3E%3Cg fill='none' stroke='%23d9d1c7' stroke-width='1.2'%3E%3Ccircle cx='15' cy='15' r='6'/%3E%3Cpath d='M50 10l8 8-8 8-8-8z'/%3E%3Cpath d='M10 55q10-10 20 0'/%3E%3C/g%3E%3C/svg%3E")}
 .pf-whatsapp .topo{display:flex;align-items:center;gap:10px;padding:10px 14px;background:#075e54;color:#fff}
 .pf-whatsapp .topo .pf-nome{font-size:16px;margin:0}
 .pf-whatsapp .topo small{font-size:12px;color:#d6f5e9}
@@ -258,7 +257,7 @@
 .pf-whatsapp .pf-rc{grid-template-columns:30px minmax(0,1fr);max-width:85%;background:#fff;border-radius:0 10px 10px 10px;box-shadow:0 1px 1px #0002;padding:6px 10px}
 .pf-whatsapp .pf-rc .pf-mini{width:30px;height:30px;border-radius:50%}
 .pf-whatsapp .pf-rc .qm a{color:#1f7a5a}
-.pf-whatsapp .pf-rc .rod{text-align:right;font-size:11px;color:#53bdeb}
+.pf-whatsapp .pf-rc .rod{text-align:right;font-size:12px;color:#3d6a7d}
 .pf-whatsapp .pf-vazio{order:1;background:#fff8c4;border-radius:8px;align-self:center;font-size:12.5px}
 .pf-whatsapp .info{background:#f0f2f5;padding:12px;border-left:1px solid #d1d7db}
 .pf-whatsapp .caixa{background:#fff;border-radius:8px;padding:12px;margin-bottom:10px}
@@ -279,10 +278,10 @@
 .pf .cab .nums b{margin-right:4px;font-size:16px}
 .pf .cab .bio{font-size:13px;margin-bottom:6px}
 .pf-dest{display:flex;gap:14px;overflow-x:auto;padding:14px 20px 4px;scrollbar-width:thin}
-.pf-dest .d{flex:none;width:76px;text-align:center;font-size:11px}
+.pf-dest .d{flex:none;width:76px;text-align:center;font-size:12px}
 .pf-dest .d i{display:grid;place-items:center;width:62px;height:62px;margin:0 auto 4px;border-radius:50%;font-style:normal;font-size:26px;background:var(--fundo2,#f2f2f2);box-shadow:0 0 0 2px var(--fundo,#fff),0 0 0 4px var(--cc)}
 .pf-dest .d b{display:block;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.pf-dest .d small{opacity:.85}
+.pf-dest .d small{opacity:.85;font-size:12px}
 .pf-vine .pf-g,.pf-snapchat .pf-g,.pf-instagram .pf-g,.pf-tiktok .pf-g,.pf-kwai .pf-g,.pf-bluesky .pf-g{grid-template-columns:minmax(0,1fr) 300px}
 .pf .rcx .pf-rc{padding:8px 0;border-radius:0}
 
@@ -293,7 +292,7 @@
 .pf-instagram .pf-figs .pf-carta{border-radius:2px}
 .pf-instagram .pf-h{font-size:12px;letter-spacing:1px;text-transform:uppercase;color:#737373;border-top:1px solid #dbdbdb;padding-top:10px}
 .pf-instagram .pf-rc .qm a{color:#262626}
-.pf-instagram .pf-rc .rod,.pf-tiktok .pf-rc .rod,.pf-kwai .pf-rc .rod,.pf-bluesky .pf-rc .rod,.pf-vine .pf-rc .rod{font-size:11.5px;opacity:.8;margin-top:3px;font-weight:600}
+.pf-instagram .pf-rc .rod,.pf-tiktok .pf-rc .rod,.pf-kwai .pf-rc .rod,.pf-bluesky .pf-rc .rod,.pf-vine .pf-rc .rod{font-size:12px;opacity:.8;margin-top:3px;font-weight:600}
 .pf-instagram .pf-form button{background:#0064d1;color:#fff}
 
 .pf-tiktok{--fundo:#121212;--fundo2:#1f1f1f;background:#121212;color:#fff}
@@ -346,7 +345,7 @@
 .pf-lays{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px}
 .pf-lay{position:relative;display:flex;flex-direction:column;gap:6px;padding:10px;min-height:44px;border-radius:12px;border:2px solid var(--line2);cursor:pointer;font:700 13px Inter,sans-serif}
 .pf-lay input{position:absolute;opacity:0;pointer-events:none}
-.pf-lay small{font-weight:500;color:var(--mut);font-size:11.5px}
+.pf-lay small{font-weight:500;color:var(--mut);font-size:12px}
 .pf-lay:has(input:checked){border-color:#0a6a9a;box-shadow:0 0 0 3px color-mix(in srgb,#0a6a9a 30%,transparent)}
 .pf-lay:has(input:focus-visible){outline:3px solid #ffbf00;outline-offset:2px}
 
@@ -498,12 +497,12 @@
 @media(max-width:520px){.pf-lays{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.pf-lay{padding:8px}.pf-lay .nm{font-size:13px}.pf-lay small{font-size:11px}}
 
 /* ---- editar perfil: corpo rola, rodapé (Cancelar/Salvar) fica sempre visível ---- */
-.pf-dlg{max-height:calc(100vh - 24px);max-height:calc(100dvh - 24px);overflow:hidden}
+.pf-dlg{max-height:calc(100vh - 24px);max-height:calc(100dvh - 24px);overflow:hidden;padding:12px}
 .pf-dlg[open]{display:flex;flex-direction:column}
 .pf-dlg form{display:flex;flex-direction:column;min-height:0;flex:1;padding:0}
-.pf-dlg h2{margin:0;padding:20px 20px 4px}
-.pf-dlg .dlg-corpo{flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;padding:0 20px 8px}
-.pf-dlg .rod{flex:none;position:sticky;bottom:0;margin:0;padding:12px 20px calc(12px + env(safe-area-inset-bottom,0px));background:var(--panel);border-top:1px solid var(--line2);box-shadow:0 -8px 14px -10px #0006}
+.pf-dlg h2{margin:0;padding:8px 8px 4px}
+.pf-dlg .dlg-corpo{flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;padding:0 8px 8px;position:relative}
+.pf-dlg .rod{flex:none;position:sticky;bottom:0;margin:0;padding:12px 8px calc(4px + env(safe-area-inset-bottom,0px));background:var(--panel);border-top:1px solid var(--line2);box-shadow:0 -8px 14px -10px #0006}
 .pf-dlg .rod-bt{display:flex;gap:8px}
 .pf-dlg .rod .pf-bt{min-height:44px}
 .pf-lays,.pf-favs{position:relative}
@@ -522,26 +521,39 @@
 .pf-dest .d{width:84px;font-size:12px}
 .pf-dest .d b{white-space:normal;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;max-width:100%;line-height:1.2;min-height:2.4em}
 .pf-whatsapp .chat.vazio{min-height:0}
-.pf-facebook .abas button{font:inherit;font-size:12px;cursor:pointer;min-height:44px;padding:6px 14px;background:#f2f2f2;border:1px solid #ccc;border-bottom:0;color:#3b5998}
-.pf-facebook .abas button[aria-selected="true"]{background:#fff;color:#333;font-weight:bold;margin-bottom:-1px}
-.pf-facebook .abas button:focus-visible{outline:3px solid #ffbf00;outline-offset:-3px}
 @media(max-width:900px){
   .pf-whatsapp .pf-g>.info{order:-1}
   .pf-whatsapp .chat{min-height:320px}.pf-whatsapp .chat.vazio{min-height:0}
-  .pf-facebook .abas button{min-height:44px;flex:1;font-size:13px}
-}
+  }
 @media(max-width:520px){
-  .pf-dlg{width:calc(100% - 16px);max-height:calc(100vh - 16px);max-height:calc(100dvh - 16px);border-radius:16px}
-  .pf-dlg h2{padding:16px 14px 4px;font-size:20px}
-  .pf-dlg .dlg-corpo{padding:0 14px 6px}
-  .pf-dlg .rod{padding:10px 14px calc(10px + env(safe-area-inset-bottom,0px));gap:8px}
+  .pf-dlg{width:calc(100% - 16px);max-height:calc(100vh - 16px);max-height:calc(100dvh - 16px);border-radius:16px;padding:10px}
+  .pf-dlg h2{padding:6px 6px 4px;font-size:20px}
+  .pf-dlg .dlg-corpo{padding:0 6px 6px}
+  .pf-dlg .rod{padding:10px 6px calc(2px + env(safe-area-inset-bottom,0px));gap:8px}
   .pf-dlg .rod #btGato{flex:1 1 100%}
   .pf-dlg .rod-bt{flex:1;gap:8px}.pf-dlg .rod-bt .pf-bt{flex:1}
-  /* os 15 visuais viram um carrossel de 1 linha, com snap; o marcado é rolado para a vista */
-  .pf-lays{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;gap:8px;padding:4px 4px 10px;scrollbar-width:thin}
-  .pf-lay{flex:0 0 148px;scroll-snap-align:center}
+  /* os 15 visuais em grade de 2 colunas; o corpo do diálogo rola na vertical */
+  .pf-lays{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
   /* legendas com altura uniforme (1, 2 ou 3 linhas não desalinham os cartões) */
   .pf-lay .nm{min-height:2.3em}
   .pf-lay small{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;min-height:2.5em;line-height:1.25}
 }
 .pf-dlg fieldset{min-width:0}
+.pf-dlg legend .dica{text-transform:none;letter-spacing:0;font-weight:600;margin-left:6px}
+.pf-facebook .abas a{display:flex;align-items:center;justify-content:center;min-height:44px;padding:6px 14px;background:#f2f2f2;border:1px solid #ccc;border-bottom:0;color:#3b5998;font-size:13px;text-decoration:none}
+.pf-facebook .abas a[aria-current="true"]{background:#fff;color:#333;font-weight:bold;margin-bottom:-1px}
+.pf-facebook .abas a:hover{text-decoration:underline}
+.pf-col small{font-size:12px}
+.pf-ask .pf-rc .qm time{opacity:1}
+/* WhatsApp no desktop: coluna lateral em 2 colunas, para o perfil não ficar 2x mais alto que os outros */
+@media(min-width:901px){
+  .pf-whatsapp .pf-g{grid-template-columns:minmax(0,1fr) 520px}
+  .pf-whatsapp .info{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px;align-content:start}
+  .pf-whatsapp .info .caixa{margin:0}
+  .pf-whatsapp .info .cen,.pf-whatsapp .info .caixa:nth-child(3){grid-column:1/-1}
+  .pf-whatsapp .info .pf-figs{grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}
+  .pf-whatsapp .info .pf-semfav{aspect-ratio:auto;min-height:96px;max-width:none}
+  .pf-whatsapp .info .pf-carta.grande{max-width:170px}
+  .pf-whatsapp .chat{min-height:0}
+}
+.pf-dlg fieldset:first-of-type>legend{position:sticky;top:0;z-index:3;width:100%;background:var(--panel);padding:6px 0;margin:0}

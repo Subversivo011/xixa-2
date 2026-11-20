@@ -14,7 +14,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Inter:wght@400;500;600;700;800&family=Baloo+2:wght@700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="theme.css?v=20261122d">
 <link rel="stylesheet" href="viewer.css?v=20261120d">
-<link rel="stylesheet" href="perfil.css?v=20261122a">
+<link rel="stylesheet" href="perfil.css?v=20261122c">
 <script>try{var t=localStorage.getItem("ns_theme")}catch(e){}document.documentElement.dataset.theme=t==="dark"?"dark":"light"</script>
 </head>
 <body>
@@ -24,13 +24,13 @@
   <p id="aviso" class="sr-only" aria-live="polite"></p>
 </main>
 
-<dialog class="pf-dlg" id="dlg" aria-labelledby="dlgT">
+<dialog class="pf-dlg" id="dlg" aria-labelledby="dlgT" aria-modal="true">
   <form method="dialog" id="dlgF">
     <h2 id="dlgT">Editar o meu perfil</h2>
     <div class="dlg-corpo" id="dlgCorpo">
     <p>Escolha a rede da sua época e a carta que vai ficar em destaque. A foto do perfil é o seu gatinho.</p>
-    <fieldset><legend id="laysL">Visual do perfil</legend><div class="pf-lays" id="lays" role="radiogroup" aria-labelledby="laysL"></div></fieldset>
-    <fieldset><legend id="favL">Carta favorita</legend><div class="pf-favs" id="fav" role="radiogroup" aria-labelledby="favL"></div></fieldset>
+    <fieldset><legend><span id="laysL">Visual do perfil</span> <span class="dica" id="laysN" aria-live="polite"></span></legend><div class="pf-lays" id="lays" role="radiogroup" aria-labelledby="laysL"></div></fieldset>
+    <fieldset><legend><span id="favL">Carta favorita</span> <span class="dica" id="favN"></span></legend><div class="pf-favs" id="fav" role="radiogroup" aria-labelledby="favL"></div></fieldset>
     <p class="erro" id="dlgErro" role="alert"></p>
     </div>
     <div class="rod">
@@ -156,9 +156,9 @@ function montar(){
        <h2 class="pf-h">${esc(L.recados)} (${nRec})</h2>${rec}</div>
       <div class="pf-c lado"><div class="nums"><span><b>${a.tenho}</b><span>figurinhas</span></span><span><b>${a.colecoes_completas}</b><span>coleções</span></span><span><b>${fmt(P.xp)}</b><span>XP</span></span></div>
        <div class="pf-box">${pat}</div><div class="pf-box"><h2 class="pf-h">Carta favorita</h2>${fav}</div><div class="pf-box"><h2 class="pf-h">Coleções</h2>${cols}</div><h2 class="pf-h">Figurinhas</h2>${figs}</div></div>`,
-    facebook:()=>`<div class="pf-top"><b>facebook</b><span aria-hidden="true">Pesquisar</span></div>
+    facebook:()=>`<div class="pf-top"><b>facebook</b></div>
      <div class="pf-g"><div class="pf-c">${gato(p.avatar_gato,p.apelido)}<div class="info" id="fb-info"><span><b>Patente:</b> ${P.patente?esc(P.patente.nome):"-"}</span><span><b>Membro desde:</b> ${esc(desde)}</span><span><b>Figurinhas:</b> ${a.tenho} de ${a.total}</span></div></div>
-      <div class="pf-c"><h1 class="pf-nome">${ap}</h1><div class="abas" role="tablist" aria-label="Seções do perfil"><button type="button" role="tab" id="ab-mural" aria-selected="true" data-ir="fb-mural">Mural</button><button type="button" role="tab" id="ab-info" aria-selected="false" data-ir="fb-info">Informações</button><button type="button" role="tab" id="ab-fotos" aria-selected="false" data-ir="fb-fotos">Fotos</button></div>
+      <div class="pf-c"><h1 class="pf-nome">${ap}</h1><nav class="abas" aria-label="Seções do perfil"><a href="#fb-mural" aria-current="true" data-ir="fb-mural">Mural</a><a href="#fb-info" data-ir="fb-info">Informações</a><a href="#fb-fotos" data-ir="fb-fotos">Fotos</a></nav>
        <div class="caixa" id="fb-mural"><h2 class="pf-h">${esc(L.recados)} (${nRec})</h2>${rec}</div><div class="caixa" id="fb-fotos"><h2 class="pf-h">Fotos (figurinhas)</h2>${figs}</div></div>
       <div class="pf-c"><div class="caixa"><h2 class="pf-h">Nível</h2>${pat}</div><div class="caixa"><h2 class="pf-h">Curtiu (carta favorita)</h2>${fav}</div><div class="caixa"><h2 class="pf-h">Grupos (coleções)</h2>${cols}</div></div></div>`
   };
@@ -186,7 +186,7 @@ function montar(){
     whatsapp:()=>`<div class="pf-g"><div class="pf-c chat${REC.length?"":" vazio"}"><div class="topo">${gato(p.avatar_gato,p.apelido,"pf-mini")}<div><h1 class="pf-nome">${ap}</h1><small>online</small></div></div>
        <div class="msgs">${rec}</div></div>
       <div class="pf-c info"><div class="caixa cen">${gato(p.avatar_gato,p.apelido)}<h2 class="pf-nome">${ap}</h2><div class="pf-cap">Recado: “${P.patente?esc(P.patente.nome):"Disponível"}” 🙂</div>${pat}</div>
-       <div class="caixa"><h2 class="pf-h">Carta favorita</h2>${fav}</div><div class="caixa"><h2 class="pf-h">Mídia (figurinhas)</h2>${figs}</div><div class="caixa"><h2 class="pf-h">Grupos em comum (coleções)</h2>${cols}</div></div></div>`,
+       <div class="caixa"><h2 class="pf-h">Carta favorita</h2>${fav}</div><div class="caixa"><h2 class="pf-h">Mídia (figurinhas)</h2>${figsHTML(4)}</div><div class="caixa"><h2 class="pf-h">Grupos em comum (coleções)</h2>${cols}</div></div></div>`,
     vine:mod,snapchat:mod,instagram:mod,tiktok:mod,kwai:mod,bluesky:mod
   });
   const el=$("pf");el.className="pf pf-"+(LAYOUTS[p.layout]?p.layout:"orkut");el.innerHTML=(T[p.layout]||T.orkut)();
@@ -198,7 +198,7 @@ function sorte(ap){let h=new Date().toDateString().length;for(const c of String(
 
 function ligar(L){
   const el=$("pf");
-  el.querySelectorAll(".abas [role=tab]").forEach(t=>t.onclick=()=>{el.querySelectorAll(".abas [role=tab]").forEach(o=>o.setAttribute("aria-selected",o===t?"true":"false"));const d=$(t.dataset.ir);if(d)d.scrollIntoView({block:"start",behavior:matchMedia("(prefers-reduced-motion:reduce)").matches?"auto":"smooth"})});
+  el.querySelectorAll(".abas a").forEach(t=>t.onclick=ev=>{ev.preventDefault();el.querySelectorAll(".abas a").forEach(o=>o.removeAttribute("aria-current"));t.setAttribute("aria-current","true");const x=$(t.dataset.ir);if(x)x.scrollIntoView({block:"start",behavior:matchMedia("(prefers-reduced-motion:reduce)").matches?"auto":"smooth"})});
   const b=el.querySelector("[data-todas]");if(b)b.onclick=()=>{MOSTRAR_TODAS=true;montar();avisar("Mostrando todas as figurinhas")};
   el.querySelectorAll("[data-apagar]").forEach(x=>x.onclick=()=>apagar(x.dataset.apagar));
   const f=$("rcF");if(!f)return;
@@ -236,12 +236,18 @@ function abrirEdicao(){
   $("fav").innerHTML=l.length?`<label class="pf-fav nenhuma"><input type="radio" name="fav" value="" ${fid?"":"checked"}><span class="pf-fv-n"><b>Nenhuma</b></span></label>`+l.map(c=>`<label class="pf-fav"><input type="radio" name="fav" value="${esc(c.id)}" ${fid===c.id?"checked":""}>${carta(c)}</label>`).join(""):`<p class="pf-vazio">Você ainda não tem figurinhas. Abra um pacote no álbum!</p>`;
   $("dlgErro").textContent="";$("dlg").showModal();
   const sel=$("lays").querySelector("input:checked");sel&&sel.focus({preventScroll:true}); // foco na rede atual, não na primeira
-  rolarAtivo($("lays"));rolarAtivo($("fav"));
+  $("favN").textContent=l.length?`${l.length} carta${l.length===1?"":"s"}`:"";contarVisual();
+  rolarAtivo($("fav"));rolarVisual();
 }
+// contador "Visual N de 15" na legenda do grupo (acompanha a escolha)
+function contarVisual(){const i=[...$("lays").querySelectorAll("input")].findIndex(x=>x.checked);$("laysN").textContent=i<0?"":`Visual ${i+1} de ${$("lays").querySelectorAll("input").length}`}
+// rola o corpo do diálogo (vertical) até o visual marcado ficar à vista
+function rolarVisual(){const b=$("dlgCorpo"),a=$("lays").querySelector("input:checked"),l=a&&a.closest("label");if(!l)return;const br=b.getBoundingClientRect(),lr=l.getBoundingClientRect();if(lr.top<br.top+40||lr.bottom>br.bottom)b.scrollTop+=(lr.top-br.top)-(b.clientHeight-lr.height)/2}
 // rola a fileira horizontal até a opção marcada (só no eixo X: não mexe no scroll do diálogo)
 function rolarAtivo(c){const a=c.querySelector("input:checked"),l=a&&a.closest("label");if(l&&c.scrollWidth>c.clientWidth)c.scrollLeft=Math.max(0,l.offsetLeft-(c.clientWidth-l.offsetWidth)/2)}
 // ao navegar com as setas, a opção marcada entra na vista (sem mexer na rolagem vertical do diálogo)
-for(const id of ["lays","fav"])$(id).addEventListener("change",ev=>{const c=$(id),l=ev.target.closest("label");if(!l)return;if(l.offsetLeft<c.scrollLeft||l.offsetLeft+l.offsetWidth>c.scrollLeft+c.clientWidth)rolarAtivo(c)});
+$("lays").addEventListener("change",()=>{contarVisual();rolarVisual()});
+$("fav").addEventListener("change",ev=>{const c=$("fav"),l=ev.target.closest("label");if(l&&(l.offsetLeft<c.scrollLeft||l.offsetLeft+l.offsetWidth>c.scrollLeft+c.clientWidth))rolarAtivo(c)});
 $("btCancelar").onclick=()=>$("dlg").close();
 $("btGato").onclick=()=>{$("dlg").close();if(typeof openSignup==="function")openSignup()};
 $("dlgF").onsubmit=async ev=>{ev.preventDefault();
