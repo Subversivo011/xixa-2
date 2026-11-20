@@ -255,11 +255,13 @@ body.home::before{background:radial-gradient(1200px 620px at 50% -20%,var(--bg-g
 @keyframes ring{0%,80%,100%{transform:rotate(0)}83%{transform:rotate(-7deg)}86%{transform:rotate(6deg)}89%{transform:rotate(-5deg)}92%{transform:rotate(3deg)}}
 .fq-txt{display:flex;flex-direction:column;position:relative}
 .fq-logo{font-family:"Baloo 2",Inter,sans-serif;font-weight:800;font-size:34px;line-height:1.1;color:#2b2330;letter-spacing:-.5px;position:relative;white-space:nowrap}
-.fq-logo i{font-style:normal;color:#e5484d}
+.fq-logo i{font-style:normal;color:#b81f29}
 .fq-o{position:relative;display:inline-block}
 .fq-o::before{content:"";position:absolute;left:50%;top:-6px;width:26px;height:8px;margin-left:-13px;border:3.5px solid #f2b22a;border-radius:50%;box-shadow:0 0 10px #ffd23f}
 :root[data-theme="dark"] .fq-logo{color:#fff}
-.fq-l1{font-family:"Baloo 2",Inter,sans-serif;font-weight:800;font-size:26px;color:#e5484d;line-height:1.1;margin-top:8px}
+:root[data-theme="dark"] .fq-logo i{color:#ff9ea3}
+:root[data-theme="dark"] .fq-l1{color:#ffd3d3}
+.fq-l1{font-family:"Baloo 2",Inter,sans-serif;font-weight:800;font-size:26px;color:#a81d27;line-height:1.1;margin-top:8px}
 .fq-l2,.fq-l3{font-size:15px;color:var(--txt);font-weight:600;line-height:1.35}
 .fq-l3{font-weight:800}
 .fq-go{display:inline-flex;align-items:center;gap:8px;background:#2b2330;color:#fff;font-weight:800;font-size:14px;padding:13px 20px;border-radius:99px;white-space:nowrap;position:relative}
@@ -555,3 +557,22 @@ img.cdo-blur{filter:blur(16px) saturate(.6);transform:scale(1.15)}
 .acct-menu .ico{width:18px;height:18px;opacity:.85}
 /* celular: o menu da conta abre dentro do painel do menu (em linha, sem ficar cortado) */
 @media(max-width:760px){.account-tools{flex-wrap:wrap}#acct{flex:1 1 auto}.account-actions{flex-wrap:wrap;justify-content:flex-end}.acct-wrap{display:contents}.acct-menu{position:static;order:9;flex:1 1 100%;margin-top:8px;min-width:0;box-shadow:0 0 0 1px var(--line)}}
+
+/* rodapé no celular (<=760px): o cartão fala.que.eu.te.escuto vem ANTES do texto legal, coluna única e centrado; o boneco (96px)
+   senta em cima do cartão, sem cobrir o canto nem descer abaixo dele; telefone decorativo >= 44px; textos de 13,5px */
+@media(max-width:760px){
+  .nsft2{margin-top:36px}
+  .nsft2 .ft-band-in{position:relative;grid-template-columns:minmax(0,1fr);grid-template-areas:"fq" "legal";gap:22px;padding:90px 16px 22px;align-items:start}
+  .nsft2 .fq-in{justify-self:center;width:100%;max-width:440px;grid-template-columns:56px minmax(0,1fr);gap:10px 14px;padding:14px 16px}
+  .nsft2 .fq-in .fq-art{width:56px;min-width:44px;min-height:44px}
+  .nsft2 .fq-in .fq-logo{font-size:clamp(15px,5vw,19px)}
+  .nsft2 .fq-in .fq-o::before{display:none}
+  .nsft2 .fq-in .fq-l1{font-size:17px;line-height:1.2}
+  .nsft2 .fq-in .fq-l2{font-size:13.5px;line-height:1.35}
+  .nsft2 .fq-in .fq-acts{flex-direction:column}
+  .nsft2 .fq-in .fq-acts .fq-go{flex:none;width:100%;min-height:44px;font-size:14px}
+  .nsft2 .ft-boneco{position:absolute;grid-area:auto;top:-16px;bottom:auto;right:calc((100% - min(100% - 32px,440px)) / 2 + 20px);height:96px;width:auto;margin:0;justify-self:auto;align-self:auto}
+}
+
+/* toque (inclui tablet/desktop touch, 761-1100px): botões do cartão com 44px e o texto de apoio com 13,5px */
+@media(pointer:coarse){.nsft2 .fq-in .fq-acts .fq-go{min-height:44px}.nsft2 .fq-in .fq-l2{font-size:13.5px}}

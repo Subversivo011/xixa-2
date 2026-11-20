@@ -12,7 +12,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preconnect" href="https://i.ytimg.com">
 <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Inter:wght@400;500;600;700&family=Baloo+2:wght@700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="theme.css?v=20261122c">
+<link rel="stylesheet" href="theme.css?v=20261122d">
 <link rel="stylesheet" href="viewer.css?v=20261120d">
 <script>try{var t=localStorage.getItem("ns_theme")}catch(e){}document.documentElement.dataset.theme=t==="dark"?"dark":"light"</script>
 <style>
@@ -76,10 +76,6 @@ main{padding:24px 28px 60px;max-width:1280px;margin:0 auto}
 .mini{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
 .mini .card .thumb{aspect-ratio:16/10;font-size:32px}
 .mini .meta{padding:6px 8px}.mini .meta h3{font-size:13px}
-.facts{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:8px}
-.fact{border:1px solid var(--line);border-radius:14px;padding:16px;background:var(--panel)}
-.fact b{display:block;color:var(--brand);font-family:Rajdhani;letter-spacing:1px;text-transform:uppercase;font-size:13px;margin-bottom:4px}
-.fact span{font-size:12px;color:var(--mut)}
 .chips{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}
 .chip{border:1px solid var(--line);padding:7px 13px;border-radius:99px;font-size:12px;color:var(--mut);background:var(--panel)}
 .chip.on,.chip:hover{border-color:var(--brand);color:var(--brand-ink);background:var(--brand-soft)}
@@ -93,7 +89,6 @@ main{padding:24px 28px 60px;max-width:1280px;margin:0 auto}
 .box h2{font-size:30px}
 .box p{color:var(--mut);font-size:14px;line-height:1.6;margin:10px 0 16px}
 .box .vp{border-radius:0}
-.note{font-size:11px;color:var(--faint);text-align:center;margin-top:30px}
 .fade{animation:f .35s ease}
 @keyframes f{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
 .pulse{display:grid;grid-template-columns:1.15fr 1fr 1fr;gap:16px;margin-bottom:24px}
@@ -160,10 +155,10 @@ main{display:flex;flex-direction:column}
 .top>.hero{order:1;margin-bottom:18px}.timeline{order:2}.top>div:not(.hero){order:3;margin-bottom:24px}.pulse{order:4}#browse{order:5}.facts{order:6}.note{order:7}
 .hero .sun{max-width:250px}.hero h1{font-size:26px}.hero p{margin:6px auto 12px}
 .timeline{padding:14px 12px 16px}.cur{padding:12px;gap:12px}.cur h2{font-size:40px}
-.top,.cur{grid-template-columns:1fr}.stage{grid-template-columns:1fr}.side{display:none}.facts{grid-template-columns:1fr 1fr}.rail{grid-template-columns:1fr 1fr}.rail .card:nth-child(3){display:none}main{padding:16px 14px 40px}}
+.top,.cur{grid-template-columns:1fr}.stage{grid-template-columns:1fr}.side{display:none}.rail{grid-template-columns:1fr 1fr}.rail .card:nth-child(3){display:none}main{padding:16px 14px 40px}}
 @media(max-width:600px){.f .two{grid-template-columns:1fr}.today{grid-template-columns:110px 1fr}.box .body{padding:16px}}
 </style>
-<link rel="stylesheet" href="home.css?v=20261122b">
+<link rel="stylesheet" href="home.css?v=20261122d">
 </head>
 <body class="home">
 <div class="rays-wrap" aria-hidden="true"><div class="rays" id="rays"></div></div>
@@ -209,7 +204,7 @@ main{display:flex;flex-direction:column}
     <div class="fact"><i data-ic="moderation"></i><b>Colaborativo</b><span>A comunidade envia, a moderação aprova, e ninguém sobe o mesmo vídeo duas vezes.</span></div>
     <div class="fact"><i data-ic="categories"></i><b>Organizado</b><span>Separado por ano, categoria e contexto.</span></div>
     <div class="fact"><i data-ic="cloud"></i><b>Eternizado</b><span>Se caiu na internet, aqui fica pra sempre.</span></div>
-    <div class="fact"><i data-ic="clock"></i><b>Você está aqui há</b><span id="timer">0m</span></div>
+    <div class="fact"><i data-ic="clock"></i><b id="timerB">Você chegou agora</b><span id="timer">Bem-vindo ao museu.</span></div>
   </section>
   <p class="note">Protótipo · os registros são exemplos para testar a navegação e precisam ser revisados antes de virar acervo de verdade. Moedas, cartas e envios ficam só neste navegador.</p>
 </main>
@@ -217,7 +212,7 @@ main{display:flex;flex-direction:column}
 <div class="modal" id="modal" onclick="if(event.target===this)closeM()"><div class="box" id="box"></div></div>
 
 <form name="feedback" data-netlify="true" netlify-honeypot="bot-field" hidden><input name="tipo"><textarea name="msg"></textarea><input name="contato"><input name="pagina"><input name="bot-field"></form>
-<script src="common.js?v=20261122c"></script>
+<script src="common.js?v=20261122d"></script>
 <script src="data.js?v=20261119q"></script>
 <script src="player.js?v=20261121w"></script>
 <script src="viewer.js?v=20261120e"></script>
@@ -549,8 +544,14 @@ document.addEventListener("keydown",e=>{
   if(e.key==="ArrowRight"&&KEYS[i+1])go(KEYS[i+1]);
   if(e.key==="ArrowLeft"&&KEYS[i-1])go(KEYS[i-1]);
 });
-const t0=Date.now();setInterval(()=>{const m=Math.floor((Date.now()-t0)/60000);$("timer").textContent=m+"m explorando a história da internet"},15000);
-$("timer").textContent="0m explorando a história da internet";
+// o tempo na página só aparece depois de 1 minuto; antes, "Você chegou agora"
+const t0=Date.now();
+const timerTick=setInterval(()=>{
+  const b=$("timerB"),el=$("timer");
+  if(!b||!el){clearInterval(timerTick);return} // faixa removida/redesenhada: não lança TypeError a cada 15 s
+  const m=Math.floor((Date.now()-t0)/60000);
+  b.textContent=m<1?"Você chegou agora":"Você está aqui há";el.textContent=m<1?"Bem-vindo ao museu.":m+" min explorando a história da internet";
+},15000);
 const h=decodeURIComponent(location.hash.slice(1)).replace("mais","+");if(Object.hasOwn(YEAR_INFO,h))cur=h;else if(/^\d{4}$/.test(h))cur=yKey(h);
 renderWallet();renderAll();scheduleApprovals();
 if(["rank","mod","send","rand","tl","todos"].includes(h))setTimeout(()=>{ftGo(h);history.replaceState(null,"",location.pathname)},300);

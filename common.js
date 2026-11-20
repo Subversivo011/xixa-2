@@ -710,9 +710,9 @@ function renderFooter(){
       <p>É dono de algum conteúdo e quer que ele saia daqui? <button onclick="openFeedback('remocao')">Peça a remoção</button> e a gente tira.</p>
       <small>© ${new Date().getFullYear()} Não Salvo · projeto do Xet, sem fins lucrativos</small></div>
     <div class="fq fq-in">
-      <button class="fq-art" onclick="openFeedback()" aria-label="Mandar feedback">${PHONE_SVG}</button>
+      <span class="fq-art" onclick="openFeedback()" aria-hidden="true">${PHONE_SVG}</span>
       <span class="fq-txt"><span class="fq-logo">fala<i>.</i>que<i>.</i>eu<i>.</i>te<i>.</i>escut<span class="fq-o">o</span></span>
-        <span class="fq-l1">feedback? <em>Quer contribuir com ideias?</em></span><span class="fq-l2">a pessoa amada em 7 dias?</span><span class="fq-l3">ajoelha e envia.</span></span>
+        <span class="fq-l1">Tem ideia, bug ou crítica?</span><span class="fq-l2">Ajoelha e envia: a gente lê tudo.</span></span>
       <span class="fq-acts"><button class="fq-go" onclick="openFeedback()">${icon("send")}Mandar feedback</button><a class="fq-go alt" href="/contribuir/">${icon("user")}Quero contribuir</a></span>
     </div>
     <img class="ft-boneco" src="boneco.png?v=2" alt="" width="478" height="600">

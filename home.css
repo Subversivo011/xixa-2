@@ -128,20 +128,14 @@ button:hover>.thumb>.play,button:hover>.ct>.play,.tthumb:hover>.play,.card:hover
 .grid{gap:18px;grid-template-columns:repeat(auto-fill,minmax(210px,1fr))}
 
 /* fatos */
-.facts{gap:14px;margin-top:20px}
-.fact{border:0;border-radius:18px;padding:18px;display:grid;grid-template-columns:40px 1fr;column-gap:12px;align-items:center;box-shadow:0 0 0 1px var(--line)}
-.fact>.ico{grid-row:span 2;width:40px;height:40px;padding:9px;border-radius:12px;background:var(--brand-soft);color:var(--brand)}
-.fact b{font-family:Inter;letter-spacing:0;text-transform:none;font-size:14px;color:var(--txt);margin:0}
-.fact span{font-size:12px;line-height:1.4}
 
 @media(max-width:1000px){.sd-logo{font-size:34px}}
 @media(max-width:860px){
   .classics{grid-template-columns:1fr}.feat .thumb{min-height:210px;aspect-ratio:16/9}
   .feat h3{font-size:19px}
   .stage{grid-template-columns:1fr}.cur{grid-template-columns:1fr;padding:14px}.cur h2{font-size:42px}
-  .facts{grid-template-columns:1fr 1fr}.fact{grid-template-columns:1fr;row-gap:8px}.fact>.ico{grid-row:auto}
 }
-@media(max-width:520px){.crow{grid-template-columns:100px 1fr}.facts{grid-template-columns:1fr}.fact{grid-template-columns:40px 1fr}.fact>.ico{grid-row:span 2}}
+@media(max-width:520px){.crow{grid-template-columns:100px 1fr}}
 /* sobe = céu, desce = inferno */
 .sd-logo .su{color:#1f7fe0}
 .sd-logo i{color:#7a8aa0;-webkit-text-stroke-color:#4a5568}
@@ -247,15 +241,18 @@ button:hover>.thumb>.play,button:hover>.ct>.play,.tthumb:hover>.play,.card:hover
 #cur .mini{transition:opacity .26s ease,transform .26s ease}
 #cur .mini.swap{opacity:0;transform:translateY(6px)}
 /* blocos de "sobre" mais discretos: uma faixa fina, sem cara de conteúdo */
-.facts{display:flex!important;flex-wrap:wrap;justify-content:center;gap:6px 26px;margin:56px auto 0;padding:16px 10px 0;border-top:1px dashed var(--line);max-width:980px;opacity:.82;transition:opacity .2s}
-.facts:hover{opacity:1}
-.fact{all:unset;display:inline-flex!important;align-items:center;gap:8px;font-size:12px;color:var(--mut)}
-.fact>.ico{width:16px!important;height:16px!important;padding:0!important;background:none!important;color:var(--brand);grid-row:auto!important;flex:none}
-.fact b{font:600 12px/1.2 Inter,system-ui,sans-serif!important;color:var(--txt)!important;letter-spacing:0!important;text-transform:none!important;margin:0!important}
-.fact span{font-size:12px;color:var(--mut)}
-.fact span::before{content:"· ";opacity:.6}
-.note{margin:12px auto 0!important;max-width:760px;font-size:10.5px!important;opacity:.7}
-@media(max-width:760px){.facts{justify-content:flex-start;gap:8px 16px;margin-top:40px}.fact{width:100%}.fact span{display:inline}}
+/* faixa de fatos (Colaborativo, Organizado, Eternizado, Você está aqui há): UMA definição, sem !important.
+   Desktop: 4 colunas numa linha só; celular/tablet estreito: grade 2x2. Texto 13px, sem opacity (contraste >= 4,5:1). */
+.facts{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px 28px;margin:110px auto 0;padding:18px 10px 0;max-width:980px;border-top:1px dashed var(--line)}
+.fact{display:grid;grid-template-columns:16px minmax(0,1fr);column-gap:8px;row-gap:2px;align-items:start;align-content:start;font-size:13px;line-height:1.4;color:var(--mut)}
+.fact>.ico{grid-row:span 2;width:16px;height:16px;margin-top:2px;color:var(--brand)}
+.fact b{display:block;font:600 13px/1.3 Inter,system-ui,sans-serif;color:var(--txt);margin:0;letter-spacing:0;text-transform:none}
+.fact span{display:block;font-size:13px;line-height:1.4;color:var(--mut)}
+main:has(.facts){padding-bottom:22px}
+body:has(main .facts) .nsft2{margin-top:22px}
+.note{margin:14px auto 0;max-width:760px;font-size:12px;line-height:1.5;color:var(--mut);text-align:center}
+@media(max-width:860px){.facts{grid-template-columns:repeat(2,minmax(0,1fr));gap:14px 16px;margin-top:70px}}
+@media(max-width:760px){main:has(.facts){padding-bottom:16px}body:has(main .facts) .nsft2{margin-top:18px}}
 
 .em{position:relative;overflow:hidden}
 /* sobe.desce: abas (visitados/clicados) e período no ícone */
@@ -281,10 +278,6 @@ button:hover>.thumb>.play,button:hover>.ct>.play,.tthumb:hover>.play,.card:hover
 .sd-nota{font-size:10.5px;color:var(--faint);margin-top:8px}
 @media(max-width:420px){.sd-pl{display:none}}
 /* faixa explicativa mais perto do rodapé (sem grudar) */
-.facts{margin-top:110px!important}
-main:has(.facts){padding-bottom:22px!important}
-body:has(main .facts) .nsft2{margin-top:22px!important}
-@media(max-width:760px){.facts{margin-top:70px!important}main:has(.facts){padding-bottom:16px!important}body:has(main .facts) .nsft2{margin-top:18px!important}}
 
 /* sobe.desce: período em botões lado a lado (Hoje | Todos os tempos), no lugar do ícone de prancheta */
 .sd-h{flex-wrap:wrap;gap:10px 12px;align-items:center}
