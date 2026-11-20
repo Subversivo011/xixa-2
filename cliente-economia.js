@@ -87,6 +87,11 @@
     abrir: function (p, o) { return pedir('POST', '/api/pacotes/abrir', p, o); },
     perfil: function (p, o) { return pedir('PATCH', '/api/eu', p, o); },
     reciclar: function (p, o) { return pedir('POST', '/api/album/reciclar', p, o); },
+    // perfil público e recados (perfil.html)
+    perfilDe: function (apelido, o) { return pedir('GET', '/api/perfil/' + encodeURIComponent(apelido), undefined, o); },
+    recados: function (apelido, o) { return pedir('GET', '/api/perfil/' + encodeURIComponent(apelido) + '/recados', undefined, o); },
+    recadar: function (apelido, texto, o) { return pedir('POST', '/api/perfil/' + encodeURIComponent(apelido) + '/recados', { texto: texto }, o); },
+    apagarRecado: function (id, o) { return pedir('DELETE', '/api/recados/' + encodeURIComponent(id), undefined, o); },
     ranking: function (metrica, limite, o) {
       return pedir('GET', '/api/ranking?metrica=' + encodeURIComponent(metrica || 'xp') + '&limite=' + encodeURIComponent(limite || 50), undefined, o);
     }

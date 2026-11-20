@@ -519,3 +519,17 @@ img.cdo-blur{filter:blur(16px) saturate(.6);transform:scale(1.15)}
 .rkx-bt{margin-top:10px;padding:7px 14px;border-radius:10px;border:0;background:var(--brand-strong,#1597d3);color:#fff;font:700 13px Inter,sans-serif;cursor:pointer}
 
 #login-dialog .lg-msg{margin:-4px 0 14px;padding:9px 11px;border-radius:8px;background:var(--brand-soft);color:var(--txt);font-weight:700}
+/* ranking: o nome leva ao perfil */
+.rkx .nm a.n{color:inherit;text-decoration:none}
+.rkx .nm a.n:hover{text-decoration:underline}
+.rkx .nm a.n:focus-visible{outline:3px solid #ffbf00;outline-offset:2px;border-radius:4px}
+/* menu da conta (clicar no próprio avatar) */
+.acct-wrap{position:relative;display:flex}
+.acct-menu{position:absolute;right:0;top:calc(100% + 8px);z-index:60;min-width:230px;padding:6px;border-radius:14px;background:var(--panel);box-shadow:0 0 0 1px var(--line),0 18px 40px #0004;display:grid;gap:2px}
+.acct-menu[hidden]{display:none}
+.acct-menu a,.account-actions .acct-menu button,.acct-menu button{display:flex;align-items:center;gap:10px;min-height:44px;padding:0 12px;border-radius:10px;border:0;background:none;color:var(--txt);font:600 13.5px Inter,sans-serif;text-decoration:none;text-align:left;cursor:pointer;width:100%;height:auto!important}
+.acct-menu a:hover,.acct-menu button:hover,.acct-menu a:focus-visible,.acct-menu button:focus-visible{background:var(--panel2)}
+.acct-menu :focus-visible{outline:3px solid #ffbf00;outline-offset:-3px}
+.acct-menu .ico{width:18px;height:18px;opacity:.85}
+/* celular: o menu da conta abre dentro do painel do menu (em linha, sem ficar cortado) */
+@media(max-width:760px){.account-tools{flex-wrap:wrap}#acct{flex:1 1 auto}.account-actions{flex-wrap:wrap;justify-content:flex-end}.acct-wrap{display:contents}.acct-menu{position:static;order:9;flex:1 1 100%;margin-top:8px;min-width:0;box-shadow:0 0 0 1px var(--line)}}

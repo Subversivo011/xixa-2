@@ -40,6 +40,7 @@ export async function servidor(pool, opcoes = {}) {
     get: (c, o) => chamar('GET', c, o),
     post: (c, corpo, o = {}) => chamar('POST', c, { ...o, corpo }),
     patch: (c, corpo, o = {}) => chamar('PATCH', c, { ...o, corpo }),
+    del: (c, o) => chamar('DELETE', c, o),
     fechar: () => new Promise((ok) => server.close(ok))
   };
 }

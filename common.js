@@ -300,7 +300,7 @@ function rkAvatar(it){
 function rkLinha(it,unid){
   const eu=meuApelido()&&String(it.apelido).toLowerCase()===meuApelido().toLowerCase();
   const pat=RANKS.find(k=>k.name===it.patente),cor=escapeHtml(pat?pat.color:"#9aa3b2");
-  return `<div class="rkx${eu?" me":""}"><b>${escapeHtml(it.posicao)}</b><span class="av">${rkAvatar(it)}</span><span class="nm"><span class="n">${escapeHtml(it.apelido)}${eu?" (você)":""}</span>${it.patente?`<span class="pt" style="color:${cor};background:${cor}22">${escapeHtml(it.patente)}</span>`:""}</span><em>${fmt(it.valor)} ${unid}</em></div>`;
+  return `<div class="rkx${eu?" me":""}"><b>${escapeHtml(it.posicao)}</b><span class="av">${rkAvatar(it)}</span><span class="nm"><a class="n" href="perfil.html?u=${encodeURIComponent(it.apelido)}">${escapeHtml(it.apelido)}${eu?" (você)":""}</a>${it.patente?`<span class="pt" style="color:${cor};background:${cor}22">${escapeHtml(it.patente)}</span>`:""}</span><em>${fmt(it.valor)} ${unid}</em></div>`;
 }
 async function carregarRanking(el,metrica){
   if(!el)return;
@@ -345,8 +345,24 @@ function avatarSessaoHTML(u){
 }
 function contaSessaoHTML(){
   const u=SESSAO.usuario,p=SESSAO.patente&&SESSAO.patente.nome?SESSAO.patente.nome:"";
-  return `<div class="account-actions"><button type="button" class="sg-acct" onclick="openSignup()" title="Editar o meu gato e o meu apelido"><span class="sg-av">${avatarSessaoHTML(u)}</span><span>${escapeHtml(u.apelido)}${p?"<b>"+escapeHtml(p)+"</b>":""}</span></button><button type="button" onclick="sairDaConta()">Sair</button></div>`;
+  return `<div class="account-actions"><span class="acct-wrap"><button type="button" class="sg-acct" onclick="abrirMenuConta(event)" aria-haspopup="menu" aria-expanded="false" aria-controls="acct-menu" title="Meu perfil"><span class="sg-av">${avatarSessaoHTML(u)}</span><span>${escapeHtml(u.apelido)}${p?"<b>"+escapeHtml(p)+"</b>":""}</span></button><div class="acct-menu" id="acct-menu" role="menu" hidden>
+    <a role="menuitem" href="perfil.html">${icon("user")}Ver o meu perfil</a>
+    <a role="menuitem" href="perfil.html#editar">${icon("edit")}Editar o meu perfil</a>
+    <button type="button" role="menuitem" onclick="fecharMenuConta();openSignup()">${icon("cat")}Editar gatinho e apelido</button>
+  </div></span><button type="button" onclick="sairDaConta()">Sair</button></div>`;
 }
+// menu da conta (clicar no próprio avatar): ver/editar o perfil e editar o gato
+function abrirMenuConta(ev){
+  ev&&ev.stopPropagation();
+  const m=document.getElementById("acct-menu"),b=document.querySelector(".sg-acct");if(!m||!b)return;
+  const abrir=m.hidden;m.hidden=!abrir;b.setAttribute("aria-expanded",String(abrir));
+  if(abrir){const p=m.querySelector("[role=menuitem]");p&&p.focus()}
+}
+function fecharMenuConta(foco){const m=document.getElementById("acct-menu"),b=document.querySelector(".sg-acct");if(!m||m.hidden)return;m.hidden=true;b&&b.setAttribute("aria-expanded","false");if(foco&&b)b.focus()}
+document.addEventListener("click",e=>{if(!e.target.closest||!e.target.closest(".acct-wrap"))fecharMenuConta()});
+document.addEventListener("keydown",e=>{const m=document.getElementById("acct-menu");if(!m||m.hidden)return;
+  if(e.key==="Escape"){fecharMenuConta(true);return}
+  if(e.key==="ArrowDown"||e.key==="ArrowUp"){e.preventDefault();const it=[...m.querySelectorAll("[role=menuitem]")],i=it.indexOf(document.activeElement);it[(i+(e.key==="ArrowDown"?1:it.length-1))%it.length].focus()}});
 function updateAccount(){
   const el=document.getElementById("acct");if(!el)return;
   if(SESSAO&&SESSAO.usuario){el.innerHTML=contaSessaoHTML();return}
@@ -508,7 +524,7 @@ function renderHeader(page,opt={}){
   document.addEventListener("pointerdown",dismissOutside);
   document.addEventListener("focusin",dismissOutside);
   panel.addEventListener("click",event=>{
-    if(event.target.closest("button,a") && !event.target.closest(".dd")){
+    if(event.target.closest("button,a") && !event.target.closest(".dd,.sg-acct")){ // o avatar abre o menu da conta: o painel fica aberto
       if(menu.getAttribute("aria-expanded")==="true")menu.focus();
       closeMenu();
     }
