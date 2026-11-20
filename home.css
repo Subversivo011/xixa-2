@@ -294,5 +294,5 @@ body:has(main .facts) .nsft2{margin-top:22px!important}
 .sd-seg button.on{background:#0a6a9a;color:#fff;box-shadow:0 2px 8px #0a6a9a55}
 .sd-seg button:focus-visible{outline:3px solid #ffbf00;outline-offset:2px}
 .sd-seg .ico.in{width:15px;height:15px;margin:0}
-@media(pointer:coarse){.sd-seg button{min-height:44px}}
+@media(pointer:coarse),(max-width:640px){.sd-seg button,.sd-tabs button{min-height:44px}}
 @media(max-width:420px){.sd-seg{margin-left:0;width:100%}.sd-seg button{flex:1;justify-content:center}}
