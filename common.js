@@ -287,7 +287,9 @@ function closeSignup(){
   const novo=document.querySelector("#acct .sg-acct");
   // quem abriu pode ter sumido (item do menu da conta fechado, avatar redesenhado): então o foco vai para o avatar
   const visivel=e=>!!e&&e!==document.body&&e.isConnected&&e.getClientRects().length>0&&typeof e.focus==="function";
-  if(visivel(f))f.focus({preventScroll:true});else if(novo)novo.focus({preventScroll:true});
+  // no celular o avatar fica dentro do menu fechado: então o foco vai para o botão que abre o menu
+  const toggle=document.querySelector(".menu-toggle");
+  if(visivel(f))f.focus({preventScroll:true});else if(visivel(novo))novo.focus({preventScroll:true});else if(visivel(toggle))toggle.focus({preventScroll:true});
 }
 async function submitSignup(){
   if(sgSalvando)return;
@@ -653,6 +655,13 @@ function openPop(anchor,items){
       if(fs.length){const i=fs.indexOf(document.activeElement);
         if(e.shiftKey&&(i<=0)){e.preventDefault();fs[fs.length-1].focus()}
         else if(!e.shiftKey&&(i===fs.length-1||i<0&&document.activeElement.classList.contains("sg-box"))){e.preventDefault();fs[0].focus()}}}}
+    // setas nas abas do editor (padrão WAI-ARIA de tablist): ←/→ trocam de aba, Home/End vão às pontas
+    const aba=e.target&&e.target.closest&&e.target.closest("#sgTabs [role=tab]");
+    if(aba&&["ArrowLeft","ArrowRight","Home","End"].includes(e.key)){
+      const n=SG_TABS.length,i=[...aba.parentElement.children].indexOf(aba);
+      sgTab=e.key==="Home"?0:e.key==="End"?n-1:(i+(e.key==="ArrowRight"?1:-1)+n)%n;
+      e.preventDefault();sgRender();const nova=document.getElementById("sgTab"+sgTab);if(nova)nova.focus({preventScroll:true});return;
+    }
     if(e.key==="Escape"){closeSignup();const t=document.getElementById("tp");t&&t.classList.remove("open");const p=document.getElementById("pop");p&&p.classList.remove("open")}});
 })();
 
