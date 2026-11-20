@@ -345,13 +345,129 @@
 .pf-dlg p{margin:0 0 14px;color:var(--mut);font-size:13.5px}
 .pf-dlg fieldset{border:0;padding:0;margin:0 0 16px}
 .pf-dlg legend{font:800 12px Inter,sans-serif;letter-spacing:1px;text-transform:uppercase;color:var(--mut);margin-bottom:8px}
-.pf-lays{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px}
+.pf-lays{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px}
 .pf-lay{position:relative;display:flex;flex-direction:column;gap:6px;padding:10px;min-height:44px;border-radius:12px;border:2px solid var(--line2);cursor:pointer;font:700 13px Inter,sans-serif}
 .pf-lay input{position:absolute;opacity:0;pointer-events:none}
-.pf-lay i{display:block;height:34px;border-radius:7px}
 .pf-lay small{font-weight:500;color:var(--mut);font-size:11.5px}
 .pf-lay:has(input:checked){border-color:#0a6a9a;box-shadow:0 0 0 3px color-mix(in srgb,#0a6a9a 30%,transparent)}
 .pf-lay:has(input:focus-visible){outline:3px solid #ffbf00;outline-offset:2px}
+
+/* ---- opções do diálogo: miniatura do perfil + nome na letra da época (sem logos) ---- */
+.pf-lay .nm{font-size:15px;line-height:1.15;color:var(--txt)}
+.mini{position:relative;display:block;height:78px;border-radius:8px;overflow:hidden;background:#ddd;box-shadow:inset 0 0 0 1px #0002}
+.mini b{position:absolute;display:block}
+.mini .av{position:absolute;width:30px;height:30px;overflow:hidden;border-radius:5px;left:10px;top:24px;z-index:2;background:#ccc}
+.mini .av svg{display:block;width:100%;height:100%}
+/* fundo padrão das "caixas" */
+.mini .x1,.mini .x2,.mini .x3{background:#fff;border-radius:3px}
+.mini .x1{left:48px;top:24px;right:10px;height:12px}
+.mini .x2{left:48px;top:42px;right:30px;height:8px}
+.mini .x3{left:10px;top:60px;right:10px;height:10px}
+.mini .t{left:0;right:0;top:0;height:16px}
+/* home page anos 90 */
+.mini-homepage{background:#008080}
+.mini-homepage .t{background:linear-gradient(90deg,#000080,#1084d0)}
+.mini-homepage .x1{background:#ffffe0;height:14px;box-shadow:inset 0 -3px #ff00ff}
+.mini-homepage .x2{background:#c0c0c0;border:1px solid #fff}
+.mini-homepage .x3{background:repeating-linear-gradient(90deg,#ff0 0 8px,#000 8px 16px);height:5px;top:64px}
+.mini-homepage .av{border-radius:0;border:2px ridge #c0c0c0}
+/* ICQ */
+.mini-icq{background:linear-gradient(180deg,#3a8ee6 0 55%,#5fae3e 55%)}
+.mini-icq .t{background:linear-gradient(#0a54d6,#2a7af0);height:12px;left:6px;right:6px;top:6px;border-radius:4px 4px 0 0}
+.mini-icq .x1,.mini-icq .x2,.mini-icq .x3{background:#ece9d8}
+.mini-icq .x1{box-shadow:inset 3px 0 #7ec850}
+/* Orkut */
+.mini-orkut{background:#d4dded}
+.mini-orkut .t{background:linear-gradient(#bfd0ea,#e8eefa);box-shadow:0 2px #c4006a}
+.mini-orkut .x1{background:#fff;box-shadow:inset 0 -2px #c4006a33}
+.mini-orkut .x2{background:#fff8d6}
+/* Fotolog */
+.mini-fotolog{background:#e6e6e6}
+.mini-fotolog .t{background:#262626;box-shadow:0 3px #8cc63f}
+.mini-fotolog .av{left:50%;margin-left:-15px;border-radius:0;border:3px solid #fff;outline:1px solid #bbb}
+.mini-fotolog .x1,.mini-fotolog .x2{display:none}
+.mini-fotolog .x3{left:30px;right:30px;height:6px;top:64px;background:#8cc63f}
+/* MSN */
+.mini-msn{background:radial-gradient(ellipse at 20% 0%,#7fd3ff,#1a6fc2 55%,#0b2a5a)}
+.mini-msn .t{background:linear-gradient(#e8f4ff,#bcd9f5);left:6px;right:6px;top:6px;height:12px;border-radius:5px 5px 0 0}
+.mini-msn .av{border:2px solid #4caf2a;border-radius:6px}
+.mini-msn .x1,.mini-msn .x2,.mini-msn .x3{background:#ffffffd9}
+/* Twitter antigo */
+.mini-twitter{background:#c0deed radial-gradient(ellipse 30px 9px at 20% 12%,#fff 60%,transparent 62%),radial-gradient(ellipse 34px 10px at 80% 10%,#fff 60%,transparent 62%) #c0deed}
+.mini-twitter .t{display:none}
+.mini-twitter .x1{background:#fff;left:8px;right:8px;top:18px;height:54px;border-radius:5px;z-index:1}
+.mini-twitter .x2{z-index:2;background:#0a6e9c;height:5px;top:30px}
+.mini-twitter .x3{z-index:2;background:#e5eef3;left:48px;top:44px;height:5px}
+/* Facebook antigo */
+.mini-facebook{background:#e9ebee}
+.mini-facebook .t{background:#3b5998;height:14px}
+.mini-facebook .av{border-radius:0;border:2px solid #fff}
+.mini-facebook .x1{box-shadow:inset 0 0 0 1px #dddfe2}
+.mini-facebook .x2{background:#4267b2;right:60px}
+/* Ask.fm */
+.mini-ask{background:#e9f1f5}
+.mini-ask .t{background:linear-gradient(#1679a0,#10607f)}
+.mini-ask .av{border-radius:50%}
+.mini-ask .x1{background:#f1f4f6;box-shadow:inset 0 0 0 1px #d5e3ea}
+.mini-ask .x2{background:#d0353e;right:70px}
+/* WhatsApp */
+.mini-whatsapp{background:#efeae2}
+.mini-whatsapp .t{background:#075e54;height:18px}
+.mini-whatsapp .av{width:14px;height:14px;top:2px;left:6px;border-radius:50%}
+.mini-whatsapp .x1{left:10px;right:50px;top:26px;height:12px;border-radius:0 6px 6px 6px}
+.mini-whatsapp .x2{left:56px;right:10px;top:44px;height:12px;background:#dcf8c6;border-radius:6px 0 6px 6px}
+.mini-whatsapp .x3{top:62px;height:10px;border-radius:8px;background:#fff;box-shadow:inset -14px 0 #00a884}
+/* Vine */
+.mini-vine{background:#f2faf7}
+.mini-vine .t{background:#00805d;height:24px}
+.mini-vine .av{border-radius:6px;top:12px;border:2px solid #f2faf7}
+.mini-vine .x1{left:48px;top:30px;right:auto;width:16px;height:16px;background:#1e2a26}
+.mini-vine .x2{left:68px;top:30px;right:auto;width:16px;height:16px;background:#00805d}
+.mini-vine .x3{left:88px;top:30px;right:auto;width:16px;height:16px;background:#1e2a26}
+/* Snapchat */
+.mini-snapchat{background:#fffc00}
+.mini-snapchat .t{display:none}
+.mini-snapchat .av{left:50%;margin-left:-17px;top:8px;width:34px;height:34px;border-radius:50%;outline:3px dotted #111;outline-offset:2px}
+.mini-snapchat .x1,.mini-snapchat .x2{display:none}
+.mini-snapchat .x3{top:56px;left:20px;right:20px;height:12px;border-radius:10px;box-shadow:0 2px #111}
+/* Instagram */
+.mini-instagram{background:#fff}
+.mini-instagram .t{height:18px;background:linear-gradient(45deg,#f09433,#dc2743,#bc1888)}
+.mini-instagram .av{border-radius:50%;top:10px;box-shadow:0 0 0 2px #fff,0 0 0 4px #dc2743}
+.mini-instagram .x1,.mini-instagram .x2{background:#efefef}
+.mini-instagram .x1{top:24px}
+.mini-instagram .x3{background:linear-gradient(90deg,#c9c9c9 0 31%,transparent 31% 34.5%,#c9c9c9 34.5% 65.5%,transparent 65.5% 69%,#c9c9c9 69%);height:14px;top:56px;border-radius:0}
+/* TikTok */
+.mini-tiktok{background:#121212}
+.mini-tiktok .t{height:18px;background:radial-gradient(ellipse at 30% 140%,#fe2c5577,transparent 60%),radial-gradient(ellipse at 70% -40%,#25f4ee77,transparent 60%),#000}
+.mini-tiktok .av{border-radius:50%;top:10px;box-shadow:-2px -1px 0 #25f4ee,2px 1px 0 #fe2c55}
+.mini-tiktok .x1,.mini-tiktok .x2{background:#2a2a2a}
+.mini-tiktok .x1{top:24px}
+.mini-tiktok .x3{background:linear-gradient(90deg,#333 0 31%,transparent 31% 34.5%,#333 34.5% 65.5%,transparent 65.5% 69%,#fe2c55 69%);height:14px;top:56px;border-radius:0}
+/* Kwai */
+.mini-kwai{background:#fff4ea}
+.mini-kwai .t{height:18px;background:linear-gradient(135deg,#c45200,#a33a00)}
+.mini-kwai .av{border-radius:50%;top:10px;border:2px solid #fff4ea}
+.mini-kwai .x1{top:24px;background:#ffe0c2}
+.mini-kwai .x2{background:#b34700;right:70px}
+/* Bluesky */
+.mini-bluesky{background:#fff}
+.mini-bluesky .t{height:18px;background:linear-gradient(180deg,#0a5cc2,#5aa9ff)}
+.mini-bluesky .av{border-radius:50%;top:10px;border:2px solid #fff}
+.mini-bluesky .x1,.mini-bluesky .x3{background:#eef3f8}
+.mini-bluesky .x1{top:24px}
+.mini-bluesky .x2{background:#0a5cc2;right:70px}
+/* nome na letra típica de cada época (não é logo: só a fonte do período) */
+.l-homepage .nm{font-family:"Comic Sans MS","Comic Sans",cursive;color:#800080}
+.l-icq .nm{font-family:Tahoma,Verdana,sans-serif}
+.l-orkut .nm,.l-fotolog .nm{font-family:Verdana,Tahoma,sans-serif;font-size:14px}
+.l-msn .nm{font-family:"Segoe UI",Tahoma,sans-serif;font-weight:600}
+.l-twitter .nm,.l-facebook .nm{font-family:"Lucida Grande","Lucida Sans Unicode",Tahoma,sans-serif;font-size:14px}
+.l-ask .nm,.l-whatsapp .nm{font-family:"Helvetica Neue",Arial,sans-serif}
+.l-vine .nm{font-family:Georgia,"Times New Roman",serif;font-style:italic}
+.l-snapchat .nm{font-family:"Avenir Next","Trebuchet MS",sans-serif;font-weight:800}
+.l-instagram .nm,.l-tiktok .nm,.l-kwai .nm,.l-bluesky .nm{font-family:-apple-system,"Segoe UI",Roboto,Inter,sans-serif;font-weight:800;letter-spacing:-.2px}
+:root[data-theme="dark"] .l-homepage .nm{color:#ff9cff}
 .pf-dlg select{width:100%;min-height:44px;padding:0 10px;border-radius:10px;border:1px solid var(--line2);background:var(--panel2);color:var(--txt);font:600 14px Inter,sans-serif}
 .pf-dlg .rod{display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px;margin-top:6px}
 .pf-dlg .erro{color:#c22a33;font-weight:700;font-size:13px;min-height:1em;margin:0 0 8px}
@@ -381,3 +497,4 @@
 /* dentro do perfil o botão segue o visual da rede (fundo claro), mesmo com o site no modo escuro */
 .pf .pf-bt{background:#fff;color:#1d2129;border-color:#0003}
 .pf-instagram .pf-figs .pf-carta .art{font-size:clamp(30px,5vw,56px)}
+@media(max-width:520px){.pf-lays{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.pf-lay{padding:8px}.pf-lay .nm{font-size:13px}.pf-lay small{font-size:11px}}

@@ -12,7 +12,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Inter:wght@400;500;600;700;800&family=Baloo+2:wght@700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="theme.css?v=20261121r">
 <link rel="stylesheet" href="viewer.css?v=20261120d">
-<link rel="stylesheet" href="perfil.css?v=20261121r">
+<link rel="stylesheet" href="perfil.css?v=20261121s">
 <script>try{var t=localStorage.getItem("ns_theme")}catch(e){}document.documentElement.dataset.theme=t==="dark"?"dark":"light"</script>
 </head>
 <body>
@@ -222,7 +222,9 @@ function barra(){
 }
 function abrirEdicao(){
   const p=P.perfil;
-  $("lays").innerHTML=Object.entries(LAYOUTS).map(([k,v])=>`<label class="pf-lay"><input type="radio" name="lay" value="${k}" ${k===p.layout?"checked":""}><i style="background:${v.cor}"></i>${esc(v.nome)}<small>${esc(v.dica)}</small></label>`).join("");
+  // cada opção: miniatura do perfil naquela rede (com o seu gatinho) e o nome na letra típica da época (sem logo)
+  const av=gatoValido(p.avatar_gato)?catSVG(p.avatar_gato):"";
+  $("lays").innerHTML=Object.entries(LAYOUTS).map(([k,v])=>`<label class="pf-lay l-${k}"><input type="radio" name="lay" value="${k}" ${k===p.layout?"checked":""}><span class="mini mini-${k}" aria-hidden="true"><b class="t"></b><span class="av">${av}</span><b class="x1"></b><b class="x2"></b><b class="x3"></b></span><span class="nm">${esc(v.nome)}</span><small>${esc(v.dica)}</small></label>`).join("");
   const l=P.album.cartas.slice().sort((a,b)=>RORD.indexOf(a.raridade)-RORD.indexOf(b.raridade)||a.nome.localeCompare(b.nome));
   $("fav").innerHTML=`<option value="">Nenhuma</option>`+l.map(c=>`<option value="${esc(c.id)}" ${P.carta_favorita&&P.carta_favorita.id===c.id?"selected":""}>${esc(c.nome)} (${esc(c.raridade)})</option>`).join("");
   $("fav").disabled=!l.length;if(!l.length)$("fav").innerHTML=`<option value="">Você ainda não tem figurinhas</option>`;
