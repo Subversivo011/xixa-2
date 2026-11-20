@@ -247,3 +247,37 @@ test("celular: a barra do Salvar fica colada embaixo da tela (não no meio) e é
   assert.strictEqual(await page.evaluate(() => { const l = [...document.querySelector(".sg-box").children]; return l[l.length - 1].className; }), "sg-bar", "última no DOM (ordem do Tab)");
   await ctx.close();
 });
+
+test("abas do editor: setas ←/→, Home e End trocam de aba e o foco acompanha", opts, async () => {
+  const { ctx, page, erros } = await abrir({ w: 1280, h: 900 });
+  await abrirEditor(page);
+  const sel = () => page.$$eval("#sgTabs [role=tab]", (l) => l.map((b) => b.getAttribute("aria-selected")).indexOf("true"));
+  await page.focus("#sgTabs [role=tab]:nth-child(1)");
+  await page.keyboard.press("ArrowRight"); assert.strictEqual(await sel(), 1);
+  assert.strictEqual(await page.evaluate(() => document.activeElement.id), "sgTab1");
+  await page.keyboard.press("End"); assert.strictEqual(await sel(), 3);
+  await page.keyboard.press("ArrowRight"); assert.strictEqual(await sel(), 0, "dá a volta");
+  await page.keyboard.press("ArrowLeft"); assert.strictEqual(await sel(), 3, "dá a volta para trás");
+  await page.keyboard.press("Home"); assert.strictEqual(await sel(), 0);
+  assert.deepStrictEqual(erros, []);
+  await ctx.close();
+});
+
+test("o botão de fechar do painel de perfil não herda o estilo do X do editor no celular", opts, async () => {
+  const { ctx, page } = await abrir({ w: 390, h: 844, toque: true });
+  await page.evaluate(() => openTestPanel());
+  await page.waitForSelector("#tp.open .sg-x");
+  const r = await page.$eval("#tp .sg-x", (b) => { const cs = getComputedStyle(b); return { pos: cs.position, w: Math.round(b.getBoundingClientRect().width) }; });
+  assert.notStrictEqual(r.pos, "fixed", "o X do painel de perfil continua absoluto no painel");
+  assert.notStrictEqual(r.w, 44);
+  await ctx.close();
+});
+
+test("celular: ao fechar o editor com o avatar escondido no menu, o foco vai para o botão do menu", opts, async () => {
+  const { ctx, page } = await abrir({ w: 390, h: 844, toque: true });
+  await abrirEditor(page);
+  await page.keyboard.press("Escape");
+  await page.waitForFunction(() => !document.getElementById("sgm").classList.contains("open"));
+  assert.ok(await page.evaluate(() => document.activeElement && document.activeElement.classList.contains("menu-toggle")), "foco no botão Menu principal");
+  await ctx.close();
+});

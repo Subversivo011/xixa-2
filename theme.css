@@ -209,8 +209,8 @@ a{color:inherit}
 @media(max-width:980px){
   #sgm{padding:0;overflow:auto}#sgm.open{display:block}
   .sg-box{display:flex;flex-direction:column;min-height:100%;max-width:none;border-radius:0;box-shadow:none;overflow:clip}
-  .sg-x{position:fixed;top:8px;right:8px;width:44px;height:44px;z-index:6;background:var(--sunk);color:var(--txt)}
-  .sg-x .ico{width:20px;height:20px}
+  #sgm .sg-x{position:fixed;top:8px;right:8px;width:44px;height:44px;z-index:6;background:var(--sunk);color:var(--txt)} /* só o X do editor (o .sg-x do painel de perfil não muda) */
+  #sgm .sg-x .ico{width:20px;height:20px}
   .sg-form{padding:16px 18px 6px}
   .sg-box h2{font-size:26px;padding-right:52px}
   .sg-studio{display:block;flex:1}
