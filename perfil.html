@@ -14,7 +14,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Inter:wght@400;500;600;700;800&family=Baloo+2:wght@700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="theme.css?v=20261122d">
 <link rel="stylesheet" href="viewer.css?v=20261120d">
-<link rel="stylesheet" href="perfil.css?v=20261122c">
+<link rel="stylesheet" href="perfil.css?v=20261122k">
 <script>try{var t=localStorage.getItem("ns_theme")}catch(e){}document.documentElement.dataset.theme=t==="dark"?"dark":"light"</script>
 </head>
 <body>
@@ -129,6 +129,20 @@ function rodRec(r){const l=P.perfil.layout,q=esc(quando(r.em));
   return {facebook:`<div class="rod">Curtir · Comentar · ${q}</div>`,whatsapp:`<div class="rod">${esc(new Date(r.em).toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit"}))} ✔✔</div>`,
    instagram:`<div class="rod">Curtir · Responder</div>`,tiktok:`<div class="rod">Responder · ♡</div>`,kwai:`<div class="rod">Responder · ♡</div>`,bluesky:`<div class="rod">💬 · 🔁 · ♡</div>`,vine:`<div class="rod">🔁 revine</div>`,
    ask:`<div class="rod">👍 Curtir</div>`,icq:`<div class="rod">uh-oh!</div>`}[l]||""}
+// um detalhe típico de cada rede moderna (sem logos, sem som, humor do site); a animação é só CSS e some com prefers-reduced-motion
+function detalheHTML(p,a,nRec){
+  const ap=esc(p.apelido),L=p.layout,autor=REC.length?esc(REC[0].autor.apelido):"alguém";
+  const dias=Math.max(1,Math.floor((Date.now()-new Date(p.membro_desde))/864e5)+1||1);
+  const f={
+    vine:()=>`<span class="loop" aria-hidden="true"><i></i></span><span>↻ 6 segundos em loop. Pode repetir à vontade.</span>`,
+    snapchat:()=>`<span class="chama" aria-hidden="true">🔥</span><span>${dias} dia${dias===1?"":"s"} de sequência. Não deixe a chama apagar!</span>`,
+    instagram:()=>`<span class="cora" aria-hidden="true">♥</span><span>Curtido por <b>${autor}</b> e outras <b>${a.tenho*3+nRec}</b> pessoas que só olharam</span>`,
+    tiktok:()=>`<span class="som"><span class="trilho"><span>♫ som original · ${ap} · com chiado de conexão discada</span><span aria-hidden="true">♫ som original · ${ap} · com chiado de conexão discada</span></span></span>`,
+    kwai:()=>`<span class="moeda" aria-hidden="true">🪙</span><span>Assista e ganhe moedas! Aqui o prêmio é a nostalgia.</span>`,
+    bluesky:()=>`<span>@${ap.toLowerCase()}.nostalgia.social</span> <span class="ok" aria-hidden="true">✔</span> <span>domínio verificado, é gato mesmo</span>`
+  }[L];
+  return f?`<div class="det det-${L}">${f()}</div>`:"";
+}
 // coleções como "destaques" redondos (Instagram, TikTok etc.)
 function destaquesHTML(){return `<div class="pf-dest">${P.album.colecoes.map(k=>{const c=colecao(k.id);return `<span class="d"><i style="--cc:${esc(c?c.c:"#888")}">${esc(c?c.ic:"📒")}</i><b title="${esc(k.nome)}">${esc(k.nome)}</b><small>${k.tenho}/${k.total}</small></span>`}).join("")}</div>`}
 // ---- cada rede monta o perfil do seu jeito ----
@@ -158,7 +172,7 @@ function montar(){
        <div class="pf-box">${pat}</div><div class="pf-box"><h2 class="pf-h">Carta favorita</h2>${fav}</div><div class="pf-box"><h2 class="pf-h">Coleções</h2>${cols}</div><h2 class="pf-h">Figurinhas</h2>${figs}</div></div>`,
     facebook:()=>`<div class="pf-top"><b>facebook</b></div>
      <div class="pf-g"><div class="pf-c">${gato(p.avatar_gato,p.apelido)}<div class="info" id="fb-info"><span><b>Patente:</b> ${P.patente?esc(P.patente.nome):"-"}</span><span><b>Membro desde:</b> ${esc(desde)}</span><span><b>Figurinhas:</b> ${a.tenho} de ${a.total}</span></div></div>
-      <div class="pf-c"><h1 class="pf-nome">${ap}</h1><nav class="abas" aria-label="Seções do perfil"><a href="#fb-mural" aria-current="true" data-ir="fb-mural">Mural</a><a href="#fb-info" data-ir="fb-info">Informações</a><a href="#fb-fotos" data-ir="fb-fotos">Fotos</a></nav>
+      <div class="pf-c"><h1 class="pf-nome">${ap}</h1><nav class="abas" aria-label="Seções do perfil"><a href="#fb-mural" aria-current="location" data-ir="fb-mural">Mural</a><a href="#fb-info" data-ir="fb-info">Informações</a><a href="#fb-fotos" data-ir="fb-fotos">Fotos</a></nav>
        <div class="caixa" id="fb-mural"><h2 class="pf-h">${esc(L.recados)} (${nRec})</h2>${rec}</div><div class="caixa" id="fb-fotos"><h2 class="pf-h">Fotos (figurinhas)</h2>${figs}</div></div>
       <div class="pf-c"><div class="caixa"><h2 class="pf-h">Nível</h2>${pat}</div><div class="caixa"><h2 class="pf-h">Curtiu (carta favorita)</h2>${fav}</div><div class="caixa"><h2 class="pf-h">Grupos (coleções)</h2>${cols}</div></div></div>`
   };
@@ -166,7 +180,7 @@ function montar(){
   const mod=()=>{const st=L.st||["figurinhas","coleções","XP"];
     return `<div class="banner" aria-hidden="true"></div><div class="cab">${gato(p.avatar_gato,p.apelido)}<div class="tx"><h1 class="pf-nome">${ap}</h1><div class="arroba">@${ap.toLowerCase()}</div>
       <div class="nums"><span><b>${a.tenho}</b>${esc(st[0])}</span><span><b>${a.colecoes_completas}/${a.colecoes.length}</b>${esc(st[1])}</span><span><b>${esc(short(P.xp))}</b>${esc(st[2])}</span></div>
-      <div class="bio">Colecionando a internet brasileira desde ${esc(desde)}.</div>${pat}</div></div>
+      <div class="bio">Colecionando a internet brasileira desde ${esc(desde)}.</div>${detalheHTML(p,a,nRec)}${pat}</div></div>
      ${destaquesHTML()}
      <div class="pf-g"><div class="pf-c"><h2 class="pf-h">${p.layout==="instagram"?"Publicações":"Figurinhas"}</h2>${figs}</div>
       <div class="pf-c"><div class="pf-box fav"><h2 class="pf-h">Carta favorita</h2>${fav}</div><div class="pf-box rcx"><h2 class="pf-h">${esc(L.recados)} (${nRec})</h2>${rec}</div></div></div>`};
@@ -198,7 +212,7 @@ function sorte(ap){let h=new Date().toDateString().length;for(const c of String(
 
 function ligar(L){
   const el=$("pf");
-  el.querySelectorAll(".abas a").forEach(t=>t.onclick=ev=>{ev.preventDefault();el.querySelectorAll(".abas a").forEach(o=>o.removeAttribute("aria-current"));t.setAttribute("aria-current","true");const x=$(t.dataset.ir);if(x)x.scrollIntoView({block:"start",behavior:matchMedia("(prefers-reduced-motion:reduce)").matches?"auto":"smooth"})});
+  el.querySelectorAll(".abas a").forEach(t=>t.onclick=ev=>{ev.preventDefault();el.querySelectorAll(".abas a").forEach(o=>o.removeAttribute("aria-current"));t.setAttribute("aria-current","location");const x=$(t.dataset.ir);if(x)x.scrollIntoView({block:"start",behavior:matchMedia("(prefers-reduced-motion:reduce)").matches?"auto":"smooth"})});
   const b=el.querySelector("[data-todas]");if(b)b.onclick=()=>{MOSTRAR_TODAS=true;montar();avisar("Mostrando todas as figurinhas")};
   el.querySelectorAll("[data-apagar]").forEach(x=>x.onclick=()=>apagar(x.dataset.apagar));
   const f=$("rcF");if(!f)return;
