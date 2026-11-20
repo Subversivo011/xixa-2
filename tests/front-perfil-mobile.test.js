@@ -204,9 +204,9 @@ for (const vp of VPS) {
     assert.ok(!/Pesquisar/.test(await page.textContent(".pf-top")), "sem o campo Pesquisar decorativo");
     const abas = await page.$$eval(".abas a", (l) => l.map((a) => ({ cur: a.getAttribute("aria-current"), h: a.getBoundingClientRect().height, w: a.getBoundingClientRect().width })));
     assert.ok(abas.every((a) => a.h >= 44 && a.w >= 44), JSON.stringify(abas));
-    assert.deepStrictEqual(abas.map((a) => a.cur), ["true", null, null]);
+    assert.deepStrictEqual(abas.map((a) => a.cur), ["location", null, null]);
     await page.click(".abas a:nth-child(3)");
-    assert.deepStrictEqual(await page.$$eval(".abas a", (l) => l.map((a) => a.getAttribute("aria-current"))), [null, null, "true"]);
+    assert.deepStrictEqual(await page.$$eval(".abas a", (l) => l.map((a) => a.getAttribute("aria-current"))), [null, null, "location"]);
     assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), "sem overflow horizontal");
     assert.deepStrictEqual(erros, []);
     await ctx.close();

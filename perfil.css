@@ -541,7 +541,7 @@
 .pf-dlg fieldset{min-width:0}
 .pf-dlg legend .dica{text-transform:none;letter-spacing:0;font-weight:600;margin-left:6px}
 .pf-facebook .abas a{display:flex;align-items:center;justify-content:center;min-height:44px;padding:6px 14px;background:#f2f2f2;border:1px solid #ccc;border-bottom:0;color:#3b5998;font-size:13px;text-decoration:none}
-.pf-facebook .abas a[aria-current="true"]{background:#fff;color:#333;font-weight:bold;margin-bottom:-1px}
+.pf-facebook .abas a[aria-current="location"]{background:#fff;color:#333;font-weight:bold;margin-bottom:-1px}
 .pf-facebook .abas a:hover{text-decoration:underline}
 .pf-col small{font-size:12px}
 .pf-ask .pf-rc .qm time{opacity:1}

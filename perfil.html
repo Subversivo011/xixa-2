@@ -14,7 +14,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Inter:wght@400;500;600;700;800&family=Baloo+2:wght@700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="theme.css?v=20261122d">
 <link rel="stylesheet" href="viewer.css?v=20261120d">
-<link rel="stylesheet" href="perfil.css?v=20261122d">
+<link rel="stylesheet" href="perfil.css?v=20261122h">
 <script>try{var t=localStorage.getItem("ns_theme")}catch(e){}document.documentElement.dataset.theme=t==="dark"?"dark":"light"</script>
 </head>
 <body>
@@ -172,7 +172,7 @@ function montar(){
        <div class="pf-box">${pat}</div><div class="pf-box"><h2 class="pf-h">Carta favorita</h2>${fav}</div><div class="pf-box"><h2 class="pf-h">Coleções</h2>${cols}</div><h2 class="pf-h">Figurinhas</h2>${figs}</div></div>`,
     facebook:()=>`<div class="pf-top"><b>facebook</b></div>
      <div class="pf-g"><div class="pf-c">${gato(p.avatar_gato,p.apelido)}<div class="info" id="fb-info"><span><b>Patente:</b> ${P.patente?esc(P.patente.nome):"-"}</span><span><b>Membro desde:</b> ${esc(desde)}</span><span><b>Figurinhas:</b> ${a.tenho} de ${a.total}</span></div></div>
-      <div class="pf-c"><h1 class="pf-nome">${ap}</h1><nav class="abas" aria-label="Seções do perfil"><a href="#fb-mural" aria-current="true" data-ir="fb-mural">Mural</a><a href="#fb-info" data-ir="fb-info">Informações</a><a href="#fb-fotos" data-ir="fb-fotos">Fotos</a></nav>
+      <div class="pf-c"><h1 class="pf-nome">${ap}</h1><nav class="abas" aria-label="Seções do perfil"><a href="#fb-mural" aria-current="location" data-ir="fb-mural">Mural</a><a href="#fb-info" data-ir="fb-info">Informações</a><a href="#fb-fotos" data-ir="fb-fotos">Fotos</a></nav>
        <div class="caixa" id="fb-mural"><h2 class="pf-h">${esc(L.recados)} (${nRec})</h2>${rec}</div><div class="caixa" id="fb-fotos"><h2 class="pf-h">Fotos (figurinhas)</h2>${figs}</div></div>
       <div class="pf-c"><div class="caixa"><h2 class="pf-h">Nível</h2>${pat}</div><div class="caixa"><h2 class="pf-h">Curtiu (carta favorita)</h2>${fav}</div><div class="caixa"><h2 class="pf-h">Grupos (coleções)</h2>${cols}</div></div></div>`
   };
@@ -212,7 +212,7 @@ function sorte(ap){let h=new Date().toDateString().length;for(const c of String(
 
 function ligar(L){
   const el=$("pf");
-  el.querySelectorAll(".abas a").forEach(t=>t.onclick=ev=>{ev.preventDefault();el.querySelectorAll(".abas a").forEach(o=>o.removeAttribute("aria-current"));t.setAttribute("aria-current","true");const x=$(t.dataset.ir);if(x)x.scrollIntoView({block:"start",behavior:matchMedia("(prefers-reduced-motion:reduce)").matches?"auto":"smooth"})});
+  el.querySelectorAll(".abas a").forEach(t=>t.onclick=ev=>{ev.preventDefault();el.querySelectorAll(".abas a").forEach(o=>o.removeAttribute("aria-current"));t.setAttribute("aria-current","location");const x=$(t.dataset.ir);if(x)x.scrollIntoView({block:"start",behavior:matchMedia("(prefers-reduced-motion:reduce)").matches?"auto":"smooth"})});
   const b=el.querySelector("[data-todas]");if(b)b.onclick=()=>{MOSTRAR_TODAS=true;montar();avisar("Mostrando todas as figurinhas")};
   el.querySelectorAll("[data-apagar]").forEach(x=>x.onclick=()=>apagar(x.dataset.apagar));
   const f=$("rcF");if(!f)return;
