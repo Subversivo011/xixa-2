@@ -40,11 +40,12 @@ const COLECOES = [
   { id: "tv", nome: "TV Aberta", total: 20, tenho: 1, completa: false }
 ];
 
-async function abrir(layout, vp, { recados = [] } = {}) {
+async function abrir(layout, vp, { recados = [], tema = null } = {}) {
   const st = { patches: [], fav: null, layout };
   const eu = () => ({ id: 1, apelido: "Ana", avatar_gato: GATO, avatar_url: null, usar_foto: false, cadastro_completo: true, perfil_layout: st.layout, carta_favorita: st.fav });
   const json = (route, status, corpo) => route.fulfill({ status, contentType: "application/json", body: JSON.stringify(corpo) });
   const ctx = await browser.newContext({ viewport: vp, hasTouch: vp.width < 600, isMobile: vp.width < 600 });
+  if (tema) await ctx.addInitScript((t) => { try { localStorage.setItem("ns_theme", t); } catch (e) { /* sem storage */ } }, tema);
   await ctx.route((url) => url.hostname !== "127.0.0.1", (r) => r.abort());
   await ctx.route("**/api/**", async (route) => {
     const req = route.request(), p = decodeURIComponent(new URL(req.url()).pathname), m = req.method();
@@ -114,10 +115,13 @@ for (const layout of MODERNOS) {
     if (layout === "snapchat") assert.match(txt, /^🔥 \d+ dias? de sequência\. Não deixe a chama apagar!$/);
     else if (layout === "tiktok") assert.ok(txt.startsWith(COPY.tiktok), txt);
     else assert.strictEqual(txt, COPY[layout]);
-    // barra de XP: preenchimento e trilho derivam de --pc (patente #2fbf5b)
+    // barra de XP: preenchimento e trilho derivam de --pc (patente verde #2fbf5b); o contraste em si é medido por pixel no teste da barra
     const xp = await page.$eval(".pf .pf-xp i", (i) => ({ fill: getComputedStyle(i).backgroundColor, track: getComputedStyle(i.parentElement).backgroundColor }));
-    assert.strictEqual(xp.fill, "rgb(47, 191, 91)");
-    assert.match(xp.track, /^rgba\(47, 191, 91, 0\.2\d*\)$|^color\(srgb/, "trilho na cor da patente: " + xp.track);
+    const nums = (c) => (c.match(/[0-9.]+/g) || []).slice(0, 3).map(Number);
+    const [r, g, bl] = nums(xp.fill);
+    assert.ok(g > r && g > bl, "preenchimento na cor (verde) da patente: " + xp.fill);
+    if (layout === "tiktok") assert.strictEqual(xp.fill, "rgb(47, 191, 91)");
+    assert.notStrictEqual(xp.fill, xp.track);
     // sem som/mídia automática, sem logos oficiais (nenhuma imagem nova)
     assert.strictEqual(await page.$$eval("#pf audio, #pf video, #pf iframe, #pf source", (l) => l.length), 0);
     assert.strictEqual(await page.$$eval(".pf .det img, .pf .det svg", (l) => l.length), 0);
@@ -163,4 +167,85 @@ test("os outros visuais não ganharam detalhe", opts, async () => {
     assert.strictEqual(await page.$$eval(".pf .det", (l) => l.length), 0, layout);
     await ctx.close();
   }
+});
+
+// ---- barra de XP: contraste por pixel (WCAG 1.4.11, componente não textual >= 3:1) ----
+const zlib = require("node:zlib");
+function lerPng(buf) {
+  let o = 8, w = 0, h = 0, ct = 0; const dados = [];
+  while (o < buf.length) {
+    const len = buf.readUInt32BE(o), tipo = buf.toString("latin1", o + 4, o + 8), d = buf.subarray(o + 8, o + 8 + len);
+    if (tipo === "IHDR") { w = d.readUInt32BE(0); h = d.readUInt32BE(4); ct = d[9]; }
+    if (tipo === "IDAT") dados.push(d);
+    o += 12 + len;
+  }
+  const bpp = ct === 6 ? 4 : 3, raw = zlib.inflateSync(Buffer.concat(dados)), st = w * bpp, px = Buffer.alloc(h * st);
+  for (let y = 0; y < h; y++) {
+    const f = raw[y * (st + 1)], lin = raw.subarray(y * (st + 1) + 1, (y + 1) * (st + 1));
+    for (let x = 0; x < st; x++) {
+      const a = x >= bpp ? px[y * st + x - bpp] : 0, b = y ? px[(y - 1) * st + x] : 0, c = x >= bpp && y ? px[(y - 1) * st + x - bpp] : 0;
+      let v = lin[x];
+      if (f === 1) v += a; else if (f === 2) v += b; else if (f === 3) v += (a + b) >> 1;
+      else if (f === 4) { const p = a + b - c, pa = Math.abs(p - a), pb = Math.abs(p - b), pc = Math.abs(p - c); v += pa <= pb && pa <= pc ? a : pb <= pc ? b : c; }
+      px[y * st + x] = v & 255;
+    }
+  }
+  return { w, h, at: (x, y) => [px[y * st + x * bpp], px[y * st + x * bpp + 1], px[y * st + x * bpp + 2]] };
+}
+const lumRgb = ([r, g, b]) => { const f = (v) => { v /= 255; return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); }; return 0.2126 * f(r) + 0.7152 * f(g) + 0.0722 * f(b); };
+const razao = (a, b) => { const x = lumRgb(a), y = lumRgb(b); return (Math.max(x, y) + 0.05) / (Math.min(x, y) + 0.05); };
+const PATENTES = [["discado", "#9aa3b2"], ["banda_larga", "#2fbf5b"], ["colaborador", "#2f86ff"], ["moderador", "#a855f7"], ["dono", "#f5b70a"], ["lenda", "#ff3b47"]];
+
+async function medirXp(layout, cor, tema) {
+  const { ctx, page } = await abrir(layout, { width: 1280, height: 900 }, { tema });
+  await page.waitForSelector(`.pf-${layout} .pf-xp`);
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  const el = await page.$(".pf .pf-xp");
+  await el.scrollIntoViewIfNeeded();
+  const r = await el.evaluate((e) => { const b = e.getBoundingClientRect(); return { x: b.left, y: b.top, w: b.width, h: b.height }; });
+  const png = lerPng(await page.screenshot({ clip: { x: Math.max(0, r.x - 10), y: Math.max(0, r.y - 10), width: r.w + 20, height: r.h + 20 } }));
+  const ox = Math.round(r.x - Math.max(0, r.x - 10)), oy = Math.round(r.y - Math.max(0, r.y - 10)), cy = oy + Math.round(r.h / 2);
+  const fill = png.at(ox + Math.round(r.w * 0.4), cy), track = png.at(ox + Math.round(r.w * 0.93), cy), fundo = png.at(ox + Math.round(r.w * 0.5), Math.max(0, oy - 6));
+  const borda = png.at(ox + Math.round(r.w * 0.93), oy + 1);
+  await ctx.close();
+  return { fillTrack: razao(fill, track), bordaFundo: razao(borda, fundo), fillFundo: razao(fill, fundo) };
+}
+
+test("barra de XP dos modernos: preenchimento x trilho >= 3:1 e contorno x fundo >= 3:1 (por pixel, 6 patentes, claro e escuro)", opts, async () => {
+  const tabela = []; const falhas = [];
+  for (const layout of MODERNOS) for (const [id, cor] of PATENTES) for (const tema of ["light", "dark"]) {
+    PAT.id = id; PAT.cor = cor;
+    const m = await medirXp(layout, cor, tema);
+    tabela.push(`${layout}|${id}|${tema}|fill/trilho ${m.fillTrack.toFixed(2)}|contorno/fundo ${m.bordaFundo.toFixed(2)}`);
+    if (m.fillTrack < 3 || m.bordaFundo < 3) falhas.push(tabela.at(-1));
+  }
+  PAT.id = "banda_larga"; PAT.cor = "#2fbf5b";
+  const min = (k) => Math.min(...tabela.map((t) => parseFloat(t.split("|")[k].split(" ").at(-1))));
+  console.log("XP min fill/trilho:", min(3).toFixed(2), "min contorno/fundo:", min(4).toFixed(2), "(72 combinações)");
+  if (process.env.XP_TABELA) console.log(tabela.join("\n"));
+  assert.deepStrictEqual(falhas, []);
+});
+
+test("vine: a barrinha do loop anima transform (sem layout por quadro) mantendo 6 s e reinício", opts, async () => {
+  const { ctx, page } = await abrir("vine", VPS[0]);
+  await page.waitForSelector(".det-vine .loop i");
+  await page.emulateMedia({ reducedMotion: "no-preference" });
+  const cs = await page.$eval(".det-vine .loop i", (e) => { const c = getComputedStyle(e); return { nome: c.animationName, dur: c.animationDuration, it: c.animationIterationCount }; });
+  assert.strictEqual(cs.dur, "6s"); assert.strictEqual(cs.it, "infinite");
+  const cdp = await page.context().newCDPSession(page);
+  await cdp.send("Performance.enable");
+  const lay = async () => (await cdp.send("Performance.getMetrics")).metrics.find((m) => m.name === "LayoutCount").value;
+  const a = await lay(); await page.waitForTimeout(3000); const b = await lay();
+  console.log("LayoutCount do vine em 3 s:", b - a);
+  assert.ok(b - a <= 6, "layouts em 3 s: " + (b - a));
+  const props = await page.evaluate((nome) => { const o = new Set(); for (const s of document.styleSheets) { let rs; try { rs = s.cssRules; } catch (e) { continue; } for (const r of rs) if (r.type === CSSRule.KEYFRAMES_RULE && r.name === nome) for (const k of r.cssRules) for (let i = 0; i < k.style.length; i++) o.add(k.style[i]); } return [...o]; }, cs.nome);
+  assert.deepStrictEqual(props, ["transform"], "só transform nos keyframes: " + props);
+  await ctx.close();
+});
+
+test("bluesky: espaço real entre handle, selo e texto no DOM", opts, async () => {
+  const { ctx, page } = await abrir("bluesky", VPS[0]);
+  await page.waitForSelector(".det-bluesky");
+  assert.strictEqual(await page.$eval(".det-bluesky", (e) => e.textContent), "@ana.nostalgia.social ✔ domínio verificado, é gato mesmo");
+  await ctx.close();
 });

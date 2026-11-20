@@ -14,7 +14,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Inter:wght@400;500;600;700;800&family=Baloo+2:wght@700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="theme.css?v=20261122d">
 <link rel="stylesheet" href="viewer.css?v=20261120d">
-<link rel="stylesheet" href="perfil.css?v=20261122h">
+<link rel="stylesheet" href="perfil.css?v=20261122k">
 <script>try{var t=localStorage.getItem("ns_theme")}catch(e){}document.documentElement.dataset.theme=t==="dark"?"dark":"light"</script>
 </head>
 <body>
@@ -139,7 +139,7 @@ function detalheHTML(p,a,nRec){
     instagram:()=>`<span class="cora" aria-hidden="true">♥</span><span>Curtido por <b>${autor}</b> e outras <b>${a.tenho*3+nRec}</b> pessoas que só olharam</span>`,
     tiktok:()=>`<span class="som"><span class="trilho"><span>♫ som original · ${ap} · com chiado de conexão discada</span><span aria-hidden="true">♫ som original · ${ap} · com chiado de conexão discada</span></span></span>`,
     kwai:()=>`<span class="moeda" aria-hidden="true">🪙</span><span>Assista e ganhe moedas! Aqui o prêmio é a nostalgia.</span>`,
-    bluesky:()=>`<span>@${ap.toLowerCase()}.nostalgia.social</span><span class="ok" aria-hidden="true">✔</span><span>domínio verificado, é gato mesmo</span>`
+    bluesky:()=>`<span>@${ap.toLowerCase()}.nostalgia.social</span> <span class="ok" aria-hidden="true">✔</span> <span>domínio verificado, é gato mesmo</span>`
   }[L];
   return f?`<div class="det det-${L}">${f()}</div>`:"";
 }
