@@ -158,7 +158,7 @@ main{display:flex;flex-direction:column}
 .top,.cur{grid-template-columns:1fr}.stage{grid-template-columns:1fr}.side{display:none}.rail{grid-template-columns:1fr 1fr}.rail .card:nth-child(3){display:none}main{padding:16px 16px 40px}}
 @media(max-width:600px){.f .two{grid-template-columns:1fr}.today{grid-template-columns:110px 1fr}.box .body{padding:16px}}
 </style>
-<link rel="stylesheet" href="home.css?v=20261122e">
+<link rel="stylesheet" href="home.css?v=20261122f">
 </head>
 <body class="home">
 <div class="rays-wrap" aria-hidden="true"><div class="rays" id="rays"></div></div>
@@ -201,10 +201,10 @@ main{display:flex;flex-direction:column}
   </section>
 
   <section class="facts">
-    <div class="fact"><i data-ic="moderation"></i><b>Colaborativo</b><span>A comunidade envia, a moderação aprova, e ninguém sobe o mesmo vídeo duas vezes.</span></div>
-    <div class="fact"><i data-ic="categories"></i><b>Organizado</b><span>Separado por ano, categoria e contexto.</span></div>
-    <div class="fact"><i data-ic="cloud"></i><b>Eternizado</b><span>Se caiu na internet, aqui fica pra sempre.</span></div>
-    <div class="fact"><i data-ic="clock"></i><b id="timerB">Você chegou agora</b><span id="timer">Bem-vindo ao museu.</span></div>
+    <div class="fact"><i data-ic="moderation"></i><b>Colaborativo</b><span>A comunidade envia, a moderação aprova. Zero vídeo repetido.</span></div>
+    <div class="fact"><i data-ic="categories"></i><b>Organizado</b><span>Por ano, categoria e contexto. Cada meme no seu quadrado.</span></div>
+    <div class="fact"><i data-ic="cloud"></i><b>Eternizado</b><span>Caiu na internet? Fica aqui pra sempre.</span></div>
+    <div class="fact fact-tempo"><i data-ic="clock"></i><b id="timerB">Você chegou agora</b><span id="timer">Bem-vindo ao museu.</span></div>
   </section>
   <p class="note">Protótipo · os registros são exemplos para testar a navegação e precisam ser revisados antes de virar acervo de verdade. Moedas, cartas e envios ficam só neste navegador.</p>
 </main>
@@ -551,7 +551,7 @@ const timerTick=setInterval(()=>{
   const b=$("timerB"),el=$("timer");
   if(!b||!el){clearInterval(timerTick);return} // faixa removida/redesenhada: não lança TypeError a cada 15 s
   const m=Math.floor((Date.now()-t0)/60000);
-  b.textContent=m<1?"Você chegou agora":"Você está aqui há";el.textContent=m<1?"Bem-vindo ao museu.":m+" min explorando a história da internet";
+  b.textContent=m<1?"Você chegou agora":"Você está aqui há";el.textContent=m<1?"Bem-vindo ao museu.":m+" min passeando pelo museu.";
 },15000);
 const h=decodeURIComponent(location.hash.slice(1)).replace("mais","+");if(Object.hasOwn(YEAR_INFO,h))cur=h;else if(/^\d{4}$/.test(h))cur=yKey(h);
 renderWallet();renderAll();scheduleApprovals();
