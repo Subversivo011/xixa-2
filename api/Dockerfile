@@ -7,8 +7,9 @@ COPY lib ./lib
 COPY routes ./routes
 COPY economia ./economia
 COPY auth ./auth
+COPY perfil ./perfil
 COPY migrations ./migrations
-RUN for f in server.js app.js migrate.js auth-stub.js lib/*.js routes/*.js economia/*.js auth/*.js; do node --check "$f" || exit 1; done
+RUN for f in server.js app.js migrate.js auth-stub.js lib/*.js routes/*.js economia/*.js auth/*.js perfil/*.js; do node --check "$f" || exit 1; done
 USER node
 EXPOSE 3000
 CMD ["node", "server.js"]
