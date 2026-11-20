@@ -39,7 +39,12 @@
 .ry.on small{opacity:1;color:#0a6a9a;font-weight:800}
 :root[data-theme="dark"] .ry.on small{color:#7fd3ff}
 .ry.era0 .ert{position:absolute;top:-2px}
-@media(max-width:760px){.lt-rail{grid-template-columns:30px minmax(0,1fr) 30px;padding:8px 4px 4px;border-radius:16px}.rl-arr{width:30px;height:30px;font-size:17px}.ry{flex-basis:64px;height:84px;font-size:14px}.ry small{top:62px}.lt-yrs{scroll-snap-type:x proximity}}
+@media(max-width:760px){.lt-rail{grid-template-columns:30px minmax(0,1fr) 30px;padding:8px 4px 4px;border-radius:16px}.rl-arr{width:30px;height:30px;font-size:17px}.ry{flex-basis:64px;height:84px;font-size:14px}.ry small{top:62px}.lt-yrs{scroll-snap-type:x proximity}
+  /* igual à home no mobile: o ano ativo não aparece na régua (só a bolinha maior); o título do herói já mostra o ano.
+     O texto continua no DOM (font-size 0, não display:none), então o botão mantém o nome acessível "2022 · 3 memes". */
+  .ry.on .rl{font-size:0;line-height:0;padding:0;background:none;box-shadow:none;color:transparent}
+  .ry.on small,.ry.on:hover small{opacity:0}
+  .ry{height:66px}.lt-rail{padding-bottom:2px}}
 /* ===== palco do ano (muda de época) ===== */
 .lt-stage{position:relative;margin-top:8px;border-radius:22px;overflow:hidden;transition:background .4s}
 .lt-hero{position:relative;display:grid;grid-template-columns:52px 1fr 52px;align-items:center;gap:14px;padding:30px 24px 26px;text-align:center}
@@ -55,10 +60,13 @@
 .lt-chips button{display:inline-flex;align-items:center;gap:6px;padding:7px 13px;border-radius:999px;font:600 12.5px Inter,sans-serif;cursor:pointer;border:1px solid transparent}
 .lt-chips button .ico{width:14px;height:14px}
 .lt-chips button small{opacity:.7}
-.lt-list{position:relative;padding-left:30px}
-.lt-list:before{content:"";position:absolute;left:8px;top:6px;bottom:6px;width:3px;border-radius:2px}
+/* geometria da linha do tempo: --lt-linha-x = da borda esquerda da lista ao CENTRO da linha; --lt-pad = padding-left efetivo
+   (o tema que mudar o padding só redefine --lt-pad); --lt-ponto = diâmetro TOTAL do ponto (com a borda). O centro do ponto
+   cai sempre no centro da linha: left = linha-x - pad - ponto/2 (relativo ao .lt-mes, que começa em --lt-pad). */
+.lt-list{--lt-pad:30px;--lt-linha-x:9.5px;--lt-linha-w:3px;--lt-ponto:19px;position:relative;padding-left:var(--lt-pad)}
+.lt-list:before{content:"";position:absolute;left:calc(var(--lt-linha-x) - var(--lt-linha-w) / 2);top:6px;bottom:6px;width:var(--lt-linha-w);border-radius:2px}
 .lt-mes{position:relative;margin:4px 0 12px;font:800 18px "Baloo 2",Inter,sans-serif;text-transform:uppercase;letter-spacing:.5px}
-.lt-mes:before{content:"";position:absolute;left:-28px;top:6px;width:13px;height:13px;border-radius:50%;border:3px solid currentColor;background:var(--lt-bg,#fff)}
+.lt-mes:before{content:"";position:absolute;box-sizing:border-box;left:calc(var(--lt-linha-x) - var(--lt-pad) - var(--lt-ponto) / 2);top:6px;width:var(--lt-ponto);height:var(--lt-ponto);border-radius:50%;border:3px solid currentColor;background:var(--lt-bg,#fff)}
 .lt-it{position:relative;display:grid;grid-template-columns:230px minmax(0,1fr);gap:18px;align-items:center;padding:12px;margin:0 0 14px;border-radius:16px;cursor:pointer;transition:transform .15s,box-shadow .15s;opacity:0;transform:translateY(12px)}
 .lt-ab{all:unset;cursor:pointer;color:inherit;font:inherit}
 .lt-ab::after{content:"";position:absolute;inset:0;border-radius:inherit}
@@ -97,7 +105,7 @@
   .lt-body{padding:4px 12px 22px}
   .lt-it{grid-template-columns:1fr;gap:10px;padding:10px}
   .lt-it h3{font-size:18px}
-  .lt-list{padding-left:22px}.lt-mes:before{left:-21px}.lt-list:before{left:4px}
+  .lt-list{--lt-pad:22px;--lt-linha-x:5.5px}
 
 }
 
@@ -206,7 +214,7 @@ body.ep-flog .lt-top small,body.ep-tw .lt-top small,body.ep-ask .lt-top small,bo
 .th-zap .lt-tick{background:#128c7e;color:#fff}
 .th-zap .lt-chips button{background:#fff;color:#075e54;border-radius:16px;box-shadow:0 1px 1px #0002}
 .th-zap .lt-chips button.on{background:#25d366;color:#fff}
-.th-zap .lt-list{padding-left:0}.th-zap .lt-list:before{display:none}
+.th-zap .lt-list{--lt-pad:0px}.th-zap .lt-list:before{display:none}
 .th-zap .lt-mes{text-align:center;font-size:12px;font-family:inherit}.th-zap .lt-mes:before{display:none}
 .th-zap .lt-mes span{display:inline-block;background:#e1f3fb;color:#4a6a78;padding:5px 12px;border-radius:8px;box-shadow:0 1px 1px #0001}
 .th-zap .lt-it{background:#dcf8c6;border-radius:10px 0 10px 10px;box-shadow:0 1px 1px #0002;max-width:860px;margin-left:auto;position:relative}
@@ -261,7 +269,7 @@ body.ep-flog .lt-top small,body.ep-tw .lt-top small,body.ep-ask .lt-top small,bo
 .th-flog .lt-body{background:#fff;max-width:760px;margin:0 auto;border-left:1px solid #ccc;border-right:1px solid #ccc}
 .th-flog .lt-chips button{background:#f4f4f4;border:1px solid #bbb;color:#333;border-radius:0;font-family:Verdana,sans-serif;font-size:11px}
 .th-flog .lt-chips button.on{background:#262626;color:#fff;border-color:#262626}
-.th-flog .lt-list{padding-left:0}.th-flog .lt-list:before,.th-flog .lt-mes:before{display:none}
+.th-flog .lt-list{--lt-pad:0px}.th-flog .lt-list:before,.th-flog .lt-mes:before{display:none}
 .th-flog .lt-mes{font:bold 11px Verdana,sans-serif;color:#4d7a12;border-bottom:1px dotted #aaa;padding-bottom:4px}
 .th-flog .lt-it{grid-template-columns:1fr;background:#fff;border:0;border-bottom:1px solid #ddd;border-radius:0;padding:14px 0 18px}
 .th-flog .lt-th{border-radius:0;border:6px solid #fff;outline:1px solid #ccc;max-width:560px;margin:0 auto;width:100%}
@@ -282,7 +290,7 @@ body.ep-flog .lt-top small,body.ep-tw .lt-top small,body.ep-ask .lt-top small,bo
 .th-tw .lt-body{background:#fff;margin:0 18px 18px;border-radius:0 0 10px 10px}
 .th-tw .lt-chips button{background:#fff;border:1px solid #c0deed;color:#0a6e9c;border-radius:5px;font-family:inherit}
 .th-tw .lt-chips button.on{background:#0a6e9c;color:#fff;border-color:#0a6e9c}
-.th-tw .lt-list{padding-left:0}.th-tw .lt-list:before,.th-tw .lt-mes:before{display:none}
+.th-tw .lt-list{--lt-pad:0px}.th-tw .lt-list:before,.th-tw .lt-mes:before{display:none}
 .th-tw .lt-mes{font:bold 13px "Lucida Grande",Arial,sans-serif;color:#555;text-transform:none;border-bottom:1px solid #eee;padding-bottom:6px}
 .th-tw .lt-it{grid-template-columns:120px minmax(0,1fr);gap:14px;align-items:start;background:#fff;border:0;border-bottom:1px solid #eee;border-radius:0;padding:12px 4px}
 .th-tw .lt-it:hover{background:#f7fbfe}
