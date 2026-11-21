@@ -65,7 +65,7 @@ async function abrir(pagina, { w, h, tema }) {
   page.on("console", (m) => { if (m.type() === "error" && !/Failed to load resource|fonts\.g/.test(m.text())) erros.push("console: " + m.text()); });
   await page.goto(base + pagina);
   await page.waitForSelector(".nsft2 .fq-in, .lt-it");
-  await page.waitForTimeout(1200); // transições e animações de entrada terminam
+  await page.waitForTimeout(2000); // transições e animações de entrada terminam
   return { ctx, page, erros };
 }
 

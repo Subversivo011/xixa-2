@@ -244,15 +244,16 @@ button:hover>.thumb>.play,button:hover>.ct>.play,.tthumb:hover>.play,.card:hover
 /* blocos de "sobre" mais discretos: uma faixa fina, sem cara de conteúdo */
 /* faixa de fatos (Colaborativo, Organizado, Eternizado, Você está aqui há): UMA definição, sem !important.
    Desktop: 4 colunas numa linha só; celular/tablet estreito: grade 2x2. Texto 13px, sem opacity (contraste >= 4,5:1). */
-.facts{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px 28px;margin:110px auto 0;padding:18px 10px 0;max-width:980px;border-top:1px dashed var(--line)}
-.fact{display:grid;grid-template-columns:16px minmax(0,1fr);column-gap:8px;row-gap:2px;align-items:start;align-content:start;font-size:13px;line-height:1.4;color:var(--mut)}
-.fact>.ico{grid-row:span 2;width:16px;height:16px;margin-top:2px;color:var(--brand)}
-.fact b{display:block;font:600 13px/1.3 Inter,system-ui,sans-serif;color:var(--txt);margin:0;letter-spacing:0;text-transform:none}
-.fact span{display:block;font-size:13px;line-height:1.4;color:var(--mut)}
+.facts{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px 28px;margin:110px auto 0;padding:20px 10px 0;max-width:980px;border-top:1px dashed var(--line)}
+.fact{display:grid;grid-template-columns:16px minmax(0,1fr);column-gap:10px;row-gap:3px;align-items:start;align-content:start;font-size:14px;line-height:1.45;color:var(--mut)}
+.fact>.ico{grid-row:span 2;width:16px;height:16px;margin-top:3px;color:var(--brand)}
+.fact b{display:block;font:800 15px/1.25 "Baloo 2",Inter,system-ui,sans-serif;color:var(--txt);margin:0;letter-spacing:0;text-transform:none;text-wrap:balance}
+.fact-tempo b{color:var(--brand-text)}
+.fact span{display:block;font-size:14px;line-height:1.45;color:var(--mut);text-wrap:pretty}
 main:has(.facts){padding-bottom:22px}
 body:has(main .facts) .nsft2{margin-top:22px}
-.note{margin:14px auto 0;max-width:760px;font-size:12px;line-height:1.5;color:var(--mut);text-align:center}
-@media(max-width:860px){.facts{grid-template-columns:repeat(2,minmax(0,1fr));gap:14px 16px;margin-top:70px}}
+.note{margin:34px auto 0;max-width:760px;font-size:12px;line-height:1.5;color:var(--mut);text-align:center}
+@media(max-width:860px){.facts{grid-template-columns:repeat(2,minmax(0,1fr));grid-auto-rows:1fr;align-content:start;gap:18px 16px;margin-top:70px}}
 @media(max-width:760px){main:has(.facts){padding-bottom:16px}body:has(main .facts) .nsft2{margin-top:18px}}
 
 .em{position:relative;overflow:hidden}

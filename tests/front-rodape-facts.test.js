@@ -206,7 +206,7 @@ test("timer só aparece depois de 1 minuto; antes diz 'Você chegou agora'", opt
   await page.clock.runFor(45000);
   m = await page.evaluate(() => [document.getElementById("timerB").textContent, document.getElementById("timer").textContent]);
   assert.strictEqual(m[0], "Você está aqui há");
-  assert.match(m[1], /^1 min explorando a história da internet/);
+  assert.match(m[1], /^1 min passeando pelo museu./);
   await ctx.close();
 });
 
