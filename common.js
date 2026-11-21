@@ -390,7 +390,7 @@ function avatarSessaoHTML(u){
 }
 function contaSessaoHTML(){
   const u=SESSAO.usuario,p=SESSAO.patente&&SESSAO.patente.nome?SESSAO.patente.nome:"";
-  return `<div class="account-actions"><span class="acct-wrap"><button type="button" class="sg-acct" onclick="abrirMenuConta(event)" aria-haspopup="menu" aria-expanded="false" aria-controls="acct-menu" title="Meu perfil"><span class="sg-av">${avatarSessaoHTML(u)}</span><span>${escapeHtml(u.apelido)}${p?"<b>"+escapeHtml(p)+"</b>":""}</span></button><div class="acct-menu" id="acct-menu" role="menu" hidden>
+  return `<div class="account-actions"><span class="acct-wrap"><button type="button" class="sg-acct" onclick="abrirMenuConta(event)" aria-haspopup="menu" aria-expanded="false" aria-controls="acct-menu" title="Meu perfil: ${escapeHtml(u.apelido)}${p?" · "+escapeHtml(p):""}"><span class="sg-av">${avatarSessaoHTML(u)}</span><span>${escapeHtml(u.apelido)}${p?"<b>"+escapeHtml(p)+"</b>":""}</span></button><div class="acct-menu" id="acct-menu" role="menu" hidden>
     <a role="menuitem" href="perfil.html">${icon("user")}Ver o meu perfil</a>
     <a role="menuitem" href="perfil.html#editar">${icon("edit")}Editar o meu perfil</a>
     <button type="button" role="menuitem" onclick="fecharMenuConta();openSignup()">${icon("cat")}Editar gatinho e apelido</button>
@@ -518,7 +518,7 @@ function toggleTheme(){setTheme(document.documentElement.dataset.theme==="light"
 // page: "inicio" | "album"; sub: [{k,ic,label,fn,cta,dd,href}]
 function renderHeader(page,opt={}){
   const hd=document.createElement("header");hd.className="hd";
-  hd.innerHTML=`<a class="brand" href="index.html" aria-label="Não Salvo — início"><img src="logo-word.png" alt="Não Salvo"><small>Museu da internet brasileira</small></a>
+  hd.innerHTML=`<a class="brand" href="index.html" aria-label="Não Salvo — início"><img src="logo-word.png" alt="Não Salvo" width="380" height="73"><small>Museu da internet brasileira</small></a>
    <div class="tools">${opt.search?`<label class="srch">${icon("search","s-ic")}<input id="q" type="search" placeholder="Buscar memes, anos, categorias…" aria-label="Buscar"></label>`:""}
    <div id="wallet"></div><div id="acct"></div><button class="tsw" id="themeB" role="switch" aria-label="Modo escuro" onclick="toggleTheme()">${icon("sun","t-l")}${icon("moon","t-d")}</button></div>`;
   document.body.prepend(hd);
