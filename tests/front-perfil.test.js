@@ -102,14 +102,18 @@ async function abrir(url, over, vp = { width: 1280, height: 900 }) {
   return { ctx, page, api, erros };
 }
 
-test("perfil próprio: gato como foto, barra de dono, sem formulário de recado; edição troca layout e favorita", opts, async () => {
+test("perfil próprio: gato como foto, lápis de edição (sem tarja), sem formulário de recado; edição troca layout e favorita", opts, async () => {
   const { ctx, page, api, erros } = await abrir("/perfil.html");
   await page.waitForSelector(".pf-orkut .pf-gato svg");
   assert.match(page.url(), /perfil\.html\?u=Ana$/);
-  assert.ok(await page.$("#btEditar"), "dono vê Editar perfil");
+  assert.strictEqual(await page.$(".pf-barra"), null, "sem tarja de dono");
+  assert.ok(await page.$('.pf-lapis[data-ed="gato"]'), "lápis no gatinho");
+  assert.ok(await page.$('[data-ed="fav"]'), "lápis (ou quadro) da carta favorita");
+  assert.ok(await page.$('[data-ed="visual"]'), "botão Trocar visual");
+  assert.ok(await page.$("#btCopiar"), "copiar link");
   assert.strictEqual(await page.$("#rcF"), null, "dono não deixa recado para si");
   assert.match(await page.textContent("#pf"), /Banda larga/);
-  await page.click("#btEditar");
+  await page.click('[data-ed="visual"]');
   await page.check('input[name=lay][value="msn"]', { force: true });
   await page.check("#fav input[value=memes-0]", { force: true });
   await page.click("#btSalvar");
@@ -124,7 +128,9 @@ test("perfil próprio: gato como foto, barra de dono, sem formulário de recado;
 test("visitar outro perfil (Fotolog): recado escapado, enviar recado com CSRF, sem botão de editar", opts, async () => {
   const { ctx, page, api, erros } = await abrir("/perfil.html?u=Beto");
   await page.waitForSelector(".pf-fotolog .pf-carta.grande");
-  assert.strictEqual(await page.$("#btEditar"), null);
+  assert.strictEqual(await page.$("[data-ed]"), null, "visitante não vê lápis");
+  assert.strictEqual(await page.$(".pf-barra"), null, "sem tarja de visitante");
+  assert.ok(await page.$("#btCopiar"), "visitante também copia o link");
   assert.strictEqual(await page.evaluate(() => window.__xss), undefined, "texto do recado não vira HTML");
   assert.strictEqual(await page.$$eval(".pf-rc img[src=x]", (l) => l.length), 0);
   await page.fill("#rcT", "Assinando o seu flog!");
@@ -147,7 +153,7 @@ for (const lay of ["homepage", "icq", "orkut", "fotolog", "msn", "twitter", "fac
       await page.waitForSelector(".pf-" + lay);
       const r = await page.evaluate(() => ({
         ovf: document.documentElement.scrollWidth > innerWidth + 1,
-        peq: [...document.querySelectorAll("#pf button, #pf textarea, .pf-barra a, .pf-barra button")].filter((e) => { const b = e.getBoundingClientRect(); return b.width && b.height < 44; }).map((e) => e.id || e.className)
+        peq: [...document.querySelectorAll("#pf button, #pf textarea, .pf-tools button")].filter((e) => { const b = e.getBoundingClientRect(); return b.width && b.height < 44; }).map((e) => e.id || e.className)
       }));
       assert.strictEqual(r.ovf, false, "rolagem lateral");
       assert.deepStrictEqual(r.peq, []);
@@ -177,6 +183,32 @@ test("menu da conta: clicar no avatar abre Ver/Editar perfil e Editar gatinho; E
   assert.strictEqual(await page.isHidden("#acct-menu"), true);
   await page.click(".sg-acct"); await page.click("#acct-menu a[href='perfil.html#editar']");
   await page.waitForSelector("#dlg[open]");
+  assert.deepStrictEqual(erros, []);
+  await ctx.close();
+});
+
+test("copiar link do perfil: copia o endereço completo e o botão confirma", opts, async () => {
+  const { ctx, page, erros } = await abrir("/perfil.html?u=Beto");
+  await ctx.grantPermissions(["clipboard-read", "clipboard-write"], { origin: base });
+  await page.waitForSelector("#btCopiar");
+  await page.click("#btCopiar");
+  await page.waitForFunction(() => /copiado/i.test(document.getElementById("btCopiar").textContent));
+  const txt = await page.evaluate(() => navigator.clipboard.readText());
+  assert.strictEqual(txt, base + "/perfil.html?u=Beto");
+  assert.deepStrictEqual(erros, []);
+  await ctx.close();
+});
+
+test("lápis: gatinho abre o criador de gato; carta favorita abre a edição com a favorita em foco", opts, async () => {
+  const { ctx, page, erros } = await abrir("/perfil.html");
+  await page.waitForSelector('.pf-lapis[data-ed="gato"]');
+  await page.click('.pf-lapis[data-ed="gato"]');
+  await page.waitForFunction(() => document.getElementById("sgm") && document.getElementById("sgm").classList.contains("open"));
+  await page.keyboard.press("Escape");
+  await page.evaluate(() => typeof closeSignup === "function" && closeSignup());
+  await page.click('[data-ed="fav"]');
+  await page.waitForSelector("#dlg[open]");
+  assert.ok(await page.evaluate(() => document.activeElement && document.activeElement.closest("#fav") !== null), "foco na fileira da carta favorita");
   assert.deepStrictEqual(erros, []);
   await ctx.close();
 });

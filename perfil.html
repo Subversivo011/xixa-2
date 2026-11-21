@@ -14,7 +14,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Inter:wght@400;500;600;700;800&family=Baloo+2:wght@700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="theme.css?v=20261122g">
 <link rel="stylesheet" href="viewer.css?v=20261120d">
-<link rel="stylesheet" href="perfil.css?v=20261122k">
+<link rel="stylesheet" href="perfil.css?v=20261123d">
 <script>try{var t=localStorage.getItem("ns_theme")}catch(e){}document.documentElement.dataset.theme=t==="dark"?"dark":"light"</script>
 </head>
 <body>
@@ -92,13 +92,20 @@ const quando=d=>{const x=new Date(d);if(isNaN(x))return"";const s=(Date.now()-x)
 function colecao(id){return (typeof COLLECTIONS!=="undefined"&&COLLECTIONS.find(c=>c.id===id))||null}
 function carta(c,grande){
   const col=colecao(c.colecao_id),bg=col?col.bg:["#334","#112"],m=c.meme_id&&typeof MEMES!=="undefined"&&MEMES.find(x=>x.id===c.meme_id);
-  const img=m&&m.yt?`<img src="https://i.ytimg.com/vi/${esc(m.yt)}/mqdefault.jpg" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.remove()">`:"";
+  const img=m&&m.yt?`<img src="https://i.ytimg.com/vi/${esc(m.yt)}/mqdefault.jpg" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="var e=this.nextElementSibling;if(e)e.hidden=false;this.remove()">`:"";
   return `<div class="pf-carta ${grande?"grande ":""}${esc(c.raridade)}" style="--rc:var(--${esc(c.raridade)})" role="img" aria-label="Carta ${esc(c.nome)}, ${esc(c.raridade)}">
    <div class="tp"><span>${String(c.numero).padStart(3,"0")}</span><em>${esc(c.raridade)}</em></div>
-   <div class="art" style="background:linear-gradient(150deg,${esc(bg[0])},${esc(bg[1])})">${img}<span>${esc(c.emoji||"⭐")}</span></div>
+   <div class="art" style="background:linear-gradient(150deg,${esc(bg[0])},${esc(bg[1])})">${img}<span${img?" hidden":""}>${esc(c.emoji||"⭐")}</span></div>
    <div class="nm">${esc(c.nome)}</div><div class="ft">${esc(col?col.n:c.colecao_id)}</div></div>`;
 }
-function favHTML(){return P.carta_favorita?carta(P.carta_favorita,true):`<div class="pf-semfav">${P.perfil.eh_meu?"Escolha a sua carta favorita em “Editar perfil”.":"Ainda sem carta favorita."}</div>`}
+function favHTML(){
+  const eu=P.perfil.eh_meu;
+  if(!P.carta_favorita)return eu?`<button type="button" class="pf-semfav" data-ed="fav">${icon("edit")}<span>Escolher a minha carta favorita</span></button>`:`<div class="pf-semfav">Ainda sem carta favorita.</div>`;
+  return eu?`<div class="pf-edw pf-edw-fav">${carta(P.carta_favorita,true)}${lapis("fav","Trocar a carta favorita")}</div>`:carta(P.carta_favorita,true)}
+// lápis de edição (só para o dono do perfil)
+const lapis=(k,t)=>`<button type="button" class="pf-lapis" data-ed="${k}" title="${esc(t)}" aria-label="${esc(t)}">${icon("edit")}</button>`;
+// foto do perfil (gatinho) com o lápis no cantinho para o dono
+function fotoPerfil(p){const g=gato(p.avatar_gato,p.apelido);return p.eh_meu?`<span class="pf-edw pf-edw-av">${g}${lapis("gato","Editar gatinho e apelido")}</span>`:g}
 function patHTML(){
   const p=P.patente,cor=p&&/^#[0-9a-f]{3,8}$/i.test(p.cor||"")?p.cor:"#0a6a9a",prox=P.proxima_patente;
   const pct=prox?Math.max(4,Math.min(100,Math.round(P.xp/(P.xp+prox.faltam)*100))):100;
@@ -151,7 +158,7 @@ function montar(){
   const a=P.album,figs=figsHTML(12),cols=colsHTML(),rec=recadosHTML(L),pat=patHTML(),fav=favHTML();
   let T={
     orkut:()=>`<div class="pf-top"><b>orkut</b><nav aria-hidden="true"><span>Início</span><span>Perfil</span><span>Scraps</span><span>Comunidades</span></nav></div>
-     <div class="pf-g"><div class="pf-c"><div class="pf-card">${gato(p.avatar_gato,p.apelido)}<div class="pf-nome">${ap}</div><div class="pf-cap">Brasil · no Não Salvo desde ${esc(desde)}</div>
+     <div class="pf-g"><div class="pf-c"><div class="pf-card">${fotoPerfil(p)}<div class="pf-nome">${ap}</div><div class="pf-cap">Brasil · no Não Salvo desde ${esc(desde)}</div>
        <div class="lk" aria-hidden="true"><span>scraps (${nRec})</span><span>figurinhas (${a.tenho})</span><span>comunidades (${a.colecoes.length})</span></div></div></div>
       <div class="pf-c"><div class="pf-card pf-box"><h1 class="ola">${ap}</h1><div class="sorte"><b>Sorte do dia:</b> ${esc(sorte(p.apelido))}</div>
         <table><tr><td>patente:</td><td>${pat}</td></tr><tr><td>figurinhas:</td><td>${a.tenho} de ${a.total}</td></tr><tr><td>coleções completas:</td><td>${a.colecoes_completas}</td></tr><tr><td>no Não Salvo desde:</td><td>${esc(desde)}</td></tr></table></div>
@@ -161,24 +168,24 @@ function montar(){
     fotolog:()=>`<div class="pf-top"><b>${ap}</b><span>flog · no Não Salvo desde ${esc(desde)}</span></div>
      <div class="pf-g"><div class="pf-c"><div class="post">${fav}<h1 class="pf-h" style="border:0;text-transform:none;font-size:16px;color:#222;margin-top:14px">${P.carta_favorita?esc(P.carta_favorita.nome):"minha figurinha favorita"}</h1><p>postada por ${ap} · ${a.tenho} figurinhas no álbum</p>
        <div class="livro"><h2 class="pf-h">${esc(L.recados)} (${nRec})</h2>${rec}</div></div></div>
-      <div class="pf-c"><div class="side pf-box">${gato(p.avatar_gato,p.apelido)}${pat}</div><div class="side pf-box"><h2 class="pf-h">flogs favoritos (figurinhas)</h2>${figs}</div><div class="side"><h2 class="pf-h">coleções</h2>${cols}</div></div></div>`,
+      <div class="pf-c"><div class="side pf-box">${fotoPerfil(p)}${pat}</div><div class="side pf-box"><h2 class="pf-h">flogs favoritos (figurinhas)</h2>${figs}</div><div class="side"><h2 class="pf-h">coleções</h2>${cols}</div></div></div>`,
     msn:()=>`<div class="win"><div class="tit"><span>Não Salvo Messenger · ${ap}</span><i aria-hidden="true"><span></span><span></span><span></span></i></div>
-      <div class="eu">${gato(p.avatar_gato,p.apelido)}<div><h1 class="pf-nome" style="margin:0">~*~ ${ap} ~*~</h1><div class="pm">${P.carta_favorita?`♫ ouvindo: ${esc(P.carta_favorita.nome)}`:"(sem mensagem pessoal)"}</div><span class="st">Online</span></div></div>
+      <div class="eu">${fotoPerfil(p)}<div><h1 class="pf-nome" style="margin:0">~*~ ${ap} ~*~</h1><div class="pm">${P.carta_favorita?`♫ ouvindo: ${esc(P.carta_favorita.nome)}`:"(sem mensagem pessoal)"}</div><span class="st">Online</span></div></div>
       <div class="pf-g"><div class="pf-c"><div class="conversa"><h2 class="pf-h">${esc(L.recados)} (${nRec})</h2>${rec}</div></div>
        <div class="pf-c"><div class="lado pf-box"><h2 class="pf-h">Nível</h2>${pat}</div><div class="lado pf-box"><h2 class="pf-h">Carta favorita</h2>${fav}</div><div class="lado pf-box"><h2 class="pf-h">Contatos (coleções)</h2>${cols}</div><div class="lado"><h2 class="pf-h">Figurinhas (${a.tenho})</h2>${figs}</div></div></div></div>`,
-    twitter:()=>`<div class="pf-g"><div class="pf-c main"><div class="cab">${gato(p.avatar_gato,p.apelido)}<div><h1 class="pf-nome" style="margin:0">${ap}</h1><div class="arroba">@${ap}</div><div class="bio">Colecionando figurinhas da internet brasileira desde ${esc(desde)}.</div></div></div>
+    twitter:()=>`<div class="pf-g"><div class="pf-c main"><div class="cab">${fotoPerfil(p)}<div><h1 class="pf-nome" style="margin:0">${ap}</h1><div class="arroba">@${ap}</div><div class="bio">Colecionando figurinhas da internet brasileira desde ${esc(desde)}.</div></div></div>
        <h2 class="pf-h">${esc(L.recados)} (${nRec})</h2>${rec}</div>
       <div class="pf-c lado"><div class="nums"><span><b>${a.tenho}</b><span>figurinhas</span></span><span><b>${a.colecoes_completas}</b><span>coleções</span></span><span><b>${fmt(P.xp)}</b><span>XP</span></span></div>
        <div class="pf-box">${pat}</div><div class="pf-box"><h2 class="pf-h">Carta favorita</h2>${fav}</div><div class="pf-box"><h2 class="pf-h">Coleções</h2>${cols}</div><h2 class="pf-h">Figurinhas</h2>${figs}</div></div>`,
     facebook:()=>`<div class="pf-top"><b>facebook</b></div>
-     <div class="pf-g"><div class="pf-c">${gato(p.avatar_gato,p.apelido)}<div class="info" id="fb-info"><span><b>Patente:</b> ${P.patente?esc(P.patente.nome):"-"}</span><span><b>Membro desde:</b> ${esc(desde)}</span><span><b>Figurinhas:</b> ${a.tenho} de ${a.total}</span></div></div>
+     <div class="pf-g"><div class="pf-c">${fotoPerfil(p)}<div class="info" id="fb-info"><span><b>Patente:</b> ${P.patente?esc(P.patente.nome):"-"}</span><span><b>Membro desde:</b> ${esc(desde)}</span><span><b>Figurinhas:</b> ${a.tenho} de ${a.total}</span></div></div>
       <div class="pf-c"><h1 class="pf-nome">${ap}</h1><nav class="abas" aria-label="Seções do perfil"><a href="#fb-mural" aria-current="location" data-ir="fb-mural">Mural</a><a href="#fb-info" data-ir="fb-info">Informações</a><a href="#fb-fotos" data-ir="fb-fotos">Fotos</a></nav>
        <div class="caixa" id="fb-mural"><h2 class="pf-h">${esc(L.recados)} (${nRec})</h2>${rec}</div><div class="caixa" id="fb-fotos"><h2 class="pf-h">Fotos (figurinhas)</h2>${figs}</div></div>
       <div class="pf-c"><div class="caixa"><h2 class="pf-h">Nível</h2>${pat}</div><div class="caixa"><h2 class="pf-h">Curtiu (carta favorita)</h2>${fav}</div><div class="caixa"><h2 class="pf-h">Grupos (coleções)</h2>${cols}</div></div></div>`
   };
   // redes novas (vídeo curto, fotos, stories): mesmo esqueleto, cada uma com seu visual no CSS
   const mod=()=>{const st=L.st||["figurinhas","coleções","XP"];
-    return `<div class="banner" aria-hidden="true"></div><div class="cab">${gato(p.avatar_gato,p.apelido)}<div class="tx"><h1 class="pf-nome">${ap}</h1><div class="arroba">@${ap.toLowerCase()}</div>
+    return `<div class="banner" aria-hidden="true"></div><div class="cab">${fotoPerfil(p)}<div class="tx"><h1 class="pf-nome">${ap}</h1><div class="arroba">@${ap.toLowerCase()}</div>
       <div class="nums"><span><b>${a.tenho}</b>${esc(st[0])}</span><span><b>${a.colecoes_completas}/${a.colecoes.length}</b>${esc(st[1])}</span><span><b>${esc(short(P.xp))}</b>${esc(st[2])}</span></div>
       <div class="bio">Colecionando a internet brasileira desde ${esc(desde)}.</div>${detalheHTML(p,a,nRec)}${pat}</div></div>
      ${destaquesHTML()}
@@ -187,19 +194,19 @@ function montar(){
   Object.assign(T,{
     homepage:()=>`<div class="win"><div class="tit">Minha Home Page - Netscape Navigator</div><div class="pg">
       <h1 class="pf-nome"><span>✨ Bem-vindo à home page de ${ap}!!! ✨</span></h1><p class="cont">Você é o visitante nº <b>${String(7000+a.tenho*13+nRec).padStart(9,"0")}</b> · 🚧 Página em construção 🚧</p>
-      <div class="pf-g"><div class="pf-c"><div class="moldura">${gato(p.avatar_gato,p.apelido)}</div><p class="eu">Este sou eu!!! :)</p>${pat}<p class="eu">No Não Salvo desde ${esc(desde)}</p></div>
+      <div class="pf-g"><div class="pf-c"><div class="moldura">${fotoPerfil(p)}</div><p class="eu">Este sou eu!!! :)</p>${pat}<p class="eu">No Não Salvo desde ${esc(desde)}</p></div>
        <div class="pf-c"><h2 class="pf-h">📖 ${esc(L.recados)} (${nRec})</h2>${rec}<hr><h2 class="pf-h">🖼️ Minhas figurinhas</h2>${figs}</div>
        <div class="pf-c"><h2 class="pf-h">⭐ Minha carta favorita</h2>${fav}<h2 class="pf-h">🔗 Meus links (coleções)</h2>${cols}<p class="melhor">Melhor visualizado em 800x600</p></div></div></div></div>`,
     icq:()=>`<div class="win"><div class="tit"><span>ICQ · Informações de ${ap}</span><i aria-hidden="true">_ □ ✕</i></div>
-      <div class="pf-g"><div class="pf-c lado"><div class="pf-box">${gato(p.avatar_gato,p.apelido)}</div><h1 class="pf-nome">${ap}</h1><div class="uin">UIN: ${esc(String(10000000+a.tenho*991+nRec*7))}</div><span class="on">🌼 Disponível</span></div>
+      <div class="pf-g"><div class="pf-c lado"><div class="pf-box">${fotoPerfil(p)}</div><h1 class="pf-nome">${ap}</h1><div class="uin">UIN: ${esc(String(10000000+a.tenho*991+nRec*7))}</div><span class="on">🌼 Disponível</span></div>
        <div class="pf-c"><div class="caixa"><h2 class="pf-h">${esc(L.recados)} (${nRec})</h2>${rec}</div><div class="caixa"><h2 class="pf-h">Arquivos recebidos (figurinhas)</h2>${figs}</div></div>
        <div class="pf-c"><div class="caixa"><h2 class="pf-h">Nível</h2>${pat}</div><div class="caixa"><h2 class="pf-h">Carta favorita</h2>${fav}</div><div class="caixa"><h2 class="pf-h">Grupos (coleções)</h2>${cols}</div></div></div></div>`,
-    ask:()=>`<div class="pf-top"><b>ask.fm</b></div><div class="pf-g"><div class="pf-c"><div class="caixa">${gato(p.avatar_gato,p.apelido)}<h1 class="pf-nome">${ap}</h1><div class="pf-cap">@${ap.toLowerCase()} · desde ${esc(desde)}</div><div class="nums"><span><b>${nRec}</b>respostas</span><span><b>${a.tenho}</b>figurinhas</span></div>${pat}</div></div>
+    ask:()=>`<div class="pf-top"><b>ask.fm</b></div><div class="pf-g"><div class="pf-c"><div class="caixa">${fotoPerfil(p)}<h1 class="pf-nome">${ap}</h1><div class="pf-cap">@${ap.toLowerCase()} · desde ${esc(desde)}</div><div class="nums"><span><b>${nRec}</b>respostas</span><span><b>${a.tenho}</b>figurinhas</span></div>${pat}</div></div>
        <div class="pf-c"><div class="caixa"><h2 class="pf-h">${esc(L.recados)} (${nRec})</h2>${rec}</div><div class="caixa"><h2 class="pf-h">Figurinhas</h2>${figs}</div></div>
        <div class="pf-c"><div class="caixa"><h2 class="pf-h">Carta favorita</h2>${fav}</div><div class="caixa"><h2 class="pf-h">Coleções</h2>${cols}</div></div></div>`,
     whatsapp:()=>`<div class="pf-g"><div class="pf-c chat${REC.length?"":" vazio"}"><div class="topo">${gato(p.avatar_gato,p.apelido,"pf-mini")}<div><h1 class="pf-nome">${ap}</h1><small>online</small></div></div>
        <div class="msgs">${rec}</div></div>
-      <div class="pf-c info"><div class="caixa cen">${gato(p.avatar_gato,p.apelido)}<h2 class="pf-nome">${ap}</h2><div class="pf-cap">Recado: “${P.patente?esc(P.patente.nome):"Disponível"}” 🙂</div>${pat}</div>
+      <div class="pf-c info"><div class="caixa cen">${fotoPerfil(p)}<h2 class="pf-nome">${ap}</h2><div class="pf-cap">Recado: “${P.patente?esc(P.patente.nome):"Disponível"}” 🙂</div>${pat}</div>
        <div class="caixa"><h2 class="pf-h">Carta favorita</h2>${fav}</div><div class="caixa"><h2 class="pf-h">Mídia (figurinhas)</h2>${figsHTML(4)}</div><div class="caixa"><h2 class="pf-h">Grupos em comum (coleções)</h2>${cols}</div></div></div>`,
     vine:mod,snapchat:mod,instagram:mod,tiktok:mod,kwai:mod,bluesky:mod
   });
@@ -231,15 +238,32 @@ async function apagar(id){
 // confirmação sem diálogo do navegador (que trava a página): 2 cliques em 4 s
 let confirmT=0;function confirmar(){const a=Date.now();if(a-confirmT<4000){confirmT=0;return true}confirmT=a;toast("Clique de novo em “apagar” para confirmar.",3500);return false}
 
-// ---- barra do dono (editar) ----
+// ---- botões em cima do perfil: copiar link (todos) e trocar visual (dono), no estilo da rede escolhida ----
 function barra(){
-  const b=$("barra");
-  if(!P||!P.perfil.eh_meu){b.innerHTML=P?`<div class="pf-barra"><p>Você está visitando o perfil de <b>${esc(P.perfil.apelido)}</b>.</p><div class="acoes"><a class="pf-bt" href="perfil.html">${icon("user")}Ver o meu perfil</a></div></div>`:"";return}
-  b.innerHTML=`<div class="pf-barra"><p>Este é o seu perfil. É assim que os visitantes veem.</p><div class="acoes"><button type="button" class="pf-bt" id="btCopiar">${icon("link")}Copiar link</button><button type="button" class="pf-bt pri" id="btEditar">${icon("edit")}Editar perfil</button></div></div>`;
-  $("btEditar").onclick=abrirEdicao;
-  $("btCopiar").onclick=async()=>{const u=location.origin+"/"+linkPerfil(P.perfil.apelido);try{await navigator.clipboard.writeText(u);toast("Link do perfil copiado!")}catch(e){toast(u,5000)}};
+  const b=$("barra");if(!P){b.innerHTML="";return}
+  const eu=P.perfil.eh_meu,lay=LAYOUTS[P.perfil.layout]?P.perfil.layout:"orkut";
+  b.innerHTML=`<div class="pf-tools t-${lay}"><button type="button" class="pf-tb" id="btCopiar" aria-live="polite">${icon("link")}<span>Copiar link</span></button>${eu?`<button type="button" class="pf-tb" data-ed="visual" title="Trocar o visual do perfil">${icon("edit")}<span>Trocar visual</span></button>`:""}</div>`;
+  $("btCopiar").onclick=copiarLink;
 }
-function abrirEdicao(){
+// endereço completo do perfil (funciona em qualquer pasta do site)
+const urlPerfil=ap=>new URL(linkPerfil(ap),location.href).href;
+async function copiarLink(){
+  const u=urlPerfil(P.perfil.apelido),bt=$("btCopiar");
+  let ok=false;
+  try{if(navigator.clipboard&&window.isSecureContext){await navigator.clipboard.writeText(u);ok=true}}catch(e){}
+  if(!ok){ // reserva: copia por um campo escondido (navegadores sem a API de área de transferência)
+    const t=document.createElement("textarea");t.value=u;t.setAttribute("readonly","");t.style.cssText="position:fixed;left:-9999px;top:0;opacity:0";
+    document.body.appendChild(t);t.select();t.setSelectionRange(0,u.length);try{ok=document.execCommand("copy")}catch(e){}t.remove()}
+  if(ok){toast("Link do perfil copiado!");avisar("Link do perfil copiado");if(bt){bt.classList.add("ok");bt.innerHTML=`${icon("check")}<span>Link copiado!</span>`;clearTimeout(bt._t);bt._t=setTimeout(()=>{bt.classList.remove("ok");bt.innerHTML=`${icon("link")}<span>Copiar link</span>`},2200)}}
+  else{toast("Não deu para copiar sozinho. Copie o link: "+u,8000);avisar("Não deu para copiar. O link está na tela.")}
+}
+// lápis e botões de edição (delegação: o perfil é redesenhado a cada mudança)
+document.addEventListener("click",ev=>{const b=ev.target.closest("[data-ed]");if(!b||!P||!P.perfil.eh_meu)return;
+  const k=b.dataset.ed;if(k==="gato"){if(typeof openSignup==="function")openSignup()}else abrirEdicao(k==="fav"?"fav":"")});
+// depois de salvar o gatinho/apelido no criador, o perfil é recarregado (o apelido pode ter mudado)
+function onAccountChange(){if(!P||!P.perfil.eh_meu||!SESSAO||!SESSAO.usuario)return;const ap=SESSAO.usuario.apelido;history.replaceState(null,"","perfil.html?u="+encodeURIComponent(ap));carregar(ap).then(()=>{ // o perfil é redesenhado: devolve o foco ao lápis do gatinho (ou ao título), não ao body
+    const l=document.querySelector(".pf-lapis[data-ed=gato]")||document.querySelector("#pf h1");if(l){if(!l.matches("button"))l.tabIndex=-1;l.focus()}})}
+function abrirEdicao(foco){
   const p=P.perfil;
   // cada opção: miniatura do perfil naquela rede (com o seu gatinho) e o nome na letra típica da época (sem logo)
   const av=gatoValido(p.avatar_gato)?catSVG(p.avatar_gato):"";
@@ -249,9 +273,9 @@ function abrirEdicao(){
   const fid=P.carta_favorita?P.carta_favorita.id:"";
   $("fav").innerHTML=l.length?`<label class="pf-fav nenhuma"><input type="radio" name="fav" value="" ${fid?"":"checked"}><span class="pf-fv-n"><b>Nenhuma</b></span></label>`+l.map(c=>`<label class="pf-fav"><input type="radio" name="fav" value="${esc(c.id)}" ${fid===c.id?"checked":""}>${carta(c)}</label>`).join(""):`<p class="pf-vazio">Você ainda não tem figurinhas. Abra um pacote no álbum!</p>`;
   $("dlgErro").textContent="";$("dlg").showModal();
-  const sel=$("lays").querySelector("input:checked");sel&&sel.focus({preventScroll:true}); // foco na rede atual, não na primeira
+  const sel=$(foco==="fav"?"fav":"lays").querySelector("input:checked")||$("lays").querySelector("input:checked");sel&&sel.focus({preventScroll:foco!=="fav"}); // foco na rede atual (ou na favorita, pelo lápis da carta)
   $("favN").textContent=l.length?`${l.length} carta${l.length===1?"":"s"}`:"";contarVisual();
-  rolarAtivo($("fav"));rolarVisual();
+  rolarAtivo($("fav"));if(foco!=="fav")rolarVisual();
 }
 // contador "Visual N de 15" na legenda do grupo (acompanha a escolha)
 function contarVisual(){const i=[...$("lays").querySelectorAll("input")].findIndex(x=>x.checked);$("laysN").textContent=i<0?"":`Visual ${i+1} de ${$("lays").querySelectorAll("input").length}`}

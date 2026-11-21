@@ -65,7 +65,7 @@ async function abrir(layout, vp, { recados = [], tema = null } = {}) {
   page.on("pageerror", (e) => erros.push("pageerror: " + e.message));
   page.on("console", (m) => { if (m.type() === "error" && !/Failed to load resource|fonts\.g/.test(m.text())) erros.push("console: " + m.text()); });
   await page.goto(base + "/perfil.html?u=Ana");
-  await page.waitForSelector("#btEditar");
+  await page.waitForSelector("[data-ed=visual]");
   return { ctx, page, st, erros };
 }
 // ---- contraste calculado (WCAG) no navegador: cor efetiva do texto (com opacity) sobre o primeiro fundo opaco acima ----
