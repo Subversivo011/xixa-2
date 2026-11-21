@@ -14,7 +14,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Inter:wght@400;500;600;700;800&family=Baloo+2:wght@700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="theme.css?v=20261122g">
 <link rel="stylesheet" href="viewer.css?v=20261120d">
-<link rel="stylesheet" href="perfil.css?v=20261123c">
+<link rel="stylesheet" href="perfil.css?v=20261123d">
 <script>try{var t=localStorage.getItem("ns_theme")}catch(e){}document.documentElement.dataset.theme=t==="dark"?"dark":"light"</script>
 </head>
 <body>
@@ -255,13 +255,14 @@ async function copiarLink(){
     const t=document.createElement("textarea");t.value=u;t.setAttribute("readonly","");t.style.cssText="position:fixed;left:-9999px;top:0;opacity:0";
     document.body.appendChild(t);t.select();t.setSelectionRange(0,u.length);try{ok=document.execCommand("copy")}catch(e){}t.remove()}
   if(ok){toast("Link do perfil copiado!");avisar("Link do perfil copiado");if(bt){bt.classList.add("ok");bt.innerHTML=`${icon("check")}<span>Link copiado!</span>`;clearTimeout(bt._t);bt._t=setTimeout(()=>{bt.classList.remove("ok");bt.innerHTML=`${icon("link")}<span>Copiar link</span>`},2200)}}
-  else{toast("Não deu para copiar sozinho. Copie o link: "+u,8000)}
+  else{toast("Não deu para copiar sozinho. Copie o link: "+u,8000);avisar("Não deu para copiar. O link está na tela.")}
 }
 // lápis e botões de edição (delegação: o perfil é redesenhado a cada mudança)
 document.addEventListener("click",ev=>{const b=ev.target.closest("[data-ed]");if(!b||!P||!P.perfil.eh_meu)return;
   const k=b.dataset.ed;if(k==="gato"){if(typeof openSignup==="function")openSignup()}else abrirEdicao(k==="fav"?"fav":"")});
 // depois de salvar o gatinho/apelido no criador, o perfil é recarregado (o apelido pode ter mudado)
-function onAccountChange(){if(!P||!P.perfil.eh_meu||!SESSAO||!SESSAO.usuario)return;const ap=SESSAO.usuario.apelido;history.replaceState(null,"","perfil.html?u="+encodeURIComponent(ap));carregar(ap)}
+function onAccountChange(){if(!P||!P.perfil.eh_meu||!SESSAO||!SESSAO.usuario)return;const ap=SESSAO.usuario.apelido;history.replaceState(null,"","perfil.html?u="+encodeURIComponent(ap));carregar(ap).then(()=>{ // o perfil é redesenhado: devolve o foco ao lápis do gatinho (ou ao título), não ao body
+    const l=document.querySelector(".pf-lapis[data-ed=gato]")||document.querySelector("#pf h1");if(l){if(!l.matches("button"))l.tabIndex=-1;l.focus()}})}
 function abrirEdicao(foco){
   const p=P.perfil;
   // cada opção: miniatura do perfil naquela rede (com o seu gatinho) e o nome na letra típica da época (sem logo)
