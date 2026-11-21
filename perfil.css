@@ -591,3 +591,45 @@
 @keyframes pf-som{to{transform:translateX(-50%)}}
 @keyframes pf-moeda{to{transform:rotateY(360deg)}}
 @media(max-width:640px){.pf .cab .det{justify-content:center;text-align:center}}
+
+/* ===== botões do perfil (sem tarja): copiar link para todos, trocar visual e lápis de edição para o dono ===== */
+.pf-carta .art span[hidden]{display:none}
+.pf-tools{display:flex;justify-content:flex-end;flex-wrap:wrap;gap:8px;margin:0 0 10px}
+.pf-tb{display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:0 16px;cursor:pointer;font:700 13px/1 var(--tf,Inter),sans-serif;
+  background:var(--tbg,#fff);color:var(--tfg,#1d2129);border:var(--tbd,1px solid #0002);border-radius:var(--trad,12px);box-shadow:var(--tsh,0 2px 6px #0001);transition:transform .12s,filter .12s}
+.pf-tb:hover{transform:translateY(-1px);filter:brightness(1.04)}
+.pf-tb:focus-visible{outline:3px solid #ffbf00;outline-offset:2px}
+.pf-tb .ico{width:17px;height:17px}
+.pf-tb.ok{background:#1f8a4c;color:#fff;border-color:#1f8a4c}
+/* cada rede com o seu botão */
+.t-homepage{--tf:"Comic Sans MS","Comic Sans",cursive;--tbg:#c0c0c0;--tfg:#000;--tbd:2px outset #fff;--trad:0;--tsh:none}
+.t-icq{--tf:Tahoma;--tbg:linear-gradient(#fff,#ece9d8);--tfg:#0a246a;--tbd:1px solid #003c74;--trad:3px}
+.t-orkut{--tf:Verdana;--tbg:#fff;--tfg:#2f4f8f;--tbd:1px solid #b9c9e6;--trad:6px}
+.t-fotolog{--tf:Verdana;--tbg:#262626;--tfg:#cfe9a8;--tbd:0;--trad:0;--tsh:inset 0 -3px #8cc63f}
+.t-msn{--tf:"Segoe UI",Tahoma;--tbg:linear-gradient(#fdfdfd,#d9e8f6);--tfg:#10233f;--tbd:1px solid #8cb7e0;--trad:6px}
+.t-twitter{--tf:"Lucida Grande",Arial;--tbg:#fff;--tfg:#0a6e9c;--tbd:1px solid #c0deed;--trad:5px}
+.t-facebook{--tf:"Lucida Grande",Tahoma;--tbg:#f6f7f9;--tfg:#4b4f56;--tbd:1px solid #ced0d4;--trad:2px}
+.t-ask{--tf:"Helvetica Neue",Arial;--tbg:#fff;--tfg:#1673a0;--tbd:1px solid #c6dce6;--trad:4px}
+.t-whatsapp{--tf:"Segoe UI",Roboto;--tbg:#00a884;--tfg:#fff;--tbd:0;--trad:22px}
+.t-vine{--tf:"Helvetica Neue",Arial;--tbg:#00805d;--tfg:#fff;--tbd:0;--trad:999px}
+.t-snapchat{--tf:"Avenir Next","Trebuchet MS";--tbg:#fffc00;--tfg:#111;--tbd:2px solid #111;--trad:999px;--tsh:0 3px 0 #111}
+.t-instagram{--tf:-apple-system,"Segoe UI";--tbg:#fff;--tfg:#262626;--tbd:1px solid #dbdbdb;--trad:8px}
+.t-tiktok{--tf:-apple-system,"Segoe UI";--tbg:#121212;--tfg:#fff;--tbd:1px solid #333;--trad:8px;--tsh:-2px -1px 0 #25f4ee,2px 1px 0 #fe2c55}
+.t-kwai{--tf:-apple-system,"Segoe UI";--tbg:#fff;--tfg:#a33a00;--tbd:1px solid #ffd2a8;--trad:999px}
+.t-bluesky{--tf:Inter,-apple-system;--tbg:#fff;--tfg:#0a5cc2;--tbd:1px solid #d4dde8;--trad:999px}
+/* lápis no cantinho (foto, carta favorita) */
+.pf-edw{position:relative;display:block}
+.pf-edw-av{flex:none}
+.pf-lapis{position:absolute;right:-8px;bottom:-8px;z-index:4;width:44px;height:44px;display:grid;place-items:center;padding:0;border-radius:50%;border:2px solid #fff;background:#0a6a9a;color:#fff;cursor:pointer;box-shadow:0 3px 10px #0005;transition:transform .12s}
+.pf-lapis:hover{transform:scale(1.08)}
+.pf-lapis:focus-visible{outline:3px solid #ffbf00;outline-offset:2px}
+.pf-lapis .ico{width:19px;height:19px}
+.pf-edw-fav{max-width:230px;margin:0 auto}
+.pf-fotolog .post .pf-edw-fav{max-width:300px}
+.pf-edw-fav .pf-lapis{top:42%;right:-12px;bottom:auto}
+/* sem carta favorita: o próprio quadro vira botão */
+button.pf-semfav{display:flex;flex-direction:column;gap:8px;align-items:center;justify-content:center;width:100%;background:none;color:inherit;font:600 13px Inter,sans-serif;cursor:pointer}
+button.pf-semfav .ico{width:26px;height:26px}
+button.pf-semfav:hover{opacity:1;background:#0000000d}
+button.pf-semfav:focus-visible{outline:3px solid #ffbf00;outline-offset:2px}
+@media(max-width:640px){.pf-tools{justify-content:stretch}.pf-tb{flex:1;justify-content:center}}

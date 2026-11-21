@@ -64,7 +64,7 @@ async function abrir(layout, vp, { recados = [] } = {}) {
   page.on("pageerror", (e) => erros.push("pageerror: " + e.message));
   page.on("console", (m) => { if (m.type() === "error" && !/Failed to load resource|fonts\.g/.test(m.text())) erros.push("console: " + m.text()); });
   await page.goto(base + "/perfil.html?u=Ana");
-  await page.waitForSelector("#btEditar");
+  await page.waitForSelector("[data-ed=visual]");
   return { ctx, page, st, erros };
 }
 // ---- contraste calculado (WCAG) no navegador: cor efetiva do texto (com opacity) sobre o primeiro fundo opaco acima ----
@@ -99,7 +99,7 @@ const REC = [{ id: 1, texto: "oi, que perfil legal", em: "2026-11-20T10:00:00Z",
 for (const vp of VPS) {
   test(`grade de visuais ${vp.width}px: contador Visual N de 15 acompanha a escolha, atual rolado para a vista, miniaturas uniformes`, opts, async () => {
     const { ctx, page, erros } = await abrir("bluesky", vp);
-    await page.click("#btEditar");
+    await page.click("[data-ed=visual]");
     await page.waitForSelector("#dlg[open]");
     assert.strictEqual(await page.$eval("#laysN", (e) => e.textContent), "Visual 15 de 15");
     assert.ok(await page.$eval("#lays input:checked", (i) => { const l = i.closest("label").getBoundingClientRect(), c = document.getElementById("dlgCorpo").getBoundingClientRect(); return l.top >= c.top - 1 && l.bottom <= c.bottom + 1; }), "o 15º (último) já abre à vista");
@@ -118,7 +118,7 @@ for (const vp of VPS) {
 
 test("diálogo: aria-modal, padding próprio, radiogroups nomeados e Tab real com 1 parada por radiogroup", opts, async () => {
   const { ctx, page, erros } = await abrir("orkut", VPS[0]);
-  await page.click("#btEditar");
+  await page.click("[data-ed=visual]");
   await page.waitForSelector("#dlg[open]");
   assert.strictEqual(await page.getAttribute("#dlg", "aria-modal"), "true");
   const pad = await page.$eval("#dlg", (d) => parseFloat(getComputedStyle(d).paddingTop));
@@ -169,7 +169,7 @@ for (const vp of VPS) {
 
 test("desktop 1280 intacto: diálogo de até 620px com 3 colunas e rodapé fixo", opts, async () => {
   const { ctx, page } = await abrir("facebook", VPS[2]);
-  await page.click("#btEditar");
+  await page.click("[data-ed=visual]");
   await page.waitForSelector("#dlg[open]");
   assert.ok(await page.$eval("#dlg", (d) => d.getBoundingClientRect().width <= 620));
   assert.strictEqual(await page.$eval("#lays", (e) => getComputedStyle(e).gridTemplateColumns.split(" ").length), 3);

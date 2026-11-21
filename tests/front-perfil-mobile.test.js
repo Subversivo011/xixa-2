@@ -64,7 +64,7 @@ async function abrir(layout, vp, { recados = [] } = {}) {
   page.on("pageerror", (e) => erros.push("pageerror: " + e.message));
   page.on("console", (m) => { if (m.type() === "error" && !/Failed to load resource|fonts\.g/.test(m.text())) erros.push("console: " + m.text()); });
   await page.goto(base + "/perfil.html?u=Ana");
-  await page.waitForSelector("#btEditar");
+  await page.waitForSelector("[data-ed=visual]");
   return { ctx, page, st, erros };
 }
 const VPS = [{ width: 390, height: 844 }, { width: 360, height: 740 }, { width: 1280, height: 900 }];
@@ -74,7 +74,7 @@ for (const vp of VPS) {
   for (const layout of VISUAIS) {
     test(`editar perfil ${vp.width}px, visual ${layout}: Salvar sempre visível, visual atual visível, favorita por mini-cartas, foco e Esc`, opts, async () => {
       const { ctx, page, st, erros } = await abrir(layout, vp);
-      await page.click("#btEditar");
+      await page.click("[data-ed=visual]");
       await page.waitForSelector("#dlg[open]");
       const vis = await page.$eval("#lays input:checked", (i) => { const l = i.closest("label").getBoundingClientRect(), c = document.getElementById("dlgCorpo").getBoundingClientRect(); return l.top >= c.top - 1 && l.bottom <= c.bottom + 1; });
       assert.ok(vis, "visual escolhido à vista");
@@ -120,7 +120,7 @@ for (const vp of VPS) {
       await page.keyboard.press("Escape");
       assert.strictEqual(await page.$eval("#dlg", (d) => d.open), false);
       // reabre, escolhe e salva
-      await page.click("#btEditar");
+      await page.click("[data-ed=visual]");
       const esperado = await page.$eval("#fav label:nth-of-type(3) input", (i) => i.value);
       await page.click("#fav label:nth-of-type(3)");
       await page.click("#btSalvar");
@@ -134,7 +134,7 @@ for (const vp of VPS) {
 
 test("trocar o visual na grade mobile atualiza o contador e salva o visual novo", opts, async () => {
   const { ctx, page, st, erros } = await abrir("orkut", VPS[0]);
-  await page.click("#btEditar");
+  await page.click("[data-ed=visual]");
   await page.locator('#lays input[value="bluesky"]').evaluate((i) => i.closest("label").scrollIntoView({ block: "center" }));
   await page.click('#lays label.l-bluesky');
   assert.strictEqual(await page.$eval("#laysN", (e) => e.textContent), "Visual 15 de 15");
@@ -147,7 +147,7 @@ test("trocar o visual na grade mobile atualiza o contador e salva o visual novo"
 
 test("setas no radiogroup dos visuais trocam o marcado", opts, async () => {
   const { ctx, page } = await abrir("orkut", VPS[0]);
-  await page.click("#btEditar");
+  await page.click("[data-ed=visual]");
   await page.keyboard.press("ArrowRight");
   assert.notStrictEqual(await page.$eval("#lays input:checked", (i) => i.value), "orkut");
   await ctx.close();
