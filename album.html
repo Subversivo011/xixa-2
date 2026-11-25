@@ -220,7 +220,7 @@
 <script src="common.js?v=20261125e"></script>
 <script src="data.js?v=20261127b"></script>
 <script src="player.js?v=20261125b"></script>
-<script src="viewer.js?v=20261126b"></script>
+<script src="viewer.js?v=20261127a"></script>
 <script src="alertas.js?v=20261125b"></script>
 <script>
 renderHeader("album",{sub:[
@@ -325,14 +325,15 @@ function pickMesa(id){const c=byId[id];$("mesa").hidden=true;document.body.class
 const TIRAS=16;
 function virar(dir){
   if(virando)return;const novo=esq+2*dir;if(novo<0||novo>=PAGS.length)return;
-  if(reduzMov()){esq=novo;abertura();return}
+  // movimento reduzido (ex.: "efeitos de animação" desligados no Windows): a folha ainda vira, mas inteira, rápida e sem dobrar
+  const calmo=reduzMov(),N=calmo?1:TIRAS;
   virando=true;
-  const W=$("ladoD").getBoundingClientRect().width,w=W/TIRAS;
+  const W=$("ladoD").getBoundingClientRect().width,w=W/N;
   const frente=dir>0?paginaHTML(esq+1,"d"):paginaHTML(esq,"e"),verso=dir>0?paginaHTML(novo,"e"):paginaHTML(novo+1,"d");
   if(dir>0)$("ladoD").innerHTML=paginaHTML(novo+1,"d");else $("ladoE").innerHTML=paginaHTML(novo,"e");
   const m=document.createElement("div");m.className="mola "+(dir>0?"prox":"ant");m.setAttribute("aria-hidden","true");
   let pai=m;const tiras=[];
-  for(let k=0;k<TIRAS;k++){
+  for(let k=0;k<N;k++){
     const t=document.createElement("div");t.className="tira";t.style.width=(w+1.2)+"px";
     if(dir>0)t.style.left=(k?w:0)+"px";else t.style.right=(k?w:0)+"px";
     const xf=dir>0?k*w:W-(k+1)*w,xv=dir>0?W-(k+1)*w:k*w;
@@ -340,8 +341,8 @@ function virar(dir){
     pai.appendChild(t);tiras.push(t);pai=t;
   }
   $("livro").appendChild(m);
-  const dur=1100,atraso=.42,t0=performance.now(),ease=x=>x<.5?2*x*x:1-Math.pow(-2*x+2,2)/2,s=dir>0?-1:1;
-  const ang=(p,k)=>180*ease(Math.min(1,Math.max(0,(p-atraso*(1-k/(TIRAS-1)))/(1-atraso))));
+  const dur=calmo?520:1100,atraso=calmo?0:.42,t0=performance.now(),ease=x=>x<.5?2*x*x:1-Math.pow(-2*x+2,2)/2,s=dir>0?-1:1;
+  const ang=(p,k)=>180*ease(Math.min(1,Math.max(0,(p-atraso*(1-(N>1?k/(N-1):1)))/(1-atraso))));
   const sb=a=>Math.sin(a*Math.PI/180)*.22,g=(x,y)=>`linear-gradient(90deg,rgba(0,0,0,${x.toFixed(3)}),rgba(0,0,0,${y.toFixed(3)}))`;
   function quadro(agora){
     const p=Math.min(1,(agora-t0)/dur);let antes=0,sAnt=sb(ang(p,0));

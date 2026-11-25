@@ -96,7 +96,7 @@
 <script src="common.js?v=20261125e"></script>
 <script src="data.js?v=20261127b"></script>
 <script src="player.js?v=20261125b"></script>
-<script src="viewer.js?v=20261126b"></script>
+<script src="viewer.js?v=20261127a"></script>
 <script src="alertas.js?v=20261125b"></script>
 <script>
 renderHeader("memepedia",{sub:[
@@ -197,6 +197,8 @@ addEventListener("hashchange",rota);
 function onAccountChange(){rota()}
 fetch("/api/memepedia",{headers:{accept:"application/json"}}).then(r=>r.ok&&(r.headers.get("content-type")||"").includes("json")?r.json():null).then(d=>{if(d&&typeof d==="object"){WK.srv=d;rota()}}).catch(()=>{});
 rota();
+// o acervo do servidor chegou (link trocado, meme novo ou oculto): refaz a página aberta
+document.addEventListener("ns:acervo",()=>{try{rota()}catch(e){}});
 </script>
 </body>
 </html>
