@@ -14,7 +14,8 @@ export function dadosDataJs() {
   const ctx = vm.createContext({});
   const arq = fileURLToPath(new URL('../../data.js', import.meta.url));
   vm.runInContext(readFileSync(arq, 'utf8') + ';this.M=MEMES;this.Y=YEAR_INFO;this.C=COLLECTIONS', ctx);
-  return { memes: ctx.M.length, eras: Object.keys(ctx.Y).length, colecoes: ctx.C.length, cartas: ctx.C.reduce((n, c) => n + c.cards.length, 0) };
+  const porCategoria = {}; for (const m of ctx.M) porCategoria[m.c] = (porCategoria[m.c] || 0) + 1;
+  return { porCategoria, memes: ctx.M.length, eras: Object.keys(ctx.Y).length, colecoes: ctx.C.length, cartas: ctx.C.reduce((n, c) => n + c.cards.length, 0) };
 }
 
 export const temBanco = () => !!process.env.TEST_DB_NAME;
