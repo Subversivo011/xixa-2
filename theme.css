@@ -581,3 +581,6 @@ img.cdo-blur{filter:blur(16px) saturate(.6);transform:scale(1.15)}
 
 /* toque (inclui tablet/desktop touch, 761-1100px): botões do cartão com 44px e o texto de apoio com 13,5px */
 @media(pointer:coarse){.nsft2 .fq-in .fq-acts .fq-go{min-height:44px}.nsft2 .fq-in .fq-l2{font-size:13.5px}}
+
+/* Moderação: só aparece para moderador/admin (papel vindo de /api/eu; a API confere de novo) */
+html:not(.pode-moderar) .so-mod{display:none!important}

@@ -365,9 +365,17 @@ async function carregarRanking(el,metrica){
 // ---- Sessão do servidor (login com Discord): GET /api/eu ----
 let SESSAO=null;
 async function carregarSessao(){
-  try{SESSAO=await Api.eu()}catch(e){SESSAO=null;updateAccount();throw e}
-  updateAccount();
+  try{SESSAO=await Api.eu()}catch(e){SESSAO=null;updateAccount();marcarPermissoes();throw e}
+  updateAccount();marcarPermissoes();
 }
+// permissões vindas do servidor (a API confere de novo em cada chamada): o front só esconde/mostra
+const podeModerar=()=>!!(SESSAO&&["moderador","admin"].includes(SESSAO.papel));
+const editaDireto=()=>!!(SESSAO&&SESSAO.edita_direto);
+function marcarPermissoes(){document.documentElement.classList.toggle("pode-moderar",podeModerar());if(SUB.length)renderSub()}
+// POST com a sessão (cookie + X-CSRF), para as rotas da equipe
+async function postComSessao(url,corpo){
+  const r=await fetch(url,{method:"POST",credentials:"same-origin",headers:{"content-type":"application/json","X-CSRF":(SESSAO&&SESSAO.csrf)||""},body:JSON.stringify(corpo)});
+  const j=await r.json().catch(()=>null);if(!r.ok)throw Object.assign({},j||{},{status:r.status});return j}
 async function sairDaConta(){
   try{await fetch("/api/auth/sair",{method:"POST",credentials:"same-origin",headers:{"X-CSRF":(SESSAO&&SESSAO.csrf)||""}})}catch(e){}
   SESSAO=null;location.reload();
@@ -591,7 +599,7 @@ function renderHeader(page,opt={}){
 }
 let SUB=[],subOn=null;
 function renderSub(items){if(items)SUB=items;const n=document.getElementById("sub");if(!n)return;
-  n.innerHTML=SUB.map((x,i)=>x.sp?`<span class="sp"></span>`:x.href?`<a href="${x.href}" class="${x.k===subOn?"on":""} ${x.cta?"cta":""}"${x.k===subOn?' aria-current="page"':""}>${icon(x.ic)}${x.label}</a>`:`<button data-i="${i}" class="${x.k===subOn?"on":""} ${x.cta?"cta":""} ${x.dd?"dd":""}">${icon(x.ic)}${x.label}</button>`).join("");
+  n.innerHTML=SUB.map((x,i)=>x.sp?`<span class="sp"></span>`:x.href?`<a href="${x.href}" class="${x.k===subOn?"on":""} ${x.cta?"cta":""}"${x.k===subOn?' aria-current="page"':""}>${icon(x.ic)}${x.label}</a>`:`<button data-i="${i}" class="${x.k===subOn?"on":""} ${x.cta?"cta":""} ${x.dd?"dd":""} ${x.so==="mod"?"so-mod":""}">${icon(x.ic)}${x.label}</button>`).join("");
   n.querySelector(".dd")?.setAttribute("aria-expanded","false");
   n.querySelectorAll("button[data-i]").forEach(b=>b.onclick=e=>{const x=SUB[+b.dataset.i];x.fn&&x.fn(e,b)});
 }
