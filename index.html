@@ -12,7 +12,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preconnect" href="https://i.ytimg.com">
 <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Inter:wght@400;500;600;700&family=Baloo+2:wght@700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="theme.css?v=20261122g">
+<link rel="stylesheet" href="theme.css?v=20261125a">
 <link rel="stylesheet" href="viewer.css?v=20261120d">
 <script>try{var t=localStorage.getItem("ns_theme")}catch(e){}document.documentElement.dataset.theme=t==="dark"?"dark":"light"</script>
 <style>
@@ -158,7 +158,7 @@ main{display:flex;flex-direction:column}
 .top,.cur{grid-template-columns:1fr}.stage{grid-template-columns:1fr}.side{display:none}.rail{grid-template-columns:1fr 1fr}.rail .card:nth-child(3){display:none}main{padding:16px 16px 40px}}
 @media(max-width:600px){.f .two{grid-template-columns:1fr}.today{grid-template-columns:110px 1fr}.box .body{padding:16px}}
 </style>
-<link rel="stylesheet" href="home.css?v=20261122g">
+<link rel="stylesheet" href="home.css?v=20261125a">
 </head>
 <body class="home">
 <div class="rays-wrap" aria-hidden="true"><div class="rays" id="rays"></div></div>
@@ -185,7 +185,7 @@ main{display:flex;flex-direction:column}
   </section>
 
   <section class="timeline" id="tl">
-    <div class="sec-title"><span><i data-ic="clock"></i>Linha do tempo da internet brasileira</span><a onclick="setView('todos')">Ver todos os anos →</a></div>
+    <div class="sec-title"><span><i data-ic="clock"></i>Linha do tempo da internet brasileira</span><a href="linha-do-tempo.html">Ver todos os anos →</a></div>
     <div class="years" id="years"></div>
     <div class="stage">
       <div class="side" id="prev"></div>
@@ -212,7 +212,7 @@ main{display:flex;flex-direction:column}
 <div class="modal" id="modal" onclick="if(event.target===this)closeM()"><div class="box" id="box"></div></div>
 
 <form name="feedback" data-netlify="true" netlify-honeypot="bot-field" hidden><input name="tipo"><textarea name="msg"></textarea><input name="contato"><input name="pagina"><input name="bot-field"></form>
-<script src="common.js?v=20261122g"></script>
+<script src="common.js?v=20261125a"></script>
 <script src="data.js?v=20261119q"></script>
 <script src="player.js?v=20261121w"></script>
 <script src="viewer.js?v=20261120e"></script>
@@ -249,7 +249,11 @@ function buildAll(){
 buildAll();
 const byId=id=>ALL.find(a=>a.id===id);
 
-let cur="2012",cat="Todas",query="",view="ano";
+// ano da linha do tempo da home: sorteado entre os anos que a pessoa ainda não explorou (guardado em ns_anos_vistos)
+function anosVistos(){try{const v=JSON.parse(localStorage.getItem("ns_anos_vistos")||"[]");return Array.isArray(v)?v.filter(x=>typeof x==="string"):[]}catch(e){return[]}}
+function marcarAnoVisto(k){try{const v=anosVistos();if(!v.includes(k)){v.push(k);localStorage.setItem("ns_anos_vistos",JSON.stringify(v.slice(-60)))}}catch(e){}}
+function anoInicial(){const ks=Object.keys(YEAR_INFO),vis=anosVistos(),novos=ks.filter(k=>!vis.includes(k));const L=novos.length?novos:ks;return L[Math.floor(Math.random()*L.length)]||"2012"}
+let cur=anoInicial(),cat="Todas",query="",view="ano";
 const $=id=>document.getElementById(id);
 const card=(a,big)=>`<button class="card" onclick="openM('${a.id}')">
   <div class="thumb" style="background:${grad(a.t)}"><i>${a.y}</i>${art(a)}${PLAY}</div>
@@ -308,7 +312,7 @@ async function renderSobeDesce(){
   const el=$("hot");if(!el)return;
   const per=SD.periodo==="hoje"?"Hoje":"Todos os tempos";
   const head=`<div class="sd-h"><span class="sd-logo"><span class="su">sobe</span><i>.</i><span class="de">desc<span class="ee">e${HORNS}</span></span></span>
-    <div class="sd-seg" role="group" aria-label="Período do ranking">${[["hoje","clock","Hoje"],["sempre","ranking","Todos os tempos"]].map(([k,ic,t])=>`<button type="button" aria-controls="sd-painel" aria-pressed="${SD.periodo===k}" class="${SD.periodo===k?"on":""}" onclick="sdSet('periodo','${k}')">${icon(ic,"in")}${t}</button>`).join("")}</div></div>
+    <div class="sd-seg" role="group" aria-label="Período do ranking">${[["hoje","clock","Hoje"],["sempre","ranking","Todos os tempos"]].map(([k,ic,t])=>`<button type="button" aria-controls="sd-painel" aria-pressed="${SD.periodo===k}" class="${SD.periodo===k?"on":""}" onclick="sdSet('periodo','${k}')"><span class="pl">${icon(ic,"in")}${t}</span></button>`).join("")}</div></div>
     <div class="sd-tabs" role="tablist"><button role="tab" id="sd-tab-visitados" aria-controls="sd-painel" aria-selected="${SD.tipo==="visitados"}" class="${SD.tipo==="visitados"?"on":""}" onclick="sdSet('tipo','visitados')">${icon("eye","in")}Mais visitados</button><button role="tab" id="sd-tab-clicados" aria-controls="sd-painel" aria-selected="${SD.tipo==="clicados"}" class="${SD.tipo==="clicados"?"on":""}" onclick="sdSet('tipo','clicados')">${icon("cursor","in")}Mais clicados</button></div>`;
   const keep=el.querySelector(".sd");el.innerHTML=head+(keep?keep.outerHTML:`<div class="sd" id="sd-painel" role="tabpanel"><div class="sd-load">carregando…</div></div>`);
   { const p=el.querySelector(".sd"); if(p){p.id="sd-painel";p.setAttribute("role","tabpanel");p.setAttribute("aria-labelledby","sd-tab-"+SD.tipo)} }
@@ -374,7 +378,7 @@ setInterval(()=>{const el=document.querySelector("#cur .mini");if(!el||el.matche
   if(ALL.filter(a=>yKey(a.y)===cur&&!a.mine).length<=3)return;
   const old=PREV_CACHE[cur]||[];let tries=0;do{delete PREV_CACHE[cur];PREV_SEED2();}while(tries++<4&&prevDoAno(cur).map(a=>a.id).join()===old.join());
   el.classList.add("swap");setTimeout(()=>{el.innerHTML=prevDoAno(cur).map(a=>card(a)).join("");el.classList.remove("swap")},260)},9000);
-function go(y,scroll){cur=String(y);view="ano";query="";$("q").value="";cat="Todas";renderNav();renderYears();renderCur();renderGrid();if(scroll)$("tl").scrollIntoView({behavior:"smooth"})}
+function go(y,scroll){cur=String(y);marcarAnoVisto(cur);view="ano";query="";$("q").value="";cat="Todas";renderNav();renderYears();renderCur();renderGrid();if(scroll)$("tl").scrollIntoView({behavior:"smooth"})}
 
 // ---- Modal do meme com o player da época ----
 let player=null;

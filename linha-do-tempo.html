@@ -12,7 +12,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Inter:wght@400;500;600;700;800&family=Baloo+2:wght@700;800&family=Press+Start+2P&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="theme.css?v=20261122g">
+<link rel="stylesheet" href="theme.css?v=20261125a">
 <link rel="stylesheet" href="viewer.css?v=20261120d">
 <script>try{var t=localStorage.getItem("ns_theme")}catch(e){}document.documentElement.dataset.theme=t==="dark"?"dark":"light"</script>
 <style>
@@ -413,7 +413,7 @@ body.ep-xp .lt-top small{color:#fff}
   <p class="lt-marcas">Visual inspirado na internet de cada época. Marcas, nomes e estilos citados pertencem aos seus donos.</p>
 </main>
 
-<script src="common.js?v=20261122g"></script>
+<script src="common.js?v=20261125a"></script>
 <script src="data.js?v=20261119q"></script>
 <script src="player.js?v=20261121w"></script>
 <script src="viewer.js?v=20261120e"></script>
@@ -493,8 +493,7 @@ function palco(){
   const F=L.filter(m=>ST.cat==="Todas"||m.c===ST.cat);
   const grupos=[];F.forEach(m=>{const d=m.date?new Date(m.date+"T12:00:00"):null;const g=d&&!isNaN(d)?(k.includes("–")?`${MES[d.getMonth()]} de ${d.getFullYear()}`:MES[d.getMonth()]):String(m.y);let x=grupos.find(z=>z.g===g);if(!x)grupos.push(x={g,its:[]});x.its.push(m)});
   const st=$("stage");st.className="lt-stage th-"+e;document.body.className=document.body.className.replace(/\bep-\w+/g,"").trim()+" ep-"+e;
-  const nt=det[1].split(" · ").map(x=>`<i>${escapeHtml(x)}</i>`).join("<i>·</i>");
-  st.innerHTML=`<div class="lt-tick" aria-hidden="true"><b>${k.includes("–")?"Na época":"Em "+escapeHtml(k)}</b><div class="tk"><span>${Array(8).fill(nt+"<i>·</i>").join("")}</span></div></div>
+  st.innerHTML=`
    <div class="lt-hero"><button class="nav" ${p?`data-k="${escapeHtml(p)}" data-f="prev"`:"disabled"} aria-label="Ano anterior">‹</button>
      <div><div class="lt-era">${EPOCA_NOME[e]} · ${escapeHtml(epAnos(e))}</div><div class="lt-big">${escapeHtml(yLab(k))}</div><div class="lt-lema">${escapeHtml(info.lema)}</div>
       <p class="lt-sub">${L.length} ${L.length===1?"viral salvo":"virais salvos"} · ${escapeHtml(info.txt)}</p>${det[0]?`<span class="lt-deco">${escapeHtml(det[0])}</span>`:""}</div>

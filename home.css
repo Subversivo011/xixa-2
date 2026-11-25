@@ -291,3 +291,16 @@ body:has(main .facts) .nsft2{margin-top:22px}
 .sd-seg .ico.in{width:15px;height:15px;margin:0}
 @media(pointer:coarse),(max-width:640px){.sd-seg button,.sd-tabs button{min-height:44px}}
 @media(max-width:420px){.sd-seg{margin-left:0;width:100%}.sd-seg button{flex:1;justify-content:center}}
+
+/* sobe.desce: período compacto, ao lado do título (onde ficava o ícone). Os dois botões ficam empilhados à direita
+   e o logo encolhe com a largura do cartão (container query) para nunca quebrar em duas linhas.
+   O botão mantém 44px de toque no celular, mas o desenho (a pílula) é menor: o fundo fica no .pl de dentro */
+.sd-h{flex-wrap:nowrap;align-items:center;gap:8px;container-type:inline-size}
+.sd-logo{min-width:0;white-space:nowrap;font-size:clamp(22px,calc(14.5cqi - 20px),38px)}
+.sd-seg{flex:none;flex-direction:column;align-items:stretch;margin-left:auto;padding:0;gap:4px;background:none;box-shadow:none;border-radius:0;width:auto}
+.sd-seg button{flex:none;min-height:30px;padding:0;background:none!important;box-shadow:none!important;border-radius:999px;justify-content:stretch}
+.sd-seg button .pl{display:flex;width:100%;justify-content:center;align-items:center;gap:5px;padding:5px 10px;border-radius:999px;background:var(--sunk);box-shadow:inset 0 0 0 1px var(--line);color:var(--mut);font:700 11.5px Inter,system-ui,sans-serif;white-space:nowrap;transition:background .15s,color .15s}
+.sd-seg button:hover .pl{color:var(--txt);background:var(--panel)}
+.sd-seg button.on .pl{background:#0a6a9a;color:#fff;box-shadow:0 2px 8px #0a6a9a55}
+.sd-seg .ico.in{width:13px;height:13px}
+@media(pointer:coarse),(max-width:640px){.sd-seg{gap:0}.sd-seg button{min-height:44px}}

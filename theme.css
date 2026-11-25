@@ -359,6 +359,7 @@ a[onclick]:not([href]):focus-visible{outline:2px solid var(--brand);outline-offs
 .sb svg{width:22px;height:22px}
 .sb:hover{transform:translateY(-3px)}
 .sb.s-tw{background:#9146FF}
+.sb.s-kick{background:#53FC18;color:#0b0e0f}
 .sb.s-x{background:#000;box-shadow:0 0 0 1px #ffffff30,0 4px 12px #0004}
 .sb.s-ig{background:radial-gradient(circle at 30% 107%,#fdf497 0%,#fdf497 5%,#fd5949 45%,#d6249f 60%,#285AEB 90%)}
 .sb.s-yt{background:#FF0000;cursor:pointer}
@@ -561,6 +562,7 @@ img.cdo-blur{filter:blur(16px) saturate(.6);transform:scale(1.15)}
 /* celular: o menu da conta abre dentro do painel do menu (em linha, sem ficar cortado) */
 @media(max-width:760px){.account-tools{flex-wrap:wrap}#acct{flex:1 1 auto}.account-actions{flex-wrap:wrap;justify-content:flex-end}.acct-wrap{display:contents}.acct-menu{position:static;order:9;flex:1 1 100%;margin-top:8px;min-width:0;box-shadow:0 0 0 1px var(--line)}}
 
+/* (boneco com top:-6px: o pé encosta no topo do cartão, sem ficar "flutuando") */
 /* rodapé no celular (<=760px): o cartão fala.que.eu.te.escuto vem ANTES do texto legal, coluna única e centrado; o boneco (96px)
    senta em cima do cartão, sem cobrir o canto nem descer abaixo dele; telefone decorativo >= 44px; textos de 13,5px */
 @media(max-width:760px){
@@ -574,7 +576,7 @@ img.cdo-blur{filter:blur(16px) saturate(.6);transform:scale(1.15)}
   .nsft2 .fq-in .fq-l2{font-size:13.5px;line-height:1.35}
   .nsft2 .fq-in .fq-acts{flex-direction:column}
   .nsft2 .fq-in .fq-acts .fq-go{flex:none;width:100%;min-height:44px;font-size:14px}
-  .nsft2 .ft-boneco{position:absolute;grid-area:auto;top:-16px;bottom:auto;right:calc((100% - min(100% - 32px,440px)) / 2 + 20px);height:96px;width:auto;margin:0;justify-self:auto;align-self:auto}
+  .nsft2 .ft-boneco{position:absolute;grid-area:auto;top:-6px;bottom:auto;right:calc((100% - min(100% - 32px,440px)) / 2 + 20px);height:96px;width:auto;margin:0;justify-self:auto;align-self:auto}
 }
 
 /* toque (inclui tablet/desktop touch, 761-1100px): botões do cartão com 44px e o texto de apoio com 13,5px */
