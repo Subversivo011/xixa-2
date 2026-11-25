@@ -1,0 +1,28 @@
+-- 025: memes do "Catálogo Completo - Acervo e Figurinhas" com vídeo achado no YouTube.
+-- Só roda em banco que já tem o acervo (num banco vazio quem carrega é o seed) e não sobrescreve nada.
+INSERT INTO memes (id, titulo, ano, data, categoria, tipo, raridade, emoji, descricao, youtube_id, adicionado_em, status)
+SELECT v.id, v.titulo, v.ano, v.data::date, v.categoria, 'video', v.raridade, v.emoji, v.descricao, v.yt, v.adicionado::date, 'publicado' FROM (VALUES
+  ('seu-madruga-will-go-on', 'Seu Madruga Will Go On (YTPBR)', 2009, '2009-01-01', 'Vídeos', 'Lendário', '🎻', 'O YouTube Poop do Mestre3224 que fez Seu Madruga cantar “My Heart Will Go On” e virou o clássico do YTPBR.', 'ettaeKZHAwA', '2026-11-25'),
+  ('alborghetti-cadeia-neles', 'Alborghetti: Cadeia Neles!', 1999, '1999-01-01', 'TV', 'Lendário', '🚔', 'Luiz Carlos Alborghetti, com o porrete na mão, gritando “cadeia neles!” contra a bandidagem no programa Cadeia.', 'd4UzlOvM4cQ', '2026-11-25'),
+  ('danca-do-quadrado', 'Dança do Quadrado', 2008, '2008-01-01', 'Música', 'Lendário', '⬛', '“Pegue o seu quadrado e quem pisar na linha vai pagar”: a música de Sharon Acioly virou febre nacional em 2008.', '5F2OpXCnzpo', '2026-11-25'),
+  ('pedala-robinho', 'Pedala, Robinho!', 2005, '2005-01-01', 'TV', 'Relíquia', '🚲', 'O quadro do Pânico na TV com o “Pedala, Robinho!” e os tapinhas na nuca que viraram bordão de toda pelada.', 'RHJ1wFUzHaM', '2026-11-25'),
+  ('galvao-e-tetra', 'Galvão Bueno: É Tetra!', 1994, '1994-07-17', 'Esportes', 'Relíquia', '🏆', '“É tetra! É tetra!” A narração de Galvão Bueno no fim do jejum de 24 anos sem Copa virou trilha de qualquer vitória.', 'mof63nznckE', '2026-11-25'),
+  ('tartaruga-da-brahma', 'Tartaruga da Brahma', 2001, '2001-01-01', 'TV', 'Relíquia', '🐢', 'A tartaruguinha dos comerciais da Brahma, lenta para tudo menos para a cerveja, marcou a TV do começo dos anos 2000.', 'O6R_5HeytJI', '2026-11-25'),
+  ('caco-antibes-horror-a-pobre', 'Caco Antibes: Eu Tenho Horror a Pobre!', 1996, '1996-01-01', 'TV', 'Relíquia', '🎩', 'O bordão do personagem de Miguel Falabella no Sai de Baixo virou a resposta irônica para qualquer pão-durismo.', 'x4hmmEFcqog', '2026-11-25'),
+  ('vera-verao-epa-bicha-nao', 'Vera Verão: Epa, Bicha Não!', 1997, '1997-01-01', 'TV', 'Relíquia', '💃', 'O grito de Jorge Lafond como Vera Verão na Praça É Nossa virou GIF e bordão eterno da internet.', 'Dyk_uhVMBew', '2026-11-25'),
+  ('poupancudos-da-caixa', 'Poupançudos da Caixa', 2009, '2009-11-01', 'TV', 'Relíquia', '🐷', 'Os cofrinhos animados da Caixa voltaram em 2009 e viraram mania de coleção (e de meme) por todo o país.', 'nt_DWDpF9Sg', '2026-11-25'),
+  ('luxemburgo-voce-e-moleque', 'Luxemburgo x Marcelinho: Você É Moleque!', 2007, '2007-01-01', 'Esportes', 'Raro', '⚽', 'O bate-boca ao vivo entre Vanderlei Luxemburgo e Marcelinho Carioca no programa do Datena virou clássico das tretas da TV.', 'jh_OyaIT-K0', '2026-11-25'),
+  ('ronaldo-copa-com-hospital', 'Ronaldo: Não Se Faz Copa com Hospital', 2011, '2011-11-01', 'Esportes', 'Raro', '🏥', 'A frase de Ronaldo Fenômeno defendendo os gastos com estádios virou meme e símbolo dos protestos contra a Copa de 2014.', 'RKdQavGLvXU', '2026-11-25'),
+  ('valeu-natalina', 'Valeu, Natalina!', 2021, '2021-12-01', 'Vídeos', 'Comum', '🎄', 'O vídeo dos meninos agradecendo a “Natalina” espalhado por Diogo Defante virou o bordão do Natal de 2021.', '0YbwuCyX1OM', '2026-11-25'),
+  ('luva-de-pedreiro-receba', 'Luva de Pedreiro: Receba!', 2022, '2022-01-01', 'Esportes', 'Comum', '🧤', 'Iran Ferreira, o Luva de Pedreiro, chutando com a luva e gritando “Receba! Obrigado, meu Deus!”, virou fenômeno mundial.', 'ppLyDJsI6o0', '2026-11-25'),
+  ('bozena-la-em-pato-branco', 'Bozena: Lá em Pato Branco...', 2007, '2007-01-01', 'TV', 'Relíquia', '🦆', 'Alessandra Maestrini como Bozena no Toma Lá, Dá Cá, começando toda história absurda com “lá em Pato Branco...”.', 'oodMuQ6rq-8', '2026-11-25'),
+  ('paulinho-gogo-conta-historia', 'Paulinho Gogó: Quem Não Tem Dinheiro Conta História', 2004, '2004-01-01', 'TV', 'Raro', '🗣️', 'O malandro de Maurício Manfrini na Praça É Nossa, com seus causos “fato venérico” e o bordão que todo mundo repete.', 'MYzlWBH6diU', '2026-11-25'),
+  ('cabrito-tevez-la-pergunta', 'Cabrito Tevez: La Pergunta?', 2007, '2007-02-22', 'TV', 'Raro', '🐐', 'O “argentino” de Alexandre Porpetone na Praça É Nossa, misturando portunhol e perguntando “la pergunta?” a cada frase.', '9skpqmE1n9I', '2026-11-25'),
+  ('nego-ney', 'Nego Ney', 2019, '2019-01-01', 'Vídeos', 'Comum', '🎤', 'Nego Ney e suas falas sem pé nem cabeça viraram figurinha de reação e meme em todo grupo de WhatsApp.', 'TcSKCo1oRGw', '2026-11-25'),
+  ('acorda-pedrinho', 'Acorda, Pedrinho!', 2022, '2022-03-21', 'Música', 'Comum', '⏰', 'O hit do Jovem Dionísio que estourou no TikTok em 2022: “Acorda, Pedrinho, que hoje tem campeonato!”.', 'ukPO8UtBAIk', '2026-11-25'),
+  ('bruno-henrique-oto-patamar', 'Bruno Henrique: Otô Patamar', 2019, '2019-01-01', 'Esportes', 'Comum', '🚀', 'O atacante do Flamengo de 2019 dizendo que o time estava em “otô patamar” e o bordão grudou em toda a torcida.', '-3eGe6azSOA', '2026-11-25'),
+  ('hoje-tem-gol-do-ribamar', 'Hoje Tem Gol do Ribamar', 2020, '2020-01-01', 'Esportes', 'Comum', '⚽', 'O funk de MC Nandinho para o atacante do Vasco virou hino irônico da internet: “Hoje tem gol do Ribamar!”.', 'M1n0s60dL44', '2026-11-25'),
+  ('o-pai-ta-on', 'O Pai Tá On', 2020, '2020-08-01', 'Esportes', 'Comum', '😎', 'O grito de Neymar no PSG em agosto de 2020 virou bordão de qualquer um que chega confiante: “o pai tá on!”.', '4UGBvNHcOm4', '2026-11-25')
+) AS v(id, titulo, ano, data, categoria, raridade, emoji, descricao, yt, adicionado)
+WHERE EXISTS (SELECT 1 FROM memes)
+ON CONFLICT (id) DO NOTHING;
