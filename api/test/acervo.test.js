@@ -64,9 +64,9 @@ test('GET /api/categorias: 7 categorias, total soma todos os memes', { skip }, a
 });
 
 test('rotas legadas seguem iguais: voto agregado e comentário', { skip }, async () => {
-  const v = await s.post('/api/votos', { id: 'havaianas-de-pau', from: 0, to: 1 });
-  assert.equal(v.status, 200); assert.equal(v.json.up, 1);
-  assert.deepEqual((await s.get('/api/votos?ids=havaianas-de-pau')).json['havaianas-de-pau'], { up: 1, down: 0, sum: 0, n: 0 });
+  // votar exige login (voto por usuário: migração 016); os totais são públicos
+  assert.equal((await s.post('/api/votos', { id: 'havaianas-de-pau', v: 1 })).status, 401);
+  assert.deepEqual((await s.get('/api/votos?ids=havaianas-de-pau')).json['havaianas-de-pau'], { up: 0, down: 0, sum: 0, n: 0 });
   const c = await s.post('/api/comentarios', { id: 'havaianas-de-pau', autor: 'zeca', texto: 'kkk' });
   assert.equal(c.status, 201);
   assert.equal((await s.post('/api/comentarios', { id: 'meme-fantasma', autor: 'zeca', texto: 'oi' })).status, 404);

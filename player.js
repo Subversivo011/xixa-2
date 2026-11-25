@@ -263,5 +263,9 @@ a.vp-again{text-decoration:none}
 .vp-e1 .vp-vol:hover .vp-vs,.vp-e1 .vp-vol:focus-within .vp-vs{width:84px;opacity:1;pointer-events:auto}
 .vp-time{white-space:nowrap}
 @media(max-width:600px){.vp-vol{display:inline-flex}.vp-vol .vp-mute{display:grid}.vp-vs{display:none}.vp-e0 .vp-vs,.vp-e1 .vp-vs{display:none}}
+/* 2013 em diante a barra fica por cima do vídeo: precisa ficar acima do iframe do YouTube (z-index 1), senão some ao tocar.
+   Em tela de toque (sem "passar o mouse") ela fica sempre visível */
+.vp-e4 .vp-bar,.vp-e5 .vp-bar{z-index:4}
+@media(hover:none){.vp-e4 .vp-bar,.vp-e5 .vp-bar{opacity:1}}
 @media(max-width:600px){.vp-rel{grid-template-columns:repeat(2,1fr)}.vp-ic{display:none}}`;
 (function(){const s=document.createElement("style");s.textContent=PLAYER_CSS;document.head.appendChild(s)})();

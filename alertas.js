@@ -161,9 +161,22 @@ function mostrarAlerta(el,m,a){
     if(a.ok){t.querySelector(".etx").textContent=a.ok;const s=t.querySelector(".ebs");s&&s.remove();clearTimeout(t._t);t._t=setTimeout(()=>t.remove(),3500)}else t.remove();
   });
   win.appendChild(t);
+  encaixarAlerta(t,win);
   tocarSom(a.som,a.s);
   if(a.shake){const w=win;if(w){w.classList.remove("shake");void w.offsetWidth;w.classList.add("shake")}}
   t._t=setTimeout(()=>t.remove(),a.bt||a.bts?11000:7000);
   return t;
+}
+// o aviso fica sempre dentro da parte visível do player (no celular a janela pode estar rolada por dentro:
+// aí o "bottom/top" do CSS cairia fora da tela). Mede e corrige com margem.
+function encaixarAlerta(t,win){
+  if(!t||!win||win===document.body)return;
+  const pad=window.innerWidth<=700?8:12;
+  t.style.marginTop="";t.style.marginBottom="";
+  const r=t.getBoundingClientRect(),w=win.getBoundingClientRect();
+  if(!r.height)return;
+  const topoVis=Math.max(w.top,0)+pad,baseVis=Math.min(w.bottom,window.innerHeight)-pad;
+  if(t.classList.contains("top")){const d=topoVis-r.top;if(Math.abs(d)>1)t.style.marginTop=d+"px"}
+  else{const d=r.bottom-baseVis;if(Math.abs(d)>1)t.style.marginBottom=d+"px"}
 }
 function alertaDaEpoca(el,m,isPhoto){if(!alertasLigados())return null;return mostrarAlerta(el,m,sortearAlerta(m,isPhoto))}

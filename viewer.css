@@ -622,3 +622,6 @@ body.vw-open{overflow:hidden}
 .vw-win .yh2 .sr,.vw-win .yh3 .sr{flex:1 1 auto;min-width:0}
 .vw-win .yh2 .sr input,.vw-win .yh3 .sr input{width:auto;flex:1 1 auto;min-width:60px}
 .vw-win .yh2 .lk,.vw-win .yh3 .lk,.vw-win .yh2 .up,.vw-win .yh3 .up{flex:none}
+
+/* aviso de época: a classe .top colidia com ".top{display:contents}" da home (no celular o aviso sumia) */
+.vw-win .etoast{display:flex!important}
