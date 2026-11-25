@@ -174,7 +174,7 @@ async function holdWallet(on){
 // Convidado (marca ns_convidado): navega, mas álbum, moedas, pacotes e perfil exigem conta. Sem laço de redirecionamento.
 function entrarComoConvidado(){
   ECO.convidado=true;ECO.pronto=false;SESSAO=null;
-  renderWallet();updateAccount();
+  renderWallet();updateAccount();renderSub();
   if(typeof onConvidado==="function")onConvidado();
 }
 // aviso "Entre para <ação>" com atalho para o login (abre o diálogo de login)
@@ -201,6 +201,7 @@ async function iniciarEconomia(){
       throw e;
     }
     if(!SESSAO)throw {status:0};
+    renderSub();
     try{await Api.visita()}catch(e){if(e&&e.status===401)return} // a visita do dia não derruba a tela se falhar
     await atualizarCarteira();
     ECO.indisponivel=false;avisoEconomiaOff(false);
@@ -250,6 +251,29 @@ function renderWallet(){
 // ---- Perfil e criador de gato: edita o perfil do servidor (PATCH /api/eu) ----
 const temConta=()=>!!(SESSAO&&SESSAO.usuario&&SESSAO.usuario.cadastro_completo!==false);
 const meuApelido=()=>(SESSAO&&SESSAO.usuario&&SESSAO.usuario.apelido)||"";
+// Quem vê o quê: o papel (usuario | moderador | admin) vem do servidor em GET /api/eu. Isto só ESCONDE; cada rota confere de novo.
+// Ranking, Álbum, Moderação e Enviar meme só para quem tem sessão; Moderação só para moderador/admin. Sem sessão (ou convidado) nada disso aparece.
+const nsLogado=()=>!!(SESSAO&&SESSAO.usuario);
+const nsEhModerador=()=>!!SESSAO&&(SESSAO.papel==="moderador"||SESSAO.papel==="admin");
+const SO_LOGADO=["rank","album","mod","send"];
+const subVisivel=x=>x.sp||(x.k==="mod"?nsEhModerador():SO_LOGADO.includes(x.k)?nsLogado():true);
+// marca <html data-papel="logado moderador"> e esconde [data-gate="logado"|"moderador"] fora disso (enquanto a sessão não chega, tudo escondido)
+function aplicarGates(){
+  const t=[];if(nsLogado())t.push("logado");if(nsEhModerador())t.push("moderador");
+  document.documentElement.dataset.papel=t.join(" ");
+  if(!document.getElementById("ns-gates")){
+    const s=document.createElement("style");s.id="ns-gates";
+    s.textContent='html:not([data-papel~="logado"]) [data-gate="logado"],html:not([data-papel~="moderador"]) [data-gate="moderador"]{display:none!important}';
+    document.head.appendChild(s);
+  }
+}
+// pede conta (convidado ou sem sessão) ou avisa que a área é de moderadores; devolve true se barrou
+function barrarSemPapel(acao,moderacao){
+  // só pede login a quem já é convidado/deslogado de fato; com a economia ainda carregando ou fora do ar, deixa o aviso de indisponível das próprias funções falar
+  if(!nsLogado()){if(ECO.convidado){avisoLogin(acao);return true}return false}
+  if(moderacao&&!nsEhModerador()){toast("A moderação é só para moderadores.",3200);return true}
+  return false;
+}
 // avatar_gato válido: 6 chaves inteiras dentro da faixa (nunca decidir cadastro por avatar_gato.length)
 const GATO_FAIXA={fur:10,pat:5,eye:5,acc:9,clo:8,bg:8};
 const gatoValido=o=>!!o&&typeof o==="object"&&Object.keys(GATO_FAIXA).every(k=>Number.isInteger(o[k])&&o[k]>=0&&o[k]<GATO_FAIXA[k]);
@@ -590,8 +614,11 @@ function renderHeader(page,opt={}){
   new ResizeObserver(()=>document.documentElement.style.setProperty("--hdh",hd.offsetHeight+"px")).observe(hd);
 }
 let SUB=[],subOn=null;
-function renderSub(items){if(items)SUB=items;const n=document.getElementById("sub");if(!n)return;
-  n.innerHTML=SUB.map((x,i)=>x.sp?`<span class="sp"></span>`:x.href?`<a href="${x.href}" class="${x.k===subOn?"on":""} ${x.cta?"cta":""}"${x.k===subOn?' aria-current="page"':""}>${icon(x.ic)}${x.label}</a>`:`<button data-i="${i}" class="${x.k===subOn?"on":""} ${x.cta?"cta":""} ${x.dd?"dd":""}">${icon(x.ic)}${x.label}</button>`).join("");
+function renderSub(items){if(items)SUB=items;aplicarGates();const n=document.getElementById("sub");if(!n)return;
+  // índice original (data-i) preservado; separador só entre dois itens visíveis
+  const vis=SUB.map(x=>subVisivel(x));
+  const mostrar=SUB.map((x,i)=>x.sp?(SUB.slice(0,i).some((y,j)=>!y.sp&&vis[j])&&SUB.slice(i+1).some((y,j)=>!y.sp&&vis[i+1+j])):vis[i]);
+  n.innerHTML=SUB.map((x,i)=>!mostrar[i]?"":x.sp?`<span class="sp"></span>`:x.href?`<a href="${x.href}" class="${x.k===subOn?"on":""} ${x.cta?"cta":""}"${x.k===subOn?' aria-current="page"':""}>${icon(x.ic)}${x.label}</a>`:`<button data-i="${i}" class="${x.k===subOn?"on":""} ${x.cta?"cta":""} ${x.dd?"dd":""}">${icon(x.ic)}${x.label}</button>`).join("");
   n.querySelector(".dd")?.setAttribute("aria-expanded","false");
   n.querySelectorAll("button[data-i]").forEach(b=>b.onclick=e=>{const x=SUB[+b.dataset.i];x.fn&&x.fn(e,b)});
 }
