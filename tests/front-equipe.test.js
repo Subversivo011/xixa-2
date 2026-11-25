@@ -57,19 +57,21 @@ async function abrir(pagina, { papel = "usuario", direto = false, vp = { width: 
 }
 const visivel = (page, sel) => page.$$eval(sel, (l) => l.some((e) => e.getClientRects().length > 0 && getComputedStyle(e).display !== "none"));
 
-test("Moderação: escondida para usuário comum (menu e 'Fila →') e o atalho avisa; aparece para moderador e admin", opts, async () => {
+test("Moderação (mecanismo do dev: papel + data-gate): escondida para usuário comum, o atalho avisa; aparece para moderador e admin", opts, async () => {
   let { ctx, page, erros } = await abrir("/index.html");
   await page.waitForSelector("#sub button");
-  assert.strictEqual(await visivel(page, "#sub .so-mod"), false, "menu escondido");
-  assert.strictEqual(await visivel(page, "a.so-mod"), false, "Fila → escondido");
+  const itens = async () => page.$$eval("#sub a, #sub button", (n) => n.map((x) => x.textContent.trim()));
+  assert.ok(!(await itens()).some((t) => t.includes("Moderação")), "menu sem Moderação");
+  assert.strictEqual(await visivel(page, '[data-gate="moderador"]'), false, "Fila → escondido");
   await page.evaluate(() => openMod());
   await page.waitForFunction(() => /só para moderadores/.test(document.body.innerText));
   assert.deepStrictEqual(erros, []);
   await ctx.close();
   for (const papel of ["moderador", "admin"]) {
     ({ ctx, page, erros } = await abrir("/index.html", { papel }));
-    await page.waitForFunction(() => document.documentElement.classList.contains("pode-moderar"));
-    assert.strictEqual(await visivel(page, "#sub .so-mod"), true, papel + ": menu visível");
+    await page.waitForFunction(() => document.documentElement.dataset.papel && /moderador/.test(document.documentElement.dataset.papel));
+    assert.ok((await itens()).some((t) => t.includes("Moderação")), papel + ": menu com Moderação");
+    assert.strictEqual(await visivel(page, '[data-gate="moderador"]'), true, papel + ": Fila → visível");
     assert.deepStrictEqual(erros, []);
     await ctx.close();
   }

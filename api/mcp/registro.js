@@ -2,12 +2,12 @@
 // tools/list do endpoint /mcp saem daqui, então a documentação nunca fica desatualizada. `ativa: false` = ainda não existe
 // no servidor (não aparece no llms.txt nem no tools/list).
 export const FERRAMENTAS = [
-  { nome: 'listar_referencias', escopo: 'ler', ativa: false,
+  { nome: 'listar_referencias', escopo: 'ler', ativa: true,
     resumo: 'Lista os valores válidos: categorias, eras, coleções, raridades e limites. Chame antes de criar algo, para não inventar valor.', params: {} },
-  { nome: 'buscar_memes', escopo: 'ler', ativa: false,
+  { nome: 'buscar_memes', escopo: 'ler', ativa: true,
     resumo: 'Busca memes por texto, ano, categoria ou situação (publicado, oculto, removido). Paginado.',
     params: { busca: { tipo: 'texto', descricao: 'trecho do título' }, ano: { tipo: 'inteiro' }, categoria: { tipo: 'texto' }, status: { tipo: 'texto', descricao: 'publicado | oculto | removido' }, limite: { tipo: 'inteiro', descricao: 'até 50' }, offset: { tipo: 'inteiro' } } },
-  { nome: 'conferir_duplicado', escopo: 'ler', ativa: false,
+  { nome: 'conferir_duplicado', escopo: 'ler', ativa: true,
     resumo: 'Confere se um link ou título já existe no acervo ou na fila de envios. Use sempre antes de criar_meme.',
     params: { url: { tipo: 'texto', descricao: 'link do vídeo ou da imagem' }, titulo: { tipo: 'texto' } } },
   { nome: 'criar_meme', escopo: 'escrever', ativa: false,
@@ -26,3 +26,27 @@ export const FERRAMENTAS = [
 ];
 
 export const ativas = () => FERRAMENTAS.filter((f) => f.ativa);
+
+const TIPO_MAP = {
+  texto: 'string',
+  inteiro: 'integer',
+  booleano: 'boolean'
+};
+
+export function schemaDe(ferramenta) {
+  const properties = {};
+  const required = [];
+  for (const [nome, p] of Object.entries(ferramenta.params || {})) {
+    const prop = { type: TIPO_MAP[p.tipo] || 'string' };
+    if (p.descricao) prop.description = p.descricao;
+    properties[nome] = prop;
+    if (p.obrigatorio) required.push(nome);
+  }
+  const s = {
+    type: 'object',
+    properties,
+    additionalProperties: false
+  };
+  if (required.length) s.required = required;
+  return s;
+}
