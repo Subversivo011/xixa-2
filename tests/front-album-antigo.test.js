@@ -190,9 +190,9 @@ test("expandir: abre na página atual, setas viram de 2 em 2, Esc fecha e o foco
   assert.ok(await page.evaluate(() => { const gi = PAGS.findIndex((P) => P.ci === 2 && P.pg === 1); return gi === esq || gi === esq + 1; }));
   const e0 = await page.evaluate(() => esq);
   await page.keyboard.press("ArrowRight");
-  assert.strictEqual(await page.evaluate(() => esq), e0 + 2);
+  await page.waitForFunction((e) => esq === e + 2 && !document.querySelector(".mola"), e0, { timeout: 2000 });
   await page.keyboard.press("ArrowLeft");
-  assert.strictEqual(await page.evaluate(() => esq), e0);
+  await page.waitForFunction((e) => esq === e && !document.querySelector(".mola"), e0, { timeout: 2000 });
   for (let i = 0; i < 6; i++) await page.keyboard.press("Tab");
   assert.ok(await page.evaluate(() => document.getElementById("mesa").contains(document.activeElement)), "foco preso na mesa");
   await page.keyboard.press("Escape");
@@ -222,11 +222,13 @@ test("expandir: a folha vira molinha (tiras) e some no fim; clicar numa figurinh
   await ctx.close();
 });
 
-test("expandir com prefers-reduced-motion: vira sem animação de tiras", opts, async () => {
+test("expandir com prefers-reduced-motion: a folha ainda vira, inteira e rápida (sem dobrar em tiras)", opts, async () => {
   const { ctx, page } = await abrirAlbum({ reduz: true });
   await page.click("#btExp");
   await page.click("#btProx");
-  assert.strictEqual(await page.$$eval(".mola", (l) => l.length), 0);
+  await page.waitForSelector(".mola .tira");
+  assert.strictEqual(await page.$$eval(".mola .tira", (l) => l.length), 1);
+  await page.waitForFunction(() => !document.querySelector(".mola"), null, { timeout: 2000 });
   assert.strictEqual(await page.evaluate(() => esq), 2);
   await ctx.close();
 });
