@@ -71,7 +71,7 @@ async function callTool(chave, name, args = {}) {
   return r;
 }
 
-test('tools/list traz 7 ferramentas para chave com 3 escopos e 3 ferramentas para chave só ler', { skip }, async () => {
+test('tools/list traz 8 ferramentas para chave com 3 escopos e 3 ferramentas para chave só ler', { skip }, async () => {
   await criarAdmin('admList');
   const { chave: kLer } = await criarChave('admList', ['ler']);
   const { chave: kTudo } = await criarChave('admList', ['ler', 'escrever', 'publicar']);
@@ -82,10 +82,10 @@ test('tools/list traz 7 ferramentas para chave com 3 escopos e 3 ferramentas par
 
   const rTudo = await s.post('/mcp', { jsonrpc: '2.0', id: 2, method: 'tools/list' }, { headers: authHeader(kTudo) });
   assert.equal(rTudo.status, 200);
-  assert.equal(rTudo.json.result.tools.length, 7);
+  assert.equal(rTudo.json.result.tools.length, 8);
   const nomesTudo = rTudo.json.result.tools.map((t) => t.name).sort();
   assert.deepEqual(nomesTudo, [
-    'buscar_memes', 'conferir_duplicado', 'criar_carta', 'criar_meme',
+    'anexar_midia', 'buscar_memes', 'conferir_duplicado', 'criar_carta', 'criar_meme',
     'editar_meme', 'listar_referencias', 'publicar_meme'
   ]);
 });

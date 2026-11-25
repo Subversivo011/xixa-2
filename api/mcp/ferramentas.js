@@ -319,6 +319,7 @@ export async function conferir_duplicado(pool, args = {}) {
 }
 
 import { criar_meme, editar_meme, publicar_meme, criar_carta } from './escrita.js';
+import { anexar_midia } from './midias.js';
 
 export const FERRAMENTAS_MAP = {
   listar_referencias,
@@ -327,5 +328,6 @@ export const FERRAMENTAS_MAP = {
   criar_meme,
   editar_meme,
   publicar_meme,
-  criar_carta
+  criar_carta,
+  anexar_midia
 };
