@@ -184,3 +184,7 @@
 @media(max-width:720px){.rings{left:6px;width:30px}.rings i{width:30px;height:9px}}
 .layout{padding-bottom:120px}
 @media(max-width:720px){.layout>.album{order:-1}.layout>.det{order:0}.layout>.side{order:1}}
+/* o álbum cabe na tela: as cartas encolhem com a altura da janela para os botões de página ficarem à vista sem rolar */
+@media(min-width:721px){
+  .cards{max-width:min(100%,calc((100vh - 330px) * 1.1 + 40px));max-width:min(100%,calc((100dvh - 330px) * 1.1 + 40px));margin-left:auto;margin-right:auto}
+}
