@@ -48,6 +48,7 @@ export function gerarLlmsTxt({ base = 'https://naosalvo.fishlab.com.br', ferrame
     tem('buscar_memes') && 'buscar_memes para ver o que já existe sobre o assunto (inclui rascunhos ocultos).',
     tem('criar_meme') && 'criar_meme (rascunho). Só use publicar=true se tiver o escopo publicar e a informação estiver conferida.',
     tem('anexar_midia') && 'anexar_midia quando o meme não for só um vídeo do YouTube.',
+    tem('editar_carta') && 'Para arte de carta: buscar_cartas (ache o id, ex.: plataformas-2) e editar_carta com imagem_url; a imagem é otimizada e aparece no álbum e no perfil.',
     'Avise o admin do que foi encontrado ou criado (ids dos memes) para revisar no painel.'
   ].filter(Boolean);
   passos.forEach((p, i) => L.push(`${i + 1}. ${p}`));
