@@ -87,6 +87,9 @@
     abrir: function (p, o) { return pedir('POST', '/api/pacotes/abrir', p, o); },
     perfil: function (p, o) { return pedir('PATCH', '/api/eu', p, o); },
     reciclar: function (p, o) { return pedir('POST', '/api/album/reciclar', p, o); },
+    // votos: um por pessoa e por meme (POST exige login); meusVotos marca o botão de curtir/as estrelas
+    votar: function (p, o) { return pedir('POST', '/api/votos', p, o); },
+    meusVotos: function (ids, o) { return pedir('GET', '/api/votos/meus?ids=' + encodeURIComponent((ids || []).join(',')), undefined, o); },
     // perfil público e recados (perfil.html)
     perfilDe: function (apelido, o) { return pedir('GET', '/api/perfil/' + encodeURIComponent(apelido), undefined, o); },
     recados: function (apelido, o) { return pedir('GET', '/api/perfil/' + encodeURIComponent(apelido) + '/recados', undefined, o); },

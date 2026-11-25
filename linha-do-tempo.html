@@ -5,15 +5,15 @@
 <link rel="icon" type="image/png" sizes="128x128" href="/avatar-ns.png?v=1">
 <link rel="apple-touch-icon" href="/avatar-ns.png?v=1">
 <script src="gate.js?v=20261120c"></script>
-<script src="cliente-economia.js?v=20261121p"></script>
+<script src="cliente-economia.js?v=20261125b"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Linha do tempo · NÃO SALVO</title>
 <meta name="description" content="A linha do tempo completa da internet brasileira: escolha um ano e veja tudo o que estava bombando, em ordem cronológica, no visual da internet daquela época.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Inter:wght@400;500;600;700;800&family=Baloo+2:wght@700;800&family=Press+Start+2P&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="theme.css?v=20261122g">
-<link rel="stylesheet" href="viewer.css?v=20261120d">
+<link rel="stylesheet" href="theme.css?v=20261125a">
+<link rel="stylesheet" href="viewer.css?v=20261125b">
 <script>try{var t=localStorage.getItem("ns_theme")}catch(e){}document.documentElement.dataset.theme=t==="dark"?"dark":"light"</script>
 <style>
 /* ===== estrutura (identidade do site) ===== */
@@ -114,15 +114,15 @@
 /* fundo da página acompanha a época (o cabeçalho e o rodapé continuam do site) */
 body{transition:background-color .4s}
 body.ep-95{background:#006666}body.ep-xp{background:#2f72c4}body.ep-ork{background:#c9d6ec}body.ep-msn{background:#0b2a5a}
-body.ep-fb{background:#dfe3ee}body.ep-flog{background:#d4d4d4}body.ep-tw{background:#c0deed}body.ep-ask{background:#dbe8ee}body.ep-vine{background:#e1f4ed}body.ep-snap{background:#fffc00}body.ep-kwai{background:#ffe9d4}body.ep-bsky{background:#e3ecf6}body.ep-zap{background:#d9d0c6}body.ep-ig{background:#f2f2f2}body.ep-tt{background:#000}
+body.ep-fb{background:#dfe3ee}body.ep-flog{background:#d4d4d4}body.ep-tw{background:#c0deed}body.ep-ask{background:#dbe8ee}body.ep-vine{background:#e1f4ed}body.ep-koo{background:#fff6cc}body.ep-snap{background:#fffc00}body.ep-kwai{background:#ffe9d4}body.ep-bsky{background:#e3ecf6}body.ep-zap{background:#d9d0c6}body.ep-ig{background:#f2f2f2}body.ep-tt{background:#000}
 body.ep-95 .lt-top,body.ep-xp .lt-top,body.ep-msn .lt-top,body.ep-tt .lt-top{color:#fff}
 body.ep-95 .lt-top h1,body.ep-xp .lt-top h1,body.ep-msn .lt-top h1,body.ep-tt .lt-top h1{color:#fff}
 body.ep-95 .lt-top p,body.ep-xp .lt-top p,body.ep-msn .lt-top p,body.ep-tt .lt-top p,body.ep-95 .lt-top small,body.ep-xp .lt-top small,body.ep-msn .lt-top small,body.ep-tt .lt-top small{color:#ffffffcc}
-body.ep-flog .lt-top h1,body.ep-tw .lt-top h1,body.ep-ask .lt-top h1,body.ep-vine .lt-top h1,body.ep-snap .lt-top h1,body.ep-kwai .lt-top h1,body.ep-bsky .lt-top h1,body.ep-ork .lt-top h1,body.ep-fb .lt-top h1,body.ep-zap .lt-top h1,body.ep-ig .lt-top h1{color:#13233a}
-body.ep-flog .lt-top p,body.ep-tw .lt-top p,body.ep-ask .lt-top p,body.ep-vine .lt-top p,body.ep-snap .lt-top p,body.ep-kwai .lt-top p,body.ep-bsky .lt-top p,body.ep-ork .lt-top p,body.ep-fb .lt-top p,body.ep-zap .lt-top p,body.ep-ig .lt-top p{color:#4a5b72}
-body.ep-flog .lt-top small,body.ep-tw .lt-top small,body.ep-ask .lt-top small,body.ep-vine .lt-top small,body.ep-snap .lt-top small,body.ep-kwai .lt-top small,body.ep-bsky .lt-top small,body.ep-ork .lt-top small,body.ep-fb .lt-top small,body.ep-zap .lt-top small,body.ep-ig .lt-top small{color:#0f5aa6}
+body.ep-flog .lt-top h1,body.ep-tw .lt-top h1,body.ep-ask .lt-top h1,body.ep-vine .lt-top h1,body.ep-snap .lt-top h1,body.ep-kwai .lt-top h1,body.ep-koo .lt-top h1,body.ep-bsky .lt-top h1,body.ep-ork .lt-top h1,body.ep-fb .lt-top h1,body.ep-zap .lt-top h1,body.ep-ig .lt-top h1{color:#13233a}
+body.ep-flog .lt-top p,body.ep-tw .lt-top p,body.ep-ask .lt-top p,body.ep-vine .lt-top p,body.ep-snap .lt-top p,body.ep-kwai .lt-top p,body.ep-koo .lt-top p,body.ep-bsky .lt-top p,body.ep-ork .lt-top p,body.ep-fb .lt-top p,body.ep-zap .lt-top p,body.ep-ig .lt-top p{color:#4a5b72}
+body.ep-flog .lt-top small,body.ep-tw .lt-top small,body.ep-ask .lt-top small,body.ep-vine .lt-top small,body.ep-snap .lt-top small,body.ep-kwai .lt-top small,body.ep-koo .lt-top small,body.ep-bsky .lt-top small,body.ep-ork .lt-top small,body.ep-fb .lt-top small,body.ep-zap .lt-top small,body.ep-ig .lt-top small{color:#0f5aa6}
 /* subtítulo e rodapé da PÁGINA (não o visual de época): legíveis sobre o fundo de cada época, nos dois temas */
-body.ep-flog .lt-marcas,body.ep-tw .lt-marcas,body.ep-ask .lt-marcas,body.ep-vine .lt-marcas,body.ep-snap .lt-marcas,body.ep-kwai .lt-marcas,body.ep-bsky .lt-marcas,body.ep-ork .lt-marcas,body.ep-fb .lt-marcas,body.ep-zap .lt-marcas,body.ep-ig .lt-marcas{color:#3b4a5e}
+body.ep-flog .lt-marcas,body.ep-tw .lt-marcas,body.ep-ask .lt-marcas,body.ep-vine .lt-marcas,body.ep-snap .lt-marcas,body.ep-kwai .lt-marcas,body.ep-koo .lt-marcas,body.ep-bsky .lt-marcas,body.ep-ork .lt-marcas,body.ep-fb .lt-marcas,body.ep-zap .lt-marcas,body.ep-ig .lt-marcas{color:#3b4a5e}
 body.ep-95 .lt-marcas,body.ep-xp .lt-marcas,body.ep-msn .lt-marcas,body.ep-tt .lt-marcas{color:#fff}
 body.ep-xp .lt-top small{color:#fff}
 /* ===================== ÉPOCAS ===================== */
@@ -364,6 +364,21 @@ body.ep-xp .lt-top small{color:#fff}
 .th-snap .lt-foot{color:#6a2f91;opacity:1;font-weight:700}
 .th-snap .lt-mais button{background:#111;color:#fffc00;border-radius:999px}
 /* 2022: Kwai */
+/* 2022: Koo, o "novo Twitter" que bombou no Brasil pelo nome */
+.th-koo{background:#fffbe6;color:#1f1a00;font-family:-apple-system,"Segoe UI",Roboto,Inter,sans-serif;--lt-bg:#fffbe6}
+.th-koo .lt-hero{background:linear-gradient(160deg,#ffd500,#f5b800);color:#1f1a00}
+.th-koo .lt-big{font-weight:900;color:#1f1a00;letter-spacing:-3px;text-shadow:0 4px 0 #ffffff99}
+.th-koo .lt-era{color:#3d3300}.th-koo .lt-lema{color:#1f1a00}.th-koo .lt-sub{color:#2b2400}
+.th-koo .nav{background:#ffffff8c;border:0;color:#1f1a00;border-radius:50%}
+.th-koo .lt-deco{background:#1f1a00;color:#ffd500}
+.th-koo .lt-chips button{background:#fff;border:1px solid #f1d36b;color:#5c4a00}
+.th-koo .lt-chips button.on{background:#1f1a00;color:#ffd500;border-color:#1f1a00}
+.th-koo .lt-list:before{background:#f5b800}.th-koo .lt-mes{color:#5c4a00}
+.th-koo .lt-it{background:#fff;border:1px solid #f7e39a;border-radius:16px}
+.th-koo .lt-it h3{color:#1f1a00;font-weight:800}.th-koo .lt-it h3:before{content:"@naosalvo · ";font-weight:600;color:#7a6400}
+.th-koo .lt-d{color:#6b5800}.th-koo .lt-cat{background:#fff6cc;color:#5c4a00}
+.th-koo .lt-foot{color:#6b5800;opacity:1;font-weight:700}
+.th-koo .lt-mais button{background:#1f1a00;color:#ffd500;border-radius:999px}
 .th-kwai{background:#fff4ea;color:#2a1a0e;font-family:-apple-system,"Segoe UI",Roboto,Inter,sans-serif;--lt-bg:#fff4ea}
 .th-kwai .lt-hero{background:linear-gradient(135deg,#c45200,#a33a00);color:#fff}
 .th-kwai .lt-big{font-weight:900;color:#fff;letter-spacing:-3px;text-shadow:0 4px 0 #6e2700}
@@ -395,7 +410,7 @@ body.ep-xp .lt-top small{color:#fff}
 .th-bsky .lt-cat{background:#e6f0fc;color:#0a5cc2}
 .th-bsky .lt-foot{color:#4a5a6c;opacity:1}
 .th-bsky .lt-mais button{background:#0a5cc2;color:#fff;border-radius:999px}
-.th-flog .lt-sub,.th-tw .lt-sub,.th-ask .lt-sub,.th-vine .lt-sub,.th-snap .lt-sub,.th-kwai .lt-sub,.th-bsky .lt-sub{opacity:1}
+.th-flog .lt-sub,.th-tw .lt-sub,.th-ask .lt-sub,.th-vine .lt-sub,.th-snap .lt-sub,.th-kwai .lt-sub,.th-koo .lt-sub,.th-bsky .lt-sub{opacity:1}
 @media(max-width:760px){
   .th-tw .lt-hero{margin:10px 10px 0}.th-tw .lt-body{margin:0 10px 10px}
   .th-tw .lt-it,.th-vine .lt-it,.th-snap .lt-it{grid-template-columns:1fr}
@@ -413,11 +428,11 @@ body.ep-xp .lt-top small{color:#fff}
   <p class="lt-marcas">Visual inspirado na internet de cada época. Marcas, nomes e estilos citados pertencem aos seus donos.</p>
 </main>
 
-<script src="common.js?v=20261122g"></script>
-<script src="data.js?v=20261119q"></script>
-<script src="player.js?v=20261121w"></script>
-<script src="viewer.js?v=20261120e"></script>
-<script src="alertas.js?v=20261119n"></script>
+<script src="common.js?v=20261125a"></script>
+<script src="data.js?v=20261125b"></script>
+<script src="player.js?v=20261125b"></script>
+<script src="viewer.js?v=20261125b"></script>
+<script src="alertas.js?v=20261125b"></script>
 <script>
 renderHeader("tl",{sub:[
   {k:"inicio",ic:"home",label:"Início",href:"index.html"},
@@ -437,9 +452,9 @@ const CAT_IC={"Vídeos":"video","TV":"tv","Música":"music","Cultura":"culture",
 const MES=["janeiro","fevereiro","março","abril","maio","junho","julho","agosto","setembro","outubro","novembro","dezembro"];
 // época visual de cada ano (só nesta página)
 // cada ano com a rede que marcou o Brasil naquele momento (sem logos oficiais)
-const EPOCA_ANO={"2004":"ork","2005":"flog","2006":"ork","2007":"msn","2008":"msn","2009":"tw","2010":"tw","2011":"fb","2012":"fb","2013":"ask","2014":"zap","2015":"vine","2016":"snap","2017":"ig","2018":"ig","2019":"ig","2022":"kwai","2024":"bsky"};
+const EPOCA_ANO={"2004":"ork","2005":"flog","2006":"ork","2007":"msn","2008":"msn","2009":"tw","2010":"tw","2011":"fb","2012":"fb","2013":"ask","2014":"zap","2015":"vine","2016":"snap","2017":"ig","2018":"ig","2019":"ig","2022":"koo","2024":"bsky","2021":"kwai"};
 const EPOCA=k=>{const y=parseInt(k);return y<2000?"95":y<2004?"xp":Object.hasOwn(EPOCA_ANO,String(y))?EPOCA_ANO[String(y)]:"tt"};
-const EPOCA_NOME={"95":"Era da internet discada","xp":"Era do Kazaa e do ICQ","ork":"Era do Orkut","msn":"Era do MSN","fb":"Era do Facebook","zap":"Era do Zap","ig":"Era dos Stories","tt":"Era do vídeo curto","flog":"Era do Fotolog","tw":"Era do Twitter (o do passarinho)","ask":"Era do Ask.fm","vine":"Era do Vine","snap":"Era do Snapchat","kwai":"Era do Kwai","bsky":"A fuga para o Bluesky"};
+const EPOCA_NOME={"95":"Era da internet discada","xp":"Era do Kazaa e do ICQ","ork":"Era do Orkut","msn":"Era do MSN","fb":"Era do Facebook","zap":"Era do Zap","ig":"Era dos Stories","tt":"Era do vídeo curto","flog":"Era do Fotolog","tw":"Era do Twitter (o do passarinho)","ask":"Era do Ask.fm","vine":"Era do Vine","snap":"Era do Snapchat","kwai":"Era do Kwai","koo":"Era do Koo (sim, esse era o nome)","bsky":"A fuga para o Bluesky"};
 // anos de cada época, montados a partir da régua (ex.: "2020–2021 · 2023")
 const epAnos=e=>{const ks=KEYS.filter(k=>EPOCA(k)===e),g=[];ks.forEach(k=>{const y=parseInt(k),u=g[g.length-1];if(u&&parseInt(u[1])+1===y)u[1]=k;else g.push([k,k])});return g.map(([a,b])=>a===b?yLab(a):`${parseInt(a)}–${String(b).split("–").pop()}`).join(" · ")};
 // detalhe de cada ano (faixinha e notícia correndo)
@@ -463,8 +478,8 @@ const DETALHE={
  "2018":["🐤 Canarinho Pistola","Copa da Rússia · TikTok chega · Cachorro dançando forró"],
  "2019":["🎧 Áudio de 2 minutos","Panificadora Alfa · Joelma triste e feliz · Galo cego"],
  "2020":["🏠 #FiqueEmCasa","Live do Bruno e Marrone · Vira-lata caramelo na nota de 200 · Uma sopa pá nóis"],
- "2021":["🧩 figurinha nova no grupo","Pior que é · Um gnomo estava andando · Tô cagado de fome"],
- "2022":["🦈 Tubarão te amo","Salada da Dona Eleni · Leandro, o cachorro · Kwai paga para assistir · Copa no Catar"],
+ "2021":["🪙 O Kwai pagando para você assistir vídeo","Pior que é · Um gnomo estava andando · Tô cagado de fome · Kwai paga para assistir"],
+ "2022":["🐤 Todo mundo foi pro Koo (e a piada com o nome veio junto)","Salada da Dona Eleni · Leandro, o cachorro · Tubarão te amo · Koo, o novo Twitter · Copa no Catar"],
  "2023":["🔵 indo ali","Não gostei, amei · Ô Denise, sai da live · Ai, Zé da Manga"],
  "2024":["🌭 Calma, Calabreso!","Que show da Xuxa é esse? · Luva de horror cósmico · X bloqueado no Brasil: todo mundo no Bluesky 🦋"],
  "2025":["🤖 feito por IA","Marisa Maiô · Morango do amor · Passinho do Jamal"],
@@ -477,9 +492,9 @@ const ALL=MEMES.slice();
 const doAno=k=>ALL.filter(m=>yKey(m.y)===k);
 const foto=m=>m.img?m.img:m.yt?`https://i.ytimg.com/vi/${m.yt}/mqdefault.jpg`:"";
 const dataTxt=m=>{const d=m.date?new Date(m.date+"T12:00:00"):null;if(!d||isNaN(d))return String(m.y);return d.getDate()===1?`${MES[d.getMonth()][0].toUpperCase()+MES[d.getMonth()].slice(1)} de ${d.getFullYear()}`:`${d.getDate()} de ${MES[d.getMonth()]} de ${d.getFullYear()}`};
-const rodape={"95":()=>"🔗 Adicionar aos Favoritos · Assinar livro de visitas","xp":()=>"📎 FW: FW: olha isso kkkk","ork":m=>`💬 ${1+m.id.length%9} scraps · ⭐ fã`,"msn":()=>"🦋 compartilhar no MSN","fb":()=>"Curtir · Comentar · Compartilhar","zap":m=>`${String(8+m.id.length%12).padStart(2,"0")}:${String(m.id.length*7%60).padStart(2,"0")} ✔✔`,"ig":m=>`♥ ${fmt(m.saves||100)} curtidas`,"tt":m=>`♥ ${short(Math.round((m.views||1000)/3))} · 💬 ${short(m.saves||100)} · ↗ compartilhar`,"flog":m=>`📖 livro de visitas (${1+m.id.length%14}) · ✚ adicionar aos flogs favoritos`,"tw":m=>`há ${1+m.id.length%11} horas via web · ↩ Responder · ⟲ Retweetar · ★ Favoritar`,"ask":m=>`👍 ${short(m.saves||100)} curtidas · respondida há ${1+m.id.length%9} horas`,"vine":m=>`🔁 ${short((m.views||1000)*12)} loops · 💚 ${short(m.saves||100)} · ⟲ revine`,"snap":m=>`⏱ 10s · 👀 visto por ${short(m.views||1000)} · some em 24h`,"kwai":m=>`🪙 ganhe moedas assistindo · ♥ ${short(m.saves||100)} · ↗ ${short(Math.round((m.views||1000)/9))}`,"bsky":m=>`💬 ${short(Math.round((m.saves||100)/7))} · 🔁 ${short(Math.round((m.saves||100)/2))} · ♡ ${short(m.saves||100)}`};
+const rodape={"95":()=>"🔗 Adicionar aos Favoritos · Assinar livro de visitas","xp":()=>"📎 FW: FW: olha isso kkkk","ork":m=>`💬 ${1+m.id.length%9} scraps · ⭐ fã`,"msn":()=>"🦋 compartilhar no MSN","fb":()=>"Curtir · Comentar · Compartilhar","zap":m=>`${String(8+m.id.length%12).padStart(2,"0")}:${String(m.id.length*7%60).padStart(2,"0")} ✔✔`,"ig":m=>`♥ ${fmt(m.saves||100)} curtidas`,"tt":m=>`♥ ${short(Math.round((m.views||1000)/3))} · 💬 ${short(m.saves||100)} · ↗ compartilhar`,"flog":m=>`📖 livro de visitas (${1+m.id.length%14}) · ✚ adicionar aos flogs favoritos`,"tw":m=>`há ${1+m.id.length%11} horas via web · ↩ Responder · ⟲ Retweetar · ★ Favoritar`,"ask":m=>`👍 ${short(m.saves||100)} curtidas · respondida há ${1+m.id.length%9} horas`,"vine":m=>`🔁 ${short((m.views||1000)*12)} loops · 💚 ${short(m.saves||100)} · ⟲ revine`,"snap":m=>`⏱ 10s · 👀 visto por ${short(m.views||1000)} · some em 24h`,"kwai":m=>`🪙 ganhe moedas assistindo · ♥ ${short(m.saves||100)} · ↗ ${short(Math.round((m.views||1000)/9))}`,"bsky":m=>`💬 ${short(Math.round((m.saves||100)/7))} · 🔁 ${short(Math.round((m.saves||100)/2))} · ♡ ${short(m.saves||100)}`,"koo":m=>`🐤 ${1+m.id.length%30} reKoos · 💛 ${short(m.saves||100)} · todo mundo achou o nome engraçado`};
 
-const COR={"95":"#00a3a3","xp":"#2a6bff","ork":"#e3007a","msn":"#4caf2a","fb":"#3b5998","zap":"#25d366","ig":"#dc2743","tt":"#fe2c55","flog":"#8cc63f","tw":"#33ccff","ask":"#2ea8d6","vine":"#00a478","snap":"#e6d800","kwai":"#ff6a00","bsky":"#0a7aff"};
+const COR={"95":"#00a3a3","xp":"#2a6bff","ork":"#e3007a","msn":"#4caf2a","fb":"#3b5998","zap":"#25d366","ig":"#dc2743","tt":"#fe2c55","flog":"#8cc63f","tw":"#33ccff","ask":"#2ea8d6","vine":"#00a478","snap":"#e6d800","kwai":"#ff6a00","bsky":"#0a7aff","koo":"#e0b400"};
 function anos(){
   $("yrs").innerHTML=KEYS.map(k=>{const n=doAno(k).length;return`<button class="ry ${k===ST.ano?"on":""}" data-k="${escapeHtml(k)}" style="--c:${COR[EPOCA(k)]}" title="${escapeHtml(yLab(k))} · ${n} meme${n===1?"":"s"}" ${k===ST.ano?'aria-current="true"':""}><span class="rl">${escapeHtml(yLab(k))}</span><i class="dt"></i><small>${n} meme${n===1?"":"s"}</small></button>`}).join("");
   $("yrs").querySelectorAll("button").forEach(b=>b.onclick=()=>ir(b.dataset.k,()=>$("yrs").querySelector(".ry.on")));
@@ -493,8 +508,7 @@ function palco(){
   const F=L.filter(m=>ST.cat==="Todas"||m.c===ST.cat);
   const grupos=[];F.forEach(m=>{const d=m.date?new Date(m.date+"T12:00:00"):null;const g=d&&!isNaN(d)?(k.includes("–")?`${MES[d.getMonth()]} de ${d.getFullYear()}`:MES[d.getMonth()]):String(m.y);let x=grupos.find(z=>z.g===g);if(!x)grupos.push(x={g,its:[]});x.its.push(m)});
   const st=$("stage");st.className="lt-stage th-"+e;document.body.className=document.body.className.replace(/\bep-\w+/g,"").trim()+" ep-"+e;
-  const nt=det[1].split(" · ").map(x=>`<i>${escapeHtml(x)}</i>`).join("<i>·</i>");
-  st.innerHTML=`<div class="lt-tick" aria-hidden="true"><b>${k.includes("–")?"Na época":"Em "+escapeHtml(k)}</b><div class="tk"><span>${Array(8).fill(nt+"<i>·</i>").join("")}</span></div></div>
+  st.innerHTML=`
    <div class="lt-hero"><button class="nav" ${p?`data-k="${escapeHtml(p)}" data-f="prev"`:"disabled"} aria-label="Ano anterior">‹</button>
      <div><div class="lt-era">${EPOCA_NOME[e]} · ${escapeHtml(epAnos(e))}</div><div class="lt-big">${escapeHtml(yLab(k))}</div><div class="lt-lema">${escapeHtml(info.lema)}</div>
       <p class="lt-sub">${L.length} ${L.length===1?"viral salvo":"virais salvos"} · ${escapeHtml(info.txt)}</p>${det[0]?`<span class="lt-deco">${escapeHtml(det[0])}</span>`:""}</div>

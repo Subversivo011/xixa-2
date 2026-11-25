@@ -20,10 +20,14 @@ const STATS={};
 async function ytStats(ids){ids=ids.filter(i=>i&&!(i in STATS));if(ids.length){const d=await apiGet(API.stats+"?ids="+ids.join(","));ids.forEach(i=>STATS[i]=d&&d[i]?d[i]:null)}return STATS}
 
 // ---- votos: curtir/não curtir e estrelas ----
-function myVote(id){NS.votes=NS.votes||{};return NS.votes[id]||(NS.votes[id]={v:0,s:0})}
+// o voto da pessoa vem do servidor (um voto por pessoa e por meme: curtir de novo não soma, e não some ao limpar o navegador)
+const VOTOS_MEUS={};
+function myVote(id){return VOTOS_MEUS[id]||(VOTOS_MEUS[id]={v:0,s:0})}
+const logado=()=>typeof SESSAO!=="undefined"&&!!(SESSAO&&SESSAO.usuario);
+async function loadMeuVoto(id){if(!logado()||typeof Api==="undefined"||!Api.meusVotos)return null;try{const d=await Api.meusVotos([id],{silencioso:true});if(d&&d[id]){VOTOS_MEUS[id]={v:d[id].v|0,s:d[id].s|0};return VOTOS_MEUS[id]}}catch(e){}return null}
 async function loadVotes(id){const d=await apiGet(API.votos+"?ids="+encodeURIComponent(id));return d&&d[id]?d[id]:null}
-function localTotals(id){const v=myVote(id);return{up:v.v===1?1:0,down:v.v===-1?1:0,sum:v.s||0,n:v.s?1:0,local:true}}
-async function sendVote(id,patch){const r=await apiPost(API.votos,{id,...patch});return r}
+function localTotals(id){return{up:0,down:0,sum:0,n:0,local:true}} // enquanto os totais do servidor não chegam
+async function sendVote(id,patch){return Api.votar({id,...patch},{silencioso:true})} // exige login (CSRF pelo cliente da API)
 
 // ---- formatos de data e números por época ----
 const ago=y=>{const n=Math.max(1,new Date().getFullYear()-(parseInt(y)||2020));return`há ${n} ano${n>1?"s":""}`};
@@ -264,14 +268,21 @@ function openViewer(m,opt={}){
   if(m.cuidado){el.classList.add("vw-cdo");const p0=paint;paint=()=>{p0();travarCuidado(el)};const xb=el.querySelector(".xrt>b");if(xb)xb.textContent="Avaliação e compartilhamento desativados neste meme (selo de cuidado)."}
   paint();
   loadVotes(m.id).then(d=>{if(d&&VW&&VW.m===m){tot=d;paint()}});
+  loadMeuVoto(m.id).then(d=>{if(d&&VW&&VW.m===m)paint()});
   if(isPhoto)initComments(el,m);
   if(isPhoto)VW.toastT=setTimeout(()=>{if(VW&&VW.m===m&&typeof alertaDaEpoca==="function")alertaDaEpoca(el,m,true)},2500);
-  async function vote(v){const mine=myVote(m.id),from=mine.v,to=from===v?0:v;mine.v=to;nsSave();sndClick();
-    if(tot.local)tot=localTotals(m.id);else{if(from===1)tot.up--;if(from===-1)tot.down--;if(to===1)tot.up++;if(to===-1)tot.down++}
-    paint();const r=await sendVote(m.id,{from,to});if(r&&VW&&VW.m===m){tot=r;paint()}}
-  async function rate(s){const mine=myVote(m.id),from=mine.s||0;mine.s=s;nsSave();sndClick();
-    if(tot.local)tot=localTotals(m.id);else{if(from){tot.sum-=from;tot.n--}tot.sum+=s;tot.n++}
-    paint();const r=await sendVote(m.id,{starFrom:from,starTo:s});if(r&&VW&&VW.m===m){tot=r;paint()}}
+  // votar: exige conta. Otimista (pinta na hora) e volta atrás se o servidor recusar.
+  async function votar(patch,aplicar){
+    if(typeof needAccount==="function"&&needAccount("votar"))return;
+    const mine=myVote(m.id),antesM={...mine},antesT={...tot};
+    aplicar(mine);sndClick();paint();
+    try{const r=await sendVote(m.id,patch);if(r&&VW&&VW.m===m){tot={up:r.up,down:r.down,sum:r.sum,n:r.n};if(r.meu)VOTOS_MEUS[m.id]={v:r.meu.v|0,s:r.meu.s|0};paint()}}
+    catch(e){Object.assign(mine,antesM);tot=antesT;if(VW&&VW.m===m)paint();if(e&&e.status!==401)toast(e&&e.status===429?"Calma! Muitas ações seguidas. Tente daqui a pouco.":"Não consegui salvar o seu voto agora.",3000)}
+  }
+  function vote(v){const from=myVote(m.id).v,to=from===v?0:v;
+    votar({v:to},mine=>{mine.v=to;if(!tot.local){if(from===1)tot.up--;if(from===-1)tot.down--;if(to===1)tot.up++;if(to===-1)tot.down++}})}
+  function rate(st){const from=myVote(m.id).s||0;
+    votar({s:st},mine=>{mine.s=st;if(!tot.local){if(from){tot.sum-=from;tot.n--}tot.sum+=st;tot.n++}})}
   if(!isPhoto){
     const setViews=n=>{const t=n==null?"":e===1?fmt(n):e===2?`${fmt(n)} exibições`:e===3?fmt(n):e===4?`${fmt(n)} visualizações`:e===5?`${short(n)} de visualizações`:`${fmt(n)} exibições no YouTube`;
       el.querySelectorAll("[data-views]").forEach(x=>x.textContent=t)};
