@@ -99,6 +99,16 @@
 .modal.open{display:grid}
 .mbox{background:var(--panel);border:1px solid var(--line2);border-radius:20px;padding:24px;max-width:900px;width:100%;box-shadow:var(--shadow);position:relative}
 .mbox h3{font-size:28px;text-align:center;margin-bottom:4px}
+.mbox.shrbox{max-width:620px}
+.mbox.shrbox h3{padding:0 48px}
+.shr{display:grid;grid-template-columns:170px minmax(0,1fr);gap:18px;align-items:start;margin-top:14px}
+.shr-tx p{font-size:14px;line-height:1.5;margin-bottom:12px}
+.shr-tx label{display:block;font-weight:700;font-size:13px;margin-bottom:6px}
+.shr-tx textarea{width:100%;min-height:88px;padding:10px 12px;border-radius:10px;border:1px solid var(--line2);background:var(--sunk);color:var(--txt);font:inherit;font-size:14px;resize:vertical}
+.shr-tx small{display:block;font-size:12px;color:var(--mut);margin-top:4px}
+.shr-bt{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin-top:16px}
+.shr-bt .mclose{margin:0;min-height:44px;text-decoration:none;display:inline-flex;align-items:center;justify-content:center}
+@media(max-width:560px){.mbox.shrbox h3{font-size:22px}.shr{grid-template-columns:1fr}.shr>.card,.shr>div:first-child{max-width:170px;margin:0 auto}.shr-bt .mclose{flex:1 1 100%}}
 .mbox>p{text-align:center;color:var(--mut);font-size:13px;margin-bottom:16px}
 .pack{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;perspective:900px}
 .flip{position:relative;aspect-ratio:3/4.1;transform-style:preserve-3d;transition:transform .7s;cursor:pointer}
@@ -291,7 +301,26 @@ async function setFav(){
   try{const r=await Api.perfil({carta_favorita:sel},{silencioso:true});if(SESSAO&&SESSAO.usuario&&r&&r.usuario)SESSAO.usuario.carta_favorita=r.usuario.carta_favorita;NS.fav=sel;nsSave();renderAll();toast("Carta favorita definida ⭐ Ela aparece no seu perfil.")}
   catch(e){toast((e&&e.erro)||"Não consegui salvar a favorita agora.")}
 }
-function share(){const c=byId[sel],t=`Consegui a carta ${c.num} "${c.name}" (${c.r}) no álbum do Não Salvo!`;try{navigator.clipboard.writeText(t).then(()=>toast("Texto copiado!"),()=>toast(t))}catch(e){toast(t)}}
+// compartilhar: vira uma publicação no seu perfil, no jeito da rede que você escolheu (tweet, story, foto no feed...)
+const COMO_POST={homepage:"uma foto na sua home page",icq:"um arquivo recebido no ICQ",orkut:"uma foto no seu álbum do Orkut",fotolog:"uma foto no seu flog",msn:"um compartilhamento no seu Messenger",twitter:"um tweet",facebook:"uma publicação no seu mural",ask:"uma resposta no seu Ask",whatsapp:"um status no Zap",vine:"um vine",snapchat:"uma story",instagram:"uma foto no seu feed",tiktok:"um vídeo no seu perfil"};
+const textoShare=c=>`Consegui a carta ${c.num} "${c.name}" (${c.r}) no álbum do Não Salvo!`;
+function copiarShare(){const t=textoShare(byId[sel]);try{navigator.clipboard.writeText(t).then(()=>toast("Texto copiado!"),()=>toast(t))}catch(e){toast(t)}}
+function share(){
+  const c=byId[sel];if(owned(c)<1){toast("Você ainda não tem essa carta.");return}
+  const u=typeof SESSAO!=="undefined"&&SESSAO&&SESSAO.usuario;
+  if(!u){copiarShare();return}
+  const lay=COMO_POST[u.perfil_layout]?u.perfil_layout:"orkut";
+  openModal(`<h3>Compartilhar no seu perfil</h3><div class="shr">${cardHTML(c,{})}<div class="shr-tx"><p>A figurinha <b>${escapeHtml(c.name)}</b> vai aparecer como <b>${COMO_POST[lay]}</b> no seu perfil, para quem visitar.</p>
+   <label for="shrL">Legenda (opcional)</label><textarea id="shrL" maxlength="140" rows="3" placeholder="Escreva algo sobre essa figurinha…"></textarea><small id="shrN" aria-live="polite">140 caracteres restantes</small></div></div>
+   <div class="shr-bt"><button type="button" class="mclose" id="shrOk">Publicar no meu perfil</button><button type="button" class="mclose ghost2" onclick="copiarShare()">Só copiar o texto</button></div>`,"shrbox");
+  const t=$("shrL"),n=$("shrN");t.oninput=()=>{n.textContent=`${140-[...t.value].length} caracteres restantes`};
+  $("shrOk").onclick=async()=>{const b=$("shrOk");b.disabled=true;
+    try{await Api.publicar({carta_id:c.id,legenda:t.value.trim()||null},{silencioso:true});
+      const link="perfil.html?u="+encodeURIComponent(u.apelido);
+      $("mbox").querySelector(".shr-bt").innerHTML=`<a class="mclose" href="${link}">Ver no meu perfil</a><button type="button" class="mclose ghost2" onclick="closeModal()">Fechar</button>`;
+      toast("Publicado no seu perfil!")}
+    catch(e){b.disabled=false;toast((e&&e.erro)||"Não consegui publicar agora.")}};
+}
 function about(){const c=COLLECTIONS[ci];openModal(`<h3>${c.n}</h3><p>${c.about}</p><table class="tbl"><tr><th>Raridade</th><th>Cartas</th><th>Você tem</th></tr>${RARITIES.map(r=>{const l=CARDS.filter(x=>x.ci===ci&&x.r===r);return l.length?`<tr><td style="color:var(--${r})">⬢ ${r}</td><td>${l.length}</td><td>${l.filter(x=>owned(x)).length}</td></tr>`:""}).join("")}</table><p style="margin-top:12px">Completar a coleção rende um bônus de <b style="color:var(--gold)">moedas</b> e XP.</p><button class="mclose" onclick="closeModal()">FECHAR</button>`)}
 function openModal(h,cls){$("mbox").className="mbox "+(cls||"");$("mbox").innerHTML=`<button class="xclose" onclick="closeModal()" aria-label="Fechar" title="Fechar (Esc)">${icon("xmark")}</button>`+h;$("modal").classList.add("open")}
 let vpl=null;
