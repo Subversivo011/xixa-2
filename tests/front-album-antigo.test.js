@@ -172,7 +172,7 @@ test("vaga: figurinha que tenho mostra nome, número e cópias; a que falta most
   await page.click("#cards .slot:nth-child(3) .vaga");
   assert.ok(await page.$eval("#cards .slot:nth-child(3) .vaga", (b) => b.classList.contains("sel")));
   assert.match(await page.$eval("#det", (d) => d.textContent), new RegExp(COLECOES[0].cards[2].name));
-  assert.match(await page.$eval("#premio", (d) => d.textContent), /Complete do nº 001 ao nº 009/);
+  assert.match(await page.$eval("#premio", (d) => d.textContent), new RegExp(`Complete do nº 001 ao nº ${String(COLECOES[0].cards.length).padStart(3, "0")}`));
   assert.deepStrictEqual(erros, []);
   await ctx.close();
 });

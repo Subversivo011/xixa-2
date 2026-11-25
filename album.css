@@ -249,9 +249,6 @@
 /* Lendas da Web: dourado de banner da internet dos anos 2000 */
 .t-lendas{--vaga:#8a5d08;--txtp:#5c3f00;--papel:#f7ecd2}
 .t-lendas h1,.t-lendas h3.tt{font:400 clamp(26px,4.4vw,44px)/1.05 "Luckiest Guy",sans-serif;color:#f2b22a;-webkit-text-stroke:2px #5c3f00;text-shadow:3px 3px 0 #5c3f00;letter-spacing:1px;font-style:normal;transform:rotate(-2deg)}
-/* Memes Icônicos: a letra de meme (branca com contorno preto) */
-.t-memes{--vaga:#222;--txtp:#222;--papel:#ececec}
-.t-memes h1,.t-memes h3.tt{font:400 clamp(28px,4.8vw,48px)/1.05 Anton,Impact,sans-serif;color:#fff;-webkit-text-stroke:2.5px #000;text-shadow:3px 3px 0 #000;font-style:normal;letter-spacing:1px;transform:none}
 /* Expansão Orkut: o azul e o rosa do Orkut */
 .t-expansao{--vaga:#4f6fb3;--txtp:#26437d;--papel:#e1e9f7}
 .t-expansao h1,.t-expansao h3.tt{font:700 clamp(26px,4.4vw,44px)/1.05 Comfortaa,sans-serif;text-transform:lowercase;font-style:normal;color:#26437d;-webkit-text-stroke:0;text-shadow:2px 2px 0 #fff,3px 3px 0 #f5b5d5;letter-spacing:-1px;transform:none}
@@ -270,6 +267,20 @@
 .t-sites{--vaga:#16749f;--txtp:#0b4f72;--papel:#dcf0fa}
 .t-sites h1,.t-sites h3.tt{font:700 clamp(26px,4.2vw,42px)/1.1 "Comic Neue","Comic Sans MS",cursive;-webkit-text-stroke:0;text-transform:none;font-style:italic;letter-spacing:0;transform:skewX(-8deg);text-shadow:none;color:#0b4f72}
 .t-sites h1 span,.t-sites h3.tt span{background:linear-gradient(90deg,#e0003a,#e07a00,#c9a800,#00a344,#0084d6,#6a00e0);-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(2px 2px 0 #0a3a5a)}
+
+/* Lendas do Fotolog: letra gordinha preta com sombra rosa de flog emo */
+.t-fotolog{--vaga:#b0215c;--txtp:#5e0f31;--papel:#fbe4ee}
+.t-fotolog h1,.t-fotolog h3.tt{font:400 clamp(26px,4.4vw,44px)/1.05 "Lilita One",sans-serif;color:#141414;-webkit-text-stroke:0;text-shadow:3px 3px 0 #ff5fa2,5px 5px 0 #141414;text-transform:none;font-style:normal;letter-spacing:1px;transform:rotate(-1.5deg)}
+/* YouTube Raiz: letra condensada de vinheta de vídeo, vermelha com sombra */
+.t-youtube{--vaga:#b51717;--txtp:#4d0909;--papel:#f1eeee}
+.t-youtube h1,.t-youtube h3.tt{font:400 clamp(28px,4.8vw,48px)/1.05 Anton,Impact,sans-serif;color:#c41a1a;-webkit-text-stroke:0;text-shadow:3px 3px 0 #1d1d1d;text-transform:uppercase;font-style:normal;letter-spacing:1px;transform:none}
+
+/* Redes & Trends: letra de timeline, azul de passarinho com sombra escura */
+.t-redes{--vaga:#0f6f8f;--txtp:#0a3e50;--papel:#e2f2f8}
+.t-redes h1,.t-redes h3.tt{font:800 clamp(24px,4vw,40px)/1.1 Inter,"Helvetica Neue",Arial,sans-serif;color:#0f6f8f;-webkit-text-stroke:0;text-shadow:2px 2px 0 #fff,3px 3px 0 #9fd3e6;text-transform:none;font-style:normal;letter-spacing:-.5px;transform:none}
+/* Grupinhos & Criadores: canetinha verde-limão de caderno de turma */
+.t-grupinhos{--vaga:#4a7a14;--txtp:#2c4a0a;--papel:#eef6e0}
+.t-grupinhos h1,.t-grupinhos h3.tt{font:400 clamp(26px,4.2vw,42px)/1.15 "Permanent Marker",cursive;color:#2c4a0a;-webkit-text-stroke:0;text-shadow:2px 2px 0 #b9e27a;text-transform:none;font-style:normal;letter-spacing:0;transform:rotate(1.5deg)}
 
 /* ===== álbum expandido: as duas páginas abertas na mesa ===== */
 body.mesa-on{overflow:hidden}
