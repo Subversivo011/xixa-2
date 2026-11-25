@@ -4,6 +4,7 @@ import { send, limited, lerJson } from '../lib/http.js';
 import { lerCookies, montarCookie, apagarCookie } from '../lib/cookies.js';
 import { verificarCsrf } from '../lib/csrf.js';
 import { patenteDoUsuario } from '../lib/patente.js';
+import { papelDoUsuario } from '../lib/papel.js';
 import { ErroNegocio, carteira } from '../economia/servico.js';
 import { lerPerfil, atualizarPerfil } from './../auth/perfil.js';
 import {
@@ -89,12 +90,13 @@ export default function registrar(r) {
 
   // quem sou eu: perfil, patente (pelo XP, no servidor), saldo e o token CSRF desta sessão
   r.get('/api/eu', async ({ res, pool, usuario }) => {
-    let atual, proxima, c, perfil;
+    let atual, proxima, c, perfil, papel;
     try {
-      [{ atual, proxima }, c, perfil] = await Promise.all([
+      [{ atual, proxima }, c, perfil, papel] = await Promise.all([
         patenteDoUsuario(pool, usuario.id),
         carteira(pool, usuario),
-        lerPerfil(pool, usuario.id)
+        lerPerfil(pool, usuario.id),
+        papelDoUsuario(pool, usuario.id)
       ]);
     } catch (e) {
       if (e instanceof ErroNegocio) return send(res, e.status, { erro: e.message });
@@ -104,6 +106,7 @@ export default function registrar(r) {
       usuario: perfil,
       patente: atual && { id: atual.id, nome: atual.nome, cor: atual.cor, xp_minimo: atual.xp_minimo },
       proxima_patente: proxima && { id: proxima.id, nome: proxima.nome, xp_minimo: proxima.xp_minimo, faltam: proxima.xp_minimo - c.xp },
+      papel, // usuario | moderador | admin: o front só mostra Moderação/Admin a quem tem o papel (a API confere de novo)
       moedas: c.moedas, xp: c.xp,
       csrf: usuario.csrf || null // enviar em X-CSRF nas chamadas que alteram dados
     });
