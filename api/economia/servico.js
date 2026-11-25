@@ -332,4 +332,4 @@ export async function ranking(pool, { metrica = 'xp', limite = 50 } = {}) {
   return rows.map((r, i) => ({ posicao: i + 1, apelido: r.apelido, avatar_gato: r.avatar_gato, avatar_url: r.avatar_url, valor: Number(r.valor), patente: patenteDe(pats, Number(r.valor)).nome }));
 }
 
-export { RARIDADES, indisponivel };
+export { RARIDADES, indisponivel, criarRazao, carregarRegras, travarUsuario };
