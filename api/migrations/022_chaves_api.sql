@@ -1,4 +1,4 @@
--- 018 · Chaves de API do MCP: cada admin cria as suas no painel; só o hash (SHA-256) é guardado, o segredo aparece uma vez.
+-- 022 · Chaves de API do MCP: cada admin cria as suas no painel; só o hash (SHA-256) é guardado, o segredo aparece uma vez.
 -- Idempotente.
 SET LOCAL lock_timeout = '5s';
 
