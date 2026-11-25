@@ -170,7 +170,7 @@ main{display:flex;flex-direction:column}
       <div class="sun"><picture><source srcset="logo-hero.webp?v=4" type="image/webp"><img src="logo-hero.png?v=4" alt="Não Salvo" width="640" height="528" fetchpriority="high"></picture></div>
       <h1>E no fim, o plano do <em>Não Salvo</em> era salvar.</h1>
       <p>Um museu colaborativo de vídeos virais, memes e momentos inesquecíveis da nossa internet.</p>
-      <div class="btns"><a class="btn" href="linha-do-tempo.html"><i data-ic="timeline"></i>Explorar por ano</a><button class="btn ghost" onclick="openSubmit()"><i data-ic="send"></i>Enviar meme</button></div>
+      <div class="btns"><a class="btn" href="linha-do-tempo.html"><i data-ic="timeline"></i>Explorar por ano</a><button class="btn ghost" data-gate="logado" onclick="openSubmit()"><i data-ic="send"></i>Enviar meme</button></div>
     </div>
     <div>
       <div class="sec-title"><span><i data-ic="star"></i>Clássicos da internet brasileira</span><a onclick="setView('todos')">Ver todos →</a></div>
@@ -181,7 +181,7 @@ main{display:flex;flex-direction:column}
   <section class="pulse">
     <div class="panel"><div class="sec-title"><span><i data-ic="clock"></i>Hoje na história da web</span><a onclick="randomPick()"><i data-ic="random"></i>Aleatório</a></div><div id="today"></div></div>
     <div class="panel sdp"><div id="hot"></div></div>
-    <div class="panel"><div class="sec-title"><span><i data-ic="new"></i>Últimos adicionados</span><a onclick="openMod()">Fila →</a></div><div id="latest"></div></div>
+    <div class="panel"><div class="sec-title"><span><i data-ic="new"></i>Últimos adicionados</span><a data-gate="moderador" onclick="openMod()">Fila →</a></div><div id="latest"></div></div>
   </section>
 
   <section class="timeline" id="tl">
@@ -195,7 +195,7 @@ main{display:flex;flex-direction:column}
   </section>
 
   <section id="browse">
-    <div class="sec-title"><span id="browseTitle">Todos os registros</span><a onclick="openSubmit()"><i data-ic="send"></i>Enviar meme</a></div>
+    <div class="sec-title"><span id="browseTitle">Todos os registros</span><a data-gate="logado" onclick="openSubmit()"><i data-ic="send"></i>Enviar meme</a></div>
     <div class="chips" id="chips"></div>
     <div class="grid" id="grid"></div>
   </section>
@@ -212,7 +212,7 @@ main{display:flex;flex-direction:column}
 <div class="modal" id="modal" onclick="if(event.target===this)closeM()"><div class="box" id="box"></div></div>
 
 <form name="feedback" data-netlify="true" netlify-honeypot="bot-field" hidden><input name="tipo"><textarea name="msg"></textarea><input name="contato"><input name="pagina"><input name="bot-field"></form>
-<script src="common.js?v=20261125a"></script>
+<script src="common.js?v=20261125b"></script>
 <script src="data.js?v=20261125b"></script>
 <script src="player.js?v=20261125b"></script>
 <script src="viewer.js?v=20261125b"></script>
@@ -258,7 +258,7 @@ const $=id=>document.getElementById(id);
 const card=(a,big)=>`<button class="card" onclick="openM('${a.id}')">
   <div class="thumb" style="background:${grad(a.t)}"><i>${a.y}</i>${art(a)}${PLAY}</div>
   <div class="meta"><h3>${escapeHtml(a.t)}</h3>${big?`<small>${a.c}${a.mine?" · enviado por você":""}</small><br>`:""}<span class="tag ${a.r}">${a.r}</span></div></button>`;
-const addCard=y=>`<button class="card add" onclick="openSubmit('${y}')"><div class="thumb"><span>＋</span></div><div class="meta"><h3>Salvar um viral de ${y}</h3><small>enviar para a moderação</small></div></button>`;
+const addCard=y=>`<button class="card add" data-gate="logado" onclick="openSubmit('${y}')"><div class="thumb"><span>＋</span></div><div class="meta"><h3>Salvar um viral de ${y}</h3><small>enviar para a moderação</small></div></button>`;
 
 const SUB_ITEMS=[
   {k:"tl",ic:"timeline",label:"Linha do tempo",href:"linha-do-tempo.html"},
@@ -426,6 +426,7 @@ function dupCheck(url,name){
 
 // ---- Enviar meme ----
 function openSubmit(y){
+  if(barrarSemPapel("enviar um meme"))return;
   if(needAccount("enviar um meme"))return;
   if(!economiaPronta("enviar um meme"))return;
   $("box").className="box form";
@@ -485,6 +486,7 @@ function saveOldLink(id,u){
 
 // ---- Moderação: patente maior modera patente menor ----
 function openMod(){
+  if(barrarSemPapel("moderar",true))return;
   if(!economiaPronta("moderar"))return;
   const r=nivelPatente(),canMod=r>=3;
   const mine=NS.subs.slice().reverse();
@@ -528,6 +530,7 @@ function moderate(id,v){NS.modDone[id]=v;NS.modDoneAt=NS.modDoneAt||{};NS.modDon
 
 // ---- Ranking da galera ----
 function openRank(){
+  if(barrarSemPapel("ver o ranking"))return;
   $("box").className="box";
   $("box").innerHTML=`<div class="body"><h2 class="disp">${icon("ranking","h")}Ranking da galera</h2><p>Quem mais salvou a internet brasileira. Pacote aberto, carta nova e coleção completa contam.</p><div id="rkBox"></div>
   <button class="btn ghost" onclick="closeM()" style="margin-top:12px">Fechar</button></div>`;

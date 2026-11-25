@@ -197,7 +197,7 @@
 <div class="modal" id="modal" onclick="if(event.target===this)closeModal()"><div class="mbox" id="mbox"></div></div>
 
 <form name="feedback" data-netlify="true" netlify-honeypot="bot-field" hidden><input name="tipo"><textarea name="msg"></textarea><input name="contato"><input name="pagina"><input name="bot-field"></form>
-<script src="common.js?v=20261125a"></script>
+<script src="common.js?v=20261125b"></script>
 <script src="data.js?v=20261125b"></script>
 <script src="player.js?v=20261125b"></script>
 <script src="viewer.js?v=20261125b"></script>
@@ -417,6 +417,7 @@ async function openShop(){
   <div style="display:flex;gap:10px;justify-content:center"><button class="mclose" style="margin:16px 0 0" onclick="closeModal()">FECHAR</button>${dupsTotal()?`<button class="mclose" style="margin:16px 0 0;background:var(--sunk);color:var(--gold);box-shadow:none;border:1px solid var(--gold)" onclick="convertAll().then(openShop)">♻ CONVERTER REPETIDAS</button>`:""}</div>`);
 }
 function openRank(){
+  if(barrarSemPapel("ver o ranking"))return;
   openModal(`<h3>Ranking de colecionadores</h3><p>Quem completar o álbum primeiro ganha selo especial.</p><div id="rkBox"></div><button class="mclose" onclick="closeModal()">FECHAR</button>`);
   carregarRanking($("rkBox"),"cartas");
 }
@@ -425,7 +426,8 @@ function onAccountChange(){renderAll()}
 // chamado por renderWallet (common.js) a cada redesenho da carteira; durante a revelação renderWallet nem chega aqui
 function onWalletRendered(){renderCols()}
 // convidado: o álbum fica vazio e o aviso explica o porquê (sem redirecionar)
-function onConvidado(){renderAll();setTimeout(()=>toast("Entre para ver o seu álbum, as moedas e os pacotes.",5000),500)}
+// convidado não vê o álbum: volta para o início (o início não exige sessão, então não há laço de redirecionamento)
+function onConvidado(){location.replace("index.html")}
 // sessão, visita e carteira prontas (common.js): busca álbum e tipos e desenha
 async function onEconomiaPronta(){
   let albumOk=true;
