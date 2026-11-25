@@ -158,7 +158,8 @@ async function contrastePorPixel(page, el, corTexto) {
 
 for (const tema of ["light", "dark"]) {
   test(`botões primários (texto sobre gradiente) >= 4,5:1 medido por pixel, em repouso e com hover (${tema})`, opts, async () => {
-    const { ctx, page } = await abrir("/index.html", { w: 1280, h: 900, tema });
+    // logado: o "Enviar meme" do cabeçalho só existe com sessão
+    const { ctx, page } = await abrirLogado({ w: 1280, h: 900, tema, apelido: "Ana", patente: "Banda larga" });
     const alvos = [["Explorar por ano", ".hero .btn:not(.ghost)"], ["Enviar meme (cabeçalho)", ".sub .cta"]];
     const falhas = [];
     for (const [nome, sel] of alvos) {
@@ -230,7 +231,7 @@ test("logo-word.png com width e height em todas as páginas (sem salto de layout
     assert.ok(r.every(([w, h]) => w && h), pagina + ": " + JSON.stringify(r));
     await ctx.close();
   }
-  const admin = fs.readFileSync(path.join(RAIZ, "admin/index.html"), "utf8");
+  const admin = fs.readFileSync(path.join(RAIZ, "seppzone/index.html"), "utf8");
   assert.match(admin, /<img src="\/logo-word\.png"[^>]*width="\d+"[^>]*height="\d+"/);
 });
 
