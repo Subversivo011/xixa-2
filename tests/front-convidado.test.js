@@ -50,7 +50,7 @@ function criarApi(over = {}) {
       if (p === "/api/eu" && st.euRede) return route.abort();
       const auth = p === "/api/eu" || /^\/api\/(carteira|album|visita|pacotes)/.test(p);
       if (auth && !st.logado) return json(route, 401, { erro: "não autenticado" });
-      if (p === "/api/eu" && m === "GET") return json(route, 200, { usuario: { id: 1, apelido: "Ana", avatar_gato: GATO, avatar_url: null, usar_foto: false, cadastro_completo: true }, patente: PAT, proxima_patente: null, moedas: 10, xp: 200, csrf: "tok" });
+      if (p === "/api/eu" && m === "GET") return json(route, 200, { usuario: { id: 1, apelido: "Ana", avatar_gato: GATO, avatar_url: null, usar_foto: false, cadastro_completo: true }, patente: PAT, proxima_patente: null, papel: st.papel || "usuario", moedas: 10, xp: 200, csrf: "tok" });
       if (p === "/api/eu" && m === "PATCH") return json(route, st.patchStatus, st.patchErro || { erro: "falhou" });
       if (p === "/api/carteira") return json(route, 200, { usuario: { id: 1, apelido: "Ana" }, moedas: 10, xp: 200, patente: PAT, proxima_patente: null, pacotes: [], cartas: { distintas: 0 }, valor_das_repetidas: 0 });
       if (p === "/api/album") return json(route, 200, { colecoes: [], total: 0, tenho: 0, colecoes_completas: 0 });
@@ -81,7 +81,7 @@ const marca = (page) => page.evaluate(() => { try { return localStorage.getItem(
 const dialogo = (page) => page.evaluate(() => { const d = document.getElementById("login-dialog"); return { aberto: !!d && d.open, msg: (document.getElementById("lgMsg") || {}).textContent || "" }; });
 const prontoConvidado = (page) => page.waitForFunction(() => typeof ECO !== "undefined" && ECO.convidado === true);
 
-for (const pg of ["/index.html", "/album.html", "/memepedia.html", "/linha-do-tempo.html"]) {
+for (const pg of ["/index.html", "/memepedia.html", "/linha-do-tempo.html"]) {
   test(`convidado em ${pg}: sem laço, cabeçalho com Login, carteira vazia e sem erro de console`, opts, async () => {
     const { ctx, page, api, erros } = await abrir(pg);
     await prontoConvidado(page);
@@ -97,25 +97,59 @@ for (const pg of ["/index.html", "/album.html", "/memepedia.html", "/linha-do-te
   });
 }
 
-test("álbum convidado: abrir pacote, loja e converter mostram 'Entre para…' sem redirecionar nem chamar a API", opts, async () => {
-  const { ctx, page, api, erros } = await abrir("/album.html");
+const itensDoMenu = (page) => page.$$eval("#sub a, #sub button", (n) => n.map((x) => x.textContent.trim()));
+const GATED = ["Ranking", "Álbum de figurinhas", "Moderação", "Enviar meme"];
+
+test("convidado em /album.html: volta para o início sem laço (o álbum só aparece com conta)", opts, async () => {
+  const { ctx, page, erros } = await abrir("/album.html");
+  await page.waitForURL(/\/index\.html$/, { timeout: 8000 });
   await prontoConvidado(page);
-  const casos = [[() => page.click("#pfab"), /abrir pacotes/], [() => page.evaluate(() => convertAll()), /converter repetidas/]]; // o botão Converter fica desabilitado sem repetidas; o atalho do menu chama convertAll()
-  for (const [acao, re] of casos) {
-    await acao();
-    await page.waitForFunction(() => document.getElementById("login-dialog").open);
-    assert.match((await dialogo(page)).msg, re);
-    await page.keyboard.press("Escape");
-    await page.waitForFunction(() => !document.getElementById("login-dialog").open);
-  }
-  await page.evaluate(() => openShop());
-  await page.waitForFunction(() => document.getElementById("login-dialog").open);
-  assert.match((await dialogo(page)).msg, /comprar pacotes/);
-  assert.strictEqual(new URL(page.url()).pathname, "/album.html");
-  assert.strictEqual(api.n(/pacotes\/(abrir|comprar)|album\/reciclar/), 0);
+  await page.waitForTimeout(1200); // se houvesse laço, a URL já teria mudado de novo
+  assert.strictEqual(new URL(page.url()).pathname, "/index.html");
+  assert.strictEqual(await marca(page), "1", "a marca de convidado continua");
   assert.deepStrictEqual(erros, []);
   await ctx.close();
 });
+
+test("convidado: o menu não mostra Ranking, Álbum, Moderação nem Enviar meme (nem os botões da home)", opts, async () => {
+  const { ctx, page, erros } = await abrir("/index.html");
+  await prontoConvidado(page);
+  const itens = await itensDoMenu(page);
+  for (const g of GATED) assert.ok(!itens.some((t) => t.includes(g)), "convidado não deveria ver " + g + " (menu: " + itens.join(" | ") + ")");
+  assert.ok(itens.some((t) => t.includes("Linha do tempo")) && itens.some((t) => t.includes("Memepédia")), "o resto do menu continua");
+  const escondidos = await page.$$eval("[data-gate]", (n) => n.length > 0 && n.every((x) => getComputedStyle(x).display === "none"));
+  assert.ok(escondidos, "botões [data-gate] da home escondidos para convidado");
+  assert.strictEqual(await page.evaluate(() => document.documentElement.dataset.papel), "");
+  assert.deepStrictEqual(erros, []);
+  await ctx.close();
+});
+
+test("usuário comum logado: vê Ranking, Álbum e Enviar meme, mas NÃO a Moderação", opts, async () => {
+  const { ctx, page, erros } = await abrir("/index.html", { logado: true, convidado: false, papel: "usuario" });
+  await page.waitForFunction(() => typeof ECO !== "undefined" && ECO.pronto === true);
+  const itens = await itensDoMenu(page);
+  for (const g of ["Ranking", "Álbum de figurinhas", "Enviar meme"]) assert.ok(itens.some((t) => t.includes(g)), "usuário deveria ver " + g);
+  assert.ok(!itens.some((t) => t.includes("Moderação")), "usuário comum não vê Moderação");
+  assert.strictEqual(await page.evaluate(() => document.documentElement.dataset.papel), "logado");
+  assert.strictEqual(await page.evaluate(() => getComputedStyle(document.querySelector('[data-gate="moderador"]')).display), "none", "Fila → escondida");
+  await page.evaluate(() => openMod()); // chamada direta também é barrada
+  await page.waitForFunction(() => /só para moderadores/.test(document.getElementById("toast").textContent));
+  assert.deepStrictEqual(erros, []);
+  await ctx.close();
+});
+
+for (const papel of ["moderador", "admin"]) {
+  test(`${papel}: vê a Moderação no menu e o botão da fila`, opts, async () => {
+    const { ctx, page, erros } = await abrir("/index.html", { logado: true, convidado: false, papel });
+    await page.waitForFunction(() => typeof ECO !== "undefined" && ECO.pronto === true);
+    const itens = await itensDoMenu(page);
+    for (const g of GATED) assert.ok(itens.some((t) => t.includes(g)), papel + " deveria ver " + g);
+    assert.strictEqual(await page.evaluate(() => document.documentElement.dataset.papel), "logado moderador");
+    assert.notStrictEqual(await page.evaluate(() => getComputedStyle(document.querySelector('[data-gate="moderador"]')).display), "none");
+    assert.deepStrictEqual(erros, []);
+    await ctx.close();
+  });
+}
 
 test("convidado: criador de gato não abre sozinho; editar perfil e enviar meme pedem login", opts, async () => {
   const { ctx, page, erros } = await abrir("/index.html");
@@ -133,12 +167,13 @@ test("convidado: criador de gato não abre sozinho; editar perfil e enviar meme 
   await ctx.close();
 });
 
-test("convidado: ranking, acervo e linha do tempo funcionam", opts, async () => {
+test("convidado: ranking pede login; acervo e linha do tempo funcionam", opts, async () => {
   const { ctx, page, erros } = await abrir("/index.html");
   await prontoConvidado(page);
   await page.evaluate(() => openRank());
-  await page.waitForSelector(".rkx");
-  assert.match(await page.textContent(".rkx"), /Colecionadora.*900 XP/);
+  await page.waitForFunction(() => document.getElementById("login-dialog").open);
+  assert.match((await dialogo(page)).msg, /ver o ranking/);
+  await page.keyboard.press("Escape");
   const tl = await ctx.newPage();
   await tl.goto(base + "/linha-do-tempo.html#2012");
   await tl.waitForSelector(".lt-it");
