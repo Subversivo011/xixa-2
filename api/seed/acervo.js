@@ -5,6 +5,9 @@
 //   DB_HOST=... DB_NAME=naosalvo_dev DB_USER=naosalvo DB_PASSWORD=... node api/seed/acervo.js
 //   (ou DB_PASSWORD_FILE=/caminho/do/secret)
 // Opção: --data=caminho/do/data.js (padrão: ../../data.js)
+// O banco é a fonte da verdade do acervo (editado pelo admin): se `memes` já tem linhas, o seed NÃO sobrescreve categorias, eras,
+// memes, mídias, coleções e cartas. Para recarregar tudo do data.js (apaga as edições do admin nesses itens): --forcar.
+// Patentes, pacotes e regras seguem a regra de sempre (patentes e pacotes são atualizados; regras só criadas).
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, resolve } from 'node:path';
@@ -61,7 +64,7 @@ const REGRAS = [
 
 const nulo = (v) => (v === undefined || v === '' ? null : v);
 
-export async function carregarAcervo(pool, { arquivo = ARQ_DATA, log = console.log } = {}) {
+export async function carregarAcervo(pool, { arquivo = ARQ_DATA, log = console.log, forcar = process.argv.includes('--forcar') } = {}) {
   const { MEMES, YEAR_INFO, COLLECTIONS } = lerDataJs(arquivo);
   const ids = new Set(MEMES.map((m) => m.id));
   if (ids.size !== MEMES.length) throw new Error('data.js tem ids de meme repetidos');
@@ -73,6 +76,9 @@ export async function carregarAcervo(pool, { arquivo = ARQ_DATA, log = console.l
   const cli = await pool.connect();
   try {
     await cli.query('BEGIN');
+    const acervoJaCarregado = !forcar && +(await cli.query('SELECT count(*)::int AS n FROM memes')).rows[0].n > 0;
+    if (acervoJaCarregado) log('acervo já tem memes: mantendo as edições do banco (use --forcar para recarregar do data.js)');
+    if (!acervoJaCarregado) {
 
     for (const [i, [nome, icone, emoji]] of CATEGORIAS.entries()) {
       await cli.query(
@@ -128,6 +134,8 @@ export async function carregarAcervo(pool, { arquivo = ARQ_DATA, log = console.l
       }
     }
 
+    }
+
     for (const [id, nome, xp, cor, descricao, permissoes] of PATENTES) {
       await cli.query(
         `INSERT INTO patentes (id, nome, xp_minimo, cor, descricao, permissoes) VALUES ($1,$2,$3,$4,$5,$6)
@@ -165,7 +173,7 @@ export async function carregarAcervo(pool, { arquivo = ARQ_DATA, log = console.l
 
     const conta = async (t) => +(await cli.query(`SELECT count(*)::int AS n FROM ${t}`)).rows[0].n;
     const total = { memes: await conta('memes'), cartas: await conta('cartas') };
-    if (total.memes < MEMES.length || total.cartas < cartasTotal) throw new Error(`Contagem não bate: ${JSON.stringify(total)}`);
+    if (!acervoJaCarregado && (total.memes < MEMES.length || total.cartas < cartasTotal)) throw new Error(`Contagem não bate: ${JSON.stringify(total)}`);
     await cli.query('COMMIT');
     log(`seed ok: ${total.memes} memes, ${total.cartas} cartas, ${COLLECTIONS.length} coleções, ${Object.keys(YEAR_INFO).length} eras, ${CATEGORIAS.length} categorias, ${PATENTES.length} patentes, ${PACOTES.length} tipos de pacote`);
     return total;
