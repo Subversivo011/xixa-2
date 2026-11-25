@@ -10,19 +10,54 @@ export const FERRAMENTAS = [
   { nome: 'conferir_duplicado', escopo: 'ler', ativa: true,
     resumo: 'Confere se um link ou título já existe no acervo ou na fila de envios. Use sempre antes de criar_meme.',
     params: { url: { tipo: 'texto', descricao: 'link do vídeo ou da imagem' }, titulo: { tipo: 'texto' } } },
-  { nome: 'criar_meme', escopo: 'escrever', ativa: false,
+  { nome: 'criar_meme', escopo: 'escrever', ativa: true,
     resumo: 'Cria um meme como rascunho oculto. Com o escopo publicar e publicar=true, já entra publicado. Recusa duplicado, salvo forcar=true.',
-    params: { id: { tipo: 'texto', obrigatorio: true, descricao: 'slug a-z, 0-9 e hífen' }, titulo: { tipo: 'texto', obrigatorio: true }, ano: { tipo: 'inteiro', obrigatorio: true }, categoria: { tipo: 'texto', obrigatorio: true }, raridade: { tipo: 'texto', obrigatorio: true }, descricao: { tipo: 'texto' }, youtube_id: { tipo: 'texto', descricao: '11 caracteres' }, publicar: { tipo: 'booleano' }, forcar: { tipo: 'booleano' } } },
-  { nome: 'editar_meme', escopo: 'escrever', ativa: false,
-    resumo: 'Altera campos de um meme existente (mesma validação do painel).', params: { id: { tipo: 'texto', obrigatorio: true } } },
-  { nome: 'publicar_meme', escopo: 'publicar', ativa: false,
+    params: {
+      id: { tipo: 'texto', obrigatorio: true, descricao: 'slug a-z, 0-9 e hífen' },
+      titulo: { tipo: 'texto', obrigatorio: true },
+      ano: { tipo: 'inteiro', obrigatorio: true },
+      categoria: { tipo: 'texto', obrigatorio: true },
+      raridade: { tipo: 'texto', obrigatorio: true },
+      tipo: { tipo: 'texto', descricao: 'video | foto (padrão video)' },
+      data: { tipo: 'texto', descricao: 'AAAA-MM-DD' },
+      emoji: { tipo: 'texto' },
+      descricao: { tipo: 'texto' },
+      autor: { tipo: 'texto' },
+      duracao: { tipo: 'inteiro', descricao: 'em segundos' },
+      youtube_id: { tipo: 'texto', descricao: '11 caracteres' },
+      publicar: { tipo: 'booleano', descricao: 'só com o escopo publicar' },
+      forcar: { tipo: 'booleano', descricao: 'ignora aviso de duplicado' }
+    } },
+  { nome: 'editar_meme', escopo: 'escrever', ativa: true,
+    resumo: 'Altera campos de um meme existente (mesma validação do painel).',
+    params: {
+      id: { tipo: 'texto', obrigatorio: true },
+      titulo: { tipo: 'texto' },
+      ano: { tipo: 'inteiro' },
+      data: { tipo: 'texto', descricao: 'AAAA-MM-DD' },
+      categoria: { tipo: 'texto' },
+      raridade: { tipo: 'texto' },
+      tipo: { tipo: 'texto', descricao: 'video | foto' },
+      emoji: { tipo: 'texto' },
+      descricao: { tipo: 'texto' },
+      autor: { tipo: 'texto' },
+      duracao: { tipo: 'inteiro', descricao: 'em segundos' },
+      youtube_id: { tipo: 'texto', descricao: '11 caracteres' }
+    } },
+  { nome: 'publicar_meme', escopo: 'publicar', ativa: true,
     resumo: 'Muda um meme de oculto para publicado.', params: { id: { tipo: 'texto', obrigatorio: true } } },
   { nome: 'anexar_midia', escopo: 'escrever', ativa: false,
     resumo: 'Anexa uma imagem (jpeg, png ou webp, até 5 MB) a um meme, a partir de uma URL ou de base64.',
     params: { id: { tipo: 'texto', obrigatorio: true }, url: { tipo: 'texto' }, base64: { tipo: 'texto' } } },
-  { nome: 'criar_carta', escopo: 'escrever', ativa: false,
+  { nome: 'criar_carta', escopo: 'escrever', ativa: true,
     resumo: 'Cria uma carta no fim de uma coleção, ligada ou não a um meme.',
-    params: { colecao_id: { tipo: 'texto', obrigatorio: true }, nome: { tipo: 'texto', obrigatorio: true }, raridade: { tipo: 'texto', obrigatorio: true }, meme_id: { tipo: 'texto' } } }
+    params: {
+      colecao_id: { tipo: 'texto', obrigatorio: true },
+      nome: { tipo: 'texto', obrigatorio: true },
+      raridade: { tipo: 'texto', obrigatorio: true },
+      emoji: { tipo: 'texto' },
+      meme_id: { tipo: 'texto' }
+    } }
 ];
 
 export const ativas = () => FERRAMENTAS.filter((f) => f.ativa);

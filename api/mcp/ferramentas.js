@@ -16,14 +16,14 @@ export const LIMITES = {
   midias_por_meme: 20
 };
 
-class ErroArgumento extends Error {
+export class ErroArgumento extends Error {
   constructor(mensagem) {
     super(mensagem);
     this.name = 'ErroArgumento';
   }
 }
 
-function validarChavesConhecidas(args, permitidas) {
+export function validarChavesConhecidas(args, permitidas) {
   if (!args || typeof args !== 'object' || Array.isArray(args)) {
     throw new ErroArgumento('argumentos devem ser um objeto');
   }
@@ -318,8 +318,14 @@ export async function conferir_duplicado(pool, args = {}) {
   };
 }
 
+import { criar_meme, editar_meme, publicar_meme, criar_carta } from './escrita.js';
+
 export const FERRAMENTAS_MAP = {
   listar_referencias,
   buscar_memes,
-  conferir_duplicado
+  conferir_duplicado,
+  criar_meme,
+  editar_meme,
+  publicar_meme,
+  criar_carta
 };

@@ -450,14 +450,14 @@ test('POST /mcp: validação de argumentos inválidos vira isError; ferramenta i
   assert.equal(rInexistente.status, 200);
   assert.equal(rInexistente.json.error.code, -32602);
 
-  // Ferramenta inativa (ex: criar_meme) -> -32602
+  // Ferramenta inativa (ex: anexar_midia) -> -32602
   const rInativa = await s.post(
     '/mcp',
     {
       jsonrpc: '2.0',
       id: 4,
       method: 'tools/call',
-      params: { name: 'criar_meme', arguments: {} }
+      params: { name: 'anexar_midia', arguments: {} }
     },
     { headers: authHeader(chave) }
   );
