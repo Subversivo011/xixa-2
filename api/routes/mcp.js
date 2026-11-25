@@ -164,13 +164,31 @@ export default function registrar(r) {
           return send(res, 200, jsonRpcSucesso(id, resultado));
         }
 
+        // Limite extra para ferramentas de escrita (escopo !== 'ler'): 60 escritas / 10 min
+        if (def.escopo !== 'ler' && limited('mcpw:' + autenticado.chave_id, 60)) {
+          const resultado = {
+            content: [{ type: 'text', text: 'limite de escritas da chave, espere e tente de novo' }],
+            isError: true
+          };
+          return send(res, 200, jsonRpcSucesso(id, resultado));
+        }
+
         const fn = FERRAMENTAS_MAP[name];
         if (!fn) {
           return send(res, 200, jsonRpcErro(id, -32602, `ferramenta não implementada: ${name}`));
         }
 
         try {
-          const dados = await fn(pool, args || {});
+          const toolCtx = {
+            pool,
+            mcp: {
+              chave_id: autenticado.chave_id,
+              usuario_id: autenticado.usuario_id,
+              apelido: autenticado.apelido,
+              escopos: autenticado.escopos
+            }
+          };
+          const dados = await fn(pool, args || {}, toolCtx);
           const resultado = {
             content: [{ type: 'text', text: JSON.stringify(dados) }],
             isError: false
