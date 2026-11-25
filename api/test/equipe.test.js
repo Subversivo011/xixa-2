@@ -93,8 +93,10 @@ test('edita_direto: Subversivo e yorkshire publicam na Memepédia e trocam link 
   assert.equal((await q('SELECT count(*)::int AS n FROM eventos_xp WHERE usuario_id = ANY($1)', [[sub.id, york.id]]))[0].n, 0);
 });
 
-test('moderador também publica direto', { skip }, async () => {
+test('moderador não publica direto; admin sim', { skip }, async () => {
   const be = await entrar(ID.be, 'be');
   await q("UPDATE usuarios SET papel = 'moderador' WHERE id = $1", [be.id]);
+  assert.equal((await s.get('/api/eu', como(be.apelido))).json.edita_direto, false);
+  await q("UPDATE usuarios SET papel = 'admin' WHERE id = $1", [be.id]);
   assert.equal((await s.get('/api/eu', como(be.apelido))).json.edita_direto, true);
 });

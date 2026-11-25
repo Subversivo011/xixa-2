@@ -174,7 +174,7 @@ async function holdWallet(on){
 // Convidado (marca ns_convidado): navega, mas álbum, moedas, pacotes e perfil exigem conta. Sem laço de redirecionamento.
 function entrarComoConvidado(){
   ECO.convidado=true;ECO.pronto=false;SESSAO=null;
-  renderWallet();updateAccount();
+  renderWallet();updateAccount();renderSub();
   if(typeof onConvidado==="function")onConvidado();
 }
 // aviso "Entre para <ação>" com atalho para o login (abre o diálogo de login)
@@ -201,6 +201,7 @@ async function iniciarEconomia(){
       throw e;
     }
     if(!SESSAO)throw {status:0};
+    renderSub();
     try{await Api.visita()}catch(e){if(e&&e.status===401)return} // a visita do dia não derruba a tela se falhar
     await atualizarCarteira();
     ECO.indisponivel=false;avisoEconomiaOff(false);
@@ -250,6 +251,29 @@ function renderWallet(){
 // ---- Perfil e criador de gato: edita o perfil do servidor (PATCH /api/eu) ----
 const temConta=()=>!!(SESSAO&&SESSAO.usuario&&SESSAO.usuario.cadastro_completo!==false);
 const meuApelido=()=>(SESSAO&&SESSAO.usuario&&SESSAO.usuario.apelido)||"";
+// Quem vê o quê: o papel (usuario | moderador | admin) vem do servidor em GET /api/eu. Isto só ESCONDE; cada rota confere de novo.
+// Ranking, Álbum, Moderação e Enviar meme só para quem tem sessão; Moderação só para moderador/admin. Sem sessão (ou convidado) nada disso aparece.
+const nsLogado=()=>!!(SESSAO&&SESSAO.usuario);
+const nsEhModerador=()=>!!SESSAO&&(SESSAO.papel==="moderador"||SESSAO.papel==="admin");
+const SO_LOGADO=["rank","album","mod","send"];
+const subVisivel=x=>x.sp||(x.k==="mod"?nsEhModerador():SO_LOGADO.includes(x.k)?nsLogado():true);
+// marca <html data-papel="logado moderador"> e esconde [data-gate="logado"|"moderador"] fora disso (enquanto a sessão não chega, tudo escondido)
+function aplicarGates(){
+  const t=[];if(nsLogado())t.push("logado");if(nsEhModerador())t.push("moderador");
+  document.documentElement.dataset.papel=t.join(" ");
+  if(!document.getElementById("ns-gates")){
+    const s=document.createElement("style");s.id="ns-gates";
+    s.textContent='html:not([data-papel~="logado"]) [data-gate="logado"],html:not([data-papel~="moderador"]) [data-gate="moderador"]{display:none!important}';
+    document.head.appendChild(s);
+  }
+}
+// pede conta (convidado ou sem sessão) ou avisa que a área é de moderadores; devolve true se barrou
+function barrarSemPapel(acao,moderacao){
+  // só pede login a quem já é convidado/deslogado de fato; com a economia ainda carregando ou fora do ar, deixa o aviso de indisponível das próprias funções falar
+  if(!nsLogado()){if(ECO.convidado){avisoLogin(acao);return true}return false}
+  if(moderacao&&!nsEhModerador()){toast("A moderação é só para moderadores.",3200);return true}
+  return false;
+}
 // avatar_gato válido: 6 chaves inteiras dentro da faixa (nunca decidir cadastro por avatar_gato.length)
 const GATO_FAIXA={fur:10,pat:5,eye:5,acc:9,clo:8,bg:8};
 const gatoValido=o=>!!o&&typeof o==="object"&&Object.keys(GATO_FAIXA).every(k=>Number.isInteger(o[k])&&o[k]>=0&&o[k]<GATO_FAIXA[k]);
@@ -345,7 +369,7 @@ function rkAvatar(it){
 function rkLinha(it,unid){
   const eu=meuApelido()&&String(it.apelido).toLowerCase()===meuApelido().toLowerCase();
   const pat=RANKS.find(k=>k.name===it.patente),cor=escapeHtml(pat?pat.color:"#9aa3b2");
-  return `<div class="rkx${eu?" me":""}"><b>${escapeHtml(it.posicao)}</b><span class="av">${rkAvatar(it)}</span><span class="nm"><a class="n" href="perfil.html?u=${encodeURIComponent(it.apelido)}">${escapeHtml(it.apelido)}${eu?" (você)":""}</a>${it.patente?`<span class="pt" style="color:${cor};background:${cor}22">${escapeHtml(it.patente)}</span>`:""}</span><em>${fmt(it.valor)} ${unid}</em></div>`;
+  return `<div class="rkx${eu?" me":""}"><b>${escapeHtml(it.posicao)}</b><span class="av">${rkAvatar(it)}</span><span class="nm"><a class="n" href="perfil.html?u=${encodeURIComponent(it.apelido)}">${escapeHtml(it.apelido)}${eu?" (você)":""}</a>${it.moderador?`<span class="mb" title="Moderador da comunidade">${icon("moderation")}Moderador</span> `:""}${it.patente?`<span class="pt" style="color:${cor};background:${cor}22">${escapeHtml(it.patente)}</span>`:""}</span><em>${fmt(it.valor)} ${unid}</em></div>`;
 }
 async function carregarRanking(el,metrica){
   if(!el)return;
@@ -365,13 +389,10 @@ async function carregarRanking(el,metrica){
 // ---- Sessão do servidor (login com Discord): GET /api/eu ----
 let SESSAO=null;
 async function carregarSessao(){
-  try{SESSAO=await Api.eu()}catch(e){SESSAO=null;updateAccount();marcarPermissoes();throw e}
-  updateAccount();marcarPermissoes();
+  try{SESSAO=await Api.eu()}catch(e){SESSAO=null;updateAccount();throw e}
+  updateAccount();
 }
-// permissões vindas do servidor (a API confere de novo em cada chamada): o front só esconde/mostra
-const podeModerar=()=>!!(SESSAO&&["moderador","admin"].includes(SESSAO.papel));
 const editaDireto=()=>!!(SESSAO&&SESSAO.edita_direto);
-function marcarPermissoes(){document.documentElement.classList.toggle("pode-moderar",podeModerar());if(SUB.length)renderSub()}
 // POST com a sessão (cookie + X-CSRF), para as rotas da equipe
 async function postComSessao(url,corpo){
   const r=await fetch(url,{method:"POST",credentials:"same-origin",headers:{"content-type":"application/json","X-CSRF":(SESSAO&&SESSAO.csrf)||""},body:JSON.stringify(corpo)});
@@ -402,6 +423,7 @@ function contaSessaoHTML(){
     <a role="menuitem" href="perfil.html">${icon("user")}Ver o meu perfil</a>
     <a role="menuitem" href="perfil.html#editar">${icon("edit")}Editar o meu perfil</a>
     <button type="button" role="menuitem" onclick="fecharMenuConta();openSignup()">${icon("cat")}Editar gatinho e apelido</button>
+    ${SESSAO.papel==="admin"?`<a role="menuitem" href="/seppzone/">${icon("moderation")}Área adm</a>`:""}
   </div></span><button type="button" onclick="sairDaConta()">Sair</button></div>`;
 }
 // menu da conta (clicar no próprio avatar): ver/editar o perfil e editar o gato
@@ -598,8 +620,11 @@ function renderHeader(page,opt={}){
   new ResizeObserver(()=>document.documentElement.style.setProperty("--hdh",hd.offsetHeight+"px")).observe(hd);
 }
 let SUB=[],subOn=null;
-function renderSub(items){if(items)SUB=items;const n=document.getElementById("sub");if(!n)return;
-  n.innerHTML=SUB.map((x,i)=>x.sp?`<span class="sp"></span>`:x.href?`<a href="${x.href}" class="${x.k===subOn?"on":""} ${x.cta?"cta":""}"${x.k===subOn?' aria-current="page"':""}>${icon(x.ic)}${x.label}</a>`:`<button data-i="${i}" class="${x.k===subOn?"on":""} ${x.cta?"cta":""} ${x.dd?"dd":""} ${x.so==="mod"?"so-mod":""}">${icon(x.ic)}${x.label}</button>`).join("");
+function renderSub(items){if(items)SUB=items;aplicarGates();const n=document.getElementById("sub");if(!n)return;
+  // índice original (data-i) preservado; separador só entre dois itens visíveis
+  const vis=SUB.map(x=>subVisivel(x));
+  const mostrar=SUB.map((x,i)=>x.sp?(SUB.slice(0,i).some((y,j)=>!y.sp&&vis[j])&&SUB.slice(i+1).some((y,j)=>!y.sp&&vis[i+1+j])):vis[i]);
+  n.innerHTML=SUB.map((x,i)=>!mostrar[i]?"":x.sp?`<span class="sp"></span>`:x.href?`<a href="${x.href}" class="${x.k===subOn?"on":""} ${x.cta?"cta":""}"${x.k===subOn?' aria-current="page"':""}>${icon(x.ic)}${x.label}</a>`:`<button data-i="${i}" class="${x.k===subOn?"on":""} ${x.cta?"cta":""} ${x.dd?"dd":""}">${icon(x.ic)}${x.label}</button>`).join("");
   n.querySelector(".dd")?.setAttribute("aria-expanded","false");
   n.querySelectorAll("button[data-i]").forEach(b=>b.onclick=e=>{const x=SUB[+b.dataset.i];x.fn&&x.fn(e,b)});
 }
@@ -727,6 +752,22 @@ function renderFooter(){
     <img class="ft-boneco" src="boneco.png?v=2" alt="" width="478" height="600">
   </div></div>`;
   document.body.appendChild(f);
+  mostrarVersao();
+}
+// Tarja sutil com a versão publicada: "dev · PR #63 · 1540939 · 25/11/2026 12:27" (o deployer grava /versao.json a cada merge).
+// Sem o arquivo (rodando local, ou deployer antigo) ou com ele inválido, não mostra nada.
+function formatarVersao(v){
+  if(!v||typeof v!=="object"||!/^[0-9a-f]{7,40}$/.test(String(v.sha||"")))return "";
+  const d=new Date(v.em),quando=isNaN(d)?"":d.toLocaleString("pt-BR",{timeZone:"America/Sao_Paulo",day:"2-digit",month:"2-digit",year:"numeric",hour:"2-digit",minute:"2-digit"});
+  return [/^[a-z0-9._-]{1,30}$/i.test(String(v.ramo||""))?v.ramo:"",/^[0-9]{1,6}$/.test(String(v.pr||""))?"PR #"+v.pr:"",v.sha,quando].filter(Boolean).join(" · ");
+}
+function mostrarVersao(){
+  fetch("/versao.json",{cache:"no-store"}).then(r=>r.ok?r.json():null).then(v=>{
+    const txt=formatarVersao(v),l=document.querySelector("#nsft .ft-legal");
+    if(!txt||!l||document.getElementById("nsver"))return;
+    const s=document.createElement("small");s.id="nsver";s.textContent=txt;s.title="Versão publicada neste ambiente";s.style.marginTop="4px";
+    l.appendChild(s);
+  }).catch(()=>{});
 }
 function openFeedback(tipo){
   let m=document.getElementById("fbm");
@@ -735,6 +776,7 @@ function openFeedback(tipo){
       <button type="button" class="fb-x" onclick="document.getElementById('fbm').classList.remove('open')" aria-label="Fechar">${icon("xmark")}</button>
       <div class="fb-top"><span class="fb-art">${PHONE_SVG}</span><div><span class="fq-logo sm">fala<i>.</i>que<i>.</i>eu<i>.</i>te<i>.</i>escut<span class="fq-o">o</span></span><p>Ideia, bug, crítica ou pedido de remoção. A gente lê tudo.</p></div></div>
       <div class="fb-tipos">${[["ideia","Ideia"],["bug","Bug"],["elogio","Elogio"],["remocao","Remoção"]].map(([k,t])=>`<label><input type="radio" name="tipo" value="${k}"><span>${t}</span></label>`).join("")}</div>
+      <input name="solicitante" id="fbSol" placeholder="Seu nome (obrigatório no pedido de remoção)" maxlength="120" autocomplete="name" hidden>
       <textarea name="msg" id="fbMsg" rows="5" maxlength="2000" placeholder="Escreve aqui, sem vergonha…" required></textarea>
       <input name="contato" id="fbC" placeholder="Seu e-mail ou nick (opcional, pra gente responder)" maxlength="120">
       <p class="fb-hp"><input name="bot-field" tabindex="-1" autocomplete="off"></p>
@@ -742,11 +784,28 @@ function openFeedback(tipo){
       <button class="fb-go" type="submit">${icon("send")}Ajoelha e envia</button>
     </form>`;document.body.appendChild(m)}
   const r=m.querySelector(`input[value="${tipo||"ideia"}"]`);if(r)r.checked=true;
+  const ajustaRemocao=()=>{const rem=m.querySelector('input[name="tipo"]:checked');const eh=!!rem&&rem.value==="remocao";const s=m.querySelector("#fbSol"),msg=m.querySelector("#fbMsg");s.hidden=!eh;s.required=eh;msg.placeholder=eh?"Qual é o conteúdo (cole o link) e por que quer a remoção? Respondemos em até 72 horas.":"Escreve aqui, sem vergonha…"};
+  m.querySelectorAll('input[name="tipo"]').forEach(i=>i.onchange=ajustaRemocao);ajustaRemocao();
   m.querySelector("#fbErr").textContent="";m.classList.add("open");setTimeout(()=>m.querySelector("#fbMsg").focus(),60);
 }
 async function sendFeedback(e){
   e.preventDefault();const f=e.target,msg=f.msg.value.trim(),er=document.getElementById("fbErr");
   if(msg.length<5){er.textContent="Escreve um pouquinho mais.";return false}
+  if((f.tipo.value||"")==="remocao"){
+    const sol=(f.solicitante.value||"").trim();
+    if(sol.length<2){er.textContent="Diga o seu nome para pedir a remoção.";return false}
+    if(msg.length<10){er.textContent="Explique o pedido com pelo menos 10 caracteres.";return false}
+    const b=f.querySelector(".fb-go");b.disabled=true;er.textContent="";
+    try{
+      const resp=await fetch("/api/remocoes",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({solicitante:sol,motivo:msg,contato:f.contato.value.trim()||undefined})});
+      if(!resp.ok){let j=null;try{j=await resp.json()}catch(_){}throw {status:resp.status,erro:j&&j.erro,campos:j&&j.campos}}
+      f.reset();document.getElementById("fbm").classList.remove("open");toast("Pedido de remoção recebido. A gente responde em até 72 horas.",4200);
+    }catch(e){
+      const c=e&&e.campos?Object.entries(e.campos).map(([k,v])=>k+" ("+v+")")[0]:"";
+      er.textContent=e&&e.status===429?"Muitos pedidos seguidos. Tente de novo daqui a pouco.":e&&e.status===0?"Sem conexão: o pedido NÃO foi enviado. Tente de novo.":(c?"Confira o pedido, campo "+c+".":((e&&e.erro)||"Não consegui enviar o pedido. Tente de novo."));
+    }
+    b.disabled=false;return false;
+  }
   const data={"form-name":"feedback",tipo:(f.tipo.value||"ideia"),msg,contato:f.contato.value.trim(),pagina:location.pathname+location.hash,"bot-field":f["bot-field"].value};
   const btn=f.querySelector(".fb-go");btn.disabled=true;
   let ok=false;

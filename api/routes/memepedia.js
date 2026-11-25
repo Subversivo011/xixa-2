@@ -3,6 +3,7 @@ import { hashIp } from '../lib/ip.js';
 import { send, lerJson, clean, limited } from '../lib/http.js';
 import { VOTE_ID } from './votos.js';
 import { podeEditarDireto } from '../lib/equipe.js';
+import { auditar } from '../lib/auditoria.js';
 
 export const CAMPOS_MEMEPEDIA = ['origem', 'porque', 'usos', 'rede', 'hoje', 'curiosidades'];
 export const EDICOES_PENDENTES_POR_IP = 5; // por meme
@@ -47,8 +48,9 @@ export default function registrar(r) {
     return send(res, 201, { ok: true });
   });
 
-  // equipe (edita_direto), moderador ou admin: o texto entra publicado, sem fila. Autor = apelido da conta. Não dá XP.
-  r.post('/api/memepedia/direto', async ({ req, res, pool, usuario }) => {
+  // equipe (edita_direto) ou admin: o texto entra publicado, sem fila. Autor = apelido da conta. Não dá XP.
+  r.post('/api/memepedia/direto', async (ctx) => {
+    const { req, res, pool, usuario } = ctx;
     if (!(await podeEditarDireto(pool, usuario.id))) return send(res, 403, { erro: 'Só a equipe publica direto. Use o envio normal.' });
     if (limited('mpd:' + usuario.id, 60)) return send(res, 429, { erro: 'Muitos envios seguidos. Aguarde um pouco.' });
     const b = await lerJson(req);
@@ -64,6 +66,7 @@ export default function registrar(r) {
       await pool.query(
         "INSERT INTO memepedia_edicoes (meme_id, campo, texto, fonte, autor, status, revisado_em) VALUES ($1,$2,$3,$4,$5,'aprovado',now())",
         [id, campo, texto, fonte || null, u.apelido]);
+      await auditar(ctx, 'memepedia.direto', 'memes:' + id, { campo, fonte: fonte || null });
     } catch (e) {
       if (e.code === '23503') return send(res, 404, { erro: 'meme não encontrado' });
       throw e;
