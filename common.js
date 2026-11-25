@@ -746,6 +746,22 @@ function renderFooter(){
     <img class="ft-boneco" src="boneco.png?v=2" alt="" width="478" height="600">
   </div></div>`;
   document.body.appendChild(f);
+  mostrarVersao();
+}
+// Tarja sutil com a versão publicada: "dev · PR #63 · 1540939 · 25/11/2026 12:27" (o deployer grava /versao.json a cada merge).
+// Sem o arquivo (rodando local, ou deployer antigo) ou com ele inválido, não mostra nada.
+function formatarVersao(v){
+  if(!v||typeof v!=="object"||!/^[0-9a-f]{7,40}$/.test(String(v.sha||"")))return "";
+  const d=new Date(v.em),quando=isNaN(d)?"":d.toLocaleString("pt-BR",{timeZone:"America/Sao_Paulo",day:"2-digit",month:"2-digit",year:"numeric",hour:"2-digit",minute:"2-digit"});
+  return [/^[a-z0-9._-]{1,30}$/i.test(String(v.ramo||""))?v.ramo:"",/^[0-9]{1,6}$/.test(String(v.pr||""))?"PR #"+v.pr:"",v.sha,quando].filter(Boolean).join(" · ");
+}
+function mostrarVersao(){
+  fetch("/versao.json",{cache:"no-store"}).then(r=>r.ok?r.json():null).then(v=>{
+    const txt=formatarVersao(v),l=document.querySelector("#nsft .ft-legal");
+    if(!txt||!l||document.getElementById("nsver"))return;
+    const s=document.createElement("small");s.id="nsver";s.textContent=txt;s.title="Versão publicada neste ambiente";s.style.marginTop="4px";
+    l.appendChild(s);
+  }).catch(()=>{});
 }
 function openFeedback(tipo){
   let m=document.getElementById("fbm");
