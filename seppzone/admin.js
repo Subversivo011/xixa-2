@@ -785,7 +785,7 @@ function sessaoExpirou() {
 function telaEntrar(msg) {
   eu = null; mostraQuem();
   trocar(app, h("div", { class: "estado" }, h("h2", null, "Entre para acessar"), h("p", null, msg || "O painel é só para a equipe do Não Salvo. Entre com o Discord para continuar."),
-    h("p", null, h("a", { class: "b pri", href: "/entrar.html?voltar=/admin/" }, "Entrar"))));
+    h("p", null, h("a", { class: "b pri", href: "/entrar.html?voltar=/seppzone/" }, "Entrar"))));
   app.querySelector("h2").tabIndex = -1; app.querySelector("h2").focus();
 }
 function mostraQuem() {

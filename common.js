@@ -369,7 +369,7 @@ function rkAvatar(it){
 function rkLinha(it,unid){
   const eu=meuApelido()&&String(it.apelido).toLowerCase()===meuApelido().toLowerCase();
   const pat=RANKS.find(k=>k.name===it.patente),cor=escapeHtml(pat?pat.color:"#9aa3b2");
-  return `<div class="rkx${eu?" me":""}"><b>${escapeHtml(it.posicao)}</b><span class="av">${rkAvatar(it)}</span><span class="nm"><a class="n" href="perfil.html?u=${encodeURIComponent(it.apelido)}">${escapeHtml(it.apelido)}${eu?" (você)":""}</a>${it.patente?`<span class="pt" style="color:${cor};background:${cor}22">${escapeHtml(it.patente)}</span>`:""}</span><em>${fmt(it.valor)} ${unid}</em></div>`;
+  return `<div class="rkx${eu?" me":""}"><b>${escapeHtml(it.posicao)}</b><span class="av">${rkAvatar(it)}</span><span class="nm"><a class="n" href="perfil.html?u=${encodeURIComponent(it.apelido)}">${escapeHtml(it.apelido)}${eu?" (você)":""}</a>${it.moderador?`<span class="mb" title="Moderador da comunidade">${icon("moderation")}Moderador</span> `:""}${it.patente?`<span class="pt" style="color:${cor};background:${cor}22">${escapeHtml(it.patente)}</span>`:""}</span><em>${fmt(it.valor)} ${unid}</em></div>`;
 }
 async function carregarRanking(el,metrica){
   if(!el)return;
@@ -418,6 +418,7 @@ function contaSessaoHTML(){
     <a role="menuitem" href="perfil.html">${icon("user")}Ver o meu perfil</a>
     <a role="menuitem" href="perfil.html#editar">${icon("edit")}Editar o meu perfil</a>
     <button type="button" role="menuitem" onclick="fecharMenuConta();openSignup()">${icon("cat")}Editar gatinho e apelido</button>
+    ${SESSAO.papel==="admin"?`<a role="menuitem" href="/seppzone/">${icon("moderation")}Área adm</a>`:""}
   </div></span><button type="button" onclick="sairDaConta()">Sair</button></div>`;
 }
 // menu da conta (clicar no próprio avatar): ver/editar o perfil e editar o gato
@@ -770,6 +771,7 @@ function openFeedback(tipo){
       <button type="button" class="fb-x" onclick="document.getElementById('fbm').classList.remove('open')" aria-label="Fechar">${icon("xmark")}</button>
       <div class="fb-top"><span class="fb-art">${PHONE_SVG}</span><div><span class="fq-logo sm">fala<i>.</i>que<i>.</i>eu<i>.</i>te<i>.</i>escut<span class="fq-o">o</span></span><p>Ideia, bug, crítica ou pedido de remoção. A gente lê tudo.</p></div></div>
       <div class="fb-tipos">${[["ideia","Ideia"],["bug","Bug"],["elogio","Elogio"],["remocao","Remoção"]].map(([k,t])=>`<label><input type="radio" name="tipo" value="${k}"><span>${t}</span></label>`).join("")}</div>
+      <input name="solicitante" id="fbSol" placeholder="Seu nome (obrigatório no pedido de remoção)" maxlength="120" autocomplete="name" hidden>
       <textarea name="msg" id="fbMsg" rows="5" maxlength="2000" placeholder="Escreve aqui, sem vergonha…" required></textarea>
       <input name="contato" id="fbC" placeholder="Seu e-mail ou nick (opcional, pra gente responder)" maxlength="120">
       <p class="fb-hp"><input name="bot-field" tabindex="-1" autocomplete="off"></p>
@@ -777,11 +779,28 @@ function openFeedback(tipo){
       <button class="fb-go" type="submit">${icon("send")}Ajoelha e envia</button>
     </form>`;document.body.appendChild(m)}
   const r=m.querySelector(`input[value="${tipo||"ideia"}"]`);if(r)r.checked=true;
+  const ajustaRemocao=()=>{const rem=m.querySelector('input[name="tipo"]:checked');const eh=!!rem&&rem.value==="remocao";const s=m.querySelector("#fbSol"),msg=m.querySelector("#fbMsg");s.hidden=!eh;s.required=eh;msg.placeholder=eh?"Qual é o conteúdo (cole o link) e por que quer a remoção? Respondemos em até 72 horas.":"Escreve aqui, sem vergonha…"};
+  m.querySelectorAll('input[name="tipo"]').forEach(i=>i.onchange=ajustaRemocao);ajustaRemocao();
   m.querySelector("#fbErr").textContent="";m.classList.add("open");setTimeout(()=>m.querySelector("#fbMsg").focus(),60);
 }
 async function sendFeedback(e){
   e.preventDefault();const f=e.target,msg=f.msg.value.trim(),er=document.getElementById("fbErr");
   if(msg.length<5){er.textContent="Escreve um pouquinho mais.";return false}
+  if((f.tipo.value||"")==="remocao"){
+    const sol=(f.solicitante.value||"").trim();
+    if(sol.length<2){er.textContent="Diga o seu nome para pedir a remoção.";return false}
+    if(msg.length<10){er.textContent="Explique o pedido com pelo menos 10 caracteres.";return false}
+    const b=f.querySelector(".fb-go");b.disabled=true;er.textContent="";
+    try{
+      const resp=await fetch("/api/remocoes",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({solicitante:sol,motivo:msg,contato:f.contato.value.trim()||undefined})});
+      if(!resp.ok){let j=null;try{j=await resp.json()}catch(_){}throw {status:resp.status,erro:j&&j.erro,campos:j&&j.campos}}
+      f.reset();document.getElementById("fbm").classList.remove("open");toast("Pedido de remoção recebido. A gente responde em até 72 horas.",4200);
+    }catch(e){
+      const c=e&&e.campos?Object.entries(e.campos).map(([k,v])=>k+" ("+v+")")[0]:"";
+      er.textContent=e&&e.status===429?"Muitos pedidos seguidos. Tente de novo daqui a pouco.":e&&e.status===0?"Sem conexão: o pedido NÃO foi enviado. Tente de novo.":(c?"Confira o pedido, campo "+c+".":((e&&e.erro)||"Não consegui enviar o pedido. Tente de novo."));
+    }
+    b.disabled=false;return false;
+  }
   const data={"form-name":"feedback",tipo:(f.tipo.value||"ideia"),msg,contato:f.contato.value.trim(),pagina:location.pathname+location.hash,"bot-field":f["bot-field"].value};
   const btn=f.querySelector(".fb-go");btn.disabled=true;
   let ok=false;

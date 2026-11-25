@@ -1,4 +1,4 @@
-// Tela de admin (admin/index.html): acesso por papel, abas, CSRF, confirmações, erros 403/422, XSS, mobile e contraste.
+// Tela de admin (seppzone/index.html): acesso por papel, abas, CSRF, confirmações, erros 403/422, XSS, mobile e contraste.
 // API mockada via page.route. Roda com arquivo explícito: node --test tests/front-admin.test.js
 // Precisa do Playwright; sem ele os testes são pulados. PLAYWRIGHT_MODULE=/caminho/node_modules/playwright, CHROMIUM_PATH=/caminho/chrome
 const test = require("node:test");
@@ -105,16 +105,16 @@ async function abrir(over = {}, { largura = 1280, tema, hash = "" } = {}) {
   const erros = [];
   page.on("pageerror", (e) => erros.push("pageerror: " + e.message));
   page.on("console", (m) => { if (m.type() === "error" && !/Failed to load resource|fonts\.g/.test(m.text())) erros.push("console: " + m.text()); });
-  await page.goto(base + "/admin/" + hash);
+  await page.goto(base + "/seppzone/" + hash);
   return { ctx, page, api, erros };
 }
 const abas = (page) => page.$$eval('[role="tab"]', (n) => n.map((x) => x.textContent.trim()));
 const irPara = async (page, nome) => { await page.click(`[role="tab"]:has-text("${nome}")`); };
 
-test("sem sessão (401): pede para entrar, com link de volta para /admin/, sem abas", opts, async () => {
+test("sem sessão (401): pede para entrar, com link de volta para /seppzone/, sem abas", opts, async () => {
   const { ctx, page, api, erros } = await abrir({ papel: null });
   await page.waitForSelector("text=Entre para acessar");
-  assert.strictEqual(await page.getAttribute("#app a.b", "href"), "/entrar.html?voltar=/admin/");
+  assert.strictEqual(await page.getAttribute("#app a.b", "href"), "/entrar.html?voltar=/seppzone/");
   assert.deepStrictEqual(await abas(page), []);
   assert.strictEqual(api.n(/\/api\/admin|\/api\/mod/), 0);
   assert.strictEqual(await page.$("text=Tela de exemplo"), null, "sem banner de exemplo");
