@@ -5,14 +5,14 @@
 <link rel="icon" type="image/png" sizes="128x128" href="/avatar-ns.png?v=1">
 <link rel="apple-touch-icon" href="/avatar-ns.png?v=1">
 <script src="gate.js?v=20261120c"></script>
-<script src="cliente-economia.js?v=20261125b"></script>
+<script src="cliente-economia.js?v=20261125c"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>NÃO SALVO — Museu da Internet Brasileira</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preconnect" href="https://i.ytimg.com">
 <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Inter:wght@400;500;600;700&family=Baloo+2:wght@700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="theme.css?v=20261125a">
+<link rel="stylesheet" href="theme.css?v=20261125b">
 <link rel="stylesheet" href="viewer.css?v=20261125b">
 <script>try{var t=localStorage.getItem("ns_theme")}catch(e){}document.documentElement.dataset.theme=t==="dark"?"dark":"light"</script>
 <style>
@@ -212,7 +212,7 @@ main{display:flex;flex-direction:column}
 <div class="modal" id="modal" onclick="if(event.target===this)closeM()"><div class="box" id="box"></div></div>
 
 <form name="feedback" data-netlify="true" netlify-honeypot="bot-field" hidden><input name="tipo"><textarea name="msg"></textarea><input name="contato"><input name="pagina"><input name="bot-field"></form>
-<script src="common.js?v=20261125c"></script>
+<script src="common.js?v=20261125d"></script>
 <script src="data.js?v=20261127a"></script>
 <script src="player.js?v=20261125b"></script>
 <script src="viewer.js?v=20261125b"></script>
@@ -458,15 +458,23 @@ function liveCheck(){
   if(r.lvl==="bad")el.innerHTML=`<div class="chk bad">${icon("xmark","in")}<b>${escapeHtml(h.t)}</b> ${where} (mesmo ${r.why}${r.s?`, ${Math.round(r.s*100)}% parecido`:""}). Não vamos abrir ticket repetido. ${h.where==="acervo"?`<button onclick="openM('${h.id}')">Ver no acervo</button>`:""}</div>`;
   else el.innerHTML=`<div class="chk warn">${icon("alert","in")}Parece com <b>${escapeHtml(h.t)}</b> (${Math.round(r.s*100)}% parecido), que ${where}. É outro meme?<label><input type="checkbox" id="sOk"> Não é o mesmo, enviar assim mesmo</label></div>`;
 }
-function sendSub(){
+// envio de verdade: POST /api/envios (patente Banda larga+); o servidor confere duplicado, campos e limite de abertos
+async function sendSub(){
   const url=$("sU").value.trim(),t=$("sN").value.trim(),y=+$("sY").value,c=$("sC").value,d=$("sD").value.trim();
   liveCheck();
   if(!url||!t){$("dup").innerHTML=`<div class="chk bad">Preencha pelo menos o link e o nome.</div>`;return}
   if(lastDup.lvl==="bad")return;
   if(lastDup.lvl==="warn"&&!($("sOk")&&$("sOk").checked))return toast("Confirme que não é o mesmo vídeo");
-  const ticket="#"+(400+NS.subs.length);
-  NS.subs.push({id:"s"+Date.now(),t,url,key:normUrl(url),y,c,d:d||"Enviado pela comunidade.",e:CAT_EMO[c],status:"pending",ts:Date.now(),ticket});nsSave();
-  closeM();toast(`Envio recebido! Ticket ${ticket} na fila da moderação ⏳`,3000);scheduleApprovals();
+  const go=$("sGo");go.disabled=true;
+  try{
+    await Api.enviar({url,titulo:t,ano:y,categoria:c,descricao:d||undefined},{silencioso:true});
+    closeM();toast("Envio recebido! Ele entra na fila da moderação ⏳",3600);
+  }catch(e){
+    go.disabled=false;
+    const campo=e&&e.campos?Object.entries(e.campos)[0]:null;
+    const msg=!e||e.status===0?"Sem conexão: o envio NÃO foi feito. Tente de novo.":e.status===429?(e.erro||"Muitos envios seguidos. Tente de novo daqui a pouco."):e.status===403?"Para enviar você precisa da patente Banda larga ou maior.":campo?`Confira o campo "${campo[0]}": ${campo[1]}.`:(e.erro||"Não consegui enviar. Tente de novo.");
+    $("dup").innerHTML=`<div class="chk bad">${escapeHtml(msg)}</div>`;
+  }
 }
 function approveMine(s){s.status="approved";s.approvedAt=nsToday();s.by=null;NS.approvedCount++;nsSave();
   buildAll();renderAll();toast(`“${s.t}” foi aprovado pela moderação`,3800)}
@@ -488,6 +496,9 @@ function saveOldLink(id,u){
 function openMod(){
   if(barrarSemPapel("moderar",true))return;
   if(!economiaPronta("moderar"))return;
+  location.href="/seppzone/#moderacao"; // a fila real (envios, votos, remoções) fica na área adm
+  return;
+  /* protótipo antigo abaixo (fila de exemplo no navegador), sem uso: sai na limpeza */
   const r=nivelPatente(),canMod=r>=3;
   const mine=NS.subs.slice().reverse();
   const qs=SEED_QUEUE.map(q=>{const st=NS.modDone[q.id];const best=ALL.filter(a=>!a.by||a.id!==q.id).map(a=>({a,s:sim(q.t,a.t)})).sort((x,y)=>y.s-x.s)[0];

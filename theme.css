@@ -542,6 +542,9 @@ img.cdo-blur{filter:blur(16px) saturate(.6);transform:scale(1.15)}
 .rkx .nm{min-width:0}
 .rkx .nm .n{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:600}
 .rkx .pt{display:inline-block;margin-top:2px;font-size:12px;font-weight:800;letter-spacing:.6px;text-transform:uppercase;padding:2px 7px;border-radius:5px}
+.rkx .mb{display:inline-flex;align-items:center;gap:4px;margin-top:2px;margin-right:4px;font-size:12px;font-weight:800;letter-spacing:.6px;text-transform:uppercase;padding:2px 7px;border-radius:5px;color:#5b1d8c;background:#f1e4fb;border:1px solid #d8b8f1;vertical-align:top}
+.rkx .mb svg{width:12px;height:12px;flex:none}
+:root[data-theme="dark"] .rkx .mb{color:#ecd9fb;background:#3a1b57;border-color:#6d3f95}
 .rkx em{font-style:normal;color:var(--brand-strong,#1597d3);font-weight:700;font-family:Rajdhani,Inter,sans-serif;font-size:16px;text-align:right;white-space:nowrap}
 .rkx-st{padding:22px 6px;color:var(--mut);text-align:center;font-size:14px}
 .rkx-bt{margin-top:10px;padding:7px 14px;border-radius:10px;border:0;background:var(--brand-fill);color:var(--on-brand);font:700 13px Inter,sans-serif;cursor:pointer}
