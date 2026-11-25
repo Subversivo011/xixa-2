@@ -573,7 +573,7 @@ const timerTick=setInterval(()=>{
   b.textContent=m<1?"Você chegou agora":"Você está aqui há";el.textContent=m<1?"Bem-vindo ao museu.":m+" min passeando pelo museu.";
 },15000);
 const h=decodeURIComponent(location.hash.slice(1)).replace("mais","+");if(Object.hasOwn(YEAR_INFO,h))cur=h;else if(/^\d{4}$/.test(h))cur=yKey(h);
-renderWallet();
+renderWallet();renderAll();
 (window.acervoPronto||Promise.resolve()).then(()=>{buildAll();renderAll()});
 scheduleApprovals();
 if(["rank","mod","send","rand","tl","todos"].includes(h))setTimeout(()=>{ftGo(h);history.replaceState(null,"",location.pathname)},300);

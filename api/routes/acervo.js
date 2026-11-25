@@ -23,7 +23,7 @@ export default function registrar(r) {
   // confere quais dos ids informados pelo cliente estão fora do ar (oculto ou removido)
   r.post('/api/memes/fora-do-ar', async ({ req, res, pool }) => {
     const ip = ipDe(req);
-    if (limited('fda:' + ip, 30)) {
+    if (limited('fda:' + ip, 150)) {
       return send(res, 429, { erro: 'Muitas consultas. Aguarde um momento.' }, NO_STORE);
     }
     const b = await lerJson(req);
