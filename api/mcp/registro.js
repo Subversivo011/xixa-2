@@ -57,6 +57,26 @@ export const FERRAMENTAS = [
       raridade: { tipo: 'texto', obrigatorio: true },
       emoji: { tipo: 'texto' },
       meme_id: { tipo: 'texto' }
+    } },
+  { nome: 'buscar_cartas', escopo: 'ler', ativa: true,
+    resumo: 'Busca cartas do álbum por parte do nome e/ou coleção, na ordem das coleções. Devolve id (ex.: plataformas-2), coleção, número, nome, raridade, meme ligado e a imagem atual. Use sem_imagem para achar as que ainda não têm arte.',
+    params: {
+      busca: { tipo: 'texto', descricao: 'parte do nome da carta (até 60 caracteres)' },
+      colecao_id: { tipo: 'texto', descricao: 'id da coleção (ver listar_referencias), ex.: plataformas' },
+      sem_imagem: { tipo: 'booleano', descricao: 'true: só cartas sem imagem' },
+      limite: { tipo: 'inteiro', descricao: '1 a 50 (padrão 20)' }
+    } },
+  { nome: 'editar_carta', escopo: 'escrever', ativa: true,
+    resumo: 'Edita uma carta existente: nome, emoji, raridade, meme ligado e a imagem. Para a imagem informe só um entre imagem_url (link público http/https, baixado pelo servidor) e imagem_base64 (só imagens pequenas, até uns 700 KB) ou remover_imagem. A imagem é reduzida (800 px) e convertida para WebP; o álbum e o perfil passam a mostrá-la.',
+    params: {
+      id: { tipo: 'texto', obrigatorio: true, descricao: 'id da carta, ex.: plataformas-2 (use buscar_cartas)' },
+      nome: { tipo: 'texto' },
+      emoji: { tipo: 'texto' },
+      raridade: { tipo: 'texto', descricao: 'Comum, Relevante, Raro, Relíquia, Lendário ou Mítico' },
+      meme_id: { tipo: 'texto', descricao: 'id do meme ligado; vazio desliga' },
+      imagem_url: { tipo: 'texto', descricao: 'link público http/https da imagem (portas 80 e 443)' },
+      imagem_base64: { tipo: 'texto', descricao: 'conteúdo da imagem em base64' },
+      remover_imagem: { tipo: 'booleano', descricao: 'true: tira a imagem da carta' }
     } }
 ];
 
