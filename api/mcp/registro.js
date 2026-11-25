@@ -46,9 +46,9 @@ export const FERRAMENTAS = [
     } },
   { nome: 'publicar_meme', escopo: 'publicar', ativa: true,
     resumo: 'Muda um meme de oculto para publicado.', params: { id: { tipo: 'texto', obrigatorio: true } } },
-  { nome: 'anexar_midia', escopo: 'escrever', ativa: false,
-    resumo: 'Anexa uma imagem (jpeg, png ou webp, até 5 MB) a um meme, a partir de uma URL ou de base64.',
-    params: { id: { tipo: 'texto', obrigatorio: true }, url: { tipo: 'texto' }, base64: { tipo: 'texto' } } },
+  { nome: 'anexar_midia', escopo: 'escrever', ativa: true,
+    resumo: 'Anexa uma imagem (jpeg, png ou webp, até 5 MB) a um meme existente. Informe exatamente um entre url (link público, baixado pelo servidor) e base64 (só imagens pequenas, até uns 700 KB, por causa do limite de 1 MB da requisição).',
+    params: { id: { tipo: 'texto', obrigatorio: true, descricao: 'id do meme' }, url: { tipo: 'texto', descricao: 'link público http/https da imagem (portas 80 e 443)' }, base64: { tipo: 'texto', descricao: 'conteúdo da imagem em base64' }, credito_por: { tipo: 'texto', descricao: 'quem fez a imagem (até 120 caracteres)' }, credito_url: { tipo: 'texto', descricao: 'link da fonte/crédito' } } },
   { nome: 'criar_carta', escopo: 'escrever', ativa: true,
     resumo: 'Cria uma carta no fim de uma coleção, ligada ou não a um meme.',
     params: {
