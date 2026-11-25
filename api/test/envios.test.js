@@ -113,6 +113,21 @@ test('fila: só moderador/admin; não mostra o próprio envio nem os votos dos o
   await q("UPDATE usuarios SET papel = 'usuario' WHERE lower(apelido) = 'autor1'");
 });
 
+test('ranking público marca só quem tem papel moderador (admin e usuário comum não)', { skip }, async () => {
+  for (const metrica of ['xp']) {
+    const r = (await s.get('/api/ranking?metrica=' + metrica + '&limite=100')).json.itens;
+    const por = Object.fromEntries(r.map((x) => [x.apelido.toLowerCase(), x.moderador]));
+    assert.equal(por.mod1, true); assert.equal(por.mod2, true);
+    assert.equal(por.chefe, false, 'admin não ganha insígnia de moderador');
+    assert.equal(por.autor1, false);
+    assert.ok(r.every((x) => typeof x.moderador === 'boolean'));
+    assert.ok(!r.some((x) => 'papel' in x), 'o papel em si não vai para o público');
+  }
+  // métrica por cartas também traz o campo
+  const c = await s.get('/api/ranking?metrica=cartas');
+  assert.equal(c.status, 200); assert.ok((c.json.itens || []).every((x) => typeof x.moderador === 'boolean'));
+});
+
 test('voto: valida corpo e id; 1 voto não fecha, mostra só a contagem; trocar o voto atualiza', { skip }, async () => {
   const idE = (await q("SELECT id FROM envios WHERE titulo = 'Meme Enviado'"))[0].id;
   assert.equal((await POST(`/api/mod/fila/${idE}/voto`, { voto: 'talvez' }, 'mod1')).status, 400);

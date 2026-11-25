@@ -52,6 +52,7 @@
     var texto = (r.json && (r.json.erro || r.json.error)) || '';
     var e = erro(r.status, texto);
     if (r.json && typeof r.json.campo === 'string') e.campo = r.json.campo; // 422 do PATCH /api/eu: qual campo falhou
+    if (r.json && r.json.campos && typeof r.json.campos === 'object') e.campos = r.json.campos; // 422 de envio/remoção: qual campo falhou
     if (r.json && typeof r.json.tente_em_segundos === 'number') e.tente_em_segundos = r.json.tente_em_segundos; // 429 do apelido: quanto falta
     var quieto = opcoes && opcoes.silencioso;
     if (r.status === 401) { irParaEntrar(); throw e; }
@@ -89,6 +90,8 @@
     reciclar: function (p, o) { return pedir('POST', '/api/album/reciclar', p, o); },
     // votos: um por pessoa e por meme (POST exige login); meusVotos marca o botão de curtir/as estrelas
     votar: function (p, o) { return pedir('POST', '/api/votos', p, o); },
+    // envio de meme para a moderação (patente Banda larga+); o pedido de remoção é público e usa fetch direto (common.js)
+    enviar: function (p, o) { return pedir('POST', '/api/envios', p, o); },
     meusVotos: function (ids, o) { return pedir('GET', '/api/votos/meus?ids=' + encodeURIComponent((ids || []).join(',')), undefined, o); },
     // perfil público e recados (perfil.html)
     perfilDe: function (apelido, o) { return pedir('GET', '/api/perfil/' + encodeURIComponent(apelido), undefined, o); },

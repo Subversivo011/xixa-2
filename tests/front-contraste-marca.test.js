@@ -231,7 +231,7 @@ test("logo-word.png com width e height em todas as páginas (sem salto de layout
     assert.ok(r.every(([w, h]) => w && h), pagina + ": " + JSON.stringify(r));
     await ctx.close();
   }
-  const admin = fs.readFileSync(path.join(RAIZ, "admin/index.html"), "utf8");
+  const admin = fs.readFileSync(path.join(RAIZ, "seppzone/index.html"), "utf8");
   assert.match(admin, /<img src="\/logo-word\.png"[^>]*width="\d+"[^>]*height="\d+"/);
 });
 
