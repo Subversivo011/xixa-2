@@ -225,7 +225,7 @@ main{display:flex;flex-direction:column}
 
 <form name="feedback" data-netlify="true" netlify-honeypot="bot-field" hidden><input name="tipo"><textarea name="msg"></textarea><input name="contato"><input name="pagina"><input name="bot-field"></form>
 <script src="common.js?v=20261202a"></script>
-<script src="data.js?v=20261201a"></script>
+<script src="data.js?v=20261204a"></script>
 <script src="player.js?v=20261130c"></script>
 <script src="viewer.js?v=20261130d"></script>
 <script src="alertas.js?v=20261125b"></script>
@@ -235,7 +235,9 @@ document.querySelectorAll("[data-ic]").forEach(e=>e.outerHTML=icon(e.dataset.ic)
 // ===================== ACERVO =====================
 const CAT_IC={"Vídeos":"video","TV":"tv","Música":"music","Cultura":"culture","Zoeira":"zoeira","Fotos":"photo","Esportes":"sports"};
 const CAT_EMO={"Vídeos":"🎞️","TV":"📺","Música":"🎵","Cultura":"🌐","Zoeira":"🤡","Fotos":"📸","Esportes":"⚽"};
-const yKey=y=>{y=parseInt(y)||2020;return y<2000?"1995–1999":y<=2003?"2000–2003":y>=2026?"2026":String(y)};
+const yKey=y=>{y=parseInt(y)||2020;return y<2000?"1995–1999":y>=2026?"2026":String(y)};
+// endereços antigos: os anos 2000–2003 eram um bloco só; agora cada ano tem a sua página
+const ANO_LEGADO={"2000–2003":"2000","2000-2003":"2000"};
 const yLab=k=>(YEAR_INFO[k]&&YEAR_INFO[k].rot)||k;
 const KEYS=Object.keys(YEAR_INFO).sort((a,b)=>parseInt(a)-parseInt(b)); // "2004" vem antes de "1995–1999" no Object.keys
 const GRAD=["#1d3a8a,#0b0f2a","#5b1d8a,#14061f","#8a3a1d,#2a0f06","#1d8a6e,#06241d","#8a1d4a,#240614","#1d6e8a,#06202a","#7a8a1d,#1f2406"];
@@ -583,7 +585,7 @@ const timerTick=setInterval(()=>{
   const m=Math.floor((Date.now()-t0)/60000);
   b.textContent=m<1?"Você chegou agora":"Você está aqui há";el.textContent=m<1?"Bem-vindo ao museu.":m+" min passeando pelo museu.";
 },15000);
-const h=decodeURIComponent(location.hash.slice(1)).replace("mais","+");if(Object.hasOwn(YEAR_INFO,h))cur=h;else if(/^\d{4}$/.test(h))cur=yKey(h);
+let h=decodeURIComponent(location.hash.slice(1)).replace("mais","+");h=ANO_LEGADO[h]||h;if(Object.hasOwn(YEAR_INFO,h))cur=h;else if(/^\d{4}$/.test(h))cur=yKey(h);
 renderWallet();renderAll();scheduleApprovals();
 if(["rank","mod","send","rand","tl","todos"].includes(h))setTimeout(()=>{ftGo(h);history.replaceState(null,"",location.pathname)},300);
 // centraliza os raios do fundo no logo
