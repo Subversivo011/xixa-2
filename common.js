@@ -519,6 +519,8 @@ function openTestPanel(){
 
 // ---- Ícones dos menus (SVG próprios, traço único) ----
 const ICONS={
+ expand:'<path d="M9 4H4v5M4 4l6 6M15 4h5v5M20 4l-6 6M9 20H4v-5M4 20l6-6M15 20h5v-5M20 20l-6-6"/>',
+ back:'<path d="M10 6l-6 6 6 6M4 12h16"/>',
  book:'<path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v15H6.5A2.5 2.5 0 0 0 4 20.5v-15Z"/><path d="M4 20.5A2.5 2.5 0 0 1 6.5 18H20v3H6.5"/><path d="M9 7.5h7M9 11h5"/>',
  care:'<path d="M12 3 4.5 6v5.5c0 4.6 3.1 8.2 7.5 9.5 4.4-1.3 7.5-4.9 7.5-9.5V6L12 3Z"/><path d="M12 8.5v4.5M12 16h.01"/>',
  eye:'<path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12Z"/><circle cx="12" cy="12" r="3"/>',
@@ -668,7 +670,7 @@ function renderSub(items){if(items)SUB=items;aplicarGates();const n=document.get
   // índice original (data-i) preservado; separador só entre dois itens visíveis
   const vis=SUB.map(x=>subVisivel(x));
   const mostrar=SUB.map((x,i)=>x.sp?(SUB.slice(0,i).some((y,j)=>!y.sp&&vis[j])&&SUB.slice(i+1).some((y,j)=>!y.sp&&vis[i+1+j])):vis[i]);
-  n.innerHTML=SUB.map((x,i)=>!mostrar[i]?"":x.sp?`<span class="sp"></span>`:x.href?`<a href="${x.href}" class="${x.k===subOn?"on":""} ${x.cta?"cta":""}"${x.k===subOn?' aria-current="page"':""}>${icon(x.ic)}${x.label}</a>`:`<button data-i="${i}" class="${x.k===subOn?"on":""} ${x.cta?"cta":""} ${x.dd?"dd":""}">${icon(x.ic)}${x.label}</button>`).join("");
+  n.innerHTML=SUB.map((x,i)=>!mostrar[i]?"":x.sp?`<span class="sp"></span>`:x.href?`<a href="${x.href}" class="${x.k===subOn?"on":""} ${x.cta?"cta":""} ${x.cls||""}"${x.k===subOn?' aria-current="page"':""}>${icon(x.ic)}${x.label}</a>`:`<button data-i="${i}" class="${x.k===subOn?"on":""} ${x.cta?"cta":""} ${x.dd?"dd":""}">${icon(x.ic)}${x.label}</button>`).join("");
   n.querySelector(".dd")?.setAttribute("aria-expanded","false");
   n.querySelectorAll("button[data-i]").forEach(b=>b.onclick=e=>{const x=SUB[+b.dataset.i];x.fn&&x.fn(e,b)});
 }

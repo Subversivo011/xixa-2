@@ -73,6 +73,10 @@ a{color:inherit}
 .sub .sp{flex:1}
 .sub .cta{color:var(--on-brand)!important;background:linear-gradient(180deg,var(--btn-a),var(--btn-b))!important;box-shadow:0 4px 14px var(--glow)}
 .sub .cta:hover{box-shadow:0 6px 18px var(--glow),0 0 0 2px var(--brand-ink)} /* hover sem filter: o filtro escurecia o texto junto e derrubava o contraste */
+/* "Voltar ao site" (álbum): botão de saída, contornado e com seta, diferente dos itens do menu */
+.sub .back{border:1.5px dashed var(--line2)!important;color:var(--txt)!important;background:var(--panel)!important;font-weight:700}
+.sub .back .ico{opacity:1;transition:transform .15s}
+.sub .back:hover{border-style:solid!important;border-color:var(--brand)!important}.sub .back:hover .ico{transform:translateX(-3px)}
 .sub .dd::after{content:"▾";font-size:10px;opacity:.7}
 .pop{position:fixed;z-index:40;background:var(--panel);border:1px solid var(--line2);border-radius:14px;padding:8px;box-shadow:var(--shadow);display:none;min-width:220px}
 .pop.open{display:block;animation:popin .15s ease}

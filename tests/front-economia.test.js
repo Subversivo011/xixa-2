@@ -308,7 +308,7 @@ test("compartilhar figurinha: vira publicação no perfil, no jeito da rede esco
   const { ctx, page, api, erros } = await abrirPagina("/album.html", { pacotes: [], qtd: { [id]: 1 }, layout: "twitter" });
   await esperarEconomia(page);
   await page.evaluate((id) => pick(id), id);
-  await page.click("text=COMPARTILHAR");
+  await page.click(".det .shrbtn");
   await page.waitForSelector("#shrOk");
   assert.match(await page.$eval("#mbox", (e) => e.innerText), /um tweet/);
   for (const sel of ["#shrOk", ".shr-bt .ghost2"]) assert.ok((await page.$eval(sel, (e) => e.getBoundingClientRect().height)) >= 44, sel + " >= 44px");
