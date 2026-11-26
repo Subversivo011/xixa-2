@@ -481,9 +481,25 @@ function pintaPrazo(c) { const r = textoPrazo(c.prazo); c.el.textContent = "Praz
 
 function abaMod(p) {
   contadores = [];
-  const fila = h("div"), rem = h("div");
-  trocar(p, h("div", { class: "sec" }, h("h2", null, "Fila de envios"), fila), h("div", { class: "sec" }, h("h2", null, "Pedidos de remoção"), rem));
-  carregarFila(fila); carregarRemocoes(rem);
+  const fila = h("div"), meus = h("div"), rem = h("div");
+  trocar(p, h("div", { class: "sec" }, h("h2", null, "Fila de envios"), fila),
+    h("div", { class: "sec" }, h("h2", null, "Seus envios"), meus),
+    h("div", { class: "sec" }, h("h2", null, "Pedidos de remoção"), rem));
+  carregarFila(fila); carregarMeusEnvios(meus); carregarRemocoes(rem);
+}
+
+const SITUACAO_ENVIO = { aberto: "Aguardando moderação", aprovado: "Aprovado", rejeitado: "Rejeitado", ajuste: "Ajuste pedido", duplicado: "Duplicado" };
+// os envios de quem está logado: a fila acima nunca mostra os próprios (quem envia não vota no próprio envio)
+async function carregarMeusEnvios(box) {
+  trocar(box, carregando("Carregando seus envios…"));
+  const r = await api("GET", "/api/envios/meus");
+  if (!r.ok) return trocar(box, erroEstado(msgErro(r), () => carregarMeusEnvios(box)));
+  const itens = r.data.itens || [];
+  if (!itens.length) return trocar(box, vazio("Você ainda não enviou nada por esta conta."));
+  trocar(box, h("p", { class: "mini" }, "Quem envia não vota no próprio envio: outra pessoa com papel de moderador precisa votar. Por isso estes envios não aparecem na fila acima."),
+    h("ul", { class: "lista" }, itens.map((i) => h("li", { class: "item" },
+      h("b", null, i.titulo), " · ", i.ano, " · ", i.categoria, " · ", h("strong", null, SITUACAO_ENVIO[i.status] || i.status),
+      h("div", { class: "mini" }, "Enviado em ", quando(i.criado_em), i.decidido_em ? " · decidido em " + quando(i.decidido_em) : "", i.motivo ? " · " + i.motivo : "")))));
 }
 
 async function carregarFila(box) {
@@ -492,7 +508,7 @@ async function carregarFila(box) {
   if (r.status === 404) return trocar(box, vazio("A fila de envios ainda não está disponível neste servidor."));
   if (!r.ok) return trocar(box, erroEstado(msgErro(r), () => carregarFila(box)));
   const itens = r.data.itens || [];
-  if (!itens.length) return trocar(box, vazio("Nenhum envio esperando votos. Bom trabalho!"));
+  if (!itens.length) return trocar(box, vazio("Nenhum envio esperando o seu voto. Seus próprios envios não entram aqui (veja \"Seus envios\" abaixo)."));
   trocar(box, h("p", { class: "mini" }, "Voto cego: você vê só quantos votos o envio já tem, nunca os votos dos outros. Dois votos iguais fecham o envio; se dividir, um admin desempata."),
     h("ul", { class: "lista" }, itens.map((i) => cartaoEnvio(i, box))));
 }
