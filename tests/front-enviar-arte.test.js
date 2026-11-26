@@ -43,7 +43,7 @@ test("mensagemDeErro: usa o texto da API e traduz falhas de rede e de serviço",
 
 test("rodapé: botão 'Enviar arte de carta' leva a enviar-arte.html, com CSS de 44 px", () => {
   const c = ler("common.js");
-  assert.match(c, /<a class="ft-arte" href="enviar-arte\.html">\$\{icon\("photo"\)\}Enviar arte de carta<\/a>/);
+  assert.match(c, /socialHTML\(`<a class="ft-arte" href="enviar-arte\.html">\$\{icon\("photo"\)\}Enviar arte de carta<\/a>`\)/); // na mesma fileira dos ícones sociais: não aumenta a altura do rodapé
   assert.ok(fs.existsSync(path.join(RAIZ, "enviar-arte.html")));
   const css = ler("theme.css");
   assert.match(css, /\.ft-legal \.ft-arte\{[^}]*min-height:44px/);
