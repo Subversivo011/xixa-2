@@ -134,7 +134,7 @@ test("Shorts do YouTube abrem em pé, no visual de app de vídeo curto (lista co
   await ctx.close();
 });
 
-test("player preenchido: na home o vídeo ocupa a largura da janela (sem faixas brancas), inclusive o de 4:3 de 2005", opts, async () => {
+test("player preenchido: na home o vídeo ocupa a largura da janela (sem faixas brancas); o 4:3 de 2005 deixa a descrição aparecer", opts, async () => {
   const { ctx, page, erros } = await abrir("/linha-do-tempo.html#2012");
   await page.setViewportSize({ width: 1366, height: 768 });
   await page.goto(base + "/index.html");
@@ -150,7 +150,12 @@ test("player preenchido: na home o vídeo ocupa a largura da janela (sem faixas 
       return { main: main.getBoundingClientRect().width, larg, tela: tela.getBoundingClientRect().width, base: tela.getBoundingClientRect().bottom, alt: innerHeight };
     });
     assert.ok(Math.abs(r.main - r.larg) < 2, id + ": o conteúdo ocupa a coluna toda " + JSON.stringify(r));
-    assert.ok(r.tela >= r.larg * 0.8 || r.base >= r.alt - 80, id + ": vídeo largo (ou limitado pela altura) " + JSON.stringify(r));
+    if (id === "jeremias-muito-louco") {
+      // 4:3 (2005): o vídeo diminui um pouco para a descrição embaixo aparecer inteira, sem rolar
+      const desc = await page.evaluate(() => document.querySelector(".vw .tabs1+*").getBoundingClientRect().bottom);
+      assert.ok(desc <= r.alt, id + ": descrição embaixo do vídeo aparece " + desc);
+      assert.ok(r.tela >= r.larg * 0.5, id + ": vídeo ainda grande " + JSON.stringify(r));
+    } else assert.ok(r.tela >= r.larg * 0.8 || r.base >= r.alt - 80, id + ": vídeo largo (ou limitado pela altura) " + JSON.stringify(r));
     assert.ok(r.base <= r.alt, id + ": o vídeo cabe na tela");
     await page.evaluate(() => closeViewer());
   }

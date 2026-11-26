@@ -408,7 +408,10 @@ function encaixarJanela(el){
   media.style.maxWidth="";media.style.maxHeight="";
   const pad=innerWidth<=700||innerHeight<800?16:48,room=innerHeight-pad,folga=innerWidth<=700?8:24;
   const minH=innerWidth<=700?180:Math.min(300,Math.round(innerHeight*.42));
-  const fim=()=>{const wr=w.getBoundingClientRect(),mr=media.getBoundingClientRect();return mr.bottom-wr.top+folga};
+  // vídeo 4:3 (2005): é alto, então ele diminui um pouco para caber também a barra de avaliação, as abas e o quadro com
+  // o canal e a descrição logo abaixo (antes o vídeo enchia a tela e a descrição ficava cortada)
+  const ate=media.closest(".vp-e1")&&innerWidth>700?(w.querySelector(".tabs1+*")||media):media;
+  const fim=()=>{const wr=w.getBoundingClientRect(),mr=ate.getBoundingClientRect();return mr.bottom-wr.top+folga};
   for(let i=0;i<4;i++){
     const over=fim()-room;if(over<=1)return;
     if(media.classList.contains("pimg")){const h=media.getBoundingClientRect().height;if(h<=minH)return;media.style.maxHeight=Math.max(minH,h-over)+"px";continue}
