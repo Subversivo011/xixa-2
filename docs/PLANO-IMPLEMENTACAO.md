@@ -224,7 +224,7 @@ erDiagram
 - [ ] Proteger `/admin` pelo login: quem não tem patente Moderador vê só uma página de acesso negado.
 - [ ] Trocar os dados fictícios por chamadas à API, mantendo o visual (estados de carregando, vazio e erro).
 - [ ] Remover o botão "Ver como" e o "Reiniciar exemplo".
-- [ ] Mover Contribuidores, Feedback e Comentários do `/dashboard` para abas do admin e aposentar o `/dashboard` (redirecionar).
+- [x] Mover Contribuidores, Feedback e Comentários do `/dashboard` para abas do admin e aposentar o `/dashboard` (redirecionar). — **feito**: abas integradas em `/seppzone/` (Comunidade) e `/dashboard/index.html` redireciona para `/seppzone/`.
 - [ ] Toda ação do painel grava em `log_auditoria`.
 - [ ] Exportação CSV de contribuidores e feedback.
 - [ ] Ideias já discutidas, em ordem de valor: voto cego (só ver os votos dos outros depois de votar), XP de moderação só depois da decisão se confirmar, auditoria por amostragem das decisões de moderadores novos, proteção de itens polêmicos, página de discussão por item, temporadas de ranking.
