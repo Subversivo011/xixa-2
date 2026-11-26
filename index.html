@@ -170,7 +170,7 @@ main{display:flex;flex-direction:column}
 .top,.cur{grid-template-columns:1fr}.stage{grid-template-columns:1fr}.side{display:none}.rail{grid-template-columns:1fr 1fr}.rail .card:nth-child(3){display:none}main{padding:16px 16px 40px}}
 @media(max-width:600px){.f .two{grid-template-columns:1fr}.today{grid-template-columns:110px 1fr}.box .body{padding:16px}}
 </style>
-<link rel="stylesheet" href="home.css?v=20261204a">
+<link rel="stylesheet" href="home.css?v=20261204b">
 </head>
 <body class="home">
 <div class="rays-wrap" aria-hidden="true"><div class="rays" id="rays"></div></div>
@@ -350,7 +350,9 @@ const anosDaDecada=d=>KEYS.filter(k=>decada(k)===d);
 function irDecada(d){const l=anosDaDecada(d);if(l.length&&decada(cur)!==d)go(l[0])}
 function renderYears(){
   const d=decada(cur);
+  const teclado=document.activeElement&&document.activeElement.closest&&document.activeElement.closest("#decs");
   $("decs").innerHTML=DECADAS.filter(([k])=>anosDaDecada(k).length).map(([k,l])=>`<button type="button" class="${k===d?"on":""}" aria-pressed="${k===d}" onclick="irDecada('${k}')">${l}</button>`).join("");
+  if(teclado){const b=$("decs").querySelector("button.on");if(b)b.focus({preventScroll:true})} // innerHTML destrói o botão focado: devolve o foco à aba ativa
   $("years").innerHTML=anosDaDecada(d).map(y=>`<button class="y ${y===cur?'on':''}" onclick="go('${y}')">${yLab(y)}</button>`).join("");
   const ys=$("years"),el=ys.querySelector(".on");if(el)ys.scrollTo({left:el.offsetLeft-ys.clientWidth/2+el.clientWidth/2,behavior:"smooth"});
 }

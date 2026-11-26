@@ -177,7 +177,7 @@ button:hover>.thumb>.play,button:hover>.ct>.play,.tthumb:hover>.play,.card:hover
   .years{gap:8px;padding:8px 16px 12px;justify-content:flex-start;scroll-snap-type:x proximity;scrollbar-width:none;-webkit-mask:linear-gradient(90deg,transparent,#000 16px,#000 calc(100% - 16px),transparent);mask:linear-gradient(90deg,transparent,#000 16px,#000 calc(100% - 16px),transparent)}
   .years::-webkit-scrollbar{display:none}
   .years::before{display:none}
-  .y{flex:0 0 auto;min-width:0;padding:8px 14px;border-radius:99px;font-size:15px;background:var(--sunk);box-shadow:0 0 0 1px var(--line);scroll-snap-align:center;color:var(--mut)}
+  .y{flex:0 0 auto;min-width:0;min-height:44px;display:inline-flex;align-items:center;justify-content:center;padding:8px 14px;border-radius:99px;font-size:15px;background:var(--sunk);box-shadow:0 0 0 1px var(--line);scroll-snap-align:center;color:var(--mut)}
   .y::after{display:none}
   .y.on{font-size:15px;background:var(--brand-fill);color:var(--on-brand);box-shadow:0 4px 14px var(--glow)}
   .stage{display:block;margin:0}
