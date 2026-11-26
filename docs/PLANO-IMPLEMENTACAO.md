@@ -253,8 +253,8 @@ erDiagram
 
 ### 6.2 Ajustes pendentes conhecidos
 
-- [ ] Álbum no celular: 8 alvos de toque abaixo de 44 px e 24 textos pequenos (home já foi corrigida).
-- [ ] Link do logo no cabeçalho do celular com 31 px de altura (fica abaixo do mínimo de toque).
+- [x] Álbum no celular: alvos de toque de 44 px e textos de carta com 12 px. — **feito**, medido a 360 e 390 px (0 alvos e 0 textos abaixo do limite no álbum, linha do tempo, Memepédia e entrar; o link da carta na linha do tempo cobre o cartão inteiro).
+- [x] Link do logo no cabeçalho do celular com 31 px de altura. — **feito**: a medição a 360 px não acusa mais o logo.
 - [ ] Tablet e celular pequeno (360 px): conferir de novo timeline, viewer e álbum depois de ligar os dados.
 - [ ] Rótulo de ~5 px cortado em dois vídeos da era Tumblr em 360 px.
 - [ ] Erro de digitação na roupa do criador de gato ("Maletom", provavelmente "Moletom").

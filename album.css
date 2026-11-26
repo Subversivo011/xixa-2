@@ -345,3 +345,7 @@ body.mesa-on{overflow:hidden}
 .livro .pg .grade{flex:1;align-content:space-evenly;min-height:0}
 .livro .pg .premio{margin:2cqi 0 4cqi}
 :root[data-theme="dark"] .pg .about.exp{background:linear-gradient(180deg,#ffd84a,#f2b10a);color:#3a2a00;box-shadow:0 0 0 1px #c98f00,0 3px 8px #c98f0040}
+
+/* celular: alvos de toque de 44px e textos de carta com 12px */
+.ghost{min-height:44px}
+@media(max-width:600px){.card .top,.card .top em,.card .ft,.card .yr,.card .cp,.card .nm,.nm{font-size:12px}}
