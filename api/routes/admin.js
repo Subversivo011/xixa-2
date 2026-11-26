@@ -64,7 +64,7 @@ export default function registrar(r) {
     const linkId = params[0];
     const { ok, statusAnterior, usuarioId } = await transacao(pool, async (cli) => {
       const { rows: [link] } = await cli.query(
-        'SELECT id, status, autor, meme_id FROM links_sugeridos WHERE id = $1 FOR UPDATE',
+        'SELECT id, status, autor, usuario_id, meme_id FROM links_sugeridos WHERE id = $1 FOR UPDATE',
         [linkId]
       );
       if (!link) return { ok: false };
@@ -72,22 +72,18 @@ export default function registrar(r) {
       const statusAnt = link.status;
       await cli.query('UPDATE links_sugeridos SET status = $1, revisado_em = now() WHERE id = $2', [st, linkId]);
 
-      let autorUsuarioId = null;
-      if (st === 'aprovado' && statusAnt !== 'aprovado') {
-        const { rows: [u] } = await cli.query('SELECT id FROM usuarios WHERE apelido = $1', [link.autor]);
-        if (u) {
-          autorUsuarioId = u.id;
-          const regras = await carregarRegras(cli);
-          const xpGanho = regras.xp_ganho?.link_antigo || 0;
-          const moedasGanhas = regras.recompensa_moedas?.link_antigo || 0;
+      const autorUsuarioId = link.usuario_id || null;
+      if (st === 'aprovado' && statusAnt !== 'aprovado' && autorUsuarioId) {
+        const regras = await carregarRegras(cli);
+        const xpGanho = regras.xp_ganho?.link_antigo || 0;
+        const moedasGanhas = regras.recompensa_moedas?.link_antigo || 0;
 
-          if (xpGanho > 0 || moedasGanhas > 0) {
-            await travarUsuario(cli, autorUsuarioId);
-            const razao = criarRazao(cli, autorUsuarioId);
-            if (xpGanho > 0) await razao.xp(xpGanho, 'link_antigo', 'link:' + linkId);
-            if (moedasGanhas > 0) await razao.moedas(moedasGanhas, 'link_antigo', 'link:' + linkId);
-            await razao.aplicar();
-          }
+        if (xpGanho > 0 || moedasGanhas > 0) {
+          await travarUsuario(cli, autorUsuarioId);
+          const razao = criarRazao(cli, autorUsuarioId);
+          if (xpGanho > 0) await razao.xp(xpGanho, 'link_antigo', 'link:' + linkId);
+          if (moedasGanhas > 0) await razao.moedas(moedasGanhas, 'link_antigo', 'link:' + linkId);
+          await razao.aplicar();
         }
       }
 
