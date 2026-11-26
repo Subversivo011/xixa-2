@@ -233,7 +233,7 @@ function avisoEconomiaOff(on){
   if(b)return;
   b=document.createElement("div");b.id="ecooff";b.setAttribute("role","alert");
   b.style.cssText="position:fixed;left:50%;bottom:16px;transform:translateX(-50%);z-index:9999;background:var(--panel,#fff);color:var(--txt,#111);border:1px solid var(--line2,#bbb);border-radius:12px;padding:10px 14px;box-shadow:0 8px 30px #0004;display:flex;gap:12px;align-items:center;font:600 14px Inter,sans-serif;max-width:calc(100vw - 24px)";
-  b.innerHTML='<span>Não consegui falar com o servidor: moedas, álbum e pacotes estão indisponíveis.</span><button type="button" style="flex:none;padding:7px 12px;border-radius:8px;border:0;background:var(--brand,#1597d3);color:#fff;font:700 13px Inter,sans-serif;cursor:pointer">Tentar de novo</button>';
+  b.innerHTML='<span>Não consegui falar com o servidor: moedas, álbum e pacotes estão indisponíveis.</span><button type="button" style="flex:none;min-height:44px;padding:7px 14px;border-radius:8px;border:0;background:var(--brand,#1597d3);color:#fff;font:700 13px Inter,sans-serif;cursor:pointer">Tentar de novo</button>';
   b.querySelector("button").onclick=()=>iniciarEconomia();
   document.body.appendChild(b);
 }
