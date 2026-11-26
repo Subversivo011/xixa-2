@@ -101,6 +101,8 @@ function criarApi(over = {}) {
       if (p === "/api/admin/colecoes" && m === "GET") return json(route, 200, { itens: [{ id: "c1", nome: "Clássicos", icone: "★", cor: "#25aae3", cores_fundo: ["#000"], sobre: "Sobre", ordem: 1, cartas: 1 }] });
       if (p === "/api/admin/cartas" && m === "GET") return json(route, 200, { itens: [{ id: "c1-01", colecao_id: "c1", numero: 1, nome: "Carta Um", emoji: "🐱", raridade: "Raro", meme_id: null }] });
       if (p === "/api/admin/links") return json(route, 200, { items: [{ id: 5, meme_id: "nyan-cat", yt: "QH2-TGUlwu4", autor: "Zé", status: "pendente", criado_em: "2026-11-20T10:00:00Z" }] });
+      if (p === "/api/admin/memepedia" && m === "GET") return json(route, 200, { items: st.memepedia || [{ id: 12, meme_id: "nyan-cat", campo: "origem", texto: XSS, fonte: "https://example.com", autor: "AutorX", status: "pendente", criado_em: "2026-11-20T10:00:00Z", revisado_em: null }] });
+      if ((x = p.match(/^\/api\/admin\/memepedia\/(\d+)$/)) && m === "POST") return json(route, 200, { ok: true });
       if (p === "/api/admin/feedback") return json(route, 200, { items: [{ id: 6, tipo: "bug", msg: XSS, contato: null, pagina: "/index.html", criado_em: "2026-11-20T10:00:00Z" }] });
       if (p === "/api/admin/comentarios") return json(route, 200, { items: [] });
       if (p === "/api/admin/contribuidores") return json(route, 200, { items: [{ id: 7, nome: "Dani", nick: "dani", discord: "dani#1", areas: ["Código"], area_outros: null, horas_semana: 4, experiencia: "pouca", ferramentas: "git", mensagem: null, criado_em: "2026-11-20T10:00:00Z" }] });
@@ -284,6 +286,19 @@ test("log mostra de/para legível; comunidade exclui feedback com confirmação 
   assert.strictEqual(api.st.log.find((l) => l.m === "DELETE").csrf, "tok-csrf");
   await page.click('#p-comunidade button:has-text("Comentários")');
   await page.waitForSelector("text=Nenhum comentário ainda");
+  // aba Memepédia (edições colaborativas da comunidade)
+  await page.click('#p-comunidade button:has-text("Memepédia")');
+  await page.waitForSelector("#p-comunidade .item");
+  assert.strictEqual(await page.evaluate(() => window.__xss), undefined, "XSS não executou");
+  assert.strictEqual(await page.$("#p-comunidade img"), null, "tag <img> não é inserida como elemento");
+  assert.match(await page.textContent("#p-comunidade .item h3"), /nyan-cat/);
+  assert.strictEqual(await page.getAttribute('#p-comunidade .item h3 a', 'href'), '/memepedia.html#nyan-cat');
+  await page.click('#p-comunidade button:has-text("Aprovar")');
+  await page.waitForSelector("#av-ok .aviso");
+  const postMp = api.st.log.find((l) => /memepedia\/12$/.test(l.p) && l.m === "POST");
+  assert.ok(postMp, "chamou POST /api/admin/memepedia/12");
+  assert.strictEqual(postMp.csrf, "tok-csrf");
+  assert.deepStrictEqual(postMp.corpo, { status: "aprovado" });
   assert.deepStrictEqual(erros, []);
   await ctx.close();
 });
