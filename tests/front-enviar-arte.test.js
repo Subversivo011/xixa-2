@@ -72,8 +72,24 @@ test("página: noindex, idioma, rótulos ligados aos campos, só imagem png/jpeg
   assert.match(h, /id="arqErro" role="alert"/);
   assert.match(h, /id="cartasEstado" role="status" aria-live="polite"/);
   assert.match(h, /<h1>Enviar arte de carta<\/h1>/);
-  for (const t of ["600 × 800", "400 px", "5 MB", "Zona segura", "Carta no álbum", "Carta no perfil", "Miniatura"]) assert.ok(h.includes(t), "guia sem: " + t);
+  for (const t of ["600 × 800", "400 px", "5 MB", "Zona segura", "Carta no álbum", "Figurinha colada", "Carta no perfil", "Miniatura", "19% em cima e 19% embaixo", "8% de margem dos lados"]) assert.ok(h.includes(t), "guia sem: " + t);
   assert.ok(!/ on[a-z]+="/.test(h), "sem handlers inline");
+});
+
+test("zona segura: moldura desenhada pelo caso mais restritivo (quadro da arte ~1,2:1 no álbum e no perfil) e texto coerente", () => {
+  const css = ler("enviar-arte.css"), h = ler("enviar-arte.html");
+  assert.match(css, /\.ea-seg-z\{[^}]*inset:19% 8%/);
+  assert.ok(!/inset:10%/.test(css), "sobrou a margem antiga de 10%");
+  assert.doesNotMatch(h, /a 10% de cada borda/);
+  // a carta do álbum e a do perfil têm o mesmo desenho: 3/4,1 com faixas de cima e do nome, arte flex:1
+  assert.match(css, /\.ea-card\{[^}]*aspect-ratio:3\/4\.1/); assert.match(css, /\.ea-card \.art\{flex:1/);
+  assert.match(css, /\.ea-card\.perfil \.art svg,\.ea-card\.perfil \.art img\{opacity:\.55\}/);
+  assert.match(css, /\.ea-vaga\{[^}]*aspect-ratio:3\/4/); assert.match(css, /\.ea-mini\{[^}]*aspect-ratio:1\/1/);
+  // confere com as folhas reais do site
+  assert.match(ler("album.html"), /\.card\{[^}]*aspect-ratio:3\/4\.1/); assert.match(ler("perfil.css"), /\.pf-carta\{[^}]*aspect-ratio:3\/4\.1/);
+  assert.match(ler("album.css"), /\.vaga\{[^}]*aspect-ratio:3\/4/); assert.match(ler("perfil.css"), /\.pf \.q\{[^}]*aspect-ratio:1\/1/);
+  // a conta do texto: 3:4 dentro de 1,2:1 mostra 0,75/1,2 = 62,5% da altura => 18,75% de corte em cada ponta (~19%)
+  assert.ok(Math.abs((1 - 0.75 / 1.2) / 2 - 0.19) < 0.005);
 });
 
 test("script: nada da API entra por innerHTML (nome de carta com HTML não vira código)", () => {
@@ -153,10 +169,11 @@ const CARTAS = [
   { id: "musica-3", colecao_id: "musica", colecao_nome: "Música", numero: 3, nome: "Carta Três", emoji: "🎵", raridade: "Mítico", pendentes: 1, meu_pendente: true }
 ];
 
-async function abrir({ w = 390, h = 844, tema = "light", cartas = CARTAS, envio = [201, { ok: true, id: 9, status: "pendente" }] } = {}) {
+async function abrir({ w = 390, h = 844, tema = "light", cartas = CARTAS, envio = [201, { ok: true, id: 9, status: "pendente" }], cancelar = [200, { ok: true }], meus = null } = {}) {
   const ctx = await browser.newContext({ viewport: { width: w, height: h }, hasTouch: w < 700 });
   await ctx.route((u) => u.hostname !== "127.0.0.1", (r) => r.abort());
   const log = [];
+  let meusLista = meus || [{ id: 1, carta_id: "musica-3", carta_nome: "Carta Três", status: "rejeitado", motivo: "Fora da margem segura", criado_em: "2026-12-04T10:00:00Z", decidido_em: "2026-12-04T12:00:00Z" }];
   const json = (route, status, corpo) => route.fulfill({ status, contentType: "application/json", body: JSON.stringify(corpo) });
   await ctx.route("**/api/**", async (route) => {
     const req = route.request(), u = new URL(req.url()), p = u.pathname, m = req.method();
@@ -172,7 +189,8 @@ async function abrir({ w = 390, h = 844, tema = "light", cartas = CARTAS, envio 
       const l = cartas.filter((x) => (!b || x.nome.toLowerCase().includes(b)) && (!c || x.colecao_id === c));
       return json(route, 200, { total: l.length, pagina: 1, limite: 24, itens: l, colecoes: [{ id: "plataformas", nome: "Plataformas", sem_arte: 2 }, { id: "musica", nome: "Música", sem_arte: 1 }] });
     }
-    if (p === "/api/arte/meus") return json(route, 200, { itens: [{ id: 1, carta_id: "musica-3", carta_nome: "Carta Três", status: "rejeitado", motivo: "Fora da margem segura", criado_em: "2026-12-04T10:00:00Z", decidido_em: "2026-12-04T12:00:00Z" }] });
+    if (/^\/api\/arte\/envios\/\d+$/.test(p) && m === "DELETE") { if (cancelar[0] === 200) meusLista = meusLista.filter((x) => x.id !== Number(p.split("/").pop())); return json(route, cancelar[0], cancelar[1]); }
+    if (p === "/api/arte/meus") return json(route, 200, { itens: meusLista });
     if (p === "/api/arte/envios" && m === "POST") return json(route, envio[0], envio[1]);
     return json(route, 404, { erro: "não mockado" });
   });
@@ -191,7 +209,7 @@ test("guia, exemplos e lista de cartas sem arte; nome com HTML aparece como text
   assert.strictEqual(await page.evaluate(() => window.__xss), undefined, "HTML do nome não executou");
   const nomes = await page.$$eval("#cartas .nm", (n) => n.map((x) => x.textContent));
   assert.ok(nomes.includes("<img src=x onerror=window.__xss=1>"));
-  assert.strictEqual(await page.$$eval("#exemplos figure", (n) => n.length), 3);
+  assert.strictEqual(await page.$$eval("#exemplos figure", (n) => n.length), 4);
   assert.ok(await page.isVisible("#segBox"));
   assert.match(await page.textContent("#cartasEstado"), /3 de 3 cartas sem arte/);
   const chips = await page.$$eval("#cartas .ea-chip", (n) => n.map((x) => x.textContent));
@@ -226,7 +244,7 @@ test("escolher a carta habilita o arquivo; carta com envio meu pendente trava o 
   await ctx.close();
 });
 
-test("arquivo inválido mostra o erro e não habilita o envio; arquivo bom mostra a prévia nos três exemplos", opts, async () => {
+test("arquivo inválido mostra o erro e não habilita o envio; arquivo bom mostra a prévia nos quatro exemplos", opts, async () => {
   const { ctx, page } = await abrir();
   await page.click('#cartas .ea-carta[data-id="plataformas-1"]');
   await page.setInputFiles("#arquivo", { name: "x.svg", mimeType: "image/svg+xml", buffer: Buffer.from("<svg xmlns='http://www.w3.org/2000/svg'/>") });
@@ -239,7 +257,7 @@ test("arquivo inválido mostra o erro e não habilita o envio; arquivo bom mostr
   await page.setInputFiles("#arquivo", { name: "ok.png", mimeType: "image/png", buffer: png(600, 800) });
   await page.waitForFunction(() => !document.getElementById("btEnviar").disabled);
   assert.strictEqual(await page.textContent("#arqErro"), "");
-  assert.strictEqual(await page.$$eval("[data-arte-img]:not([hidden])", (n) => n.length), 3, "prévia nos três exemplos");
+  assert.strictEqual(await page.$$eval("[data-arte-img]:not([hidden])", (n) => n.length), 4, "prévia nos quatro exemplos");
   assert.match(await page.textContent("#exTxt"), /600 × 800/);
   await ctx.close();
 });
@@ -260,6 +278,34 @@ test("envio: POST binário com Content-Type da imagem e X-CSRF; sucesso marca a 
   const meus = await page.$$eval("#meus li", (n) => n.map((x) => x.textContent));
   assert.ok(meus.some((t) => /Carta Três/.test(t) && /Rejeitada/.test(t) && /Fora da margem segura/.test(t)));
   assert.deepStrictEqual(erros, []);
+  await ctx.close();
+});
+
+test("Seus envios: pendente mostra 'Cancelar envio' (44px); cancelar chama DELETE com X-CSRF, devolve a carta e some da lista", opts, async () => {
+  const pend = { id: 7, carta_id: "musica-3", carta_nome: "Carta Três", status: "pendente", motivo: null, criado_em: "2026-12-05T10:00:00Z", decidido_em: null };
+  const { ctx, page, log, erros } = await abrir({ meus: [pend] });
+  await page.waitForSelector("#meus .cancelar");
+  assert.strictEqual(await page.$$eval("#meus .cancelar", (n) => n.length), 1, "só o pendente tem botão");
+  const h = await page.$eval("#meus .cancelar", (b) => b.getBoundingClientRect().height);
+  assert.ok(h >= 44, "alvo de " + h);
+  assert.match(await page.getAttribute("#meus .cancelar", "aria-label"), /Carta Três/);
+  assert.ok((await page.textContent('#cartas .ea-carta[data-id="musica-3"]')).includes("Você já enviou"));
+  await page.click("#meus .cancelar");
+  await page.waitForFunction(() => /Envio cancelado/.test(document.getElementById("meusEstado").textContent));
+  const del = log.find((l) => l.m === "DELETE");
+  assert.ok(del); assert.strictEqual(del.p, "/api/arte/envios/7"); assert.strictEqual(del.csrf, "csrf-teste");
+  assert.strictEqual(await page.$$eval("#meus li", (n) => n.length), 0);
+  assert.ok(!(await page.textContent('#cartas .ea-carta[data-id="musica-3"]')).includes("Você já enviou"), "a carta volta a ficar livre para mim");
+  assert.deepStrictEqual(erros, []);
+  await ctx.close();
+});
+
+test("cancelar um envio que já foi decidido (409) mostra o aviso e recarrega a lista", opts, async () => {
+  const pend = { id: 7, carta_id: "musica-3", carta_nome: "Carta Três", status: "pendente", motivo: null, criado_em: "2026-12-05T10:00:00Z", decidido_em: null };
+  const { ctx, page } = await abrir({ meus: [pend], cancelar: [409, { erro: "esse envio já foi decidido e não pode mais ser cancelado" }] });
+  await page.waitForSelector("#meus .cancelar");
+  await page.click("#meus .cancelar");
+  await page.waitForFunction(() => /já foi decidido/.test(document.getElementById("meusEstado").textContent));
   await ctx.close();
 });
 
@@ -312,8 +358,8 @@ test("contraste >= 4,5:1 do texto principal, dos chips e do botão nos dois tema
   }
 });
 
-test("rodapé de qualquer página: botão 'Enviar arte de carta' visível, com 44 px e destino correto", opts, async () => {
-  const ctx = await browser.newContext({ viewport: { width: 390, height: 844 }, hasTouch: true });
+for (const larg of [320, 360, 390]) test(`rodapé de qualquer página a ${larg}px: botão 'Enviar arte de carta' visível, com 44 px de altura e destino correto`, opts, async () => {
+  const ctx = await browser.newContext({ viewport: { width: larg, height: 844 }, hasTouch: true });
   await ctx.route((u) => u.hostname !== "127.0.0.1", (r) => r.abort());
   await ctx.route("**/api/**", (r) => r.fulfill({ status: 401, contentType: "application/json", body: "{}" }));
   await ctx.addInitScript(() => { try { localStorage.setItem("ns_convidado", "1"); } catch (e) { /* sem storage */ } });

@@ -106,7 +106,7 @@
     if (estado.url) { URL.revokeObjectURL(estado.url); estado.url = null; }
     $('exemplos').classList.remove('tem-arte');
     [].forEach.call(document.querySelectorAll('[data-arte-img]'), function (i) { i.hidden = true; i.removeAttribute('src'); });
-    $('exTxt').textContent = 'Exemplo com uma arte de modelo. Escolha o arquivo no passo 3 e estes três quadros passam a mostrar a sua imagem.';
+    $('exTxt').textContent = 'Exemplo com uma arte de modelo. Escolha o arquivo no passo 3 e estes quadros passam a mostrar a sua imagem.';
   }
 
   function lerDimensoes(arquivo) {
@@ -134,7 +134,7 @@
     estado.arquivo = f; estado.url = d.url;
     [].forEach.call(document.querySelectorAll('[data-arte-img]'), function (i) { i.src = d.url; i.hidden = false; });
     $('exemplos').classList.add('tem-arte');
-    $('exTxt').textContent = 'Assim a sua arte fica na carta do álbum, no perfil e na miniatura (' + d.largura + ' × ' + d.altura + ' px).';
+    $('exTxt').textContent = 'Assim a sua arte fica na carta do álbum, na figurinha colada, no perfil e na miniatura (' + d.largura + ' × ' + d.altura + ' px).';
     atualizarSelecao();
   }
 
@@ -161,6 +161,20 @@
     carregarMeus();
   }
 
+  async function cancelar(x, botao) {
+    botao.disabled = true;
+    try { await Api.arteCancelar(x.id, { silencioso: true }); } catch (e) {
+      if (e && e.status === 401) return;
+      botao.disabled = false;
+      if (e && (e.status === 404 || e.status === 409)) { await carregarMeus(); return dizer('meusEstado', mensagemDeErro(e), 'bad'); }
+      return dizer('meusEstado', mensagemDeErro(e), 'bad');
+    }
+    var c = itens[x.carta_id];
+    if (c) { c.meu_pendente = false; c.pendentes = Math.max(0, (c.pendentes || 1) - 1); var b = $('cartas').querySelector('[data-id="' + (window.CSS && CSS.escape ? CSS.escape(c.id) : c.id) + '"]'); if (b) b.closest('li').replaceWith(cartaBotao(c)); if (estado.sel && estado.sel.id === c.id) atualizarSelecao(); }
+    await carregarMeus();
+    dizer('meusEstado', 'Envio cancelado. Você pode mandar outra arte para essa carta.', 'ok');
+  }
+
   var SITUACAO = { pendente: 'Aguardando moderação', aprovado: 'Aprovada', rejeitado: 'Rejeitada' };
   async function carregarMeus() {
     var ul = $('meus'); ul.textContent = ''; dizer('meusEstado', 'Carregando…');
@@ -172,6 +186,12 @@
       var li = el('li');
       li.append(el('span', 'nm', x.carta_nome), el('span', 'st ' + x.status, SITUACAO[x.status] || x.status));
       if (x.motivo) li.append(el('span', 'mo', (x.status === 'rejeitado' ? 'Motivo: ' : '') + x.motivo));
+      if (x.status === 'pendente') {
+        var bc = el('button', 'cancelar', 'Cancelar envio');
+        bc.type = 'button'; bc.setAttribute('aria-label', 'Cancelar o envio da arte de ' + x.carta_nome);
+        bc.addEventListener('click', function () { cancelar(x, bc); });
+        li.append(bc);
+      }
       ul.append(li);
     });
   }

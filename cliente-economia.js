@@ -106,6 +106,7 @@
     arteCartas: function (qs, o) { return pedir('GET', '/api/arte/cartas' + (qs ? '?' + qs : ''), undefined, o); },
     arteEnviar: function (cartaId, arquivo, o) { return pedir('POST', '/api/arte/envios?carta=' + encodeURIComponent(cartaId), arquivo, o); },
     arteMeus: function (o) { return pedir('GET', '/api/arte/meus', undefined, o); },
+    arteCancelar: function (id, o) { return pedir('DELETE', '/api/arte/envios/' + encodeURIComponent(id), undefined, o); },
     // moderação das artes (seppzone): fila, aprovar e rejeitar
     arteFila: function (status, o) { return pedir('GET', '/api/mod/arte/envios?status=' + encodeURIComponent(status || 'pendente'), undefined, o); },
     arteAprovar: function (id, o) { return pedir('POST', '/api/mod/arte/envios/' + encodeURIComponent(id) + '/aprovar', {}, o); },

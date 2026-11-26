@@ -35,38 +35,48 @@
 
     <div class="ea-guia">
       <figure class="ea-seg">
-        <div class="ea-seg-box" id="segBox" role="img" aria-label="Retângulo 3 por 4 com uma moldura tracejada a 10% da borda: é a zona segura">
+        <div class="ea-seg-box" id="segBox" role="img" aria-label="Retângulo 3 por 4 com uma moldura tracejada: 8% de margem dos lados e 19% em cima e embaixo. Dentro dela fica a zona segura">
           <svg viewBox="0 0 300 400" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><use href="#arteModelo"/></svg>
           <span class="ea-seg-z"><i>zona segura</i></span>
         </div>
-        <figcaption><b>Zona segura.</b> A carta corta a arte nas bordas (a imagem preenche o quadro). Deixe o que importa (rosto, texto, personagem) dentro da moldura tracejada, a 10% de cada borda. Não escreva o nome da carta na imagem: ele já aparece em cima da figurinha.</figcaption>
+        <figcaption><b>Zona segura.</b> A imagem <em>preenche</em> o quadro da carta e o que sobra é cortado. No álbum e no perfil o quadro da arte é quase quadrado (de cerca de 1,2 : 1 nas cartas pequenas a 0,9 : 1 nas grandes), então uma arte 3:4 perde até <b>19% em cima e 19% embaixo</b>; nas figurinhas coladas e nas miniaturas ela perde cerca de 8% dos lados e 12,5% em cima e embaixo. Deixe tudo o que importa (rosto, personagem, texto) dentro da moldura tracejada: <b>8% de margem dos lados e 19% em cima e embaixo</b>. Não escreva o nome da carta na imagem: ele já aparece numa faixa própria.</figcaption>
       </figure>
       <div class="ea-dicas">
         <h3>O que a carta faz com a sua arte</h3>
         <ul>
-          <li><b>Álbum:</b> a imagem preenche o quadro da figurinha (retrato 3:4) e a etiqueta de raridade fica por cima do canto de cima.</li>
-          <li><b>Perfil e carta favorita:</b> a imagem fica um pouco mais suave (cerca de 55% de opacidade) atrás do nome, no pé da carta. Evite detalhes importantes na parte de baixo.</li>
-          <li><b>Miniatura:</b> um quadrado cortado do centro. O centro da arte é o que aparece.</li>
+          <li><b>Carta no álbum (lista):</b> o quadro da arte fica entre a faixa de cima (número e raridade) e a faixa do nome, quase quadrado. A imagem é centralizada e cortada.</li>
+          <li><b>Figurinha colada (página do álbum):</b> quadro retrato 3:4 com uma moldura amarela de 6%, levemente inclinada.</li>
+          <li><b>Carta no perfil e favorita:</b> mesmo desenho da carta do álbum, mas a imagem fica mais suave (55% de opacidade) sobre o fundo escuro. Prefira cores fortes e contraste.</li>
+          <li><b>Miniatura:</b> um quadrado 1:1 cortado do centro, usado nas grades do perfil.</li>
           <li><b>Só arte original ou que você pode usar.</b> Nada de conteúdo ofensivo, de marca d'água de terceiros ou de pessoas reais sem contexto de meme.</li>
         </ul>
       </div>
     </div>
 
     <h3 class="ea-h3">Como fica aplicada</h3>
-    <p class="ea-mut" id="exTxt">Exemplo com uma arte de modelo. Escolha o arquivo no passo 3 e estes três quadros passam a mostrar a <b>sua</b> imagem.</p>
+    <p class="ea-mut" id="exTxt">Exemplo com uma arte de modelo. Escolha o arquivo no passo 3 e estes quadros passam a mostrar a <b>sua</b> imagem.</p>
     <div class="ea-ex" id="exemplos">
       <figure class="ea-ex-i">
-        <div class="ea-album" aria-hidden="true">
-          <div class="top"><span>#7</span><em>Raro</em></div>
-          <div class="art"><svg viewBox="0 0 300 400" preserveAspectRatio="xMidYMid slice"><use href="#arteModelo" data-arte></use></svg><img alt="" hidden data-arte-img></div>
-          <b class="nm">Nome da carta</b>
+        <div class="ea-card" aria-hidden="true">
+          <div class="top"><span>07</span><em>Raro</em></div>
+          <div class="art"><svg viewBox="0 0 300 400" preserveAspectRatio="xMidYMid slice"><use href="#arteModelo"></use></svg><img alt="" hidden data-arte-img></div>
+          <div class="nm">Nome da carta</div>
+          <div class="ft">Coleção</div>
         </div>
         <figcaption>Carta no álbum</figcaption>
       </figure>
       <figure class="ea-ex-i">
-        <div class="ea-perfil" aria-hidden="true">
+        <div class="ea-vaga" aria-hidden="true">
+          <div class="f"><div class="art"><svg viewBox="0 0 300 400" preserveAspectRatio="xMidYMid slice"><use href="#arteModelo"></use></svg><img alt="" hidden data-arte-img></div></div>
+        </div>
+        <figcaption>Figurinha colada</figcaption>
+      </figure>
+      <figure class="ea-ex-i">
+        <div class="ea-card perfil" aria-hidden="true">
+          <div class="top"><span>07</span><em>Raro</em></div>
           <div class="art"><svg viewBox="0 0 300 400" preserveAspectRatio="xMidYMid slice"><use href="#arteModelo"></use></svg><img alt="" hidden data-arte-img></div>
-          <div class="info"><em>Raro</em><b>Nome da carta</b></div>
+          <div class="nm">Nome da carta</div>
+          <div class="ft">Coleção</div>
         </div>
         <figcaption>Carta no perfil (favorita)</figcaption>
       </figure>
@@ -74,7 +84,7 @@
         <div class="ea-mini" aria-hidden="true">
           <svg viewBox="0 0 300 400" preserveAspectRatio="xMidYMid slice"><use href="#arteModelo"></use></svg><img alt="" hidden data-arte-img>
         </div>
-        <figcaption>Miniatura</figcaption>
+        <figcaption>Miniatura 1:1</figcaption>
       </figure>
     </div>
   </section>
