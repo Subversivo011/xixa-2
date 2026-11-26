@@ -788,7 +788,7 @@ function renderFooter(){
     <div class="ft-legal">${socialHTML()}<b>Aviso legal</b>
       <p>O Não Salvo é apenas um compilado de vídeos e fotos que já estão publicados na internet. Não hospedamos nenhum vídeo: todos são exibidos direto do YouTube, pelo player oficial, e continuam pertencendo aos seus autores e canais de origem. As fotos e marcas citadas pertencem aos seus respectivos donos.</p>
       <p>É dono de algum conteúdo e quer que ele saia daqui? <button onclick="openFeedback('remocao')">Peça a remoção</button> e a gente tira.</p>
-      <small>© ${new Date().getFullYear()} Não Salvo · projeto do Xet, sem fins lucrativos</small></div>
+      <small>© ${new Date().getFullYear()} Não Salvo · projeto do Xet, sem fins lucrativos · <a href="privacidade.html">Privacidade</a> · <a href="termos.html">Termos de uso</a></small></div>
     <div class="fq fq-in">
       <span class="fq-art" onclick="openFeedback()" aria-hidden="true">${PHONE_SVG}</span>
       <span class="fq-txt"><span class="fq-logo">fala<i>.</i>que<i>.</i>eu<i>.</i>te<i>.</i>escut<span class="fq-o">o</span></span>
