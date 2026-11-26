@@ -399,13 +399,18 @@ function dialUp(root){return new Promise(res=>{
 })}
 
 // ---- janela inteira na tela: diminui a mídia até tudo caber, sem rolagem dentro da janela ----
+// O vídeo (ou a foto) tem que caber inteiro na tela, com os controles, sem rolar. Antes a janela INTEIRA tinha que caber,
+// então cada coisa nova embaixo do vídeo (troca de link, comentários, botões) encolhia o vídeo até ele ficar miúdo.
+// Agora só o topo da janela até o fim do vídeo precisa caber; o resto (descrição, botões…) rola dentro da janela.
 function encaixarJanela(el){
   const w=el.querySelector(".vw-win");if(!w)return;
   const media=w.querySelector(".tkv")||w.querySelector(".vp-stage")||w.querySelector(".pimg");if(!media)return;
   media.style.maxWidth="";media.style.maxHeight="";
-  const pad=innerWidth<=700||innerHeight<800?16:48,room=innerHeight-pad,minH=innerWidth<=700?140:120;
+  const pad=innerWidth<=700||innerHeight<800?16:48,room=innerHeight-pad,folga=innerWidth<=700?8:24;
+  const minH=innerWidth<=700?180:Math.min(300,Math.round(innerHeight*.42));
+  const fim=()=>{const wr=w.getBoundingClientRect(),mr=media.getBoundingClientRect();return mr.bottom-wr.top+folga};
   for(let i=0;i<4;i++){
-    const over=w.offsetHeight-room;if(over<=1)return;
+    const over=fim()-room;if(over<=1)return;
     if(media.classList.contains("pimg")){const h=media.getBoundingClientRect().height;if(h<=minH)return;media.style.maxHeight=Math.max(minH,h-over)+"px";continue}
     const scr=media.querySelector(".vp-screen")||media,sr=scr.getBoundingClientRect();if(sr.height<=minH)return;
     const ar=sr.width/Math.max(1,sr.height),h=Math.max(minH,sr.height-over);
