@@ -108,7 +108,7 @@
 </div>
 
 <script src="common.js?v=20261203a"></script>
-<script src="data.js?v=20261201a"></script>
+<script src="data.js?v=20261204a"></script>
 <script src="player.js?v=20261130c"></script>
 <script src="viewer.js?v=20261203a"></script>
 <script src="alertas.js?v=20261125b"></script>
@@ -131,7 +131,9 @@ const CAMPOS=[
   ["hoje","Onde está hoje","O que aconteceu com as pessoas ou o meme depois."],
   ["curiosidades","Curiosidades","Bastidores, processos, remixes, homenagens."]
 ];
-const yKey=y=>{y=parseInt(y)||2020;return y<2000?"1995–1999":y<=2003?"2000–2003":y>=2026?"2026":String(y)};
+const yKey=y=>{y=parseInt(y)||2020;return y<2000?"1995–1999":y>=2026?"2026":String(y)};
+// endereços antigos: os anos 2000–2003 eram um bloco só; agora cada ano tem a sua página
+const ANO_LEGADO={"2000–2003":"2000","2000-2003":"2000"};
 const yLab=k=>(YEAR_INFO[k]&&YEAR_INFO[k].rot)||k;
 const L=[...MEMES].sort((a,b)=>a.t.localeCompare(b.t,"pt-BR"));
 const WK={srv:{},ano:"",q:""};
