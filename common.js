@@ -5,7 +5,7 @@ const SG={
  pat:["Liso","Tigrado","Pintado","Smoking","Máscara","Tartaruga","Tricolor","Siamês","Peludo"],
  eye:[["Âmbar","#e6a21a"],["Verde","#5bbf3a"],["Azul","#2f8cff"],["Esmeralda","#19c29a"],["Roxo","#9a5cff"],["Mel","#c98a2a"],["Cinza","#9aa7b3"],["Heterocromia (azul e âmbar)","#2f8cff","#e6a21a"]],
  acc:[["Nenhum"],["Óculos redondo"],["Óculos escuro"],["Boné"],["Gorro"],["Fone"],["Bandana"],["Corrente"],["Monóculo"],["Viseira"],["Piercing na sobrancelha"],["Laço"],["Coroa"],["Gravata-borboleta"],["Cartola"],["Brinco de argola"],["Óculos 3D"],["Coleira com sininho"]],
- clo:[["Hoodie","#1c1c24"],["Camiseta","#ececec"],["Jaqueta jeans","#3d6aa8"],["Maletom","#cfc7b4"],["Jaqueta bomber","#4b5a3a"],["Camisa xadrez","#b3262d"],["Regata","#22222a"],["Pelado","#0000"],["Camisa canarinho","#f4d01e"],["Camisa florida","#1fa3a0"],["Terno","#2b2f3a"],["Listrada","#f4f4f4"],["Puffer","#e2542f"],["Suéter de tricô","#7a4ea8"]],
+ clo:[["Hoodie","#1c1c24"],["Camiseta","#ececec"],["Jaqueta jeans","#3d6aa8"],["Moletom","#cfc7b4"],["Jaqueta bomber","#4b5a3a"],["Camisa xadrez","#b3262d"],["Regata","#22222a"],["Pelado","#0000"],["Camisa canarinho","#f4d01e"],["Camisa florida","#1fa3a0"],["Terno","#2b2f3a"],["Listrada","#f4f4f4"],["Puffer","#e2542f"],["Suéter de tricô","#7a4ea8"]],
  bg:[["Azul",["#2a6bff","#0a2a8a"]],["Roxo",["#7a4dff","#2a1070"]],["Rosa",["#ff6bd0","#7a2aa8"]],["Verde",["#19c29a","#06503f"]],["Sol",["#ffb12a","#d9561a"]],["Noite",["#1a1f4a","#05060f"]],["Menta",["#7ef0c8","#1a8a7a"]],["Vermelho",["#ff5a6a","#7a1030"]]]
 };
 // ícones coloridos dos acessórios no editor (desenhos próprios, no lugar de emoji: mesma ordem de SG.acc)
