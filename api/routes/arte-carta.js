@@ -2,16 +2,20 @@
 //  - GET  /api/arte/cartas            cartas SEM imagem aprovada (cartas.imagem IS NULL), com busca e filtro de coleção (login)
 //  - POST /api/arte/envios?carta=ID   corpo binário (image/png|jpeg|webp, até 5 MB): valida pelos bytes, otimiza e guarda em pendentes/
 //  - GET  /api/arte/meus              os envios de quem está logado e a situação de cada um
+//  - DELETE /api/arte/envios/:id      cancela o próprio envio (só dono, só pendente) e apaga o arquivo pendente
 //  - GET  /api/mod/arte/envios        fila (papel moderador ou admin)
 //  - GET  /api/mod/arte/envios/:id/arquivo   a imagem pendente (só moderador; nunca pública)
 //  - POST /api/mod/arte/envios/:id/aprovar   copia para midias/, grava cartas.imagem e audita
 //  - POST /api/mod/arte/envios/:id/rejeitar  { motivo } (3 a 300 caracteres)
+// Ordem dos travamentos (evita deadlock): SEMPRE a carta primeiro, depois o envio. S3 fica FORA das transações.
 // Só a APROVAÇÃO tira a carta da lista. Enquanto isso a carta segue disponível para receber arte de outras pessoas.
 // Arquivo pendente mora em pendentes/ (o nginx só expõe midias/) e o nome é sempre gerado pelo servidor.
 import { randomBytes } from 'node:crypto';
 import { send, limited, lerJson, readBodyBuffer } from '../lib/http.js';
 import { auditar } from '../lib/auditoria.js';
 import { otimizarImagem, ErroImagem } from '../lib/imagens.js';
+import { detectarImagem } from '../mcp/imagem.js';
+import { criarSemaforo } from '../lib/semaforo.js';
 import { ID_CARTA } from '../lib/acervo-validacao.js';
 import { ErroNegocio, transacao } from '../economia/servico.js';
 import { papelAtinge } from '../lib/papel.js';
@@ -21,6 +25,8 @@ export const MAX_BYTES_ARTE = 5 * 1024 * 1024; // entrada; depois de otimizada (
 export const MIN_LADO_ARTE = 400; // lado menor da imagem original, em px
 export const PROPORCAO_ARTE = { min: 0.5, max: 2 }; // largura / altura: nada de tira fina
 export const MAX_POR_DIA = 10; // envios por usuário em 24 h (qualquer situação)
+// conversões de imagem (sharp) simultâneas no processo: a CPU/memória do sharp é o custo mais alto da rota
+const conversoes = criarSemaforo(Math.min(3, Math.max(2, Number(process.env.ARTE_CONVERSOES) || 2)));
 const TIPOS = new Set(['image/jpeg', 'image/png', 'image/webp']);
 const ARQUIVO_PENDENTE = /^pendentes\/arte-[a-f0-9]{24}\.webp$/;
 
@@ -30,6 +36,34 @@ const aInt = (v, padrao, min, max) => {
   return Number.isInteger(n) && n >= min && n <= max ? n : null;
 };
 const escaparLike = (s) => s.replace(/[\\%_]/g, (c) => '\\' + c);
+const CONFLITO = 'conflito com outra decisão ao mesmo tempo: tente de novo';
+/** Transação com mapeamento de deadlock/serialização (40P01, 40001) para 409. */
+export async function tx(pool, fn) {
+  try { return await transacao(pool, fn); } catch (e) {
+    if (e && (e.code === '40P01' || e.code === '40001')) throw new ErroNegocio(409, CONFLITO);
+    throw e;
+  }
+}
+/** Trava a CARTA e depois o envio (mesma ordem em todas as rotas). Devolve { c, e } (e = linha do envio, c = { id, imagem }). */
+async function travar(cli, envioId) {
+  const { rows: [pre] } = await cli.query('SELECT carta_id FROM envios_arte_carta WHERE id = $1', [envioId]);
+  if (!pre) throw new ErroNegocio(404, 'envio não encontrado');
+  const { rows: [c] } = await cli.query('SELECT id, imagem FROM cartas WHERE id = $1 FOR UPDATE', [pre.carta_id]);
+  if (!c) throw new ErroNegocio(404, 'carta não encontrada');
+  const { rows: [e] } = await cli.query('SELECT * FROM envios_arte_carta WHERE id = $1 FOR UPDATE', [envioId]);
+  if (!e || e.carta_id !== c.id) throw new ErroNegocio(409, CONFLITO);
+  return { c, e };
+}
+/** Regras baratas do envio (sem sharp): carta existe e sem arte, limite diário, 1 pendente por pessoa e carta. Lança ErroNegocio. */
+async function checarEnvio(db, carta, usuarioId, { travarCarta = false } = {}) {
+  const { rows: [c] } = await db.query(`SELECT id, imagem FROM cartas WHERE id = $1${travarCarta ? ' FOR SHARE' : ''}`, [carta]);
+  if (!c) throw new ErroNegocio(404, 'carta não encontrada');
+  if (c.imagem) throw new ErroNegocio(409, 'essa carta já tem arte aprovada');
+  const { rows: [{ n }] } = await db.query("SELECT count(*)::int AS n FROM envios_arte_carta WHERE usuario_id = $1 AND criado_em > now() - interval '24 hours'", [usuarioId]);
+  if (n >= MAX_POR_DIA) throw new ErroNegocio(429, `Limite de ${MAX_POR_DIA} envios por dia atingido. Tente amanhã.`);
+  const { rows: [ja] } = await db.query("SELECT 1 AS x FROM envios_arte_carta WHERE carta_id = $1 AND usuario_id = $2 AND status = 'pendente'", [carta, usuarioId]);
+  if (ja) throw new ErroNegocio(409, 'você já tem uma arte pendente para essa carta; espere a moderação decidir');
+}
 const erroDe = (res, e) => { if (e instanceof ErroNegocio) { send(res, e.status, { erro: e.message }); return true; } return false; };
 
 export default function registrar(r, { s3 = null } = {}) {
@@ -79,9 +113,13 @@ export default function registrar(r, { s3 = null } = {}) {
     }
     if (!buf.length) return send(res, 400, { erro: 'arquivo vazio' });
 
-    // 1) o arquivo: tipo pelos bytes (nunca pelo nome nem pelo Content-Type), estática, dimensões, proporção
+    // 1) regras baratas ANTES do sharp (carta sem arte, limite diário, 1 pendente por pessoa)
+    try { await checarEnvio(pool, carta, usuario.id); } catch (e) { if (erroDe(res, e)) return; throw e; }
+
+    // 2) o arquivo: tipo pelos bytes (nunca pelo nome nem pelo Content-Type); só então a conversão pesada, com no máximo 2 a 3 ao mesmo tempo
+    if (!detectarImagem(buf)) return send(res, 422, { erro: 'o arquivo não é uma imagem jpeg, png ou webp' });
     let img;
-    try { img = await otimizarImagem(buf, 'carta'); } catch (e) {
+    try { img = await conversoes.rodar(() => otimizarImagem(buf, 'carta')); } catch (e) {
       if (e instanceof ErroImagem) return send(res, 422, { erro: e.message });
       throw e;
     }
@@ -90,31 +128,44 @@ export default function registrar(r, { s3 = null } = {}) {
     const prop = w / h;
     if (prop < PROPORCAO_ARTE.min || prop > PROPORCAO_ARTE.max) return send(res, 422, { erro: 'proporção fora do aceito: a imagem não pode ser mais de 2 vezes mais larga que alta, nem o contrário' });
 
-    // 2) as regras do envio (no banco, serializadas pelo índice único)
-    const { rows: [c] } = await pool.query('SELECT id, imagem FROM cartas WHERE id = $1', [carta]);
-    if (!c) return send(res, 404, { erro: 'carta não encontrada' });
-    if (c.imagem) return send(res, 409, { erro: 'essa carta já tem arte aprovada' });
-    const { rows: [{ n }] } = await pool.query("SELECT count(*)::int AS n FROM envios_arte_carta WHERE usuario_id = $1 AND criado_em > now() - interval '24 hours'", [usuario.id]);
-    if (n >= MAX_POR_DIA) return send(res, 429, { erro: `Limite de ${MAX_POR_DIA} envios por dia atingido. Tente amanhã.` });
-    const { rows: [ja] } = await pool.query("SELECT 1 AS x FROM envios_arte_carta WHERE carta_id = $1 AND usuario_id = $2 AND status = 'pendente'", [carta, usuario.id]);
-    if (ja) return send(res, 409, { erro: 'você já tem uma arte pendente para essa carta; espere a moderação decidir' });
-
-    // 3) grava o pendente (nome gerado pelo servidor) e o registro; falhou no banco = não deixa arquivo órfão
+    // 3) grava o pendente (nome gerado pelo servidor), depois o registro numa transação com a carta travada (FOR SHARE) e as regras revalidadas
     const arquivo = `pendentes/arte-${randomBytes(12).toString('hex')}.${img.ext}`;
     try { await cliente.put(arquivo, img.buffer, img.tipo); } catch {
       return send(res, 502, { erro: 'não consegui guardar a imagem; tente de novo' });
     }
     try {
-      const { rows: [e] } = await pool.query(
-        'INSERT INTO envios_arte_carta (carta_id, usuario_id, arquivo, largura, altura, bytes) VALUES ($1,$2,$3,$4,$5,$6) RETURNING id, criado_em',
-        [carta, usuario.id, arquivo, img.largura, img.altura, img.bytes]);
+      const e = await tx(pool, async (cli) => {
+        await cli.query('SELECT pg_advisory_xact_lock(hashtext($1))', ['arte:' + usuario.id]); // serializa os envios da mesma pessoa (limite diário exato)
+        await checarEnvio(cli, carta, usuario.id, { travarCarta: true }); // aprovação concorrente trava a carta: aqui vê imagem NOT NULL
+        const { rows: [novo] } = await cli.query(
+          'INSERT INTO envios_arte_carta (carta_id, usuario_id, arquivo, largura, altura, bytes) VALUES ($1,$2,$3,$4,$5,$6) RETURNING id, criado_em',
+          [carta, usuario.id, arquivo, img.largura, img.altura, img.bytes]);
+        return novo;
+      });
       return send(res, 201, { ok: true, id: Number(e.id), status: 'pendente', criado_em: e.criado_em });
     } catch (e) {
-      await cliente.remove(arquivo).catch(() => {});
+      await cliente.remove(arquivo).catch(() => {}); // não deixa arquivo órfão
+      if (erroDe(res, e)) return;
       if (e.code === '23505') return send(res, 409, { erro: 'você já tem uma arte pendente para essa carta; espere a moderação decidir' });
       if (e.code === '23503') return send(res, 404, { erro: 'carta não encontrada' });
       throw e;
     }
+  }, { autenticada: true });
+
+  // cancelar o próprio envio: só o dono e só enquanto pendente (qualquer outro caso = 404/409); apaga o arquivo pendente
+  r.delete(/^\/api\/arte\/envios\/(\d{1,18})$/, async ({ res, pool, params, usuario }) => {
+    let arquivo;
+    try {
+      arquivo = await tx(pool, async (cli) => {
+        const { e } = await travar(cli, params[0]);
+        if (Number(e.usuario_id) !== Number(usuario.id)) throw new ErroNegocio(404, 'envio não encontrado'); // não revela envio de outra pessoa
+        if (e.status !== 'pendente') throw new ErroNegocio(409, 'esse envio já foi decidido e não pode mais ser cancelado');
+        await cli.query('DELETE FROM envios_arte_carta WHERE id = $1', [e.id]);
+        return e.arquivo;
+      });
+    } catch (e) { if (erroDe(res, e)) return; throw e; }
+    if (ARQUIVO_PENDENTE.test(arquivo)) { const cl = armazenamento(); if (cl) await cl.remove(arquivo).catch(() => {}); }
+    return send(res, 200, { ok: true });
   }, { autenticada: true });
 
   r.get('/api/arte/meus', async ({ res, pool, usuario }) => {
@@ -157,36 +208,43 @@ export default function registrar(r, { s3 = null } = {}) {
     res.end(buf);
   }, { papel: 'moderador' });
 
-  // quem envia não decide o próprio envio (só admin); aprovar: copia para midias/, grava a imagem da carta, rejeita as outras pendentes
+  // aprovar: S3 FORA da transação (copia pendentes/ -> midias/ sem recodificar), banco depois; se o banco falhar, apaga o objeto novo.
+  // Quem envia não decide o próprio envio (só admin: por desenho, admin pode aprovar o próprio).
   r.post(/^\/api\/mod\/arte\/envios\/(\d{1,18})\/aprovar$/, async (ctx) => {
     const { res, pool, params, usuario } = ctx;
     const cliente = armazenamento();
     if (!cliente) return send(res, 503, { erro: 'o armazenamento de imagens não está configurado neste servidor' });
+    const ehAdmin = papelAtinge(ctx.papel, 'admin');
+    const proprio = (e) => Number(e.usuario_id) === Number(usuario.id) && !ehAdmin;
     let nova = null, descartar = [], decidido;
     try {
-      decidido = await transacao(pool, async (cli) => {
-        const { rows: [e] } = await cli.query('SELECT * FROM envios_arte_carta WHERE id = $1 FOR UPDATE', [params[0]]);
-        if (!e) throw new ErroNegocio(404, 'envio não encontrado');
+      // A) checagens baratas e cópia no S3, sem segurar lock de banco
+      const { rows: [pre] } = await pool.query('SELECT * FROM envios_arte_carta WHERE id = $1', [params[0]]);
+      if (!pre) throw new ErroNegocio(404, 'envio não encontrado');
+      if (pre.status !== 'pendente') throw new ErroNegocio(409, 'esse envio já foi decidido');
+      if (proprio(pre)) throw new ErroNegocio(403, 'você não decide o seu próprio envio; peça a outra pessoa da moderação');
+      if (!ARQUIVO_PENDENTE.test(pre.arquivo)) throw new ErroNegocio(409, 'arquivo pendente inválido');
+      let bruto;
+      try { bruto = await cliente.get(pre.arquivo, { max: MAX_BYTES_ARTE }); } catch { throw new ErroNegocio(502, 'não consegui ler a imagem pendente; tente de novo'); }
+      if (!bruto) throw new ErroNegocio(409, 'o arquivo desse envio sumiu do armazenamento; rejeite o envio');
+      const det = detectarImagem(bruto);
+      if (!det || det.ext !== 'webp') throw new ErroNegocio(409, 'arquivo pendente inválido; rejeite o envio'); // o pendente é sempre o WebP gerado no envio
+      const destino = `midias/carta-${randomBytes(6).toString('hex')}.webp`;
+      try { await cliente.put(destino, bruto, 'image/webp'); } catch { throw new ErroNegocio(502, 'não consegui gravar a imagem; tente de novo'); }
+      nova = destino;
+      // B) banco: carta primeiro, depois o envio
+      decidido = await tx(pool, async (cli) => {
+        const { c, e } = await travar(cli, params[0]);
         if (e.status !== 'pendente') throw new ErroNegocio(409, 'esse envio já foi decidido');
-        if (Number(e.usuario_id) === Number(usuario.id) && !papelAtinge(ctx.papel, 'admin')) throw new ErroNegocio(403, 'você não decide o seu próprio envio; peça a outra pessoa da moderação');
-        const { rows: [c] } = await cli.query('SELECT id, imagem FROM cartas WHERE id = $1 FOR UPDATE', [e.carta_id]);
-        if (!c) throw new ErroNegocio(404, 'carta não encontrada');
+        if (e.arquivo !== pre.arquivo) throw new ErroNegocio(409, CONFLITO);
         if (c.imagem) throw new ErroNegocio(409, 'a carta já tem arte aprovada; rejeite este envio');
-        if (!ARQUIVO_PENDENTE.test(e.arquivo)) throw new ErroNegocio(409, 'arquivo pendente inválido');
-        let bruto;
-        try { bruto = await cliente.get(e.arquivo, { max: MAX_BYTES_ARTE }); } catch { throw new ErroNegocio(502, 'não consegui ler a imagem pendente; tente de novo'); }
-        if (!bruto) throw new ErroNegocio(409, 'o arquivo desse envio sumiu do armazenamento; rejeite o envio');
-        let img;
-        try { img = await otimizarImagem(bruto, 'carta'); } catch (er) { throw er instanceof ErroImagem ? new ErroNegocio(422, er.message) : er; }
-        nova = `midias/carta-${randomBytes(6).toString('hex')}.${img.ext}`;
-        try { await cliente.put(nova, img.buffer, img.tipo); } catch { nova = null; throw new ErroNegocio(502, 'não consegui gravar a imagem; tente de novo'); }
-        await cli.query('UPDATE cartas SET imagem = $2 WHERE id = $1', [c.id, nova]);
+        await cli.query('UPDATE cartas SET imagem = $2 WHERE id = $1', [c.id, destino]);
         await cli.query("UPDATE envios_arte_carta SET status = 'aprovado', decidido_por = $2, decidido_em = now() WHERE id = $1", [e.id, usuario.id]);
         const { rows: outros } = await cli.query(
           `UPDATE envios_arte_carta SET status = 'rejeitado', motivo = 'outra arte foi aprovada para esta carta', decidido_por = $2, decidido_em = now()
             WHERE carta_id = $1 AND status = 'pendente' RETURNING id, arquivo`, [c.id, usuario.id]);
         descartar = [e.arquivo, ...outros.map((o) => o.arquivo)];
-        return { envio_id: Number(e.id), carta_id: c.id, autor_id: Number(e.usuario_id), imagem: nova, rejeitados: outros.length, bytes: img.bytes };
+        return { envio_id: Number(e.id), carta_id: c.id, autor_id: Number(e.usuario_id), imagem: destino, rejeitados: outros.length, bytes: bruto.length };
       });
     } catch (e) {
       if (nova) await cliente.remove(nova).catch(() => {}); // não deixa arquivo órfão em midias/
@@ -194,7 +252,7 @@ export default function registrar(r, { s3 = null } = {}) {
       throw e;
     }
     await auditar(ctx, 'carta.arte_aprovar', 'cartas:' + decidido.carta_id, { envio_id: decidido.envio_id, autor_id: decidido.autor_id, imagem: decidido.imagem, bytes: decidido.bytes, rejeitados: decidido.rejeitados });
-    for (const a of descartar) if (ARQUIVO_PENDENTE.test(a)) await cliente.remove(a).catch(() => {}); // melhor esforço: pendente já não serve
+    for (const a of descartar) if (ARQUIVO_PENDENTE.test(a)) await cliente.remove(a).catch(() => {}); // melhor esforço: a limpeza periódica pega o que sobrar
     return send(res, 200, { ok: true, carta_id: decidido.carta_id, imagem: decidido.imagem, url_publica: '/' + decidido.imagem, outros_rejeitados: decidido.rejeitados });
   }, { papel: 'moderador' });
 
@@ -206,13 +264,12 @@ export default function registrar(r, { s3 = null } = {}) {
     if (motivo.length < 3 || motivo.length > 300) return send(res, 422, { erro: 'diga o motivo (3 a 300 caracteres)' });
     let arquivo, cartaId;
     try {
-      ({ arquivo, cartaId } = await transacao(pool, async (cli) => {
-        const { rows: [e] } = await cli.query('SELECT * FROM envios_arte_carta WHERE id = $1 FOR UPDATE', [params[0]]);
-        if (!e) throw new ErroNegocio(404, 'envio não encontrado');
+      ({ arquivo, cartaId } = await tx(pool, async (cli) => {
+        const { c, e } = await travar(cli, params[0]);
         if (e.status !== 'pendente') throw new ErroNegocio(409, 'esse envio já foi decidido');
         if (Number(e.usuario_id) === Number(usuario.id) && !papelAtinge(ctx.papel, 'admin')) throw new ErroNegocio(403, 'você não decide o seu próprio envio; peça a outra pessoa da moderação');
         await cli.query("UPDATE envios_arte_carta SET status = 'rejeitado', motivo = $2, decidido_por = $3, decidido_em = now() WHERE id = $1", [e.id, motivo, usuario.id]);
-        return { arquivo: e.arquivo, cartaId: e.carta_id };
+        return { arquivo: e.arquivo, cartaId: c.id };
       }));
     } catch (e) { if (erroDe(res, e)) return; throw e; }
     await auditar(ctx, 'carta.arte_rejeitar', 'cartas:' + cartaId, { envio_id: Number(params[0]), motivo });
