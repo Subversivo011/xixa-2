@@ -192,7 +192,17 @@ function initComments(el,m){
     f.onsubmit=async ev=>{ev.preventDefault();const t=f.t.value.trim();if(!t)return;
       if(!temConta()){needAccount("comentar");return}
       const btn=f.querySelector("button");btn.disabled=true;
-      const r=await apiPost("/api/comentarios",{id:m.id,autor:meuApelido(),texto:t,"bot-field":f["bot-field"].value});
+      let r=null;
+      try{
+        if(typeof postComSessao==="function"){
+          r=await postComSessao("/api/comentarios",{id:m.id,texto:t,"bot-field":f["bot-field"].value});
+        }else{
+          r=await apiPost("/api/comentarios",{id:m.id,texto:t,"bot-field":f["bot-field"].value});
+        }
+      }catch(e){
+        if(e&&e.status===401){btn.disabled=false;needAccount("comentar");return}
+        toast((e&&e.erro)||"Não foi possível enviar o comentário.",3200);
+      }
       btn.disabled=false;
       const c=r&&r.texto?r:{autor:meuApelido(),texto:t,em:new Date().toISOString(),local:true};
       if(!r){localCmts(m.id).push(c);nsSave()}
