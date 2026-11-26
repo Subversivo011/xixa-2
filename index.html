@@ -170,7 +170,7 @@ main{display:flex;flex-direction:column}
 .top,.cur{grid-template-columns:1fr}.stage{grid-template-columns:1fr}.side{display:none}.rail{grid-template-columns:1fr 1fr}.rail .card:nth-child(3){display:none}main{padding:16px 16px 40px}}
 @media(max-width:600px){.f .two{grid-template-columns:1fr}.today{grid-template-columns:110px 1fr}.box .body{padding:16px}}
 </style>
-<link rel="stylesheet" href="home.css?v=20261125a">
+<link rel="stylesheet" href="home.css?v=20261204a">
 </head>
 <body class="home">
 <div class="rays-wrap" aria-hidden="true"><div class="rays" id="rays"></div></div>
@@ -198,6 +198,7 @@ main{display:flex;flex-direction:column}
 
   <section class="timeline" id="tl">
     <div class="sec-title"><span><i data-ic="clock"></i>Linha do tempo da internet brasileira</span><a href="linha-do-tempo.html">Ver todos os anos →</a></div>
+    <div class="decs" id="decs" role="group" aria-label="Décadas"></div>
     <div class="years" id="years"></div>
     <div class="stage">
       <div class="side" id="prev"></div>
@@ -343,8 +344,15 @@ async function renderSobeDesce(){
 }
 
 // ---- Linha do tempo (layout original) ----
+// décadas: as abas em cima da linha; a linha mostra só os anos da década do ano atual (no máximo 10)
+const DECADAS=[["90","Anos 90"],["2000","Anos 2000"],["2010","Anos 2010"],["2020","Anos 2020"]];
+const decada=k=>{const y=parseInt(k);return y<2000?"90":y<2010?"2000":y<2020?"2010":"2020"};
+const anosDaDecada=d=>KEYS.filter(k=>decada(k)===d);
+function irDecada(d){const l=anosDaDecada(d);if(l.length&&decada(cur)!==d)go(l[0])}
 function renderYears(){
-  $("years").innerHTML=KEYS.map(y=>`<button class="y ${y===cur?'on':''}" onclick="go('${y}')">${yLab(y)}</button>`).join("");
+  const d=decada(cur);
+  $("decs").innerHTML=DECADAS.filter(([k])=>anosDaDecada(k).length).map(([k,l])=>`<button type="button" class="${k===d?"on":""}" aria-pressed="${k===d}" onclick="irDecada('${k}')">${l}</button>`).join("");
+  $("years").innerHTML=anosDaDecada(d).map(y=>`<button class="y ${y===cur?'on':''}" onclick="go('${y}')">${yLab(y)}</button>`).join("");
   const ys=$("years"),el=ys.querySelector(".on");if(el)ys.scrollTo({left:el.offsetLeft-ys.clientWidth/2+el.clientWidth/2,behavior:"smooth"});
 }
 // prévia da linha do tempo: 3 memes sorteados a cada visita (e a cada volta ao ano), misturando vídeo e foto quando houver
@@ -370,7 +378,7 @@ function renderCur(){
   el.innerHTML=`<div class="cur-t"><div class="cur-h"><button class="mnav" ${p?`onclick="go('${p}')"`:"disabled"} aria-label="Ano anterior">‹</button><div><h2 class="disp">${yLab(cur)}</h2><div class="lema">${d.lema}</div></div><button class="mnav" ${n?`onclick="go('${n}')"`:"disabled"} aria-label="Próximo ano">›</button></div>
     <p>${d.txt}</p><button class="btn dexp" onclick="${exp}">Explorar ${yLab(cur)} →</button></div>
     <div class="mini">${fill.join("")}</div>
-    <div class="mfoot"><span class="mdots">${KEYS.map(k=>`<i class="${k===cur?"on":""}"></i>`).join("")}</span><button class="btn mexp" onclick="${exp}">Ver tudo de ${yLab(cur)} →</button></div>`;
+    <div class="mfoot"><span class="mdots">${anosDaDecada(decada(cur)).map(k=>`<i class="${k===cur?"on":""}"></i>`).join("")}</span><button class="btn mexp" onclick="${exp}">Ver tudo de ${yLab(cur)} →</button></div>`;
 }
 function renderGrid(){
   let list=ALL,title="Todos os registros";
