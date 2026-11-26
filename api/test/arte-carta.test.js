@@ -65,7 +65,7 @@ async function naLista(u, c) {
 }
 const pendentesNoS3 = () => [...objetos.keys()].filter((k) => k.startsWith('pendentes/'));
 
-test('migração 029: tabela, índice único parcial e CHECK do arquivo (só pendentes/)', { skip }, async () => {
+test('migração 030: tabela, índice único parcial e CHECK do arquivo (só pendentes/)', { skip }, async () => {
   const idx = await q("SELECT indexname FROM pg_indexes WHERE tablename = 'envios_arte_carta'");
   for (const i of ['envios_arte_pendente_uq', 'envios_arte_fila_idx', 'envios_arte_carta_idx', 'envios_arte_usuario_idx']) assert.ok(idx.some((x) => x.indexname === i), i);
   const { id } = await pessoa();

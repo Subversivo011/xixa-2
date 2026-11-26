@@ -142,7 +142,7 @@ O texto do recado é guardado como texto puro: **o front sempre escapa** antes d
 
 ## Envio de arte de carta (temporário) 🔒
 
-Página `enviar-arte.html` (botão no rodapé do site): a comunidade manda a arte das cartas sem imagem e a moderação aprova. Migração 029 (`envios_arte_carta`). Tudo exige login; as rotas que alteram dados exigem `X-CSRF` (sessão por cookie). Quando a campanha acabar, a página, o botão do rodapé e as rotas podem sair sem afetar o resto (a tabela fica como histórico).
+Página `enviar-arte.html` (botão no rodapé do site): a comunidade manda a arte das cartas sem imagem e a moderação aprova. Migração 030 (`envios_arte_carta`). Tudo exige login; as rotas que alteram dados exigem `X-CSRF` (sessão por cookie). Quando a campanha acabar, a página, o botão do rodapé e as rotas podem sair sem afetar o resto (a tabela fica como histórico).
 
 | Rota | Resposta |
 |---|---|

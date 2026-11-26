@@ -1,4 +1,4 @@
--- 029 · Envio de arte de carta pela comunidade (página temporária enviar-arte.html).
+-- 030 · Envio de arte de carta pela comunidade (página temporária enviar-arte.html).
 -- Cada envio guarda o arquivo PENDENTE em pendentes/<nome gerado pelo servidor> (prefixo que o nginx NÃO expõe).
 -- Só a aprovação de um moderador copia para midias/ e grava cartas.imagem. Vários envios pendentes por carta são
 -- permitidos, mas só 1 pendente por (carta, usuário). Idempotente.
