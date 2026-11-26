@@ -351,7 +351,7 @@ test("celular: coleções vêm antes do álbum (faixa que rola de lado), depois 
   const alb = await page.$eval(".album", (e) => e.getBoundingClientRect().width);
   assert.ok(alb >= 360, "álbum de ponta a ponta: " + alb);
   await page.evaluate(() => { const id = CARDS.find((c) => owned(c) > 0).id; pick(id); });
-  assert.strictEqual(await page.$eval("#det .shrbtn", (b) => b.textContent.trim()), "Compartilhar no seu perfil");
+  assert.match(await page.$eval("#det .shrbtn .tx", (b) => b.firstChild.textContent.trim()), /^Compartilhar no seu perfil$/);
   assert.ok((await page.$eval("#det .shrbtn", (b) => b.getBoundingClientRect().height)) >= 44);
   assert.deepStrictEqual(erros, []);
   await ctx.close();
