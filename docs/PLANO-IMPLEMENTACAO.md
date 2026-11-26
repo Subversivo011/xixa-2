@@ -226,7 +226,7 @@ erDiagram
 - [x] Proteger `/admin` pelo login: quem não tem patente Moderador vê só uma página de acesso negado. — **feito**: painel `seppzone/` (ver `docs/PLANO-ADMIN.md`).
 - [x] Trocar os dados fictícios por chamadas à API, mantendo o visual (estados de carregando, vazio e erro). — **feito**: painel `seppzone/` (ver `docs/PLANO-ADMIN.md`).
 - [x] Remover o botão "Ver como" e o "Reiniciar exemplo". — **feito**: painel `seppzone/` (ver `docs/PLANO-ADMIN.md`).
-- [ ] Mover Contribuidores, Feedback e Comentários do `/dashboard` para abas do admin e aposentar o `/dashboard` (redirecionar). — **parcial**: as abas existem em `seppzone/`; o `/dashboard/` legado ainda existe e falta redirecioná-lo e aposentar o token fixo.
+- [x] Mover Contribuidores, Feedback e Comentários do `/dashboard` para abas do admin e aposentar o `/dashboard` (redirecionar). — **feito**: abas em `/seppzone/` (Comunidade) e `/dashboard/index.html` redireciona para `/seppzone/`. O token fixo segue como chave de emergência.
 - [x] Toda ação do painel grava em `log_auditoria`. — **feito**: painel `seppzone/` (ver `docs/PLANO-ADMIN.md`).
 - [x] Exportação CSV de contribuidores e feedback. — **feito**: painel `seppzone/` (ver `docs/PLANO-ADMIN.md`).
 - [ ] Ideias já discutidas, em ordem de valor: voto cego (só ver os votos dos outros depois de votar), XP de moderação só depois da decisão se confirmar, auditoria por amostragem das decisões de moderadores novos, proteção de itens polêmicos, página de discussão por item, temporadas de ranking. — **feito:** voto cego (em `api/routes/envios.js` e no painel).
